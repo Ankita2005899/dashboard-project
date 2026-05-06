@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<style>
+    body {
+background: #d4f4f8;    font-family: Arial;
+}
+
+.box {
+    width: 320px;
+    margin: 100px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+input {
+    width: 90%;
+    padding: 8px;
+    margin: 8px 0;
+}
+
+button {
+    padding: 8px 20px;
+    background: green;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+a {
+    color: blue;
+    text-decoration: none;
+}
+.error {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+/* ================= FOOTER ================= */
+.footer{
+    position:fixed;
+
+    bottom:0;
+    left:0;
+
+    width:100%;
+    height:60px;
+
+    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+
+    z-index:1000;
+}
+</style>
+<body>
+
+<div class="box">
+    <h2>Login</h2>
+
+    <form method="POST" autocomplete="off">
+    <input type="email" name="email" placeholder="Email"
+           autocomplete="off" required>
+
+    <input type="password" name="password" placeholder="Password"
+           autocomplete="new-password" required>
+
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <button type="submit">Login</button>
+</form>
+
+    <p>Don't have an account? <a href="/signup">Signup</a></p>
+</div>
+<footer class="footer">
+    © 2026 Product Dashboard | All Rights Reserved
+</footer>
+</body>
+</html>

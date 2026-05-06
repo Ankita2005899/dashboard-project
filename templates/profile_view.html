@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile View</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #d4f4f8;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        /* MAIN CONTAINER */
+        .profile-view-box {
+            width: 750px;
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+        }
+
+        /* PROFILE HEADER */
+        .account-row {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 26px;
+            border-radius: 18px;
+            margin-bottom: 40px;
+        }
+
+        .account-icon {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .account-name {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .account-role {
+            font-size: 18px;
+            color: #6b7280;
+        }
+
+
+        .pref-title {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .pref-sub {
+            font-size: 17px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+
+        .arrow {
+            font-size: 34px;
+        }
+
+        /* POPUP */
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .popup-box {
+            width: 92%;
+            max-width: 750px;
+            background: #fff;
+            border-radius: 22px;
+            padding: 30px;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .popup-header {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        /* POPUP OPTION */
+        .popup-option {
+            padding: 20px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .popup-option-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .popup-option-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .popup-option-sub {
+            font-size: 16px;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        /* BUTTONS */
+        .add-btn {
+            border: 1.5px solid #cbd5e1;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .option-btn {
+            border: 1.5px solid #cbd5e1;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            background: #fff;
+            cursor: pointer;
+            margin: 6px 6px 0 0;
+        }
+
+        .option-btn.selected {
+            background: #10b981;
+            color: #fff;
+            border-color: #10b981;
+        }
+
+        .save-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: #10b981;
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* SELECTION BOX */
+        .selection-box {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* DEPARTMENT PREF */
+        .dept-title {
+            margin-top: 28px;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .dept-desc {
+            font-size: 16px;
+            color: #6b7280;
+            margin: 10px 0 20px;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 30px;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding-bottom: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            color: #0f766e;
+            border-bottom: 3px solid #0f766e;
+        }
+
+        /* TAB CONTENT */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* INPUTS FOR HEIGHT/WEIGHT */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            align-items: center;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 15px;
+        }
+
+        .unit-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .unit-btn.selected {
+            background: #10b981;
+            color: #fff;
+            border-color: #10b981;
+        }
+
+        /* DONE BUTTON FIXED */
+        .done-btn {
+            margin-top: 30px;
+            width: 100%;
+            padding: 16px;
+            border-radius: 30px;
+            border: none;
+            background: #10b981;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .done-btn:hover {
+            background: #059669;
+        }
+
+        #shoeSizes {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        /* SKIN CARE */
+
+        .skin-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 5px;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .skin-item span {
+            color: #6b7280;
+        }
+
+        .skin-options {
+            display: none;
+            padding: 10px 0 15px 0;
+        }
+
+        #openSkinPopup:hover {
+            background: #f1f5f9;
+        }
+
+        /* ========== SKIN PAGE STYLE ========== */
+
+        .skin-box {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .skin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 5px;
+            border-bottom: 1px solid #ddd;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .skin-item:hover {
+            background: #f8fafc;
+        }
+
+        .skin-options {
+            display: none;
+            padding: 10px 0;
+        }
+
+        .skin-options button {
+            margin: 5px;
+            padding: 7px 12px;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .skin-options button:hover {
+            background: #e0f2fe;
+        }
+
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            font-size: 22px;
+            font-weight: 700;
+            color: #6b7280;
+            transition: 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #ef4444;
+        }
+
+        /* INTEREST TAGS */
+
+        .interest-btn {
+            padding: 10px 18px;
+            border-radius: 30px;
+            border: 1.5px solid #cbd5e1;
+            background: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .interest-btn.selected {
+            background: #ecfeff;
+            border-color: #06b6d4;
+            color: #0f766e;
+        }
+
+        #openInterestPopup {
+            position: relative;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        #openInterestPopup {
+            position: relative;
+            z-index: 5;
+            pointer-events: auto;
+        }
+
+        /* === MAIN OPTION CARDS === */
+
+        .pref-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 22px 26px;
+            margin-bottom: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pref-section:hover {
+            background: #f1f5f9;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .pref-section .pref-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .pref-section .pref-sub {
+            font-size: 15px;
+            color: #6b7280;
+        }
+
+        .pref-section .arrow {
+            font-size: 26px;
+            color: #9ca3af;
+        }
+
+/* Green background + border for all fields in modal */
+#userModal input,
+#userModal textarea {
+    border: 2px solid #10b981 !important;
+    background-color: #ecfdf5 !important; /* light green field */
+    color: #065f46; /* dark green text */
+    outline: none !important;
+    transition: 0.2s ease;
+}
+
+/* Strong highlight on focus */
+#userModal input:focus,
+#userModal textarea:focus {
+    border: 2px solid #059669 !important;
+    background-color: #d1fae5 !important;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    padding: 20px 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+}
+
+.profile-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.profile-img {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e5e7eb;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.profile-info h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.profile-info p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.edit-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.edit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(59,130,246,0.3);
+}
+
+.edit-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    padding: 10px 10px;   /* 🔹 Bigger size */
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 20px;      /* 🔹 Larger text */
+    transition: 0.2s ease;
+}
+
+.edit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(59,130,246,0.35);
+}
+
+/* Navigation Buttons */
+.nav-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.nav-btn {
+    text-decoration: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border: 1.5px solid transparent;
+}
+/* FIXED LEFT PAGE BUTTONS */
+.page-side-nav {
+    position: fixed;
+    top: 120px;        /* distance from top */
+    left: 20px;        /* distance from left */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;         /* spacing between buttons */
+    z-index: 1000;
+}
+
+.page-side-nav .nav-btn {
+    display: inline-block;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    border: 1.5px solid transparent;
+    background: #fff;
+    color: #111827;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    transition: all 0.25s ease;
+}
+
+.page-side-nav .nav-btn.dashboard-btn {
+    border-color: #3b82f6; /* blue border for Dashboard */
+}
+
+.page-side-nav .nav-btn.profile-btn {
+    border-color: #10b981; /* green border for Profile */
+}
+
+.page-side-nav .nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+    background-color: #f0fdf4; /* subtle green hover for all */
+}
+
+.page-side-nav .nav-btn.active {
+    background-color: #10b981; /* green active */
+    color: #fff;
+    border-color: #10b981;
+}
+/* ================= LEFT PAGE NAV BUTTONS ================= */
+.page-side-nav {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 1000;
+}
+
+.page-side-nav .nav-btn {
+    display: inline-block;
+    text-decoration: none;
+    background: white;
+    color: #333;
+    padding: 14px 18px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-side-nav .nav-btn:hover,
+.page-side-nav .nav-btn.active {
+    background: #10b981;
+    color: white;
+}
+/* ================= FOOTER ================= */
+.footer{
+    position:fixed;
+
+    bottom:0;
+    left:0;
+
+    width:100%;
+    height:60px;
+
+    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+
+    z-index:1000;
+}
+
+.header-btn{
+    padding:8px 16px;
+
+    border-radius:8px;
+    border:2px solid #cbd5e1;
+
+    background:white;
+    color:#1e293b;
+
+    text-decoration:none;
+    font-weight:600;
+
+    transition:all 0.25s ease;
+}
+
+.header-btn:hover{
+    background:linear-gradient(135deg,#f97316,#f59e0b);
+    color:white;
+    border-color:#f97316;
+}
+
+.container{
+    margin-top:100px;
+}
+/* ================= HEADER ================= */
+
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:70px;
+
+    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+
+    border-bottom:3px solid #1e293b;
+
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+
+    display:flex;
+    justify-content:center;
+
+    z-index:3000;
+}
+
+/* header inner container */
+.header-container{
+    width:100%;
+    max-width:1200px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 20px;
+}
+
+.header-left h2{
+    font-weight:700;
+    color:#1e293b;
+}
+
+.header-right{
+    display:flex;
+    gap:10px;
+}
+.main-content{
+    max-width:1200px;
+    margin:auto;
+    padding-top:100px;
+}
+/* ===== USER EDIT MODAL FIX ===== */
+
+#userModal{
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+
+    display:none;
+    justify-content:center;
+    align-items:center;
+
+    background:rgba(0,0,0,0.5);
+
+    padding:90px 20px 80px 20px; /* space for header + footer */
+
+    z-index:5000;
+}
+
+#userModal .modal-content{
+    width:450px;
+    max-width:95%;
+
+    background:white;
+
+    border-radius:12px;
+
+    padding:25px;
+
+    max-height:calc(100vh - 180px); /* prevents footer overlap */
+
+    overflow-y:auto; /* scroll inside form */
+
+    box-shadow:0 20px 60px rgba(0,0,0,0.35);
+}
+ </style>
+</head>
+
+<body>
+
+
+
+    <div class="profile-view-box">
+
+        <!-- PROFILE -->
+<div class="profile-header" style="display:flex; align-items:center; justify-content:space-between; position:relative;">
+
+    <!-- Left side: Image + Name + Subtitle -->
+    <div style="display:flex; align-items:center; gap:20px;">
+        
+        <!-- Profile Image (Left) -->
+        <img src="{{ user.profile_image if user.profile_image else '/static/default_profile.png' }}" 
+             alt="Profile Image" 
+             style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid #ddd;">
+
+        <!-- Name & Subtitle (Right of Image) -->
+        <div>
+            <h2 style="margin:0; font-weight:600;">
+                {{ user.name if user.name else "User Name" }}
+            </h2>
+            <p style="color:gray; margin-top:6px;">Account holder</p>
+        </div>
+
+    </div>
+
+
+    
+    <!-- Right side buttons -->
+   
+
+    <!-- Edit button (Right side) -->
+    <!-- Edit Button -->
+    <button id="openEditBtn" class="edit-btn">Edit Personal Detail ✍🏼</button>
+
+</div>
+
+
+<!-- USER MODAL POPUP -->
+<div id="userModal" class="modal">
+    
+    <div class="modal-content" style="width:450px; max-width:95%; background:white; border-radius:8px; padding:20px; position:relative;">
+        <button class="close-btn" id="closeUserModal" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:20px; cursor:pointer;">×</button>
+        <h2 style="text-align:center; margin-bottom:15px;">User Details</h2>
+
+        <form id="userForm" method="POST" action="/save-user-detail" enctype="multipart/form-data">
+            <!-- Profile Image Upload -->
+            <div style="text-align:center; margin: 10px 0;">
+                <img id="profilePreview" src="https://via.placeholder.com/120"
+                     style="width:120px; height:120px; object-fit:cover; border-radius:50%; margin-bottom:10px;">
+                <input type="file" id="profileImage" name="profile_image" accept="image/*" style="display:block; margin:auto;">
+            </div>
+
+            <!-- User Form Fields -->
+            <label>Username</label>
+            <input type="text" id="username" name="name" value="{{ user.name }}"
+                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
+
+            <label>Age</label>
+            <input type="number" id="userAge" name="age"
+                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
+
+            <label>Main Phone</label>
+            <input type="tel" id="mainPhone" name="phone1"
+                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
+
+            <label>Secondary Phone</label>
+            <input type="tel" id="secondPhone" name="phone2"
+                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
+
+            <label>Main Address</label>
+            <textarea id="mainAddress" name="address1" rows="2"
+                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;"></textarea>
+
+            <label>Secondary Address</label>
+            <textarea id="secondAddress" name="address2" rows="2"
+                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;"></textarea>
+
+            <label>Email</label>
+            <input type="email" id="email" name="email" value="{{ user.email }}" readonly
+                style="width:100%; padding:6px; margin:4px 0 12px; border-radius:6px; border:1px solid #ccc; background:#f3f4f6;">
+
+ <button type="submit" style="
+background:#10b981;
+color:white;
+border:none;
+padding:12px 14px;
+width:100%;
+border-radius:8px;
+cursor:pointer;
+font-weight:600;
+margin-top:15px;
+position:sticky;
+bottom:0;
+">
+Save
+</button>
+        </form>
+    </div>
+</div>
+
+
+
+        <!-- MAIN OPTIONS (CARDS) -->
+
+        <div class="pref-section" id="openPopup">
+            <div>
+                <div class="pref-title">Clothing and shoes</div>
+                <div class="pref-sub">Size, fit and price</div>
+            </div>
+            <div class="arrow">›</div>
+        </div>
+
+        <div class="pref-section" id="openSkinPopup">
+            <div>
+                <div class="pref-title">Skin care and beauty</div>
+                <div class="pref-sub">Skin type and ingredient preferences</div>
+            </div>
+            <div class="arrow">›</div>
+        </div>
+
+        <div class="pref-section" id="openInterestPopup">
+            <div>
+                <div class="pref-title">Interests and attributes</div>
+                <div class="pref-sub">Activities and hobbies</div>
+            </div>
+            <div class="arrow">›</div>
+        </div>
+
+        <!-- REMOVED HEIGHT AND WEIGHT FROM MAIN PAGE -->
+  
+</div>
+    <!-- POPUP -->
+    <div class="popup-overlay" id="popup">
+        <div class="popup-box">
+
+            <div class="popup-header">
+                Clothing and Shoes
+                <span class="close-btn" id="closeMainPopup">✕</span>
+            </div>
+
+
+            <!-- PREFERRED DEPARTMENT -->
+            <div class="popup-option" id="preferredDept">
+                <div class="popup-option-top">
+                    <div class="popup-option-title">Preferred department</div>
+                    <button type="button" class="add-btn" id="deptAddBtn">Add</button>
+
+                </div>
+                <div class="popup-option-sub" id="deptText"></div>
+                <div id="deptOptions" style="display:none;">
+                    <button class="option-btn" data-value="Women">Women</button>
+                    <button class="option-btn" data-value="Men">Men</button>
+                    <br>
+                    <button class="save-btn" id="deptSaveBtn">Save</button>
+                </div>
+            </div>
+
+            <!-- HEIGHT AND WEIGHT -->
+            <div class="popup-option" id="heightWeightPopup">
+                <div class="popup-option-top">
+                    <div class="popup-option-title">Height and Weight</div>
+                    <button class="add-btn" id="heightWeightAddBtn">Add</button>
+                </div>
+                <div class="popup-option-sub" id="heightWeightPopupDisplay"></div>
+                <div class="popup-option-sub" id="heightWeightContent" style="display:none;">
+                    <div>What's your current height and weight?</div>
+
+                    <div class="input-group">
+                        <input type="number" id="heightValue" placeholder="Enter height">
+                        <button class="unit-btn selected" id="heightUnitBtn">cm</button>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="number" id="weightValue" placeholder="Enter weight">
+                        <button class="unit-btn selected" id="weightUnitBtn">kg</button>
+                    </div>
+
+                    <button class="save-btn" id="heightWeightSaveBtn">Save</button>
+                </div>
+            </div>
+
+            <!-- AGE GROUP OPTION -->
+            <div class="popup-option" id="ageGroupPopup">
+                <div class="popup-option-top">
+                    <div class="popup-option-title">Age group</div>
+                    <button class="add-btn" id="ageGroupAddBtn">Add</button>
+                </div>
+                <div class="popup-option-sub" id="ageGroupDisplay"></div>
+                <div id="ageGroupOptions" style="display:none;">
+                    <button class="option-btn" data-value="18-25">18-25</button>
+                    <button class="option-btn" data-value="26-35">26-35</button>
+                    <button class="option-btn" data-value="36-45">36-45</button>
+                    <button class="option-btn" data-value="46+">46+</button>
+                    <br>
+                    <button class="save-btn" id="ageGroupSaveBtn">Save</button>
+                </div>
+            </div>
+
+            <div
+                style="width:100%;background:#fff;padding:40px;border-radius:20px;box-shadow:0 15px 40px rgba(0,0,0,0.1);">
+
+                <h2>Department preferences</h2>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab(event,'women')">Women’s</div>
+                    <div class="tab" onclick="switchTab(event,'men')">Men’s</div>
+                </div>
+
+                <!-- ================= WOMEN ================= -->
+                <div id="women" class="tab-content active">
+
+                    <div class="popup-option">
+
+                        <div class="popup-option-title">Fit attributes</div>
+                        <button class="add-btn" onclick="toggleWomenFit()">Add</button>
+
+                        <div id="womenFitView" style="display:none;">
+
+                            <div class="popup-option-sub" id="womenDisplay">
+                                Shoulders: --<br>
+                                Waist: --<br>
+                                Thighs/Legs: --<br>
+                                Hips: --
+                            </div>
+
+                            <button class="add-btn" onclick="openWomenSelection()">Add</button>
+
+                            <div class="selection-box" id="womenSelection">
+                                <h4>How would you describe your:</h4>
+                                <div id="womenOptions"></div>
+                                <button class="save-btn" onclick="saveWomen()">Save</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ================= MEN ================= -->
+                <div id="men" class="tab-content">
+
+                    <div class="popup-option">
+
+                        <div class="popup-option-title">Fit attributes</div>
+                        <button class="add-btn" onclick="toggleMenFit()">Add</button>
+
+                        <div id="menFitView" style="display:none;">
+
+                            <div class="popup-option-sub" id="menDisplay">
+                                Shoulders: --<br>
+                                Waist: --<br>
+                                Thighs/Legs: --<br>
+                                Chest: --
+                            </div>
+
+                            <button class="add-btn" onclick="openMenSelection()">Add</button>
+
+                            <div class="selection-box" id="menSelection">
+                                <h4>How would you describe your:</h4>
+                                <div id="menOptions"></div>
+                                <button class="save-btn" onclick="saveMen()">Save</button>
+                            </div>
+                        </div>
+
+                    </div> <!-- closes MEN tab -->
+                </div> <!-- 🔥 THIS closes Department preferences white card -->
+            </div>
+
+
+            <div class="popup-option" id="shoesPopup">
+
+                <div class="popup-option-top">
+                    <div class="popup-option-title">Shoes</div>
+                    <button class="add-btn" id="shoesAddBtn">Add</button>
+                </div>
+
+                <div class="popup-option-sub" id="shoesDisplay">
+                    Shoes: --
+                </div>
+
+                <!-- Hidden Shoe Options -->
+                <div id="shoesOptions" style="display:none; margin-top:15px;">
+
+                    <h4>What size shoe do you typically wear?</h4>
+
+                    <div id="shoeSizes"></div>
+
+                    <h4 style="margin-top:15px;">Width</h4>
+
+                    <div>
+                        <button class="option-btn" onclick="selectWidth(this)">Narrow</button>
+                        <button class="option-btn" onclick="selectWidth(this)">Standard</button>
+                        <button class="option-btn" onclick="selectWidth(this)">Wide</button>
+                    </div>
+
+                    <button class="save-btn" onclick="saveShoes()">Save</button>
+
+                </div>
+
+            </div>
+
+
+
+            <button class="done-btn" id="closePopup" onclick="saveAllData()">Done</button>
+        </div>
+    </div>
+
+    <!-- SKIN CARE POPUP -->
+
+    <!-- SKIN CARE POPUP -->
+
+    <div class="popup-overlay" id="skinPopup">
+        <div class="popup-box skin-box">
+
+
+            <h2 class="popup-header">
+                Skin care and beauty
+                <span id="closeSkinPopup" class="close-btn">✕</span>
+            </h2>
+
+
+            <!-- ========== SKIN TYPE ========== -->
+            <div class="skin-item" onclick="toggleSection('type')">
+                <span>Skin Type</span>
+                <span id="typeVal">--</span>
+                <span>⌄</span>
+            </div>
+
+            <div class="skin-options" id="type">
+
+                <button onclick="setVal('type','Dry')">Dry</button>
+                <button onclick="setVal('type','Oily')">Oily</button>
+                <button onclick="setVal('type','Normal')">Normal</button>
+                <button onclick="setVal('type','Combination')">Combination</button>
+
+            </div>
+
+
+            <!-- ========== SENSITIVITY ========== -->
+            <div class="skin-item" onclick="toggleSection('sensitive')">
+                <span>Skin Sensitivity</span>
+                <span id="sensitiveVal">--</span>
+                <span>⌄</span>
+            </div>
+
+            <div class="skin-options" id="sensitive">
+
+                <button onclick="setVal('sensitive','Low')">Low</button>
+                <button onclick="setVal('sensitive','Medium')">Medium</button>
+                <button onclick="setVal('sensitive','High')">High</button>
+
+            </div>
+
+
+            <!-- ========== CONCERN ========== -->
+            <div class="skin-item" onclick="toggleSection('concern')">
+                <span>Top Skin Concern</span>
+                <span id="concernVal">--</span>
+                <span>⌄</span>
+            </div>
+
+            <div class="skin-options" id="concern">
+
+                <button onclick="setVal('concern','Acne')">Acne</button>
+                <button onclick="setVal('concern','Dryness')">Dryness</button>
+                <button onclick="setVal('concern','Wrinkles')">Wrinkles</button>
+                <button onclick="setVal('concern','Pigmentation')">Pigmentation</button>
+
+            </div>
+
+
+            <!-- ========== SKIN TONE ========== -->
+            <div class="skin-item" onclick="toggleSection('tone')">
+                <span>Skin Tone</span>
+                <span id="toneVal">--</span>
+                <span>⌄</span>
+            </div>
+
+            <div class="skin-options" id="tone">
+
+                <button onclick="setVal('tone','Fair')">Fair</button>
+                <button onclick="setVal('tone','Medium')">Medium</button>
+                <button onclick="setVal('tone','Wheatish')">Wheatish</button>
+                <button onclick="setVal('tone','Dark')">Dark</button>
+
+            </div>
+
+
+            <!-- ========== EYE CARE ========== -->
+            <div class="skin-item" onclick="toggleSection('eye')">
+                <span>Eye Care Concerns</span>
+                <span id="eyeVal">--</span>
+                <span>⌄</span>
+            </div>
+
+            <div class="skin-options" id="eye">
+
+                <button onclick="setVal('eye','Dark Circles')">Dark Circles</button>
+                <button onclick="setVal('eye','Puffiness')">Puffiness</button>
+                <button onclick="setVal('eye','Fine Lines')">Fine Lines</button>
+                <button onclick="setVal('eye','Dryness')">Dryness</button>
+
+            </div>
+
+
+            <!-- ========== INGREDIENTS ========== -->
+            <div class="skin-item" onclick="toggleSection('avoid')">
+                <span>Ingredients Not Wanted</span>
+                <span id="avoidVal">--</span>
+                <span>⌄</span>
+            </div>
+
+            <div class="skin-options" id="avoid">
+
+                <button onclick="setVal('avoid','Paraben')">Paraben</button>
+                <button onclick="setVal('avoid','Sulphate')">Sulphate</button>
+                <button onclick="setVal('avoid','Alcohol')">Alcohol</button>
+                <button onclick="setVal('avoid','Fragrance')">Fragrance</button>
+
+            </div>
+
+
+            <!-- ========== QUALITIES ========== -->
+            <div class="skin-item" onclick="toggleSection('quality')">
+                <span>Important Qualities</span>
+                <span id="qualityVal">--</span>
+                <span>⌄</span>
+            </div>
+
+            <div class="skin-options" id="quality">
+
+                <button onclick="setVal('quality','Cruelty Free')">Cruelty Free</button>
+                <button onclick="setVal('quality','Vegan')">Vegan</button>
+                <button onclick="setVal('quality','Dermat Tested')">Dermat Tested</button>
+
+            </div>
+
+
+            <!-- ========== FORMULATION ========== -->
+            <div class="skin-item" onclick="toggleSection('form')">
+                <span>Product Formulation</span>
+                <span id="formVal">--</span>
+                <span>⌄</span>
+            </div>
+
+            <div class="skin-options" id="form">
+
+                <button onclick="setVal('form','Gel')">Gel</button>
+                <button onclick="setVal('form','Cream')">Cream</button>
+                <button onclick="setVal('form','Lotion')">Lotion</button>
+                <button onclick="setVal('form','Serum')">Serum</button>
+
+            </div>
+
+
+            <button class="done-btn" id="closePopup" onclick="closeSkinPopup()">Done</button>
+        </div>
+    </div>
+
+
+    <!-- INTERESTS POPUP -->
+
+    <div class="popup-overlay" id="interestPopup">
+        <div class="popup-box">
+
+            <h2 class="popup-header">
+                Interests
+                <span id="closeInterestPopup" class="close-btn">✕</span>
+            </h2>
+
+            <p style="color:#6b7280;margin-bottom:20px;">
+                Based on your activity and popular interests. Select to get personalized recommendations.
+            </p>
+
+            <h3 style="margin-bottom:15px;">Suggested interests</h3>
+
+            <div id="interestList" style="display:flex;flex-wrap:wrap;gap:12px;">
+
+            </div>
+
+            <button class="done-btn" id="doneBtn" onclick="saveAllData()">Done</button>
+
+        </div>
+    </div>
+
+    <script>
+
+
+
+
+
+        const openPopup = document.getElementById("openPopup");
+        const popup = document.getElementById("popup");
+        const closePopup = document.getElementById("closePopup");
+
+        // Open/close popup
+        openPopup.onclick = () => popup.style.display = "flex";
+        popup.onclick = e => { if (e.target === popup) popup.style.display = "none"; };
+
+        popup.addEventListener("click", (e) => {
+            if (e.target === popup) { // only close if clicked on overlay
+                popup.style.display = "none";
+                document.body.style.overflow = "auto";
+            }
+        });
+
+
+
+        // --- Preferred Department Logic ---
+        const deptAddBtn = document.getElementById("deptAddBtn");
+        const deptText = document.getElementById("deptText");
+        const deptOptions = document.getElementById("deptOptions");
+        const deptSaveBtn = document.getElementById("deptSaveBtn");
+        const optionButtons = deptOptions.querySelectorAll(".option-btn");
+
+
+        deptAddBtn.onclick = () => {
+            deptText.textContent = "Which department do you typically shop in?";
+            deptOptions.style.display = "block";
+        };
+
+        optionButtons.forEach(btn => {
+            btn.onclick = () => {
+                optionButtons.forEach(b => b.classList.remove("selected"));
+                btn.classList.add("selected");
+                selectedDept = btn.getAttribute("data-value");
+            };
+        });
+
+        deptSaveBtn.onclick = () => {
+            if (selectedDept) {
+                deptText.textContent = selectedDept;
+                deptOptions.style.display = "none";
+            }
+        };
+
+        // --- Height and Weight Logic ---
+        const heightWeightAddBtn = document.getElementById("heightWeightAddBtn");
+        const heightWeightContent = document.getElementById("heightWeightContent");
+        const heightUnitBtn = document.getElementById("heightUnitBtn");
+        const weightUnitBtn = document.getElementById("weightUnitBtn");
+        const heightValue = document.getElementById("heightValue");
+        const weightValue = document.getElementById("weightValue");
+        const heightWeightSaveBtn = document.getElementById("heightWeightSaveBtn");
+        const heightWeightPopupDisplay = document.getElementById("heightWeightPopupDisplay");
+
+        heightWeightAddBtn.onclick = () => {
+            heightWeightContent.style.display = "block";
+        };
+
+        heightUnitBtn.onclick = () => {
+            heightUnitBtn.textContent = (heightUnitBtn.textContent === "cm") ? "ft" : "cm";
+        };
+        weightUnitBtn.onclick = () => {
+            weightUnitBtn.textContent = (weightUnitBtn.textContent === "kg") ? "lbs" : "kg";
+        };
+
+        heightWeightSaveBtn.onclick = () => {
+            const hVal = heightValue.value;
+            const hUnit = heightUnitBtn.textContent;
+            const wVal = weightValue.value;
+            const wUnit = weightUnitBtn.textContent;
+            if (hVal && wVal) {
+                const displayText = `Height: ${hVal} ${hUnit}, Weight: ${wVal} ${wUnit}`;
+                heightWeightPopupDisplay.textContent = displayText;
+                heightWeightContent.style.display = "none";
+            }
+        };
+
+        // --- Age Group Logic ---
+        const ageGroupAddBtn = document.getElementById("ageGroupAddBtn");
+        const ageGroupDisplay = document.getElementById("ageGroupDisplay");
+        const ageGroupOptions = document.getElementById("ageGroupOptions");
+        const ageGroupSaveBtn = document.getElementById("ageGroupSaveBtn");
+        const ageButtons = ageGroupOptions.querySelectorAll(".option-btn");
+        let selectedAge = "";
+
+        ageGroupAddBtn.onclick = () => {
+            ageGroupOptions.style.display = "block";
+        };
+
+        ageButtons.forEach(btn => {
+            btn.onclick = () => {
+                ageButtons.forEach(b => b.classList.remove("selected"));
+                btn.classList.add("selected");
+                selectedAge = btn.getAttribute("data-value");
+            };
+        });
+
+        ageGroupSaveBtn.onclick = () => {
+            if (selectedAge) {
+                ageGroupDisplay.textContent = selectedAge;
+                ageGroupOptions.style.display = "none";
+            }
+        };
+    </script>
+    <script>
+
+        /* TAB SWITCH */
+        function switchTab(event, tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        /* ================= DATA STORAGE ================= */
+
+        let womenData = {
+            Shoulders: "--",
+            Waist: "--",
+            "Thighs/Legs": "--",
+            Hips: "--"
+        };
+
+        let menData = {
+            Shoulders: "--",
+            Waist: "--",
+            "Thighs/Legs": "--",
+            Chest: "--"
+        };
+
+        /* ================= WOMEN ================= */
+
+        function toggleWomenFit() {
+            document.getElementById("womenFitView").style.display = "block";
+        }
+
+        function openWomenSelection() {
+            document.getElementById("womenSelection").style.display = "block";
+
+            const parts = ["Shoulders", "Waist", "Thighs/Legs", "Hips"];
+            let html = "";
+
+            parts.forEach(part => {
+                html += `<div><strong>${part}</strong><br>
+<button class="option-btn" onclick="selectOption(this,'women','${part}')">Narrow</button>
+<button class="option-btn" onclick="selectOption(this,'women','${part}')">Average</button>
+<button class="option-btn" onclick="selectOption(this,'women','${part}')">Wide</button>
+</div><br>`;
+            });
+
+            document.getElementById("womenOptions").innerHTML = html;
+        }
+
+        function saveWomen() {
+
+            document.getElementById("womenDisplay").innerHTML = `
+Shoulders: ${womenData["Shoulders"]}<br>
+Waist: ${womenData["Waist"]}<br>
+Thighs/Legs: ${womenData["Thighs/Legs"]}<br>
+Hips: ${womenData["Hips"]}
+`;
+
+            document.getElementById("womenSelection").style.display = "none";
+        }
+
+        /* ================= MEN ================= */
+
+        function toggleMenFit() {
+            document.getElementById("menFitView").style.display = "block";
+        }
+
+        function openMenSelection() {
+            document.getElementById("menSelection").style.display = "block";
+
+            const parts = ["Shoulders", "Waist", "Thighs/Legs", "Chest"];
+            let html = "";
+
+            parts.forEach(part => {
+                html += `<div><strong>${part}</strong><br>
+<button class="option-btn" onclick="selectOption(this,'men','${part}')">Narrow</button>
+<button class="option-btn" onclick="selectOption(this,'men','${part}')">Average</button>
+<button class="option-btn" onclick="selectOption(this,'men','${part}')">Wide</button>
+</div><br>`;
+            });
+
+            document.getElementById("menOptions").innerHTML = html;
+        }
+
+        function saveMen() {
+
+            document.getElementById("menDisplay").innerHTML = `
+Shoulders: ${menData["Shoulders"]}<br>
+Waist: ${menData["Waist"]}<br>
+Thighs/Legs: ${menData["Thighs/Legs"]}<br>
+Chest: ${menData["Chest"]}
+`;
+
+            document.getElementById("menSelection").style.display = "none";
+        }
+
+        /* ================= OPTION SELECT ================= */
+
+        function selectOption(btn, gender, part) {
+
+            const siblings = btn.parentElement.querySelectorAll('.option-btn');
+            siblings.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            if (gender === "women") {
+                womenData[part] = btn.textContent;
+            } else {
+                menData[part] = btn.textContent;
+            }
+
+        }
+
+    </script>
+    <script>
+        /* ========== SKIN PAGE LOGIC ========== */
+
+        let skinData = {};
+
+        /* Toggle Dropdown */
+        function toggleSection(id) {
+
+            document.querySelectorAll(".skin-options").forEach(sec => {
+                if (sec.id !== id) {
+                    sec.style.display = "none";
+                }
+            });
+
+            const el = document.getElementById(id);
+
+            el.style.display = (el.style.display === "block") ? "none" : "block";
+        }
+
+
+        /* Set Value */
+        function setVal(key, value) {
+
+            skinData[key] = value;
+
+            document.getElementById(key + "Val").textContent = value;
+
+            document.getElementById(key).style.display = "none";
+
+        }
+
+
+        function closeSkinPopup() {
+            // Collect skin data
+            const skinDataToSave = {
+                Type: skinData.type || "--",
+                Sensitivity: skinData.sensitive || "--",
+                Concern: skinData.concern || "--",
+                Tone: skinData.tone || "--",
+                "Eye care": skinData.eye || "--",
+                "Ingredients not wanted": skinData.avoid || "--",
+                "Imp qualities": skinData.quality || "--",
+                "Product Formulation": skinData.form || "--"
+            };
+
+            // Merge with clothing & shoes + other data
+            const dataToSend = {
+                Username: "Kevin Smith",
+                Department: selectedDept || "--",
+                Heights: document.getElementById("heightValue")?.value || "--",
+                Weights: document.getElementById("weightValue")?.value || "--",
+                Age: selectedAge || "--",
+                "Fit attributes": `Women: ${womenData?.Shoulders || "--"}, ${womenData?.Waist || "--"}, ${womenData?.["Thighs/Legs"] || "--"}, ${womenData?.Hips || "--"}; Men: ${menData?.Shoulders || "--"}, ${menData?.Waist || "--"}, ${menData?.["Thighs/Legs"] || "--"}, ${menData?.Chest || "--"}`,
+                Shoes: selectedShoeSize ? `${selectedShoeSize}, Width: ${selectedWidth}` : "--",
+                ...skinDataToSave,
+                Interests: selectedInterests.join(", ") // ✅ only if selectedInterests is an array            
+                // 
+
+            };
+
+            fetch("/save_data", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(dataToSend)
+            })
+                .then(res => res.json())
+                .then(res => {
+                    alert(res.message);  // This shows the popup message
+                    skinPopup.style.display = "none";  // Close Skin popup
+                })
+                .catch(err => console.error(err));
+        }
+
+
+        /* OPEN SKIN POPUP */
+
+        const openSkinPopup = document.getElementById("openSkinPopup");
+        const skinPopup = document.getElementById("skinPopup");
+
+        openSkinPopup.onclick = () => {
+            skinPopup.style.display = "flex";
+        };
+
+
+        /* ========== SHOES LOGIC ========== */
+
+        const shoesAddBtn = document.getElementById("shoesAddBtn");
+        const shoesOptions = document.getElementById("shoesOptions");
+        const shoesDisplay = document.getElementById("shoesDisplay");
+
+        let selectedShoeSize = "";
+        let selectedWidth = "";
+
+
+        /* Generate Shoe Sizes */
+        const shoeSizesBox = document.getElementById("shoeSizes");
+
+        for (let i = 5; i <= 12; i += 0.5) {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.textContent = i;
+            btn.onclick = function () {
+                document.querySelectorAll("#shoeSizes .option-btn")
+                    .forEach(b => b.classList.remove("selected"));
+
+                btn.classList.add("selected");
+                selectedShoeSize = i;
+            };
+
+            shoeSizesBox.appendChild(btn);
+        }
+
+
+        /* Open Shoes Section */
+        shoesAddBtn.onclick = () => {
+            shoesOptions.style.display = "block";
+        };
+
+
+        /* Select Width */
+        function selectWidth(btn) {
+
+            btn.parentElement.querySelectorAll(".option-btn")
+                .forEach(b => b.classList.remove("selected"));
+
+            btn.classList.add("selected");
+
+            selectedWidth = btn.textContent;
+        }
+
+
+        /* Save Shoes */
+        function saveShoes() {
+
+            if (selectedShoeSize && selectedWidth) {
+
+                shoesDisplay.textContent =
+                    `Shoes: ${selectedShoeSize}, Width: ${selectedWidth}`;
+
+                shoesOptions.style.display = "none";
+
+            } else {
+                alert("Please select size and width");
+            }
+        }
+        /* ========== CLOSE BUTTONS ========== */
+
+        // Main Clothing Popup ❌
+        const closeMainPopupBtn = document.getElementById("closeMainPopup");
+
+        if (closeMainPopupBtn) {
+            closeMainPopupBtn.onclick = () => {
+                document.getElementById("popup").style.display = "none";
+            };
+        }
+
+        // Skin Popup ❌
+        const closeSkinPopupBtn = document.getElementById("closeSkinPopup");
+
+        if (closeSkinPopupBtn) {
+            closeSkinPopupBtn.onclick = () => {
+                document.getElementById("skinPopup").style.display = "none";
+            };
+        }
+
+    </script>
+
+    <script>
+
+
+
+        /* ========== INTERESTS LOGIC ========== */
+
+        const openInterestPopup = document.getElementById("openInterestPopup");
+        const interestPopup = document.getElementById("interestPopup");
+        const closeInterestPopup = document.getElementById("closeInterestPopup");
+        const interestList = document.getElementById("interestList");
+
+        let selectedInterests = [];
+
+
+        /* Interest Data */
+        const interests = [
+            "Skin Care",
+            "Storage & Organization",
+            "Interior Design",
+            "Hair Care and Styling",
+            "Babies and Toddlers",
+            "Dorm Essentials",
+            "Baking",
+            "Makeup",
+            "Women's Attire",
+            "Party Planning"
+        ];
+
+
+        /* Generate Buttons */
+        interests.forEach(item => {
+
+            const btn = document.createElement("button");
+
+            btn.className = "interest-btn";
+
+            btn.innerHTML = `+ ${item}`;
+
+            btn.onclick = () => toggleInterest(btn, item);
+
+            interestList.appendChild(btn);
+
+        });
+
+
+        /* Open Popup */
+        openInterestPopup.onclick = () => {
+            interestPopup.style.display = "flex";
+        };
+
+
+        /* Close Popup */
+        closeInterestPopup.onclick = () => {
+            interestPopup.style.display = "none";
+        };
+
+
+        /* Toggle Select */
+        function toggleInterest(btn, item) {
+
+            if (selectedInterests.includes(item)) {
+
+                selectedInterests =
+                    selectedInterests.filter(i => i !== item);
+
+                btn.classList.remove("selected");
+                btn.innerHTML = `+ ${item}`;
+
+            } else {
+
+                selectedInterests.push(item);
+
+                btn.classList.add("selected");
+                btn.innerHTML = `✓ ${item}`;
+            }
+        }
+
+
+        /* Save Interests */
+        function saveInterests() {
+
+            console.log("Saved Interests:", selectedInterests);
+
+            interestPopup.style.display = "none";
+        }
+        /* SAFETY CLICK FIX */
+
+        document.getElementById("openInterestPopup")
+            .addEventListener("click", function (e) {
+
+                e.stopPropagation(); // prevent block
+
+                document.getElementById("interestPopup").style.display = "flex";
+            });
+        /* FORCE INTEREST CLICK FIX - NO UI CHANGE */
+
+        const interestBox = document.getElementById("openInterestPopup");
+
+        if (interestBox) {
+
+            interestBox.style.cursor = "pointer";
+
+            interestBox.addEventListener("click", function (e) {
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                document.getElementById("interestPopup").style.display = "flex";
+
+            });
+
+        }
+
+    </script>
+
+    <script>
+
+
+        let selectedDept = "--"; // default value
+
+
+        
+        // Listen for changes on department radio buttons
+        document.querySelectorAll('input[name="department"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                selectedDept = this.value;
+                console.log("Selected Department:", selectedDept);
+            });
+        });
+
+        // Save button
+        const saveDeptBtn = document.getElementById("saveDeptBtn");
+
+        if (saveDeptBtn) {
+            saveDeptBtn.addEventListener("click", function () {
+                saveAllData();
+            });
+        }
+
+
+        // Updated saveAllData function
+        function saveAllData() {
+            // --- Clothing & Shoes data ---
+            const clothingData = {
+                Department: selectedDept || "--",
+                Height: document.getElementById("heightValue")?.value || "--",
+                Weight: document.getElementById("weightValue")?.value || "--",
+                Age: selectedAge || "--",
+                "Fit attributes": `Women: ${womenData?.Shoulders || "--"}, ${womenData?.Waist || "--"}, ${womenData?.["Thighs/Legs"] || "--"}, ${womenData?.Hips || "--"} | Men: ${menData?.Shoulders || "--"}, ${menData?.Waist || "--"}, ${menData?.["Thighs/Legs"] || "--"}, ${menData?.Chest || "--"}`,
+                Shoes: shoesDisplay?.textContent || "--"
+            };
+
+            // --- Skin Care data ---
+            const skinFinal = {
+                Type: skinData?.type || "--",
+                Sensitivity: skinData?.sensitive || "--",
+                Concern: skinData?.concern || "--",
+                Tone: skinData?.tone || "--",
+                "Eye care": skinData?.eye || "--",
+                "Ingredients not wanted": skinData?.avoid || "--",
+                "Imp qualities": skinData?.quality || "--",
+                "Product Formulation": skinData?.form || "--"
+            };
+
+            // --- Interests data ---
+            const interestsFinal = (selectedInterests && selectedInterests.length > 0)
+                ? selectedInterests.join(", ")  // join as comma-separated string
+                : "--";
+
+            // --- Combine all ---
+            const payload = {
+                UserID: "001",  // optional, can be dynamic
+                Username: "Kevin Smith",
+                ...clothingData,
+                ...skinFinal,
+                Interests: interestsFinal  // <-- last column
+            };
+
+            console.log("Payload to send:", payload);
+
+            // Send to backend
+            fetch('/save_data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    alert("Data saved successfully!"); // ✅ message after Done click
+                    // Close any open popups
+                    document.getElementById("popup").style.display = "none";
+                    document.getElementById("skinPopup").style.display = "none";
+                    document.getElementById("interestPopup").style.display = "none";
+                })
+                .catch(err => console.error(err));
+        }
+
+
+    </script>
+<script>
+    // Elements
+    const openEditBtn = document.getElementById("openEditBtn");
+    const userModal = document.getElementById("userModal");
+    const closeUserModal = document.getElementById("closeUserModal");
+    const profileImage = document.getElementById("profileImage");
+    const profilePreview = document.getElementById("profilePreview");
+
+    // Open modal & fetch latest saved detail
+    openEditBtn.addEventListener("click", async () => {
+        try {
+            // Fetch latest profile from server
+            const res = await fetch("/get-latest-profile");
+            const data = await res.json();
+
+            if (data.success) {
+                // Fill the form fields
+                document.getElementById("username").value = data.name || "";
+                document.getElementById("email").value = data.email || "";
+                profilePreview.src = data.profile_image || "/static/default_profile.png";
+            }
+
+            // Show modal
+            userModal.style.display = "flex";
+            document.body.style.overflow = "hidden";
+
+        } catch (err) {
+            console.error("Error fetching user details:", err);
+            userModal.style.display = "flex"; // still open modal even if fetch fails
+        }
+    });
+
+    // Close modal
+    closeUserModal.addEventListener("click", () => {
+        userModal.style.display = "none";
+        document.body.style.overflow = "auto";
+    });
+
+    // Click outside modal to close
+    userModal.addEventListener("click", (e) => {
+        if (e.target === userModal) {
+            userModal.style.display = "none";
+            document.body.style.overflow = "auto";
+        }
+    });
+
+    // Preview uploaded profile image
+    profileImage.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            profilePreview.src = URL.createObjectURL(file);
+        }
+    });
+
+    openEditBtn.addEventListener("click", async () => {
+    try {
+        const res = await fetch("/get-full-profile");  // 🔹 Use new route
+        const data = await res.json();
+
+        if (data.success) {
+            document.getElementById("username").value = data.name || "";
+            document.getElementById("userAge").value = data.age || "";
+            document.getElementById("mainPhone").value = data.phone1 || "";
+            document.getElementById("secondPhone").value = data.phone2 || "";
+            document.getElementById("mainAddress").value = data.address1 || "";
+            document.getElementById("secondAddress").value = data.address2 || "";
+            document.getElementById("email").value = data.email || "";
+            document.getElementById("profilePreview").src = data.profile_image || "/static/default_profile.png";
+        }
+
+        userModal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+
+    } catch (err) {
+        console.error("Error fetching full user details:", err);
+        userModal.style.display = "flex";
+    }
+});
+
+
+document.getElementById("userForm").addEventListener("submit", function(e) {
+    e.preventDefault(); // stop instant submit
+
+    const form = this;
+    const formData = new FormData(form);
+
+    fetch("/save-user-detail", {
+        method: "POST",
+        body: formData
+    })
+    .then(() => {
+        alert("Data added successfully!");
+        form.submit(); // continue original submit & redirect
+    })
+    .catch(() => {
+        alert("Error saving data");
+    });
+});
+
+
+</script>
+
+
+
+</body>
+
+</html>

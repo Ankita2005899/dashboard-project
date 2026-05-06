@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Product Add to Cart Data</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{ font-family:"Segoe UI",sans-serif; padding:20px;    background:#d4f4f8; 
+; }
+h1{ margin-bottom:15px; }
+.chart-container{ margin-top:20px; }
+.table-container{ margin-top:20px; overflow-x:auto; }
+table{ width:100%; border-collapse: collapse; background:white; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+th,td{ padding:12px; border-bottom:1px solid #ddd; text-align:left; }
+th{ background:#15803d; color:white; }
+.progress-wrapper{ background:#f1f3f6; border-radius:8px; height:18px; width:100%; overflow:hidden; }
+.progress-bar{ height:100%; border-radius:8px; text-align:right; padding-right:5px; color:white; font-size:12px; line-height:18px; }
+.low-interest{ border:2px solid red; }
+.low-interest .progress-bar{ background:rgba(255,0,0,0.6); backdrop-filter:blur(2px); }
+.moderate-interest .progress-bar{ background:rgba(255,204,0,0.6); }
+/* ================= FOOTER ================= */
+.footer{
+    position:fixed;
+
+    bottom:0;
+    left:0;
+
+    width:100%;
+    height:60px;
+
+    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+
+    z-index:1000;
+}
+
+.header-btn{
+    padding:8px 16px;
+
+    border-radius:8px;
+    border:2px solid #cbd5e1;
+
+    background:white;
+    color:#1e293b;
+
+    text-decoration:none;
+    font-weight:600;
+
+    transition:all 0.25s ease;
+}
+
+.header-btn:hover{
+    background:linear-gradient(135deg,#f97316,#f59e0b);
+    color:white;
+    border-color:#f97316;
+}
+
+.container{
+    margin-top:100px;
+}
+/* ================= HEADER ================= */
+
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:70px;
+
+    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+
+    border-bottom:3px solid #1e293b;
+
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+
+    display:flex;
+    justify-content:center;
+
+    z-index:3000;
+}
+
+/* header inner container */
+.header-container{
+    width:100%;
+    max-width:1200px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 20px;
+}
+
+.header-left h2{
+    font-weight:700;
+    color:#1e293b;
+}
+
+.header-right{
+    display:flex;
+    gap:10px;
+}
+.main-content{
+    max-width:1200px;
+    margin:auto;
+    padding-top:100px;
+}
+</style>
+</head>
+<body>
+
+    <header class="header">
+
+    <div class="header-container">
+
+        <div class="header-left">
+            <h2>🛍️ Product Add to Cart Data </h2>
+        </div>
+
+    Product Add to Cart Data     <div class="header-right">
+            <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+        </div>
+
+    </div>
+
+</header>
+<br>
+<br>
+
+
+<h1>Product Add to Cart Data</h1>
+<div id="dashboardMain"></div>
+
+<script>
+function loadData(){
+    fetch(`/addtocart-products?q=`).then(res=>res.json()).then(data=>{
+        const main=document.getElementById("dashboardMain"); 
+        if(!data || data.length===0){ main.innerHTML="<p>No data available</p>"; return; }
+
+        // Chart
+        const chartDiv=document.createElement("div"); chartDiv.classList.add("chart-container");
+        const canvas=document.createElement("canvas"); canvas.id="lineChart"; chartDiv.appendChild(canvas); main.appendChild(chartDiv);
+        const labels=data.map(d=>d.name); 
+        const chartData=data.map(d=>d.addtocart_count||0);
+        new Chart(canvas,{
+            type:'bar', 
+            data:{ labels, datasets:[{label:"Add to Cart Count",data:chartData,backgroundColor:'#15803d'}]}, 
+            options:{responsive:true, scales:{y:{beginAtZero:true}}} 
+        });
+
+        // Products Table
+        const tableDiv=document.createElement("div"); tableDiv.classList.add("table-container");
+        const table=document.createElement("table"); 
+        const thead=document.createElement("thead"); 
+        const trHead=document.createElement("tr");
+        ["#","Cart ID","Product Name","Category","Today's Addtocart Count","Time"].forEach(h=>{ const th=document.createElement("th"); th.innerText=h; trHead.appendChild(th); });
+        thead.appendChild(trHead); table.appendChild(thead);
+
+        const tbody=document.createElement("tbody");
+        data.forEach((item,i)=>{
+            const tr=document.createElement("tr");
+            tr.innerHTML=`<td>${i+1}</td><td>${item.id}</td><td>${item.name}</td><td>${item.category}</td><td>${item.addtocart_count||0}</td><td>${item.time||'-'}</td>`;
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody); tableDiv.appendChild(table); main.appendChild(tableDiv);
+
+        // Users Table
+        const userTableDiv=document.createElement("div"); userTableDiv.classList.add("table-container");
+        const userTable=document.createElement("table"); 
+        const userThead=document.createElement("thead"); 
+        const trHeadUser=document.createElement("tr");
+        ["User ID","User Name","Add to Cart Rate"].forEach(h=>{ const th=document.createElement("th"); th.innerText=h; trHeadUser.appendChild(th); });
+        userThead.appendChild(trHeadUser); userTable.appendChild(userThead);
+
+        const tbodyUser=document.createElement("tbody");
+        for(let i=1;i<=5;i++){
+            const tr=document.createElement("tr");
+            const uid=document.createElement("td"); uid.innerText='U'+i; tr.appendChild(uid);
+            const uname=document.createElement("td"); uname.innerText='User '+i; tr.appendChild(uname);
+            const val=Math.floor(Math.random()*100);
+            const td=document.createElement("td"); td.innerHTML=`<div class="progress-wrapper"><div class="progress-bar" style="width:${val}%">${val}%</div></div>`; 
+            tr.appendChild(td);
+            if(val<25) tr.classList.add("low-interest"); else if(val<50) tr.classList.add("moderate-interest");
+            tbodyUser.appendChild(tr);
+        }
+        userTable.appendChild(tbodyUser); userTableDiv.appendChild(userTable); main.appendChild(userTableDiv);
+    });
+}
+
+// Load immediately
+loadData();
+</script>
+
+<footer class="footer">
+    © 2026 Product Dashboard | All Rights Reserved
+</footer>
+</body>
+</html>

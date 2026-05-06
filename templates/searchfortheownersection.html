@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Owner Search Table</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    font-family: "Segoe UI", sans-serif;
+    background: #d4f4f8;
+    min-height: 100vh;
+    padding: 0;
+    color: #111827;
+}
+
+/* ================= HEADER ================= */
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:70px;
+    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+    border-bottom:3px solid #1e293b;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    display:flex;
+    justify-content:center;
+    z-index:3000;
+}
+
+.header-container{
+    width:100%;
+    max-width:1200px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+}
+
+.header-left h2{
+    font-weight:700;
+    color:#1e293b;
+}
+
+.header-right{
+    display:flex;
+    gap:10px;
+}
+
+/* ✅ SAME BUTTON STYLE */
+.header-btn{
+    padding:8px 16px;
+    border-radius:8px;
+    border:2px solid #cbd5e1;
+    background:white;
+    color:#1e293b;
+    text-decoration:none;
+    font-weight:600;
+    transition:all 0.25s ease;
+}
+
+.header-btn:hover{
+    background:linear-gradient(135deg,#f97316,#f59e0b);
+    color:white;
+    border-color:#f97316;
+}
+
+/* ================= MAIN ================= */
+.main-content{
+    max-width:1200px;
+    margin:auto;
+    padding:30px;
+    padding-top:100px; /* ✅ FIX overlap */
+    padding-bottom:80px;
+}
+
+/* ================= CARDS ================= */
+.card-table,
+.card-chart {
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    margin-bottom: 40px;
+}
+
+/* ✅ GREEN THEME */
+.section-title {
+    font-weight: 700;
+    font-size: 24px;
+    color: #10b981;
+    text-align: center;
+    padding: 12px 0;
+    border-bottom: 3px solid #cbd5e1;
+    margin-bottom: 25px;
+    background: linear-gradient(135deg,#ecfdf5,#f0fdfa);
+}
+
+.section-title::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 4px;
+    margin: 8px auto 0;
+    background: #10b981;
+}
+
+/* ================= TABLE ================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background: #10b981;
+    color: white;
+}
+
+tr:hover {
+    background: #f0fdf4;
+}
+
+/* ================= DATE ================= */
+#currentDate {
+    text-align:right;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+/* ================= FOOTER ================= */
+.footer{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:60px;
+    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="header-container">
+        <div class="header-left">
+            <h2>📊 Owner Search Table</h2>
+        </div>
+        <div class="header-right">
+            <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+        </div>
+    </div>
+</header>
+
+<div class="main-content">
+
+    <!-- ✅ CHART FIRST -->
+    <div class="card-chart">
+        <h2 class="section-title">📈 Search Trend</h2>
+        <canvas id="searchChart"></canvas>
+    </div>
+
+    <!-- ✅ DATE BETWEEN -->
+    <div id="currentDate"></div>
+
+    <!-- TABLE -->
+    <div class="card-table">
+        <h2 class="section-title">Unified Product Table</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Product ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Today's Searched Count</th>
+                    <th>Last Searched Time</th>
+                </tr>
+            </thead>
+
+            <tbody id="tableBody">
+                <tr><td colspan="6">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+let searchChart = null;
+let lastTimes = {};
+let previousCounts = {};
+
+function formatISTTime(t){
+    if (!t || t==="N/A") return "-";
+    return t;
+}
+
+async function loadData(){
+    const res = await fetch("/products/search");
+    const data = await res.json();
+
+    const body = document.getElementById("tableBody");
+    body.innerHTML = "";
+
+    const labels=[], counts=[], times=[];
+
+    data.forEach((row,i)=>{
+        const pid = String(row.id);
+        const cur = row.searched_count || 0;
+        const prev = previousCounts[pid] || 0;
+
+        let time = lastTimes[pid] || formatISTTime(row.last_searched_time || row.updated_at);
+
+        if(cur > prev){
+            time = formatISTTime(row.last_searched_time || row.updated_at);
+            lastTimes[pid] = time;
+        }
+
+        previousCounts[pid] = cur;
+
+        body.innerHTML += `
+        <tr>
+            <td>${i+1}</td>
+            <td>${row.id}</td>
+            <td>${row.name}</td>
+            <td>${row.category}</td>
+            <td>${cur}</td>
+            <td>${time}</td>
+        </tr>`;
+
+        labels.push(row.name);
+        counts.push(cur);
+        times.push(time);
+    });
+
+    const ctx = document.getElementById("searchChart").getContext("2d");
+
+    if(searchChart) searchChart.destroy();
+
+    searchChart = new Chart(ctx,{
+        type:"line",
+        data:{
+            labels,
+            datasets:[{
+                label:"Search Count",
+                data:counts,
+                borderWidth:2,
+                borderColor:"#d97706",
+                backgroundColor:"rgba(217,119,6,0.2)"
+            }]
+        },
+        options:{
+            plugins:{
+                tooltip:{
+                    callbacks:{
+                        label:(c)=>{
+                            const i=c.dataIndex;
+                            return `Count: ${counts[i]} | Time: ${times[i]}`;
+                        }
+                    },
+                    bodyColor:"#d97706"
+                }
+            }
+        }
+    });
+}
+
+loadData();
+setInterval(loadData,5000);
+
+document.getElementById("currentDate").textContent =
+new Date().toLocaleDateString('en-IN',{
+    year:'numeric', month:'long', day:'numeric'
+});
+
+
+</script>
+
+<footer class="footer">
+© 2026 Product Dashboard
+</footer>
+
+</body>
+</html>

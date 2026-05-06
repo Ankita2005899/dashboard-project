@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Owner Dashboard</title>
+<style>
+/* ===== General Styles ===== */
+body{
+    font-family:"Segoe UI",sans-serif;
+    background:#d4f4f8;
+    margin:0;
+}
+
+.container{
+    display:flex;
+    margin-top:70px;
+    min-height:calc(100vh - 70px);
+}/* ================= SIDEBAR ================= */
+.sidebar{
+    width:260px;
+
+    background:linear-gradient(180deg,#a8bcee,#bcc2c3,#81f5e8);
+
+    padding:20px;
+
+    position:fixed;
+    top:70px;
+    left:0;
+
+    height:calc(100vh - 130px); /* header + footer */
+
+    display:flex;
+    flex-direction:column;
+
+    box-shadow:4px 0 20px rgba(0,0,0,0.1);
+}
+
+/* ================= SIDEBAR BUTTON ================= */
+.sidebar button{
+    padding:12px 14px;
+    margin-bottom:13px;
+
+    border-radius:10px;
+
+    border:2px solid #cbd5e1;
+
+    background:rgba(255,255,255,0.9);
+    color:#1e293b;
+
+    text-align:left;
+    font-size:14px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:all 0.25s ease;
+
+    width:100%;
+    padding-left:14px;
+}
+
+/* Hover animation */
+.sidebar button:hover{
+    background:linear-gradient(135deg,#f97316,#f59e0b);
+    color:white;
+
+    border-color:#f97316;
+
+    transform:translateX(6px);
+}
+
+/* Active button */
+.sidebar button.active{
+    background:linear-gradient(135deg,#6366f1,#4f46e5);
+    color:white;
+
+    border-color:#4f46e5;
+}
+.main{
+    flex:1;
+    margin-left:260px;
+    width:calc(100% - 260px);
+
+    padding-top:30px;
+    padding-right:30px;
+    padding-bottom:90px;
+    padding-left:0;   /* remove left padding */
+
+    background:#d4f4f8;
+    overflow-x:auto;
+    box-sizing:border-box;
+}
+
+.buyers-table{
+    width:100%;
+    min-width:1100px;
+    border-collapse:collapse;
+    table-layout:auto;
+}
+.modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.5);
+    backdrop-filter:blur(2px);
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+/* Set proper widths for each column */
+.buyers-table th:nth-child(1),
+.buyers-table td:nth-child(1){
+    width:10%;
+}
+
+.buyers-table th:nth-child(2),
+.buyers-table td:nth-child(2){
+    width:18%;
+}
+
+.buyers-table th:nth-child(3),
+.buyers-table td:nth-child(3){
+    width:8%;
+}
+
+.buyers-table th:nth-child(4),
+.buyers-table td:nth-child(4){
+    width:25%;
+}
+
+.buyers-table th:nth-child(5),
+.buyers-table td:nth-child(5){
+    width:29%;
+}
+
+.buyers-table th:nth-child(6),
+.buyers-table td:nth-child(6){
+    width:10%;
+    text-align:center;
+}
+
+/* Fix text wrapping */
+.overall-text{
+    color:#15803d;
+    font-size:13px;
+    line-height:1.5;
+    font-weight:500;
+
+    white-space:normal;        /* allow wrapping */
+    word-break:break-word;
+    overflow-wrap:break-word;
+}
+
+/* Product tags wrap properly */
+.product-tag{
+    display:inline-block;
+    margin:3px;
+    white-space:nowrap;
+}
+
+/* Better modal sizing */
+.buyers-modal{
+    background:white;
+    width:95%;
+    max-width:1400px;
+
+    border-radius:15px;
+    padding:25px;
+
+    max-height:90vh;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    box-sizing:border-box;
+}
+
+.buyers-table th,
+.buyers-table td{
+    padding:10px 12px;   /* smaller padding */
+    border-bottom:1px solid #ddd;
+    text-align:left;
+    vertical-align:middle;
+    white-space:nowrap;
+}
+
+
+
+/* ===== Modal Overlay ===== */
+.modal-overlay { display:none; position: fixed; inset:0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); z-index:9999; justify-content:center; align-items:center; }
+
+/* ===== Modal Content ===== */
+.modal-content { background:white; width:400px; max-height:80vh; overflow-y:auto; border-radius:12px; position:relative; box-shadow:0 15px 40px rgba(0,0,0,0.25); transform: translateY(-50px); opacity:0; animation: popup 0.3s forwards ease-out; }
+@keyframes popup{ from{transform:translateY(-50px); opacity:0;} to{transform:translateY(0); opacity:1;} }
+
+.modal-header { background-color: #007bff; color:white; padding:15px 20px; font-size:18px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; border-top-left-radius:12px; border-top-right-radius:12px; }
+.close-modal{ font-size:24px; font-weight:bold; cursor:pointer; transition: color 0.2s ease; }
+.close-modal:hover{ color:#ff4d4f; }
+.modal-body{ padding:20px; display:flex; flex-direction:column; gap:12px; }
+
+/* Month Buttons with different colors */
+.month-btn{ display:flex; align-items:center; justify-content:center; padding:12px; border-radius:8px; border:2px solid #007bff; color:#007bff; font-weight:bold; cursor:pointer; transition: all 0.3s ease; background:white; }
+.month-btn[data-color="blue"]{ border-color:#007bff; color:#007bff;}
+.month-btn[data-color="green"]{ border-color:#15803d; color:#15803d;}
+.month-btn[data-color="yellow"]{ border-color:#facc15; color:#b45309;}
+.month-btn:hover{ opacity:0.85; }
+.month-btn.selected{ color:white !important; }
+.month-btn.selected[data-color="blue"]{ background:#007bff;}
+.month-btn.selected[data-color="green"]{ background:#15803d;}
+.month-btn.selected[data-color="yellow"]{ background:#facc15;}
+
+/* Confirm Button */
+.confirm-btn{ width:100%; padding:12px; border:none; border-radius:8px; background:#10b981; color:white; font-weight:bold; font-size:16px; cursor:pointer; margin-top:15px; transition: all 0.3s ease; }
+.confirm-btn:hover{ background:#059669; }
+
+/* Year select dropdown */
+.year-select{ padding:10px; font-size:16px; border-radius:6px; border:1px solid #ccc; margin-bottom:10px; }
+/* ================= FOOTER ================= */
+.footer{
+    position:fixed;
+
+    bottom:0;
+    left:0;
+
+    width:100%;
+    height:60px;
+
+    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+
+    z-index:1000;
+}
+
+
+.header-btn{
+    padding:8px 16px;
+
+    border-radius:8px;
+    border:2px solid #cbd5e1;
+
+    background:white;
+    color:#1e293b;
+
+    text-decoration:none;
+    font-weight:600;
+
+    transition:all 0.25s ease;
+}
+
+.header-btn:hover{
+    background:linear-gradient(135deg,#f97316,#f59e0b);
+    color:white;
+    border-color:#f97316;
+}
+
+
+/* ================= HEADER ================= */
+
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:70px;
+
+    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+
+    border-bottom:3px solid #1e293b;
+
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+
+    display:flex;
+    justify-content:center;
+
+    z-index:3000;
+}
+
+/* header inner container */
+.header-container{
+    width:100%;
+    max-width:1200px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 20px;
+}
+
+.header-left h2{
+    font-weight:700;
+    color:#1e293b;
+}
+
+.header-right{
+    display:flex;
+    gap:10px;
+}
+/* ===== Dashboard Cards ===== */
+.dashboard-cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:25px;
+    margin:30px 90px 0 90px;
+}
+
+
+
+/* top accent line */
+.card::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:5px;
+    background:linear-gradient(90deg,#3b82f6,#14b8a6,#f59e0b);
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+    position:relative;
+    overflow:hidden;
+}
+
+/* hover effect only for dashboard cards */
+.dashboard-card{
+    border:2px solid transparent;
+    transition:all 0.35s ease;
+}
+
+.dashboard-card:hover{
+    transform:translateY(-8px);
+    border:2px solid #3b82f6;
+    box-shadow:
+        0 15px 30px rgba(0,0,0,0.15),
+        0 0 20px rgba(59,130,246,0.25);
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    border:2px solid #3b82f6;
+    box-shadow:
+        0 15px 30px rgba(0,0,0,0.15),
+        0 0 20px rgba(59,130,246,0.25);
+}
+/* hover effect */
+
+.card h3{
+    font-size:15px;
+    color:#64748b;
+    margin-bottom:15px;
+    font-weight:600;
+}
+
+.card h2{
+    font-size:34px;
+    font-weight:800;
+    color:#0f172a;
+    margin-bottom:12px;
+}
+
+.card p{
+    font-size:14px;
+    font-weight:700;
+}
+
+/* Trend styles */
+.up{
+    color:#16a34a;
+}
+
+.down{
+    color:#dc2626;
+}
+/* Responsive */
+@media(max-width:1000px){
+    .dashboard-cards{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:600px){
+    .dashboard-cards{
+        grid-template-columns:1fr;
+    }
+}
+
+
+.buyers-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.search-box{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    margin-bottom:20px;
+}
+
+
+
+.buyers-table th{
+    background:#f8fafc;
+}
+.customer-info{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.avatar{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:700;
+}
+
+.pink{background:#fce7f3;color:#be185d;}
+.orange{background:#ffedd5;color:#c2410c;}
+.green{background:#dcfce7;color:#15803d;}
+.blue{background:#dbeafe;color:#1d4ed8;}
+
+.order-badge{
+    background:#fef3c7;
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+}
+
+
+
+
+.send-btn{
+    background:#14b8a6;
+    color:white;
+    border:none;
+    padding:8px 18px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.send-btn:hover{
+    transform:scale(1.05);
+}
+.buyers-section{
+    margin-top:40px;
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    margin-left: 90px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+.share{
+    padding:5px 12px;
+    border-radius:8px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.high{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+.mid{
+    background:#fef3c7;
+    color:#b45309;
+}
+
+.low{
+    background:#fee2e2;
+    color:#b91c1c;
+}
+
+.trend-bar{
+    width:100px;
+    height:8px;
+    background:#d6d3d1;
+    border-radius:10px;
+}
+
+.risk{
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.high-risk{
+    background:#fee2e2;
+    color:#b91c1c;
+}
+
+.mid-risk{
+    background:#fef3c7;
+    color:#b45309;
+}
+
+.low-risk{
+    background:#dcfce7;
+    color:#15803d;
+}
+.table-wrapper{
+    width:100%;
+    overflow-x:auto;
+}
+
+.churn-cards{
+    padding-left:0 !important;
+    margin-top:20px;
+}
+
+#churnModal .buyers-section{
+    margin-left:0 !important;
+    margin-top:25px;
+}
+
+#churnModal .buyers-modal{
+    width:95%;
+    max-width:1400px;
+    max-height:90vh;
+    overflow-y:auto;
+}
+.churn-card{
+    max-height:500px;
+    overflow-y:auto;
+}
+
+.churn-card hr{
+    border:none;
+    border-top:1px solid #e5e7eb;
+    margin:15px 0;
+}
+
+.open-churn-btn{
+    width:100%;
+    margin-top:20px;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#14b8a6;
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.open-churn-btn:hover{
+    transform:scale(1.03);
+}
+
+.graph-section{
+    margin:35px 0 0 90px;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+.graph-header{
+    margin-bottom:20px;
+}
+
+.graph-header h3{
+    margin:0;
+    font-size:22px;
+    color:#0f172a;
+}
+
+.graph-header p{
+    margin-top:8px;
+    color:#64748b;
+    font-size:14px;
+}
+
+#customerTrendChart{
+    width:100%;
+    height:350px !important;
+}
+
+.dashboard-card{
+    cursor:pointer;
+}
+
+/* Reward Modal */
+.reward-modal{
+    width:95%;
+    max-width:1300px;
+}
+
+/* Category tags */
+.category-tag{
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.software{
+    background:#dbeafe;
+    color:#1d4ed8;
+}
+
+.starter{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+.enterprise{
+    background:#fef3c7;
+    color:#b45309;
+}
+
+/* Progress bar */
+.progress-wrapper{
+    width:220px;
+    height:12px;
+    background:#e5e7eb;
+    border-radius:30px;
+    overflow:hidden;
+    position:relative;
+}
+
+.progress-bar{
+    height:100%;
+    border-radius:30px;
+    background:linear-gradient(90deg,#14b8a6,#3b82f6,#8b5cf6);
+    transition:width 0.5s ease;
+}
+
+/* Reward tiers */
+.tier{
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.gold{
+    background:#fef3c7;
+    color:#b45309;
+}
+
+.silver{
+    background:#e5e7eb;
+    color:#374151;
+}
+
+.platinum{
+    background:#ede9fe;
+    color:#6d28d9;
+}
+
+/* Table row hover */
+.reward-table tbody tr{
+    transition:0.3s ease;
+}
+
+.reward-table tbody tr:hover{
+    background:#f8fafc;
+    transform:scale(1.01);
+}
+.product-code{
+    background:#0f172a;
+    color:white;
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.5px;
+}
+.code-box{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.copy-btn{
+    border:none;
+    background:#f1f5f9;
+    padding:6px 8px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:14px;
+    transition:0.25s;
+}
+
+.copy-btn:hover{
+    background:#dbeafe;
+    transform:scale(1.08);
+}
+
+.copy-btn{
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    padding:4px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:0.2s ease;
+}
+
+.copy-btn:hover{
+    transform:scale(1.1);
+}
+
+.copy-icon{
+    width:20px;
+    height:20px;
+    fill:none;
+    stroke:#111827;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.copy-btn:hover .copy-icon{
+    stroke:#2563eb;
+}
+
+.reward-btn{
+    background:linear-gradient(135deg,#14b8a6,#0ea5e9);
+    color:white;
+    border:none;
+}
+
+.reward-btn:hover{
+    transform:translateY(-2px);
+}
+.reward-distribution-modal{
+    width:95%;
+    max-width:1400px;
+    height:85vh;
+    background:white;
+    border-radius:18px;
+    display:flex;
+    overflow:hidden;
+}
+
+.reward-left{
+    width:35%;
+    border-right:1px solid #e5e7eb;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+}
+
+.reward-right{
+    width:65%;
+    padding:20px;
+    overflow-y:auto;
+}
+
+.reward-users-list{
+    flex:1;
+    overflow-y:auto;
+    margin-top:20px;
+}
+
+.reward-user-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    margin-bottom:12px;
+    cursor:pointer;
+}
+
+.reward-user-item:hover{
+    background:#f8fafc;
+}
+
+.reward-user-item input{
+    width:18px;
+    height:18px;
+}
+
+.done-btn{
+    margin-top:20px;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#14b8a6;
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.charts-container{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:20px;
+}
+
+.user-chart-card{
+    background:#f8fafc;
+    border-radius:14px;
+    padding:20px;
+    border:1px solid #e5e7eb;
+}
+
+.metric{
+    margin-bottom:15px;
+}
+
+.metric-label{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:6px;
+    font-size:13px;
+    font-weight:600;
+}
+
+.metric-bar{
+    width:100%;
+    height:10px;
+    background:#e5e7eb;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.metric-fill{
+    height:100%;
+    border-radius:10px;
+    background:linear-gradient(90deg,#3b82f6,#14b8a6);
+}
+
+</style>
+</head>
+<body>
+
+       <header class="header">
+
+    <div class="header-container">
+
+        <div class="header-left">
+            <h2>🧑‍💼 Owner Dashboard</h2>
+        </div>
+
+<div class="header-right">
+    <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+
+    <button class="header-btn reward-btn" onclick="openRewardDistributionModal()">
+        🎁 Reward Distribution
+    </button>
+</div>
+
+    </div>
+
+</header>
+
+
+<!-- Reward Distribution Modal -->
+<div id="rewardDistributionModal" class="modal-overlay">
+    <div class="reward-distribution-modal">
+
+        <!-- LEFT SIDE -->
+        <div class="reward-left">
+
+            <div class="reward-header">
+                <h3>Reward Distribution</h3>
+            </div>
+
+            <input
+                type="text"
+                id="rewardUserSearch"
+                class="search-box"
+                placeholder="Search User ID or Name..."
+                onkeyup="searchRewardUsers()"
+            >
+
+            <div id="rewardUsersList" class="reward-users-list">
+
+                <label class="reward-user-item">
+                    <input type="checkbox" value="U1001">
+                    <span>#U1001 - Omar Abdulhadi</span>
+                </label>
+
+                <label class="reward-user-item">
+                    <input type="checkbox" value="U1002">
+                    <span>#U1002 - Isabella Ricci</span>
+                </label>
+
+                <label class="reward-user-item">
+                    <input type="checkbox" value="U1003">
+                    <span>#U1003 - Tomas Novak</span>
+                </label>
+
+                <label class="reward-user-item">
+                    <input type="checkbox" value="U1004">
+                    <span>#U1004 - Emma Watson</span>
+                </label>
+
+                <label class="reward-user-item">
+                    <input type="checkbox" value="U1005">
+                    <span>#U1005 - David Lee</span>
+                </label>
+
+            </div>
+
+            <button class="done-btn" onclick="showSelectedUsers()">
+                Done
+            </button>
+
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="reward-right">
+
+            <div id="selectedUsersCharts" class="charts-container">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="container">
+<div class="sidebar">
+
+    <button onclick="openSearchPage()">
+        Product Search Data
+    </button>        
+
+    <button onclick="window.location.href='/addtocartfortheownersection'">
+        Product Add to Cart Data
+    </button>
+
+    <button onclick="openMonthModal('purchased')">
+        Product Purchased Data
+    </button>
+
+    <button onclick="openRewardModal()">
+    Product Reward Data
+</button>
+
+<div class="card churn-card">
+    <h3>At Risk Customers</h3>
+    <h2>1,284</h2>
+    <p class="down">↑ 6.4% this month</p>
+
+    <hr>
+
+    <h3>Recovered Customers</h3>
+    <h2>426</h2>
+    <p class="up">↑ 12.1%</p>
+
+    <hr>
+
+    <h3>Avg Churn Probability</h3>
+    <h2>42%</h2>
+    <p class="down">High attention needed</p>
+
+    <hr>
+
+    <h3>Retention Success</h3>
+    <h2>68%</h2>
+    <p class="up">Improved</p>
+
+    <button class="open-churn-btn" onclick="openChurnModal()">
+        Open
+    </button>
+</div>
+</div>
+    <div class="main">
+
+    <!-- Dashboard Stats Cards -->
+    
+<div class="dashboard-cards">
+
+<div class="card dashboard-card" onclick="openTotalCustomersModal()" style="cursor:pointer;">
+    <h3>Total customers</h3>
+    <h2>48,291</h2>
+    <p class="up">↑ 12.4% vs last month</p>
+</div>
+
+    <div class="card dashboard-card" onclick="openActiveBuyersModal()" style="cursor:pointer;">
+        <h3>Active buyers</h3>
+        <h2>31,805</h2>
+        <p class="up">↑ 8.1% vs last month</p>
+    </div>
+
+<div class="card dashboard-card" onclick="openNewCustomersModal()" style="cursor:pointer;">       <h3>New this month</h3>
+        <h2>5,412</h2>
+        <p class="up">↑ 21.3% vs last month</p>
+    </div>
+
+<div class="card dashboard-card" onclick="openAvgOrdersModal()" style="cursor:pointer;">
+         <h3>Avg. orders/customer</h3>
+        <h2>3.2</h2>
+        <p class="down">↓ 2.0% vs last month</p>
+    </div>
+
+</div>
+<div id="newCustomersModal" class="modal-overlay">
+    <div class="buyers-modal">
+
+        <div class="buyers-header">
+            <div>
+                <h3>New Customers This Month</h3>
+                <small>Showing newly registered customers</small>
+            </div>
+            <button onclick="closeNewCustomersModal()" class="send-btn">Close</button>
+        </div>
+
+        <input 
+            type="text"
+            id="newCustomerSearch"
+            placeholder="Search by User ID, Name..."
+            class="search-box"
+            onkeyup="searchNewCustomers()"
+        >
+
+        <table class="buyers-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Customer</th>
+                    <th>Signup Date</th>
+                    <th>Source</th>
+                    <th>First Purchase</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="newCustomersTableBody">
+                <tr>
+                    <td>#N2001</td>
+                    <td>James Carter</td>
+                    <td>May 02, 2026</td>
+                    <td>Website</td>
+                    <td>Starter Kit</td>
+                    <td><button class="send-btn">View</button></td>
+                </tr>
+
+                <tr>
+                    <td>#N2002</td>
+                    <td>Sophia Miller</td>
+                    <td>May 04, 2026</td>
+                    <td>Referral</td>
+                    <td>Pro Subscription</td>
+                    <td><button class="send-btn">View</button></td>
+                </tr>
+
+                <tr>
+                    <td>#N2003</td>
+                    <td>Daniel Scott</td>
+                    <td>May 05, 2026</td>
+                    <td>Ad Campaign</td>
+                    <td>Enterprise Plan</td>
+                    <td><button class="send-btn">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div id="avgOrdersModal" class="modal-overlay">
+    <div class="buyers-modal">
+
+        <div class="buyers-header">
+            <div>
+                <h3>Average Orders Per Customer</h3>
+                <small>Showing customer ordering behavior</small>
+            </div>
+            <button onclick="closeAvgOrdersModal()" class="send-btn">Close</button>
+        </div>
+
+        <input 
+            type="text"
+            id="avgOrdersSearch"
+            placeholder="Search by User ID, Name..."
+            class="search-box"
+            onkeyup="searchAvgOrders()"
+        >
+
+        <table class="buyers-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Customer</th>
+                    <th>Total Orders</th>
+                    <th>Avg / Month</th>
+                    <th>Last Order</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody id="avgOrdersTableBody">
+                <tr>
+                    <td>#A3001</td>
+                    <td>Michael Brown</td>
+                    <td>24</td>
+                    <td>4.0</td>
+                    <td>May 03, 2026</td>
+                    <td>Frequent Buyer</td>
+                </tr>
+
+                <tr>
+                    <td>#A3002</td>
+                    <td>Emily Davis</td>
+                    <td>12</td>
+                    <td>2.0</td>
+                    <td>May 01, 2026</td>
+                    <td>Regular Buyer</td>
+                </tr>
+
+                <tr>
+                    <td>#A3003</td>
+                    <td>William Clark</td>
+                    <td>6</td>
+                    <td>1.0</td>
+                    <td>Apr 28, 2026</td>
+                    <td>Low Activity</td>
+                </tr>
+
+                <tr>
+                    <td>#A3004</td>
+                    <td>Olivia Turner</td>
+                    <td>18</td>
+                    <td>3.0</td>
+                    <td>May 04, 2026</td>
+                    <td>Stable Buyer</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+<div class="graph-section">
+    <div class="graph-header">
+        <h3>Customer Behavior Trends</h3>
+        <p>Churn Risk vs Retention vs Purchase Frequency</p>
+    </div>
+
+    <canvas id="customerTrendChart"></canvas>
+</div>
+
+<div id="totalCustomersModal" class="modal-overlay">
+    <div class="buyers-modal">
+
+        <div class="buyers-header">
+            <div>
+                <h3>Total Customers</h3>
+                <small>Showing all registered customers</small>
+            </div>
+            <button onclick="closeTotalCustomersModal()" class="send-btn">Close</button>
+        </div>
+
+        <input 
+            type="text"
+            id="customerSearch"
+            placeholder="Search by User ID, Name..."
+            class="search-box"
+            onkeyup="searchTotalCustomers()"
+        >
+
+        <table class="buyers-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Customer</th>
+                    <th>Status</th>
+                    <th>Joined Date</th>
+                    <th>Total Orders</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="totalCustomersTableBody">
+                <tr>
+                    <td>#U1001</td>
+                    <td>Omar Abdulhadi</td>
+                    <td>Active</td>
+                    <td>Jan 2026</td>
+                    <td>18</td>
+                    <td><button class="send-btn">View</button></td>
+                </tr>
+
+                <tr>
+                    <td>#U1002</td>
+                    <td>Isabella Ricci</td>
+                    <td>Active</td>
+                    <td>Feb 2026</td>
+                    <td>9</td>
+                    <td><button class="send-btn">View</button></td>
+                </tr>
+
+                <tr>
+                    <td>#U1003</td>
+                    <td>Tomas Novak</td>
+                    <td>Inactive</td>
+                    <td>Mar 2026</td>
+                    <td>27</td>
+                    <td><button class="send-btn">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+<div class="buyers-section">
+    <h3>Top products by unique buyers</h3>
+
+    <table class="buyers-table">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Product</th>
+                <th>Buyers</th>
+                <th>Share</th>
+                <th>Trend</th>
+            </tr>
+        </thead>
+
+       <tbody>
+            <tr>
+                <td>#U1001</td>
+                <td>Pro Subscription</td>
+                <td>14,820</td>
+                <td><span class="share high">High</span></td>
+                <td><div class="trend-bar"></div></td>
+            </tr>
+
+            <tr>
+                <td>#U1002</td>
+                <td>Starter Kit</td>
+                <td>11,240</td>
+                <td><span class="share high">High</span></td>
+                <td><div class="trend-bar"></div></td>
+            </tr>
+
+            <tr>
+                <td>#U1003</td>
+                <td>Add-on Pack A</td>
+                <td>7,610</td>
+                <td><span class="share mid">Mid</span></td>
+                <td><div class="trend-bar"></div></td>
+            </tr>
+
+            <tr>
+                <td>#U1004</td>
+                <td>Enterprise Plan</td>
+                <td>4,390</td>
+                <td><span class="share mid">Mid</span></td>
+                <td><div class="trend-bar"></div></td>
+            </tr>
+
+            <tr>
+                <td>#U1005</td>
+                <td>Legacy Bundle</td>
+                <td>1,890</td>
+                <td><span class="share low">Low</span></td>
+                <td><div class="trend-bar"></div></td>
+            </tr>
+</tbody>
+</table>
+</div>
+<!-- Active Buyers Modal -->
+
+<!-- Active Buyers Modal -->
+<div id="activeBuyersModal" class="modal-overlay">
+    <div class="buyers-modal">
+
+        <div class="buyers-header">
+            <div>
+                <h3>Active buyers</h3>
+                <small>Showing 25–30 of 31</small>
+            </div>
+            <button onclick="closeActiveBuyersModal()" class="send-btn">Close</button>
+        </div>
+
+<input 
+    type="text"
+    id="buyerSearch"
+    placeholder="Search by User ID, Name or Product..."
+    class="search-box"
+    onkeyup="searchBuyers()"
+>
+        <table class="buyers-table">
+            <thead>
+                <tr>
+    <th>User ID</th>
+    <th>Customer</th>
+    <th>Orders</th>
+    <th>Products Purchased</th>
+    <th>Overall Look</th>
+    <th>Send</th>
+</tr>
+            </thead>
+
+         <tbody id="buyersTableBody">
+
+<tr>
+    <td>#U1001</td>
+    <td>
+        <div class="customer-info">
+            <div class="avatar pink">OA</div>
+            <span>Omar Abdulhadi</span>
+        </div>
+    </td>
+    <td><span class="order-badge">18</span></td>
+    <td>
+        <span class="product-tag">Pro Subscription</span>
+        <span class="product-tag">Enterprise Plan</span>
+    </td>
+    <td class="overall-text">
+        Power buyer — High frequency wider product usage stable.
+    </td>
+    <td><button class="send-btn">Send</button></td>
+</tr>
+
+<tr>
+    <td>#U1002</td>
+    <td>
+        <div class="customer-info">
+            <div class="avatar orange">IR</div>
+            <span>Isabella Ricci</span>
+        </div>
+    </td>
+    <td><span class="order-badge">9</span></td>
+    <td>
+        <span class="product-tag">Starter Kit</span>
+        <span class="product-tag">Legacy Bundle</span>
+    </td>
+    <td class="overall-text">
+        Growing interest — Adapting product usage. Good potential.
+    </td>
+    <td><button class="send-btn">Send</button></td>
+</tr>
+
+<tr>
+    <td>#U1003</td>
+    <td>
+        <div class="customer-info">
+            <div class="avatar blue">TN</div>
+            <span>Tomas Novak</span>
+        </div>
+    </td>
+    <td><span class="order-badge">27</span></td>
+    <td>
+        <span class="product-tag">Enterprise Plan</span>
+        <span class="product-tag">Pro Subscription</span>
+    </td>
+    <td class="overall-text">
+        Loyal customer — Consistent orders across products.
+    </td>
+    <td><button class="send-btn">Send</button></td>
+</tr>
+
+<tr>
+    <td>#U1004</td>
+    <td>
+        <div class="customer-info">
+            <div class="avatar pink">EM</div>
+            <span>Emma Watson</span>
+        </div>
+    </td>
+    <td><span class="order-badge">14</span></td>
+    <td>
+        <span class="product-tag">Starter Kit</span>
+        <span class="product-tag">Add-on Pack B</span>
+    </td>
+    <td class="overall-text">
+        Returning customer — Steady monthly purchases.
+    </td>
+    <td><button class="send-btn">Send</button></td>
+</tr>
+
+<tr>
+    <td>#U1005</td>
+    <td>
+        <div class="customer-info">
+            <div class="avatar orange">DL</div>
+            <span>David Lee</span>
+        </div>
+    </td>
+    <td><span class="order-badge">22</span></td>
+    <td>
+        <span class="product-tag">Pro Subscription</span>
+        <span class="product-tag">Legacy Bundle</span>
+    </td>
+    <td class="overall-text">
+        Premium buyer — Increasing order frequency.
+    </td>
+    <td><button class="send-btn">Send</button></td>
+</tr>
+
+<tr>
+    <td>#U1006</td>
+    <td>
+        <div class="customer-info">
+            <div class="avatar green">AR</div>
+            <span>Ava Roberts</span>
+        </div>
+    </td>
+    <td><span class="order-badge">16</span></td>
+    <td>
+        <span class="product-tag">Enterprise Plan</span>
+    </td>
+    <td class="overall-text">
+        Business account — High-value purchases.
+    </td>
+    <td><button class="send-btn">Send</button></td>
+</tr>
+
+<tr>
+    <td>#U1007</td>
+    <td>
+        <div class="customer-info">
+            <div class="avatar green">SK</div>
+            <span>Samuel Kim</span>
+        </div>
+    </td>
+    <td><span class="order-badge">11</span></td>
+    <td>
+        <span class="product-tag">Pro Subscription</span>
+        <span class="product-tag">Add-on Pack A</span>
+    </td>
+    <td class="overall-text">
+        Growing customer — Expanding product usage. Good candidate.
+    </td>
+    <td><button class="send-btn">Send</button></td>
+</tr>
+
+</tbody>   
+        </table>
+
+    </div>
+</div>
+
+<div id="rewardModal" class="modal-overlay">
+    <div class="buyers-modal reward-modal">
+
+        <div class="buyers-header">
+            <div>
+                <h3>🎁 Product Rewards</h3>
+                <small>Reward performance by product category</small>
+            </div>
+            <button onclick="closeRewardModal()" class="send-btn">Close</button>
+        </div>
+
+        <table class="buyers-table reward-table">
+            <thead>
+                <tr>
+                    <th>Product Code</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Reward Progress</th>
+                    <th>Product Code</th>                         
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>#PRD-101</td>
+                    <td>Pro Subscription</td>
+                    <td><span class="category-tag software">Software</span></td>
+                    <td>
+                        <div class="progress-wrapper">
+                            <div class="progress-bar" style="width:85%;"></div>
+                        </div>
+                        <small>85%</small>
+                    </td>
+                    <td>
+    <div class="code-box">
+        <span class="product-code">PRD-GLD-001</span>
+      <button class="copy-btn" onclick="copyCode('PRD-GLD-001')">
+    <svg viewBox="0 0 24 24" class="copy-icon">
+        <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+        <rect x="4" y="4" width="11" height="11" rx="2"></rect>
+    </svg>
+</button>
+    </div>
+</td>
+                    <td><button class="send-btn">Reward</button></td>
+                </tr>
+
+                <tr>
+                    <td>#PRD-102</td>
+                    <td>Starter Kit</td>
+                    <td><span class="category-tag starter">Starter</span></td>
+                    <td>
+                        <div class="progress-wrapper">
+                            <div class="progress-bar" style="width:65%;"></div>
+                        </div>
+                        <small>65%</small>
+                    </td>
+<td>
+    <div class="code-box">
+        <span class="product-code">PRD-SLV-002</span>
+<button class="copy-btn" onclick="copyCode('PRD-GLD-001')">
+    <svg viewBox="0 0 24 24" class="copy-icon">
+        <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+        <rect x="4" y="4" width="11" height="11" rx="2"></rect>
+    </svg>
+</button>
+    </div>
+</td>                    <td><button class="send-btn">Reward</button></td>
+                </tr>
+
+                <tr>
+                    <td>#PRD-103</td>
+                    <td>Enterprise Plan</td>
+                    <td><span class="category-tag enterprise">Enterprise</span></td>
+                    <td>
+                        <div class="progress-wrapper">
+                            <div class="progress-bar" style="width:92%;"></div>
+                        </div>
+                        <small>92%</small>
+                    </td>
+<td>
+    <div class="code-box">
+        <span class="product-code">PRD-PLT-003</span>
+<button class="copy-btn" onclick="copyCode('PRD-GLD-001')">
+    <svg viewBox="0 0 24 24" class="copy-icon">
+        <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+        <rect x="4" y="4" width="11" height="11" rx="2"></rect>
+    </svg>
+</button>
+    </div>
+</td>                    <td><button class="send-btn">Reward</button></td>
+                </tr>
+
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+<!-- ===== Single Modal Popup ===== -->
+<div id="monthModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="modalTitle">Select Month & Year</span>
+            <span class="close-modal" onclick="closeMonthModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <select id="yearSelect" class="year-select"></select>
+            <div id="monthList"></div>
+            <button class="confirm-btn" onclick="confirmMonths()">Confirm</button>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Month colors cycling
+const monthColors = ["blue","green","yellow","blue","green","yellow","blue","green","yellow","blue","green","yellow"];
+const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const monthListDiv=document.getElementById("monthList");
+const yearSelect=document.getElementById("yearSelect");
+let currentPage = ""; // stores which page to redirect
+
+// Fill Year dropdown (past years only)
+const currentYear=new Date().getFullYear();
+for(let y=currentYear-1;y>=2000;y--){
+    const opt=document.createElement("option");
+    opt.value=y; opt.innerText=y;
+    yearSelect.appendChild(opt);
+}
+
+// Open Modal for a given page
+function openMonthModal(page){
+    currentPage = page;
+    document.getElementById("modalTitle").innerText = "Select Month & Year for "+page.replace(/^\w/,c=>c.toUpperCase());
+    
+    // Clear previous month buttons
+    monthListDiv.innerHTML = "";
+
+    months.forEach((m,i)=>{
+        const btn=document.createElement("div");
+        btn.classList.add("month-btn");
+        btn.setAttribute("data-color",monthColors[i]);
+        btn.innerText=m;
+        btn.onclick = ()=> btn.classList.toggle("selected");
+        monthListDiv.appendChild(btn);
+    });
+
+    document.getElementById("monthModal").style.display = "flex";
+}
+
+// Close Modal
+function closeMonthModal(){
+    document.getElementById("monthModal").style.display = "none";
+}
+
+// Confirm selection and redirect
+function confirmMonths(){
+    const selectedMonths=[];
+    document.querySelectorAll(".month-btn.selected").forEach(b=>selectedMonths.push(b.innerText));
+    const year = yearSelect.value;
+    if(selectedMonths.length===0){
+        alert("Please select at least one month");
+        return;
+    }
+    // Redirect to page after confirmation
+    if(currentPage==="search") window.location.href="/search?year="+year+"&months="+selectedMonths.join(",");
+    else if(currentPage==="addtocart") window.location.href="/addtocart?year="+year+"&months="+selectedMonths.join(",");
+    else if(currentPage==="purchased") window.location.href="/purchased?year="+year+"&months="+selectedMonths.join(",");
+}
+
+function openSearchPage() {
+    window.location.href = "/searchfortheownersection";
+}
+
+
+function openActiveBuyersModal(){
+    document.getElementById("activeBuyersModal").style.display = "flex";
+}
+
+function closeActiveBuyersModal(){
+    document.getElementById("activeBuyersModal").style.display = "none";
+}
+
+function searchBuyers() {
+    let input = document.getElementById("buyerSearch").value.toLowerCase();
+    let rows = document.querySelectorAll("#buyersTableBody tr");
+
+    rows.forEach(row => {
+        let userId = row.cells[0].innerText.toLowerCase();
+        let customerName = row.cells[1].innerText.toLowerCase();
+        let products = row.cells[3].innerText.toLowerCase();
+
+        if (
+            userId.includes(input) ||
+            customerName.includes(input) ||
+            products.includes(input)
+        ) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+
+function openChurnModal(){
+    document.getElementById("churnModal").style.display = "flex";
+}
+
+function closeChurnModal(){
+    document.getElementById("churnModal").style.display = "none";
+}
+
+const ctx = document.getElementById('customerTrendChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+        datasets: [
+            {
+                label: 'Churn Risk',
+                data: [22, 30, 38, 35, 42, 48],
+                borderColor: '#ef4444',
+                backgroundColor: 'transparent',
+                tension: 0.4
+            },
+            {
+                label: 'Retention Success',
+                data: [40, 45, 50, 58, 63, 68],
+                borderColor: '#10b981',
+                backgroundColor: 'transparent',
+                tension: 0.4
+            },
+            {
+                label: 'Purchase Frequency',
+                data: [12, 18, 22, 28, 31, 36],
+                borderColor: '#3b82f6',
+                backgroundColor: 'transparent',
+                tension: 0.4
+            }
+        ]
+    },
+    options: {
+        responsive:true,
+        maintainAspectRatio:false
+    }
+});
+function openTotalCustomersModal(){
+    document.getElementById("totalCustomersModal").style.display = "flex";
+}
+
+function closeTotalCustomersModal(){
+    document.getElementById("totalCustomersModal").style.display = "none";
+}
+
+function searchTotalCustomers(){
+    let input = document.getElementById("customerSearch").value.toLowerCase();
+    let rows = document.querySelectorAll("#totalCustomersTableBody tr");
+
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(input) ? "" : "none";
+    });
+}
+function openTotalCustomersModal() {
+    const modal = document.getElementById("totalCustomersModal");
+    modal.style.display = "flex";
+}
+
+function closeTotalCustomersModal() {
+    const modal = document.getElementById("totalCustomersModal");
+    modal.style.display = "none";
+}
+
+function openNewCustomersModal(){
+    document.getElementById("newCustomersModal").style.display = "flex";
+}
+
+function closeNewCustomersModal(){
+    document.getElementById("newCustomersModal").style.display = "none";
+}
+
+function searchNewCustomers(){
+    let input = document.getElementById("newCustomerSearch").value.toLowerCase();
+    let rows = document.querySelectorAll("#newCustomersTableBody tr");
+
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(input) ? "" : "none";
+    });
+}
+
+function openAvgOrdersModal(){
+    document.getElementById("avgOrdersModal").style.display = "flex";
+}
+
+function closeAvgOrdersModal(){
+    document.getElementById("avgOrdersModal").style.display = "none";
+}
+
+function searchAvgOrders(){
+    let input = document.getElementById("avgOrdersSearch").value.toLowerCase();
+    let rows = document.querySelectorAll("#avgOrdersTableBody tr");
+
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(input) ? "" : "none";
+    });
+}
+
+window.onclick = function(e){
+    document.querySelectorAll(".modal-overlay").forEach(modal=>{
+        if(e.target === modal){
+            modal.style.display = "none";
+        }
+    });
+}
+
+function openRewardModal(){
+    document.getElementById("rewardModal").style.display = "flex";
+}
+
+function closeRewardModal(){
+    document.getElementById("rewardModal").style.display = "none";
+}
+
+function copyCode(code){
+    navigator.clipboard.writeText(code).then(()=>{
+        alert("Code copied: " + code);
+    }).catch(err=>{
+        console.error("Copy failed", err);
+    });
+}
+function openRewardDistributionModal(){
+    document.getElementById("rewardDistributionModal").style.display = "flex";
+}
+
+function closeRewardDistributionModal(){
+    document.getElementById("rewardDistributionModal").style.display = "none";
+}
+
+
+const rewardUsersData = {
+    U1001:{
+        name:"Omar Abdulhadi",
+        search:80,
+        purchased:92,
+        addtocart:70
+    },
+    U1002:{
+        name:"Isabella Ricci",
+        search:60,
+        purchased:75,
+        addtocart:85
+    },
+    U1003:{
+        name:"Tomas Novak",
+        search:90,
+        purchased:88,
+        addtocart:76
+    },
+    U1004:{
+        name:"Emma Watson",
+        search:55,
+        purchased:67,
+        addtocart:82
+    },
+    U1005:{
+        name:"David Lee",
+        search:72,
+        purchased:95,
+        addtocart:60
+    }
+};
+
+function searchRewardUsers(){
+    let input = document.getElementById("rewardUserSearch").value.toLowerCase();
+    let users = document.querySelectorAll(".reward-user-item");
+
+    users.forEach(user=>{
+        let text = user.innerText.toLowerCase();
+        user.style.display = text.includes(input) ? "flex" : "none";
+    });
+}
+
+function showSelectedUsers(){
+    let selected = document.querySelectorAll(
+        '#rewardUsersList input[type="checkbox"]:checked'
+    );
+
+    let container = document.getElementById("selectedUsersCharts");
+    container.innerHTML = "";
+
+    selected.forEach(item=>{
+        let user = rewardUsersData[item.value];
+
+        container.innerHTML += `
+            <div class="user-chart-card">
+
+                <h4>${item.value} - ${user.name}</h4>
+
+                <div class="metric">
+                    <div class="metric-label">
+                        <span>Search Data</span>
+                        <span>${user.search}/100</span>
+                    </div>
+                    <div class="metric-bar">
+                        <div class="metric-fill" style="width:${user.search}%"></div>
+                    </div>
+                </div>
+
+                <div class="metric">
+                    <div class="metric-label">
+                        <span>Purchased Data</span>
+                        <span>${user.purchased}/100</span>
+                    </div>
+                    <div class="metric-bar">
+                        <div class="metric-fill" style="width:${user.purchased}%"></div>
+                    </div>
+                </div>
+
+                <div class="metric">
+                    <div class="metric-label">
+                        <span>Add to Cart Data</span>
+                        <span>${user.addtocart}/100</span>
+                    </div>
+                    <div class="metric-bar">
+                        <div class="metric-fill" style="width:${user.addtocart}%"></div>
+                    </div>
+                </div>
+
+            </div>
+        `;
+    });
+}
+
+</script>
+
+
+<footer class="footer">
+    © 2026 Product Dashboard | All Rights Reserved
+</footer>
+</body>
+</html>

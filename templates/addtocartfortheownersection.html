@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Owner Add to Cart Table</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    font-family: "Segoe UI", sans-serif;
+    background: #d4f4f8;
+    min-height: 100vh;
+    color: #111827;
+}
+
+/* ================= HEADER ================= */
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:70px;
+    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+    border-bottom:3px solid #1e293b;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    display:flex;
+    justify-content:center;
+    z-index:3000;
+}
+
+.header-container{
+    width:100%;
+    max-width:1200px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+}
+
+.header-left h2{
+    font-weight:700;
+    color:#1e293b;
+}
+
+.header-right{
+    display:flex;
+    gap:10px;
+}
+
+.header-btn{
+    padding:8px 16px;
+    border-radius:8px;
+    border:2px solid #cbd5e1;
+    background:white;
+    color:#1e293b;
+    text-decoration:none;
+    font-weight:600;
+    transition:all 0.25s ease;
+}
+
+.header-btn:hover{
+    background:linear-gradient(135deg,#10b981,#059669);
+    color:white;
+    border-color:#10b981;
+}
+
+/* ================= MAIN ================= */
+.main-content{
+    max-width:1200px;
+    margin:auto;
+    padding:30px;
+    padding-top:100px;
+    padding-bottom:80px;
+}
+
+/* ================= CARDS ================= */
+.card-table,
+.card-chart {
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    margin-bottom: 40px;
+}
+
+/* ================= TITLE (GREEN THEME) ================= */
+.section-title {
+    font-weight: 700;
+    font-size: 24px;
+    color: #10b981;
+    text-align: center;
+    padding: 12px 0;
+    border-bottom: 3px solid #cbd5e1;
+    margin-bottom: 25px;
+    background: linear-gradient(135deg,#ecfdf5,#f0fdfa);
+}
+
+.section-title::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 4px;
+    margin: 8px auto 0;
+    background: #10b981;
+}
+
+/* ================= TABLE ================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background: #10b981;
+    color: white;
+}
+
+tr:hover {
+    background: #ecfdf5;
+}
+
+/* ================= DATE ================= */
+#currentDate {
+    text-align:right;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+/* ================= FOOTER ================= */
+.footer{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:60px;
+    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="header-container">
+        <div class="header-left">
+            <h2>🛒 Owner Add to Cart Table</h2>
+        </div>
+        <div class="header-right">
+            <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+        </div>
+    </div>
+</header>
+
+<div class="main-content">
+
+    <!-- CHART -->
+    <div class="card-chart">
+        <h2 class="section-title">📈 Add to Cart Trend</h2>
+        <canvas id="cartChart"></canvas>
+    </div>
+
+    <!-- DATE -->
+    <div id="currentDate"></div>
+
+    <!-- TABLE -->
+    <div class="card-table">
+        <h2 class="section-title">Unified Add to Cart Table</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Product ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Total Add to Cart</th>
+                    <th>Last Time</th>
+                </tr>
+            </thead>
+
+            <tbody id="tableBody">
+                <tr><td colspan="6">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<script>
+let cartChart = null;
+let lastTimes = {};
+let previousCounts = {};
+function formatTime(t){
+    if (!t || t === "None") return "-";
+
+    // If already formatted (YYYY-MM-DD HH:MM:SS)
+    if (typeof t === "string" && t.includes("-") && t.includes(":")) {
+        return t;
+    }
+
+    const date = new Date(t);
+
+    if (isNaN(date.getTime())) return "-";
+
+    return date.toLocaleString('en-IN',{
+        hour:'2-digit',
+        minute:'2-digit',
+        second:'2-digit'
+    });
+}
+// ✅ Render Chart (separate function = clean code)
+function renderChart(labels, counts){
+    const ctx = document.getElementById("cartChart").getContext("2d");
+
+    if(cartChart) cartChart.destroy();
+
+    cartChart = new Chart(ctx,{
+        type:"line",
+        data:{
+            labels: labels,
+            datasets:[{
+                label:"Add to Cart Count",
+                data: counts,
+                borderColor:"#10b981",
+                backgroundColor:"rgba(16,185,129,0.2)",
+                tension:0.4,
+                fill:true,
+                pointRadius:5,
+                pointBackgroundColor:"#10b981"
+            }]
+        },
+        options:{
+            responsive:true,
+            scales:{
+                y:{
+                    beginAtZero:true,
+                    title:{
+                        display:true,
+                        text:"Count"
+                    }
+                },
+                x:{
+                    title:{
+                        display:true,
+                        text:"Products"
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ✅ Load Data from Backend
+async function loadData(){
+    try{
+        const res = await fetch("/owner-addtocart-data");
+
+        if(!res.ok){
+            throw new Error("Failed to fetch data");
+        }
+
+const json = await res.json();
+const data = json.data || [];
+
+// ✅ SORT
+data.sort((a,b) => b.count - a.count);
+
+// ✅ CLEAN OLD IDS (ADD HERE)
+const newIds = new Set(data.map(item => item.product_id));
+
+Object.keys(previousCounts).forEach(id => {
+    if(!newIds.has(id)){
+        delete previousCounts[id];
+        delete lastTimes[id];
+    }
+});
+
+// 👇 THEN START LOOP
+        data.sort((a,b) => b.count - a.count);
+
+        const body = document.getElementById("tableBody");
+        body.innerHTML = "";
+
+        // ✅ Handle Empty Data
+        if(data.length === 0){
+            body.innerHTML = `<tr><td colspan="6">No Data Available</td></tr>`;
+            return;
+        }
+
+        const labels = [];
+        const counts = [];
+data.forEach((row,i)=>{
+
+    const pid = row.product_id;
+    const cur = Number(row.count) || 0;
+
+    // ✅ ALWAYS take backend time first
+    let time = formatTime(row.time);
+
+    const prev = previousCounts[pid] ?? -1;
+
+    // ✅ Only update stored time if count increased
+    if(cur > prev){
+        lastTimes[pid] = time;
+    } else {
+        time = lastTimes[pid] || time;
+    }
+
+    // ✅ store latest count
+    previousCounts[pid] = cur;
+
+    body.innerHTML += `
+    <tr>
+        <td>${i+1}</td>
+        <td>${pid}</td>
+        <td>${row.name}</td>
+        <td>${row.category}</td>
+        <td>${cur}</td>
+        <td>${time}</td>
+    </tr>`;
+
+    // ✅ chart only for >0
+    if(cur > 0){
+        labels.push(row.name);
+        counts.push(cur);
+    }
+});
+        // ✅ ADD HERE (after loop ends)
+if(body.innerHTML === ""){
+    body.innerHTML = `<tr><td colspan="6">No Data Available</td></tr>`;
+}
+
+
+// ✅ THEN THIS
+renderChart(labels, counts);
+    }catch(err){
+        console.error("Error loading data:", err);
+
+        document.getElementById("tableBody").innerHTML =
+        `<tr><td colspan="6">Error loading data</td></tr>`;
+    }
+}
+
+// ✅ Initial Load + Auto Refresh
+loadData();
+setInterval(loadData, 5000);
+
+// ✅ Current Date
+document.getElementById("currentDate").textContent =
+new Date().toLocaleDateString('en-IN',{
+    year:'numeric',
+    month:'long',
+    day:'numeric'
+});
+</script>
+
+<footer class="footer">
+© 2026 Product Dashboard
+</footer>
+
+</body>
+</html>

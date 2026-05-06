@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+      body {
+    background: #d4f4f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+     /* ================= LEFT SLIDER ================= */
+.left-slider {
+   width:260px;
+
+    /* colorful gradient background */
+    background:linear-gradient(180deg,#a8bcee,#bcc2c3,#81f5e8);
+
+    padding:20px;
+
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+
+    display:flex;
+    flex-direction:column;
+
+    box-shadow:4px 0 20px rgba(0,0,0,0.1);
+}
+
+.left-slider button {
+     padding:12px 14px;
+     margin-bottom: 13px;
+
+    border-radius:10px;
+
+    /* NEW BORDER */
+    border:2px solid #cbd5e1;
+
+    background:rgba(255,255,255,0.9);
+    color:#1e293b;
+
+    text-align:left;
+    font-size:14px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:all 0.25s ease;
+
+     width: 100%; /* optional: makes buttons full width */
+    text-align: left; /* keep text aligned left */
+    padding-left: 14px; /* internal padding inside button */
+ 
+}
+
+.left-slider button:hover {
+    background:linear-gradient(135deg,#f97316,#f59e0b);
+    color:white;
+
+    border-color:#f97316;
+
+    transform:translateX(6px);
+}
+
+.left-slider button.active {
+    background:linear-gradient(135deg,#6366f1,#4f46e5);
+    color:white;
+
+    border-color:#4f46e5;
+}
+
+.left-slider a {
+    text-decoration: none;
+}
+
+       
+
+.main-content{
+    margin-left:260px;
+    margin-top:90px;
+
+    padding:30px;
+    padding-bottom:100px;
+
+    max-width:1200px;
+}
+  .profile-header{
+    position:relative;
+    height:260px;
+
+    border-radius:14px;
+    overflow:hidden;
+
+    background:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1950&q=80') center/cover;
+
+    margin-bottom:70px;
+}
+.profile-picture{
+    position:absolute;
+
+    bottom:-55px;
+    left:50%;
+    transform:translateX(-50%);
+
+    width:120px;
+    height:120px;
+
+    border-radius:50%;
+    border:4px solid white;
+
+    object-fit:cover;
+
+    cursor:pointer;
+}
+       .profile-info{
+    text-align:center;
+    margin-bottom:40px;
+}
+        .profile-info h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .profile-info p {
+            color: #6b7280;
+        }
+
+        /* ================= POPUP COMMON ================= */
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .popup-box {
+            width: 420px;
+            background: #fff;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .popup-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* ================= ACCOUNT POPUP ================= */
+        .account-row {
+            display: flex;
+            gap: 15px;
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 10px;
+            align-items: center;
+        }
+
+        .account-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .account-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .account-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .account-name {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .account-role {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .view-link {
+            margin-left: auto;
+            color: #10b981;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .profile-actions {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            color: #10b981;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .signed-as {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .switch-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 25px;
+            border: 2px solid #10b981;
+            background: white;
+            color: #10b981;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .switch-btn:hover {
+            background: #10b981;
+            color: white;
+        }
+
+        .sign-out {
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* ================= ADD PROFILE POPUP ================= */
+        .add-profile-box {
+            text-align: center;
+        }
+
+        .add-profile-icon {
+            width: 80px;
+            height: 80px;
+            margin: auto;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .add-profile-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .change-photo {
+            color: #10b981;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .input-box {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .popup-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .popup-actions button {
+            width: 48%;
+            padding: 12px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background: #e5e7eb;
+        }
+
+        .continue-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        /* HIDDEN FILE INPUT */
+        #fileInput {
+            display: none;
+        }
+
+        /* ================= SHOP SECTIONS ================= */
+
+        .shop-section {
+            max-width: 900px;
+            margin: 35px auto;
+            text-align: left;
+        }
+
+        .shop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .shop-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .shop-header span {
+            color: #10b981;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 18px;
+        }
+
+        .shop-card {
+            background: white;
+            border-radius: 14px;
+            padding: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .shop-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .shop-card p {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+ 
+/* ================= FOOTER ================= */
+.footer{
+    position:fixed;
+
+    bottom:0;
+    left:0;
+
+    width:100%;
+    height:60px;
+
+    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+
+    z-index:1000;
+}
+/* Highlight the popup */
+.popup-box {
+    width: 420px;
+    background: linear-gradient(135deg,#ffffff,#f0f0f0,#ffffff); /* subtle gradient */
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35); /* stronger shadow for highlight */
+    border: 2px solid #10b981; /* green border highlight */
+    position: relative;
+}
+
+/* Make Switch Account button same as left-slider buttons */
+.popup-box .switch-btn {
+    background: linear-gradient(135deg,#6366f1,#4f46e5); /* same as active left-slider button */
+    color: white;
+    border: 2px solid #4f46e5;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%; /* full width inside popup */
+    margin-top: 10px;
+    text-align: left; /* match left slider */
+    transition: all 0.25s ease;
+}
+
+/* Hover effect */
+.popup-box .switch-btn:hover {
+    background: linear-gradient(135deg,#f97316,#f59e0b); /* same hover gradient as slider */
+    border-color: #f97316;
+    transform: translateX(6px);
+}
+
+.account-row {
+    display: flex;
+    gap: 15px;
+    background: linear-gradient(135deg,#f0f9ff,#dbeafe); /* subtle highlight */
+    padding: 15px;
+    border-radius: 10px;
+    align-items: center;
+    border: 1px solid #cbd5e1;
+}
+
+/* Switch Account button like left-slider button, centered text */
+.popup-box .switch-btn {
+    background: linear-gradient(135deg,#6366f1,#4f46e5); /* same as active left-slider button */
+    color: white;
+    border: 2px solid #4f46e5;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%; /* full width inside popup */
+    margin-top: 10px;
+    text-align: center; /* center the text */
+    transition: all 0.25s ease;
+}
+
+/* Hover effect */
+.popup-box .switch-btn:hover {
+    background: linear-gradient(135deg,#f97316,#f59e0b); /* same hover gradient as slider */
+    border-color: #f97316;
+    transform: translateY(-2px); /* slight lift on hover */
+}
+
+.header-btn{
+    padding:8px 16px;
+
+    border-radius:8px;
+    border:2px solid #cbd5e1;
+
+    background:white;
+    color:#1e293b;
+
+    text-decoration:none;
+    font-weight:600;
+
+    transition:all 0.25s ease;
+}
+
+.header-btn:hover{
+    background:linear-gradient(135deg,#f97316,#f59e0b);
+    color:white;
+    border-color:#f97316;
+}
+
+.container{
+    margin-top:100px;
+}
+/* ================= HEADER ================= */
+
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:70px;
+
+    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+
+    border-bottom:3px solid #1e293b;
+
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+
+    display:flex;
+    justify-content:center;
+
+    z-index:3000;
+}
+
+/* header inner container */
+.header-container{
+    width:100%;
+    max-width:1200px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 20px;
+}
+
+.header-left h2{
+    font-weight:700;
+    color:#1e293b;
+}
+
+.header-right{
+    display:flex;
+    gap:10px;
+}
+
+
+    </style>
+</head>
+
+<body>
+
+    
+
+       <header class="header">
+
+    <div class="header-container">
+
+        <div class="header-left">
+            <h2>🙍 Profile Detail</h2>
+        </div>
+
+        <div class="header-right">
+            <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+        </div>
+
+    </div>
+
+</header>
+
+    <!-- LEFT SLIDER -->
+   <div class="left-slider">
+    <a href="dashboard.html">
+        <button>Dashboard</button>
+    </a>
+    <button class="active">My Shopping</button>
+    <button>Orders</button>
+    <button>Account</button>
+    <button>Analytics</button>
+    <button>Settings</button>
+</div>
+
+
+    <!-- MAIN -->
+    <div class="main-content">
+        <div class="profile-header">
+            <img id="mainProfileImg" src="{{ user.profile_image }}" class="profile-picture">
+
+        </div>
+
+        <div class="profile-info">
+
+            <h1 id="profileName">{{ user.name }}</h1>
+            <p id="profileEmail">{{ user.email }}</p>
+
+        </div>
+        <!-- ================= SHOP CONTENT ================= -->
+
+        <!-- YOUR ORDERS -->
+        <div class="shop-section">
+
+            <div class="shop-header">
+                <h3>Your Orders</h3>
+                <span>See all</span>
+            </div>
+
+            <div class="shop-items">
+
+                <div class="shop-card">
+                    <img src="https://m.media-amazon.com/images/I/81WZOm6hC0L.jpg">
+                </div>
+
+                <div class="shop-card">
+                    <img src="https://m.media-amazon.com/images/I/61Nn1jN8K0L.jpg">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- BUY AGAIN -->
+        <div class="shop-section">
+
+            <div class="shop-header">
+                <h3>Buy Again</h3>
+                <span>See all</span>
+            </div>
+
+            <div class="shop-items">
+
+                <div class="shop-card">
+                    <img src="https://m.media-amazon.com/images/I/61p15B2FqDL.jpg">
+                </div>
+
+                <div class="shop-card">
+                    <img src="https://m.media-amazon.com/images/I/61Nn1jN8K0L.jpg">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- KEEP SHOPPING -->
+        <div class="shop-section">
+
+            <div class="shop-header">
+                <h3>Keep shopping for</h3>
+                <span>Edit | Browsing history</span>
+            </div>
+
+            <div class="shop-items">
+
+                <div class="shop-card">
+                    <img src="https://m.media-amazon.com/images/I/61p15B2FqDL.jpg">
+                    <p>Shampoos</p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+    <!-- POPUP 1 -->
+    <div class="popup-overlay" id="popup1">
+        <div class="popup-box">
+            <h2>Who is shopping?</h2>
+
+            <div class="account-row">
+                <div class="account-icon" id="accountIcon">👤</div>
+
+                <div class="account-content">
+                    <div class="account-name" id="accountName">Kevin Smith</div>
+                    <div class="account-role">Account holder</div>
+                </div>
+
+<a href="/profile-view-basic" class="view-link">View</a>
+            </div>
+
+            <div class="profile-actions">
+                <div id="addProfileBtn">Add profile</div>
+                <div>Remove profile</div>
+            </div>
+
+            <div class="signed-as">
+                Signed in as {{ user.name }} ({{ user.email }})
+            </div>
+
+            <button class="switch-btn">Switch Account</button>
+            <div class="sign-out">Sign out</div>
+        </div>
+    </div>
+
+    <!-- POPUP 2 -->
+    <div class="popup-overlay" id="popup2">
+        <div class="popup-box add-profile-box">
+
+            <div class="add-profile-icon" id="previewIcon">👤</div>
+            <div class="change-photo" id="changePhoto">Change profile photo</div>
+
+            <input type="text" id="nameInput" class="input-box" placeholder="Profile name">
+
+            <div class="popup-actions">
+                <button class="cancel-btn" id="cancelAdd">Cancel</button>
+                <button class="continue-btn" id="continueBtn">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*">
+
+    <script>
+        const mainImg = document.getElementById("mainProfileImg");
+        const popup1 = document.getElementById("popup1");
+        const popup2 = document.getElementById("popup2");
+        const addProfileBtn = document.getElementById("addProfileBtn");
+        const cancelAdd = document.getElementById("cancelAdd");
+        const changePhoto = document.getElementById("changePhoto");
+        const fileInput = document.getElementById("fileInput");
+        const previewIcon = document.getElementById("previewIcon");
+        const continueBtn = document.getElementById("continueBtn");
+        const profileName = document.getElementById("profileName");
+        const nameInput = document.getElementById("nameInput");
+        const accountIcon = document.getElementById("accountIcon");
+        const accountName = document.getElementById("accountName");
+
+        /* OPEN POPUPS */
+        mainImg.onclick = () => popup1.style.display = "flex";
+
+        popup1.onclick = e => {
+            if (e.target === popup1) popup1.style.display = "none";
+        };
+
+        addProfileBtn.onclick = () => {
+            popup1.style.display = "none";
+            popup2.style.display = "flex";
+        };
+
+        cancelAdd.onclick = () => popup2.style.display = "none";
+
+        /* IMAGE UPLOAD */
+        changePhoto.onclick = () => fileInput.click();
+
+        fileInput.onchange = () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                previewIcon.innerHTML = `<img src="${e.target.result}">`;
+                mainImg.src = e.target.result;
+                accountIcon.innerHTML = `<img src="${e.target.result}">`;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        /* CONTINUE */
+        continueBtn.onclick = () => {
+            if (nameInput.value.trim() !== "") {
+                profileName.innerText = nameInput.value;
+                accountName.innerText = nameInput.value;
+            }
+            popup2.style.display = "none";
+        };
+
+        //to get store the data (name and image) of the save_details table to the profile page --->
+        // Fetch latest profile from server
+        // 👇 PLACE THE NEW CODE HERE (END OF SCRIPT)
+        const profileEmail = document.getElementById("profileEmail");
+
+        fetch("/get-latest-profile")
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const name = data.name || "Kevin Smith";
+                    const email = data.email || "Advisor and Consultant";
+                    const img = data.profile_image || "https://randomuser.me/api/portraits/men/32.jpg";
+
+                    profileName.innerText = name;
+                    accountName.innerText = name;
+                    profileEmail.innerText = email;
+
+                    mainImg.src = img;
+                    accountIcon.innerHTML = `<img src="${img}">`;
+                    previewIcon.innerHTML = `<img src="${img}">`;
+                }
+            })
+            .catch(err => console.error("Error fetching profile:", err));
+
+    </script>
+
+<footer class="footer">
+    © 2026 Product Dashboard | All Rights Reserved
+</footer>
+</body>
+
+</html>

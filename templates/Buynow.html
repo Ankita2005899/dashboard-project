@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <title>Payment Popup with Scanner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #d4f4f8;
+
+        }
+
+        /* Product Card */
+        .card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 300px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .buy-btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Main Payment Overlay */
+        .payment-overlay {
+            display: none;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: flex-start;
+            align-items: center;
+            padding-top: 20px;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .payment-form {
+            background: #fff;
+            border-radius: 12px;
+            width: 400px;
+            max-width: 95%;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        h2,
+        h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .section {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        /* Delivery Address */
+        .delivery {
+            font-size: 14px;
+            line-height: 1.4;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .delivery a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        /* Payment options */
+        .payment-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .payment-option input {
+            margin-right: 10px;
+        }
+
+        .description {
+            font-size: 13px;
+            color: #555;
+            margin-left: 25px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .add-card {
+            display: flex;
+            align-items: center;
+            color: #007bff;
+            cursor: pointer;
+            margin-left: 25px;
+            margin-top: 5px;
+        }
+
+        /* Continue button */
+        .continue-btn {
+            width: 100%;
+            background-color: #FFD700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .continue-btn:hover {
+            background-color: #FFC300;
+        }
+
+        /* UPI overlay */
+        .upi-overlay {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .upi-overlay .payment-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .upi-overlay .payment-option:last-child {
+            border-bottom: none;
+        }
+
+        /* UPI / GPay Details Popup */
+        .upi-details-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 12px;
+            width: 350px;
+            max-width: 90%;
+            padding: 20px;
+            z-index: 2000;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .upi-details-popup img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .upi-details-popup .close-upi {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .upi-details-popup .order-summary {
+            text-align: left;
+            margin-top: 10px;
+        }
+
+        .upi-details-popup .order-summary strong {
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* Pay Now button */
+        .pay-now-btn {
+            display: block;
+            width: 100%;
+            background-color: #28a745;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        .pay-now-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Scanner Popup */
+        .scanner-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 12px;
+            width: 400px;
+            max-width: 95%;
+            padding: 20px;
+            z-index: 3000;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .scanner-popup h3 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .scanner-popup .card-detail {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .scanner-popup .card-detail img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            margin-bottom: 5px;
+            border-radius: 8px;
+        }
+
+        .scanner-popup .scanner-section {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .scanner-popup .scanner-box {
+            width: 200px;
+            height: 200px;
+            border: 2px dashed #007bff;
+            margin: 10px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            font-size: 14px;
+            border-radius: 12px;
+        }
+
+        /* Done Button under scanner */
+        .scanner-popup .done-btn {
+            display: block;
+            width: 100%;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        .scanner-popup .done-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .scanner-box {
+            width: 200px;
+            height: 200px;
+            border: 2px dashed #007bff;
+            margin: 10px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .scanner-box img.scanner-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* ================= FOOTER ================= */
+        .footer {
+            position: fixed;
+
+            bottom: 0;
+            left: 0;
+
+            width: 100%;
+            height: 60px;
+
+            background: linear-gradient(90deg, #111827, #1f2937, #0f766e);
+
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 14px;
+
+            z-index: 1000;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+
+            border-radius: 8px;
+            border: 2px solid #cbd5e1;
+
+            background: white;
+            color: #1e293b;
+
+            text-decoration: none;
+            font-weight: 600;
+
+            transition: all 0.25s ease;
+        }
+
+        .header-btn:hover {
+            background: linear-gradient(135deg, #f97316, #f59e0b);
+            color: white;
+            border-color: #f97316;
+        }
+
+        .container {
+            margin-top: 100px;
+        }
+
+        /* ================= HEADER ================= */
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+
+            background: linear-gradient(135deg, #e0f2fe, #f0fdfa);
+
+            border-bottom: 3px solid #1e293b;
+
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+            display: flex;
+            justify-content: center;
+
+            z-index: 3000;
+        }
+
+        /* header inner container */
+        .header-container {
+            width: 100%;
+            max-width: 1200px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 0 20px;
+        }
+
+        .header-left h2 {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: auto;
+            padding-top: 100px;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <header class="header">
+
+        <div class="header-container">
+
+            <div class="header-left">
+                <h2>🛒 Buy Now</h2>
+            </div>
+
+            <div class="header-right">
+                <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+            </div>
+
+        </div>
+
+    </header>
+    <br>
+
+    <br>
+    <br>
+
+    <!-- Product Card -->
+    <div class="card">
+        <img src="https://via.placeholder.com/300x180" alt="Product Image">
+        <div class="card-content">
+            <h3>Awesome Product</h3>
+            <p>Get this amazing product now and enjoy exclusive benefits.</p>
+            <button class="buy-btn">Buy Now</button>
+        </div>
+    </div>
+
+    <!-- Main Payment Overlay -->
+    <div class="payment-overlay" id="paymentOverlay">
+        <div class="payment-form">
+            <span class="close-btn"
+                onclick="document.getElementById('paymentOverlay').style.display='none'">&times;</span>
+
+            <!-- Delivery Address -->
+            <div class="delivery section">
+                <strong>Delivering to Ankita Bandal</strong><br>
+                Zeal college, Survey No. 39, Narhe-Dhayari Road, PUNE, MAHARASHTRA, 411041, India<br>
+                <a href="#">Change delivery address</a>
+            </div>
+
+            <!-- Payment Options -->
+            <div class="section">
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="gpay">
+                    Google Pay
+                </label>
+
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="upi">
+                    Pay by any UPI App
+                </label>
+                <div class="description" id="desc-upi">Google Pay, PhonePe, Paytm and more</div>
+            </div>
+
+            <div class="sction">
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="card">
+                    Credit & Debit Cards
+                </label>
+                <div class="add-card">+ Add a new credit or debit card</div>
+            </div>
+
+            <div class="section">
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="cod">
+                    Cash on Delivery / Pay on Delivery
+                </label>
+                <div class="description" id="desc-cod">Cash, UPI and Cards accepted. <a href="#">Know more</a></div>
+            </div>
+
+            <div class="section">
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="return">
+                    Return Back Payment Detail
+                </label>
+            </div>
+
+            <!-- UPI Apps Overlay -->
+            <div class="upi-overlay" id="upiOverlay">
+                <h3>Your UPI Apps</h3>
+                <div class="payment-option">
+                    <label><input type="radio" name="upi" value="Google Pay"> Google Pay</label>
+                </div>
+                <div class="payment-option">
+                    <label><input type="radio" name="upi" value="Paytm"> Paytm</label>
+                </div>
+                <div class="payment-option">
+                    <label><input type="radio" name="upi" value="PhonePe"> PhonePe</label>
+                </div>
+            </div>
+
+            <button class="continue-btn" id="continueBtn">Continue</button>
+        </div>
+    </div>
+
+    <!-- UPI / GPay Details Popup -->
+    <div class="upi-details-popup" id="upiDetailsPopup">
+        <span class="close-upi" onclick="document.getElementById('upiDetailsPopup').style.display='none'">&times;</span>
+        <h3 id="upiTitle">Google Pay Summary</h3>
+<div class="order-summary">
+    Items: ₹<span id="itemPrice">0</span><br>
+    Delivery: ₹40.00<br>
+    Marketplace Fee: ₹5.00<br>
+    <strong>Order Total: ₹<span id="totalPrice">0</span></strong><br>
+    + Add a new credit or debit card
+</div>
+        <div class="delivery" style="margin-top:10px;">
+            <strong>Delivering to Ankita Bandal</strong><br>
+            Zeal college, Survey No. 39, Narhe-Dhayari Road, PUNE, MAHARASHTRA, 411041, India<br>
+            <a href="#">Change delivery address</a>
+        </div>
+        <img src="https://via.placeholder.com/300x180" alt="Product Image">
+        <h3>Awesome Product</h3>
+        <p>Get this amazing product now and enjoy exclusive benefits.</p>
+<button id="payNowBtn">Pay Now</button>    </div>
+
+       
+
+
+    <script>
+
+let productAmount = 0;
+let currentProduct = null;
+const urlParams = new URLSearchParams(window.location.search);
+const cartId = urlParams.get("cart_id");
+
+if (cartId) {
+    fetch(`/get-buynow-item/${cartId}`)
+        .then(res => res.json())
+.then(item => {
+
+    currentProduct = item;
+    productAmount = Number(item.price);
+
+
+    // ✅ rest of your code continues
+    // ✅ Card
+    document.querySelector(".card h3").innerText = item.name;
+    document.querySelector(".card img").src = item.image;
+
+    // ✅ Summary popup
+    document.getElementById("upiTitle").innerText = item.name + " Summary";
+    document.getElementById("itemPrice").innerText = productAmount;
+    document.getElementById("totalPrice").innerText = productAmount;
+
+    document.querySelector("#upiDetailsPopup img").src = item.image;
+    document.querySelector("#upiDetailsPopup h3:nth-of-type(2)").innerText = item.name;
+
+    // ✅ Scanner popup
+    document.querySelector(".scanner-popup img").src = item.image;
+    document.querySelector(".scanner-popup").innerHTML =
+        document.querySelector(".scanner-popup").innerHTML
+        .replace("Awesome Product", item.name)
+        .replace("₹231.00", "₹" + productAmount);
+
+});    
+
+}    // Show payment overlay on Buy Now
+        document.querySelector('.buy-btn').addEventListener('click', function () {
+            document.getElementById('paymentOverlay').style.display = 'flex';
+        });
+
+        // Handle payment selection
+        document.querySelectorAll('input[name="payment"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const upiOverlay = document.getElementById('upiOverlay');
+                const descUpi = document.getElementById('desc-upi');
+                const upiPopup = document.getElementById('upiDetailsPopup');
+                const upiTitle = document.getElementById('upiTitle');
+
+                if (this.value === 'gpay') {
+                    upiPopup.style.display = 'block';
+                    upiTitle.textContent = 'Google Pay Summary';
+                    upiOverlay.style.display = 'none';
+                    descUpi.style.display = 'none';
+                } else if (this.value === 'upi') {
+                    upiPopup.style.display = 'none';
+                    upiOverlay.style.display = 'block';
+                    descUpi.style.display = 'block';
+
+                    // Listen for UPI app selection
+                    document.querySelectorAll('input[name="upi"]').forEach(upiRadio => {
+                        upiRadio.addEventListener('change', function () {
+                            upiPopup.style.display = 'block';
+                            upiTitle.textContent = this.value + ' Summary';
+                            upiOverlay.style.display = 'none';
+                            descUpi.style.display = 'none';
+                        });
+                    });
+
+                } else {
+                    upiPopup.style.display = 'none';
+                    upiOverlay.style.display = 'none';
+                    descUpi.style.display = 'none';
+                }
+            });
+        });
+
+        // Continue button behavior
+        document.getElementById('continueBtn').addEventListener('click', function () {
+            const selected = document.querySelector('input[name="payment"]:checked')?.value;
+            if (!selected) return alert('Please select a payment option.');
+
+            if (selected === 'return') {
+                alert('Open Return Back Payment Detail overlay or section');
+            } else if (selected === 'upi') {
+                const upiSelected = document.querySelector('input[name="upi"]:checked')?.value;
+                if (upiSelected) alert('Proceed with ' + upiSelected);
+                else alert('Please select a UPI App');
+            } else {
+                alert('Proceed with ' + selected);
+            }
+        });
+
+        document.getElementById('payNowBtn').addEventListener('click', async function () {
+
+            let res = await fetch("/create-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ amount: productAmount * 100 })
+
+});
+
+            let order = await res.json();
+
+            var options = {
+    key: "rzp_test_Sap1qsHJLFFbC5",   // ✅ correct key
+    amount: order.amount,
+    currency: "INR",
+    name: "My Store",
+    description: "Product Purchase",
+    order_id: order.id,
+
+    handler: async function (response) {
+
+        let verify = await fetch("/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+    razorpay_order_id: response.razorpay_order_id,
+    razorpay_payment_id: response.razorpay_payment_id,
+    razorpay_signature: response.razorpay_signature
+})
+        });
+
+        let result = await verify.json();
+
+        if (result.status === "success") {
+            alert("✅ Payment Successful!");
+        } else {
+            alert("❌ Payment Failed");
+        }
+    },
+
+    prefill: {
+        name: "Ankita",
+        email: "ankitabandal45@gmail.com",
+        contact: "9226618581"
+    },
+
+    theme: {
+        color: "#3399cc"
+    }
+};
+
+var rzp = new Razorpay(options);
+rzp.open();
+        });
+    </script>
+    <footer class="footer">
+        © 2026 Product Dashboard | All Rights Reserved
+    </footer>
+</body>
+
+</html>

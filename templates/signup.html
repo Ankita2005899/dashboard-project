@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signup</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<style>
+    body {
+    background: #d4f4f8;
+    font-family: Arial;
+}
+
+.box {
+    width: 320px;
+    margin: 100px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+input {
+    width: 90%;
+    padding: 8px;
+    margin: 8px 0;
+}
+
+button {
+    padding: 8px 20px;
+    background: green;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+a {
+    color: blue;
+    text-decoration: none;
+}
+.error {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+/* ================= FOOTER ================= */
+.footer{
+    position:fixed;
+
+    bottom:0;
+    left:0;
+
+    width:100%;
+    height:60px;
+
+    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+
+    z-index:1000;
+}
+</style>
+<body>
+
+<div class="box">
+    <h2>Signup</h2>
+
+<form method="POST" onsubmit="return validatePassword()" autocomplete="off">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="email" name="email" placeholder="Email" required>
+
+        <input type="password" id="password" name="password" placeholder="Password" required>
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+
+        <p id="error"></p>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <button type="submit">Signup</button>
+    </form>
+
+    <p><a href="/">Back to Login</a></p>
+</div><script>
+let weakAttempts = 0;
+let autoApplied = false;
+
+function validatePassword() {
+    const passwordField = document.getElementById("password");
+    const confirmField = document.querySelector("input[name='confirm_password']");
+    const error = document.getElementById("error");
+
+    const password = passwordField.value.trim();
+
+    // ❌ DO NOTHING if user has not typed anything
+    if (password === "") {
+        error.innerHTML = "";
+        return false;
+    }
+
+    // Strong password regex
+    const pattern =
+      /^(?=(.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]){3,})(?=(.*\d){2,})(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+
+    // ✅ If auto password already applied → allow submit
+    if (autoApplied) {
+        return true;
+    }
+
+    // ✅ Manual strong password
+    if (pattern.test(password)) {
+        error.innerHTML = "";
+        return true;
+    }
+
+    // ❌ Weak password
+    weakAttempts++;
+
+    error.style.color = "red";
+    error.innerHTML =
+        "Password must contain:<br>" +
+        "• 1 Uppercase<br>" +
+        "• 1 Lowercase<br>" +
+        "• 2 Numbers<br>" +
+        "• 3 Special characters<br>" +
+        "• Minimum 8 characters";
+
+    // 🔥 Auto password ONLY after 2 failures + permission
+    if (weakAttempts >= 2) {
+        const consent = confirm(
+            "Your password is weak.\n\nDo you want us to generate a strong password for you?"
+        );
+
+        if (!consent) {
+            return false;
+        }
+
+        fetch("/get-strong-password", { cache: "no-store" })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.password) {
+                    alert("❌ No strong passwords available");
+                    return;
+                }
+
+                passwordField.value = data.password;
+                confirmField.value = data.password;
+
+                autoApplied = true;
+
+                error.style.color = "green";
+                error.innerHTML = "✅ Strong password auto-generated for you";
+            })
+            .catch(() => {
+                alert("❌ Server error while generating password");
+            });
+    }
+
+    return false; // ⛔ stop submit until password is valid
+}
+</script>
+
+<footer class="footer">
+    © 2026 Product Dashboard | All Rights Reserved
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>My Cart</title>
+
+    <style>
+        /* ================= RESET ================= */
+        * {
+            box-sizing: border-box;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #d4f4f8;
+        }
+
+        /* ================= PAGE ================= */
+        .container {
+            padding: 30px;
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+
+        /* ================= CART HEADER ================= */
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .cart-date {
+            font-size: 15px;
+            font-weight: 600;
+            color: #0d6efd;
+        }
+
+        /* ================= SLIDER ================= */
+        .slider-wrapper {
+            position: relative;
+            margin-top: 20px;
+        }
+
+        .slider {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 10px 0;
+            scroll-behavior: smooth;
+        }
+
+        .slider::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .slider::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 6px;
+        }
+
+        /* ================= CARD ================= */
+        .card {
+            min-width: 240px;
+            flex-shrink: 0;
+            background: #ffffff;
+            padding: 14px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+            transition: transform 0.25s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        .card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .card h3 {
+            margin: 10px 0 4px;
+            font-size: 16px;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .card h4 {
+            margin-top: 8px;
+            font-size: 16px;
+        }
+
+        /* ================= CARD ACTIONS ================= */
+        .card-actions {
+            display: flex;
+            margin-top: 12px;
+        }
+
+        .detail-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            background: #10b981;
+            color: white;
+        }
+
+        /* ================= QUANTITY BADGE ================= */
+        .qty-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #10b981;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ================= DELETE BUTTON ================= */
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* ================= MODAL ================= */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    justify-content: center;
+    align-items: center;
+    z-index: 5000;  /* higher than footer */
+}.modal {
+    padding-bottom: 80px;   /* ✅ space for footer */
+}
+        .modal-content {
+    background: white;
+    width: 420px;
+    border-radius: 14px;
+    padding: 18px;
+    position: relative;
+    animation: pop 0.25s ease;
+
+    max-height: 80vh;        /* ✅ limit height */
+    overflow-y: auto;        /* ✅ enable scroll */
+}
+
+        @keyframes pop {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 14px;
+            font-size: 22px;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .modal img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .modal h2 {
+            margin: 12px 0 6px;
+            font-size: 18px;
+        }
+
+        .modal p {
+            margin: 4px 0;
+            font-size: 14px;
+        }
+
+        .modal video {
+            width: 100%;
+            height: 160px;
+            margin-top: 10px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        /* ================= EMPTY ================= */
+        .empty {
+            text-align: center;
+            color: #777;
+            margin-top: 40px;
+        }
+
+        .delete-btn {
+            pointer-events: all !important;
+            z-index: 9999 !important;
+            cursor: pointer;
+        }
+
+        .card * {
+            pointer-events: auto;
+        }
+
+        .card img {
+            pointer-events: none !important;
+        }
+
+
+        .delete-btn:hover {
+            transform: scale(1.15);
+            background: #dc2626;
+        }
+
+        .cart-row {
+            margin-top: 25px;
+        }
+
+        .cart-row h3 {
+            margin: 0 0 8px;
+            color: #0d6efd;
+            font-size: 16px;
+        }
+
+        .cart-row .slider {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .buy-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            background: #10b981;
+            color: white;
+        }
+
+        .buy-btn:hover {
+            background: #059669;
+        }
+
+        /* stronger vibration */
+        @keyframes vibrate {
+            0% {
+                transform: translateX(0);
+            }
+
+            10% {
+                transform: translateX(-6px) rotate(-1deg);
+            }
+
+            20% {
+                transform: translateX(6px) rotate(1deg);
+            }
+
+            30% {
+                transform: translateX(-6px) rotate(-1deg);
+            }
+
+            40% {
+                transform: translateX(6px) rotate(1deg);
+            }
+
+            50% {
+                transform: translateX(-6px) rotate(-1deg);
+            }
+
+            60% {
+                transform: translateX(6px) rotate(1deg);
+            }
+
+            70% {
+                transform: translateX(-6px) rotate(-1deg);
+            }
+
+            80% {
+                transform: translateX(6px) rotate(1deg);
+            }
+
+            90% {
+                transform: translateX(-6px) rotate(-1deg);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .vibrate {
+            animation: vibrate 0.3s linear 5;
+            /* vibrate longer */
+        }
+
+        /* highlight user details button */
+        .highlight-btn {
+            animation: highlightPulse 1s ease-in-out 0s 3;
+            background-color: #f59e0b !important;
+            /* bright orange */
+            color: white !important;
+        }
+
+        @keyframes highlightPulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* ================= FOOTER ================= */
+.footer{
+    position:fixed;
+
+    bottom:0;
+    left:0;
+
+    width:100%;
+    height:60px;
+
+    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+
+    z-index:1000;
+}
+
+.header-btn{
+    padding:8px 16px;
+
+    border-radius:8px;
+    border:2px solid #cbd5e1;
+
+    background:white;
+    color:#1e293b;
+
+    text-decoration:none;
+    font-weight:600;
+
+    transition:all 0.25s ease;
+}
+
+.header-btn:hover{
+    background:linear-gradient(135deg,#f97316,#f59e0b);
+    color:white;
+    border-color:#f97316;
+}
+
+.container{
+    margin-top:100px;
+}
+/* ================= HEADER ================= */
+
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:70px;
+
+    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+
+    border-bottom:3px solid #1e293b;
+
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+
+    display:flex;
+    justify-content:center;
+
+    z-index:3000;
+}
+
+/* header inner container */
+.header-container{
+    width:100%;
+    max-width:1200px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 20px;
+}
+
+.header-left h2{
+    font-weight:700;
+    color:#1e293b;
+}
+
+.header-right{
+    display:flex;
+    gap:10px;
+}
+.main-content{
+    max-width:1200px;
+    margin:auto;
+    padding-top:100px;
+}
+.header-right{
+    display:flex;
+    gap:12px;
+    align-items:center;
+}
+
+    </style>
+</head>
+
+<body>
+<header class="header">
+
+    <div class="header-container">
+
+        <div class="header-left">
+            <h2>👀 View Cart</h2>
+        </div>
+
+        <div class="header-right">
+
+            <button id="userBtn" class="header-btn">
+                👤 User Details
+            </button>
+
+            <a href="dashboard.html" class="header-btn">
+                🏠 Dashboard
+            </a>
+
+        </div>
+
+    </div>
+
+</header>
+
+    <!-- this is the message from the save detail button-->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <script>
+        alert("{{ messages[0] }}");
+    </script>
+    {% endif %}
+    {% endwith %}
+
+
+    <!-- ================= USER DETAILS BUTTON ================= -->
+<!---  <button id="userBtn" style="
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #0d6efd;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 9999;
+    font-weight: 600;
+">User Details</button>
+----->
+
+    <div class="container">
+
+        <a href="/home" class="back-btn">← Back to Dashboard</a>
+
+        <div class="cart-header">
+            <h1>🛒 My Cart</h1>
+            <div id="cartDate" class="cart-date"></div>
+        </div>
+
+        <div id="cartGrid"></div>
+
+        <p class="empty" id="emptyCart" style="display:none;">Your cart is empty</p>
+
+        <h3>Total Items: <span id="totalItems">0</span></h3>
+        <h3>Total Amount: ₹<span id="totalPrice">0</span></h3>
+    </div>
+
+    <!-- ================= MODAL ================= -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">×</button>
+
+            <img id="modalImage">
+            <h2 id="modalName"></h2>
+
+            <p><b>Available:</b> <span id="modalAvailability"></span></p>
+            <p><b>Price:</b> ₹<span id="modalPrice"></span></p>
+            <p><b>Date:</b> <span id="modalDate"></span></p>
+            <p><b>Address:</b> <span id="modalAddress"></span></p>
+
+            <!-- ================= MODAL ================= -->
+            <video id="modalVideo" controls playsinline muted style="display:none;">
+                <source id="modalVideoSource" src="" type="video/mp4">
+            </video>
+
+
+        </div>
+    </div>
+    <!--save button popup -->
+    <!-- ================= USER DETAILS MODAL ================= -->
+<!-- ================= USER DETAILS MODAL ================= -->
+<div id="userModal" class="modal">
+    <div class="modal-content" style="width: 450px; max-width: 95%;">
+        <button class="close-btn" onclick="closeUserModal()">×</button>
+        <h2>User Details</h2>
+
+        <form id="userForm" method="POST" action="/save-user-detail" enctype="multipart/form-data">
+
+            <!-- Profile Image Upload -->
+            <div style="text-align:center; margin: 10px 0;">
+                <img id="profilePreview" src="https://via.placeholder.com/120"
+                    style="width:120px; height:120px; object-fit:cover; border-radius:50%; margin-bottom:10px;">
+                <input type="file" id="profileImage" name="profile_image" accept="image/*" style="display:block; margin:auto;">
+            </div>
+
+            <!-- User Form Fields -->
+            <label>Username</label>
+            <input type="text" id="username" name="name" value="{{ user.name }}"
+                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
+
+            <label>Age</label>
+            <input type="number" id="userAge" name="age"
+                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
+
+            <label>Main Phone</label>
+            <input type="tel" id="mainPhone" name="phone1"
+                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
+
+            <label>Secondary Phone</label>
+            <input type="tel" id="secondPhone" name="phone2"
+                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
+
+            <label>Main Address</label>
+            <textarea id="mainAddress" name="address1" rows="2"
+                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;"></textarea>
+
+            <label>Secondary Address</label>
+            <textarea id="secondAddress" name="address2" rows="2"
+                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;"></textarea>
+
+            <label>Email</label>
+            <input type="email" id="email" name="email" value="{{ user.email }}" readonly
+                style="width:100%; padding:6px; margin:4px 0 12px; border-radius:6px; border:1px solid #ccc; background:#f3f4f6;">
+
+            <button type="submit" style="
+                background:#10b981;
+                color:white;
+                border:none;
+                padding:10px 14px;
+                width:100%;
+                border-radius:6px;
+                cursor:pointer;
+                font-weight:600;
+            ">Save</button>
+        </form>
+    </div>
+</div>
+
+
+    <!-- ================= EXISTING DETAIL OPTION MODAL ================= -->
+<div id="detailOptionModal" class="modal">
+    <div class="modal-content" style="width:380px; text-align:center;">
+        <h3 style="margin-bottom:15px;">⚠️ Details Already Exist</h3>
+        <p style="margin-bottom:20px;">
+            Your details are already saved.<br>
+            What would you like to do?
+        </p>
+
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button id="saveAsIsBtn" style="
+                background:#3b82f6;
+                color:white;
+                border:none;
+                padding:10px 14px;
+                border-radius:6px;
+                cursor:pointer;
+                font-weight:600;
+            ">Save as it is</button>
+
+            <button id="saveAnotherBtn" style="
+                background:#10b981;
+                color:white;
+                border:none;
+                padding:10px 14px;
+                border-radius:6px;
+                cursor:pointer;
+                font-weight:600;
+            ">Save another detail</button>
+        </div>
+    </div>
+</div>
+
+    <script>
+
+        let isRemoving = false;
+
+        // ================= LOAD CART ITEMS =================
+        async function loadCartItems() {
+            const res = await fetch("/get-cart-items");
+            const items = await res.json();
+
+            const container = document.getElementById("cartGrid");
+            const emptyText = document.getElementById("emptyCart");
+            container.innerHTML = "";
+
+            if (!items || items.length === 0) {
+                emptyText.style.display = "block";
+                document.getElementById("totalItems").innerText = 0;
+                document.getElementById("totalPrice").innerText = "0.00";
+                return;
+            }
+
+            emptyText.style.display = "none";
+
+            // Group items by date
+            const grouped = {};
+            items.forEach(item => {
+                const date = item.date || "Unknown Date";
+                if (!grouped[date]) grouped[date] = [];
+                grouped[date].push(item);
+            });
+
+            let totalItems = 0;
+            let totalAmount = 0;
+
+            Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b)).forEach(date => {
+                const row = document.createElement("div");
+                row.className = "cart-row";
+                row.innerHTML = `<h3>📅 ${date}</h3>`;
+
+                const slider = document.createElement("div");
+                slider.className = "slider";
+
+                grouped[date].forEach(item => {
+                    totalItems += Number(item.quantity || 1);
+                    totalAmount += Number(item.price) * Number(item.quantity || 1);
+
+                    const card = document.createElement("div");
+                    card.className = "card";
+                    card.dataset.cartId = item.id;
+                    card.dataset.quantity = item.quantity || 1;
+
+                    card.innerHTML = `
+                <img src="${item.image}">
+                <h3>${item.name}</h3>
+                <p>Available: ${item.availability}</p>
+                <h4>₹${item.price}</h4>
+                ${item.quantity > 1 ? `<div class="qty-badge">${item.quantity}</div>` : ""}
+                <div class="card-actions" style="margin-top:10px; display:flex; gap:8px;">
+                    <button class="buy-btn" data-id="${item.id}">🛍 Buy Now</button>
+                    <button class="delete-btn" data-id="${item.id}">❌</button>
+                </div>
+            `;
+
+                    card.querySelector(".buy-btn").addEventListener("click", function (e) {
+                        e.preventDefault();
+                        buyNow(card.dataset.cartId, card);
+                  });
+
+
+
+                    slider.appendChild(card);
+                });
+
+                row.appendChild(slider);
+                container.appendChild(row);
+            });
+
+            document.getElementById("totalItems").innerText = totalItems;
+            document.getElementById("totalPrice").innerText = totalAmount.toFixed(2);
+        }
+
+        // ================= REMOVE ITEM =================
+        document.getElementById("cartGrid").addEventListener("click", function (e) {
+            const btn = e.target.closest(".delete-btn");
+            if (!btn) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const card = btn.closest(".card");
+            const cartId = btn.dataset.id;
+            if (!card || !cartId) return;
+
+            removeItem(btn, cartId);
+        });
+
+        function removeItem(btn, cartId) {
+            if (isRemoving) return;
+            isRemoving = true;
+
+            const card = btn.closest(".card");
+            if (!card) {
+                isRemoving = false;
+                return;
+            }
+
+            let quantity = parseInt(card.dataset.quantity || "1");
+
+            if (quantity > 1) {
+                quantity--;
+                card.dataset.quantity = quantity;
+                const badge = card.querySelector(".qty-badge");
+                if (badge) badge.innerText = quantity;
+            } else {
+                card.remove();
+            }
+
+            fetch("/remove-from-cart", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: cartId, force_remove: true })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) loadCartItems();
+                    if (data.action === "decremented") loadCartItems();
+                })
+                .catch(() => loadCartItems())
+                .finally(() => { isRemoving = false; });
+        }
+
+        // ================= BUY NOW WITH VIBRATE =================
+        // ================= BUY NOW WITH VIBRATE =================
+        // ================= BUY NOW WITH VIBRATE =================
+        function buyNow(cardId, cardElement) {
+            fetch("/check-user-detail", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({})
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.exists) {
+    // ✅ user exists → navigate to Buynow page
+window.location.href = `/Buynow.html?cart_id=${cardId}`;}
+ else {
+                        // ❌ user missing → vibrate card & highlight user button
+                        const userBtn = document.getElementById("userBtn");
+
+                        // add vibration to card
+                        cardElement.classList.add("vibrate");
+                        setTimeout(() => cardElement.classList.remove("vibrate"), 3000);
+
+                        // highlight user details button
+                        userBtn.classList.add("highlight-btn");
+                        setTimeout(() => userBtn.classList.remove("highlight-btn"), 3000);
+
+                        // scroll into view
+                        userBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+
+                        // optional tooltip or message
+                        alert("⚠️ Please fill in your User Details before purchasing!");
+                    }
+                })
+                .catch(err => console.error(err));
+        }
+
+
+        // ================= USER MODAL =================
+        const userBtn = document.getElementById("userBtn");
+        const userModal = document.getElementById("userModal");
+        const profileImage = document.getElementById("profileImage");
+        const profilePreview = document.getElementById("profilePreview");
+
+
+// 🔽 ADD THIS CODE HERE
+const detailOptionModal = document.getElementById("detailOptionModal");
+const saveAsIsBtn = document.getElementById("saveAsIsBtn");
+const saveAnotherBtn = document.getElementById("saveAnotherBtn");
+
+userBtn.addEventListener("click", async () => {
+    const res = await fetch("/check-user-detail", { method: "POST" });
+    const data = await res.json();
+
+    if (data.exists) {
+        // show custom modal instead of confirm
+        detailOptionModal.classList.add("active");
+    } else {
+        userModal.classList.add("active");
+    }
+});
+
+// Option 1: Save as it is → go back to cart page
+saveAsIsBtn.addEventListener("click", () => {
+    detailOptionModal.classList.remove("active");
+    window.location.href = "/view-cart";
+});
+
+// Option 2: Save another detail → open form modal
+saveAnotherBtn.addEventListener("click", () => {
+    detailOptionModal.classList.remove("active");
+    userModal.classList.add("active");
+});
+
+
+        function closeUserModal() { userModal.classList.remove("active"); }
+
+        profileImage.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => profilePreview.src = e.target.result;
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById("userForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    // 🔹 Check if detail already exists
+    const checkRes = await fetch("/check-user-detail", { method: "POST" });
+    const checkData = await checkRes.json();
+
+    if (checkData.exists) {
+        // show 2 option popup
+        const choice = confirm(
+            "⚠️ Your details already exist.\n\nOK = Save another detail (update existing)\nCancel = Save as it is"
+        );
+
+        if (!choice) {
+            // Save as it is → go back to cart
+            window.location.href = "/view-cart";
+            return;
+        }
+        // else continue to update existing row
+    }
+
+    // 🔹 Save / Update detail
+    const formData = new FormData(this);
+    const res = await fetch("/save-user-detail", { method: "POST", body: formData });
+
+    if (res.ok) {
+        alert("✅ Details saved successfully!");
+        closeUserModal();
+        window.location.href = "/view-cart";
+    } else {
+        alert("❌ Server error");
+    }
+});
+
+
+        // ================= INIT =================
+        document.addEventListener("DOMContentLoaded", loadCartItems);
+
+    </script>
+
+<footer class="footer">
+    © 2026 Product Dashboard | All Rights Reserved
+</footer>
+</body>
+
+</html>

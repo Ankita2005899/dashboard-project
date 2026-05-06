@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Unified Product Search Table</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { font-family: "Segoe UI", sans-serif; padding:30px; background: #d4f4f8; }
+h2 { text-align:center; margin-bottom:20px; }
+table { width:100%; border-collapse:collapse; background:white; box-shadow:0 4px 10px rgba(0,0,0,0.08); border-radius:10px; overflow:hidden; margin-bottom:40px; }
+th, td { padding:12px; border-bottom:1px solid #ddd; text-align:center; }
+th { background:#4f46e5; color:white; }
+tr:hover { background:#f1f5ff; }
+.placeholder { text-align:center; color:#888; font-style:italic; }
+.progress-wrapper{ background:#f1f3f6; border-radius:8px; height:18px; width:100%; overflow:hidden; }
+.progress-bar{ height:100%; border-radius:8px; text-align:right; padding-right:5px; color:white; font-size:12px; line-height:18px; }
+.low-interest{ border:2px solid red; }
+.low-interest .progress-bar{ background:rgba(255,0,0,0.6); backdrop-filter:blur(2px); }
+.moderate-interest .progress-bar{ background:rgba(255,204,0,0.6); }
+/* ================= FOOTER ================= */
+.footer{
+    position:fixed;
+
+    bottom:0;
+    left:0;
+
+    width:100%;
+    height:60px;
+
+    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+
+    z-index:1000;
+}
+
+.header-btn{
+    padding:8px 16px;
+
+    border-radius:8px;
+    border:2px solid #cbd5e1;
+
+    background:white;
+    color:#1e293b;
+
+    text-decoration:none;
+    font-weight:600;
+
+    transition:all 0.25s ease;
+}
+
+.header-btn:hover{
+    background:linear-gradient(135deg,#f97316,#f59e0b);
+    color:white;
+    border-color:#f97316;
+}
+
+.container{
+    margin-top:100px;
+}
+/* ================= HEADER ================= */
+
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:70px;
+
+    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+
+    border-bottom:3px solid #1e293b;
+
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+
+    display:flex;
+    justify-content:center;
+
+    z-index:3000;
+}
+
+/* header inner container */
+.header-container{
+    width:100%;
+    max-width:1200px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 20px;
+}
+
+.header-left h2{
+    font-weight:700;
+    color:#1e293b;
+}
+
+.header-right{
+    display:flex;
+    gap:10px;
+}
+.main-content{
+    max-width:1200px;
+    margin:auto;
+    padding-top:100px;
+}
+
+</style>
+</head>
+<body>
+
+    <br>
+    <br>
+    
+    <header class="header">
+
+    <div class="header-container">
+
+        <div class="header-left">
+            <h2>🔍 Search Data</h2>
+        </div>
+
+        <div class="header-right">
+            <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+        </div>
+
+    </div>
+
+</header>
+<h2>Unified Product Table</h2>
+<table border="1" width="100%" style="border-collapse:collapse">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Product ID</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Today's Searched Count</th>
+            <th>Last Searched Time</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+        <tr><td colspan="6" class="placeholder">Loading...</td></tr>
+    </tbody>
+</table>
+
+<h2>📈 Today's Product Search Trend</h2>
+<canvas id="searchChart" width="800" height="400"></canvas>
+
+<h2>👥 User Search Rates</h2>
+<table border="1" width="100%" style="border-collapse:collapse">
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>User Name</th>
+            <th>Search Rate</th>
+        </tr>
+    </thead>
+    <tbody id="userTableBody">
+        <tr><td colspan="3" class="placeholder">Loading...</td></tr>
+    </tbody>
+</table>
+
+<script>
+let searchChart = null;
+
+function utcToISTPlus1Hour(utcString) {
+    if(!utcString) return "N/A";
+    const date = new Date(utcString);
+    if(isNaN(date.getTime())) return "N/A";
+    const adjustedTime = new Date(date.getTime() + (6.5*60*60*1000));
+    let timeStr = adjustedTime.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}).toLowerCase();
+    timeStr = timeStr.replace('am','TEMP').replace('pm','am').replace('TEMP','pm');
+    return timeStr;
+}
+
+async function loadTableAndChart(query="") {
+    try {
+        const res = await fetch(`/search-products?q=${query}`);
+        const data = await res.json();
+        const body = document.getElementById("tableBody");
+        const userBody = document.getElementById("userTableBody");
+
+        if(!data || data.length===0){
+            body.innerHTML='<tr><td colspan="6" class="placeholder">No data available</td></tr>';
+            userBody.innerHTML='<tr><td colspan="3" class="placeholder">No users found</td></tr>';
+            if(searchChart){
+                searchChart.data.labels = ["No Data"];
+                searchChart.data.datasets[0].data = [0];
+                searchChart.update();
+            }
+            return;
+        }
+
+        // ------------------ Product Table ------------------
+        body.innerHTML = "";
+        const labels = [];
+        const counts = [];
+        const searchTimes = [];
+
+        data.forEach((row,index)=>{
+            const formattedTime = utcToISTPlus1Hour(row.last_searched_time);
+            body.innerHTML += `<tr>
+                <td>${index+1}</td>
+                <td>${row.id}</td>
+                <td>${row.name}</td>
+                <td>${row.category}</td>
+                <td>${row.todays_searched_count || 0}</td>
+                <td>${formattedTime}</td>
+            </tr>`;
+            labels.push(row.name);
+            counts.push(row.todays_searched_count || 0);
+            searchTimes.push(formattedTime);
+        });
+
+        // ------------------ Chart ------------------
+        const ctx = document.getElementById('searchChart').getContext('2d');
+        if(!searchChart){
+            searchChart = new Chart(ctx,{
+                type:'line',
+                data:{ labels, datasets:[{ label:"No. of People Searched", data:counts, borderColor:'rgba(79,70,229,1)', backgroundColor:'rgba(79,70,229,0.3)', borderWidth:3, tension:0.4, pointRadius:6 }] },
+                options:{
+                    responsive:true,
+                    plugins:{ tooltip:{ callbacks:{ label:function(context){ const idx = context.dataIndex; return `Product: ${labels[idx]} | People: ${counts[idx]} | Time: ${searchTimes[idx]}`; } } } },
+                    scales:{ y:{ beginAtZero:true, title:{ display:true, text:'No. of People' } }, x:{ title:{ display:true, text:'Product Name'} } }
+                }
+            });
+        } else {
+            searchChart.data.labels = labels;
+            searchChart.data.datasets[0].data = counts;
+            searchChart.update();
+        }
+
+        // ------------------ User Table ------------------
+        userBody.innerHTML = "";
+        for(let i=1;i<=5;i++){
+            const tr = document.createElement("tr");
+            const uid = document.createElement("td"); uid.innerText = 'U'+i; tr.appendChild(uid);
+            const uname = document.createElement("td"); uname.innerText = 'User '+i; tr.appendChild(uname);
+            const val = Math.floor(Math.random()*100);
+            const td = document.createElement("td");
+            td.innerHTML = `<div class="progress-wrapper"><div class="progress-bar" style="width:${val}%">${val}%</div></div>`;
+            tr.appendChild(td);
+            if(val<25) tr.classList.add("low-interest");
+            else if(val<50) tr.classList.add("moderate-interest");
+            userBody.appendChild(tr);
+        }
+
+    } catch(err){
+        console.error("Error loading data:", err);
+        document.getElementById("tableBody").innerHTML='<tr><td colspan="6" class="placeholder">Error loading data</td></tr>';
+        document.getElementById("userTableBody").innerHTML='<tr><td colspan="3" class="placeholder">Error loading data</td></tr>';
+    }
+}
+
+// Load all products initially
+loadTableAndChart();
+
+// Optional: connect a search input from dashboard.html
+document.getElementById("searchInput")?.addEventListener("input", e=>{
+    const q = e.target.value.trim();
+    loadTableAndChart(q);
+});
+</script>
+
+<footer class="footer">
+    © 2026 Product Dashboard | All Rights Reserved
+</footer>
+</body>
+</html>

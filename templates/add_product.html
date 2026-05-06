@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Add Product</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+       /* ================= BODY ================= */
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+
+    /* Soft dashboard gradient background */
+   background:#d4f4f8; 
+    min-height: 100vh;
+
+    /* Make sure content uses full width and height */
+    width: 100%;
+    color: #111827; /* default text color for contrast */
+}
+
+/* Optional: ensure main area also inherits background */
+.main {
+    background: transparent; /* so the body gradient shows through */
+}
+
+        .card {
+            border-radius: 12px;
+        }
+
+        .form-title {
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .upload-box {
+            border: 2px dashed #ced4da;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            background: #fff;
+            min-height: 230px;
+        }
+
+        .upload-box img,
+        .upload-box video {
+            max-width: 100%;
+            max-height: 180px;
+            border-radius: 8px;
+            display: none;
+            margin-bottom: 10px;
+        }
+
+        .sub-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #0d6efd;
+        }
+
+
+        .form-error {
+            color: red;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .border-error {
+            border: 1px solid red;
+            padding: 10px;
+            border-radius: 5px;
+        }
+/* ================= FORM CARD BORDER ================= */
+form {
+    border: 2px solid #cbd5e1; /* same as card/sidebar */
+    border-radius: 12px;        /* match card */
+    padding: 20px;              /* add spacing inside */
+    background: #fff;           /* white background */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06); /* subtle shadow */
+}
+
+/* ================= SUBMIT BUTTON ================= */
+form button[type="submit"] {
+    border: 2px solid #cbd5e1;                /* same border as dashboard buttons */
+    border-radius: 10px;                       /* rounded corners */
+    background: linear-gradient(135deg,#4f46e5,#6366f1); /* gradient like add button */
+    color: white;
+    font-weight: 600;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+form button[type="submit"]:hover {
+    background: #f97316; /* hover effect like dashboard */
+    border-color: #f97316;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.upload-box {
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* ================= FORM TITLE ================= */
+.form-title {
+    font-weight: 700;                        /* bolder */
+    font-size: 24px;                         /* bigger */
+    letter-spacing: 1px;                     /* spacing between letters */
+    color: #4f46e5;                          /* gradient-like purple */
+    text-align: center;                      /* center */
+    padding: 12px 0;                         /* some vertical padding */
+    border-bottom: 3px solid #cbd5e1;       /* subtle border under title */
+    margin-bottom: 25px;                     /* spacing from form */
+    border-radius: 8px 8px 0 0;             /* rounded top corners */
+    background: linear-gradient(135deg,#e0e7ff,#f3f4f6); /* soft gradient background */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06); /* subtle shadow */
+}
+
+.form-title::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 4px;
+    margin: 8px auto 0 auto;
+    background: #10b981; /* green accent */
+    border-radius: 2px;
+}
+        /* ================= FIXED FOOTER ================= */
+/* ================= FOOTER ================= */
+/* ================= FOOTER ================= */
+.footer{
+    position:fixed;
+
+    bottom:0;
+    left:0;
+
+    width:100%;
+    height:60px;
+
+    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+
+    z-index:1000;
+}
+
+/* prevent content hiding behind footer */
+.main {
+    padding-bottom: 80px;
+}
+
+/* ================= PROFESSIONAL HEADER ================= */
+
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:70px;
+
+    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 30px;
+
+    border-bottom:3px solid #1e293b;
+
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+
+    z-index:3000;
+}
+
+.header-left h2{
+    font-weight:700;
+    color:#1e293b;
+}
+
+.header-right{
+    display:flex;
+    gap:10px;
+}
+
+.header-btn{
+    padding:8px 16px;
+
+    border-radius:8px;
+    border:2px solid #cbd5e1;
+
+    background:white;
+    color:#1e293b;
+
+    text-decoration:none;
+    font-weight:600;
+
+    transition:all 0.25s ease;
+}
+
+.header-btn:hover{
+    background:linear-gradient(135deg,#f97316,#f59e0b);
+    color:white;
+    border-color:#f97316;
+}
+
+.container{
+    margin-top:100px;
+}
+
+.card{
+    border-radius:14px;
+    border:2px solid #cbd5e1;
+
+    box-shadow:0 6px 16px rgba(0,0,0,0.08);
+}.form-title{
+    font-weight:700;
+    font-size:24px;
+
+    text-align:center;
+
+    padding:14px;
+
+    background:linear-gradient(135deg,#e0e7ff,#f3f4f6);
+
+    border-radius:10px;
+    border:2px solid #cbd5e1;
+
+    color:#1e293b;
+
+    margin-bottom:30px;
+}
+
+.upload-box{
+    border:2px dashed #cbd5e1;
+
+    padding:25px;
+
+    border-radius:12px;
+
+    background:#ffffff;
+
+    text-align:center;
+
+    transition:all 0.25s ease;
+}
+
+.upload-box:hover{
+    border-color:#4f46e5;
+}
+
+
+    </style>
+</head>
+
+<body>
+<!-- ================= HEADER ================= -->
+<header class="header">
+
+    <div class="header-left">
+        <h2>📦 Add Product</h2>
+    </div>
+
+    <div class="header-right">
+        <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+    </div>
+
+</header>
+<BR>
+    <br>
+
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                <div class="card shadow">
+                    <div class="card-body p-4">
+
+                        <h4 class="text-center mb-4 form-title">
+                            ADD THE PRODUCT DETAIL
+                        </h4>
+
+                        <form action="/add-product" method="POST" enctype="multipart/form-data">
+
+                            <!-- Upload Section -->
+                            <div class="row mb-4">
+
+                                <!-- Image -->
+                                <div class="col-md-6">
+                                    <div class="upload-box">
+                                        <label class="fw-semibold">
+                                            Product Image <span class="text-danger">*</span>
+                                        </label>
+
+                                        <img id="imagePreview">
+
+                                        <input type="file" name="image" class="form-control mt-2" accept="image/*"
+                                            required onchange="previewImage(event)">
+                                    </div>
+                                </div>
+
+                                <!-- Video -->
+                                <div class="col-md-6">
+                                    <div class="upload-box">
+                                        <label class="fw-semibold">
+                                            Product Video (Optional)
+                                        </label>
+
+                                        <video id="videoPreview" controls></video>
+
+                                        <input type="file" name="video" class="form-control mt-2" accept="video/*"
+                                            onchange="previewVideo(event)">
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Basic Details -->
+                            <div class="row">
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Product Name</label>
+                                    <input type="text" name="product_name" class="form-control" required>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Product Price</label>
+                                    <input type="number" name="product_price" class="form-control" required>
+                                </div>
+
+
+                                <!-- Product Type -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Type of Product <span style="color:red">*</span></label>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input product-type" type="checkbox"
+                                            name="product_type[]" value="Kitchen">
+                                        <label class="form-check-label">Kitchen</label>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input product-type" type="checkbox"
+                                            name="product_type[]" value="Study Material">
+                                        <label class="form-check-label">Study Material</label>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input product-type" type="checkbox"
+                                            name="product_type[]" value="Food">
+                                        <label class="form-check-label">Food Items</label>
+                                    </div>
+
+                                    <!-- 🔴 ERROR MESSAGE -->
+                                    <small id="typeError" style="color:red; display:none;">
+                                        Please select at least one product type.
+                                    </small>
+                                </div>
+
+
+                                <!-- Availability -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Product Availability (Stock Count)</label>
+                                    <input type="number" name="availability_count" class="form-control" min="0"
+                                        required>
+                                </div>
+
+                                <!-- Expiry -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Product Expiry</label>
+
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="noExpiry" checked
+                                            onchange="toggleExpiry()">
+                                        <label class="form-check-label">
+                                            None (No Expiry)
+                                        </label>
+                                    </div>
+
+                                    <input type="date" name="expiry_date" id="expiryDate" class="form-control" disabled>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Product Uploaded Date</label>
+                                    <input type="date" name="uploaded_date" class="form-control" required>
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Address (Product From)</label>
+                                    <input type="text" name="address" class="form-control" required>
+                                </div>
+
+                            </div>
+
+                            <!-- Product Details Section -->
+                            <div class="mt-4">
+                                <h5 class="sub-title">Product Details *</h5>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Product Made Up Of</label>
+                                    <textarea name="made_of" class="form-control" rows="2" required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Mostly Used For</label>
+                                    <textarea name="used_for" class="form-control" rows="2" required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Harmful Activities / Misuse</label>
+                                    <textarea name="harmful_activity" class="form-control" rows="2" required></textarea>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Safety Precautions</label>
+                                    <textarea name="precautions" class="form-control" rows="2" required></textarea>
+                                </div>
+                            </div>
+
+                            <div id="formError" class="form-error"></div>
+
+
+                            <!-- Submit -->
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary px-5">
+                                    Add Product
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    
+    
+    <!-- JS -->
+    <script>
+        function previewImage(event) {
+            const img = document.getElementById("imagePreview");
+            img.src = URL.createObjectURL(event.target.files[0]);
+            img.style.display = "block";
+        }
+
+        function previewVideo(event) {
+            const video = document.getElementById("videoPreview");
+            video.src = URL.createObjectURL(event.target.files[0]);
+            video.style.display = "block";
+        }
+
+        function toggleExpiry() {
+            const checkbox = document.getElementById("noExpiry");
+            const expiryDate = document.getElementById("expiryDate");
+
+            expiryDate.disabled = checkbox.checked;
+            if (checkbox.checked) expiryDate.value = "";
+        }
+
+        document.querySelector("form").addEventListener("submit", function (e) {
+
+            let isValid = true;
+
+            // 🔴 FORM ERROR BOX
+            const formError = document.getElementById("formError");
+            formError.style.display = "none";
+            formError.innerText = "";
+
+            // 🔴 PRODUCT TYPE VALIDATION (checkbox group)
+            const productTypes = document.querySelectorAll(".product-type");
+            const typeError = document.getElementById("typeError");
+
+            let isChecked = false;
+            productTypes.forEach(cb => {
+                if (cb.checked) isChecked = true;
+            });
+
+            if (!isChecked) {
+                isValid = false;
+                typeError.style.display = "block";
+                typeError.scrollIntoView({ behavior: "smooth", block: "center" });
+            } else {
+                typeError.style.display = "none";
+            }
+
+            // 🔴 REQUIRED INPUTS & TEXTAREAS
+            const requiredFields = document.querySelectorAll(
+                "input[required], textarea[required]"
+            );
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.style.border = "1px solid red";
+                    isValid = false;
+                } else {
+                    field.style.border = "1px solid #ced4da";
+                }
+            });
+
+            // ❌ STOP SUBMISSION
+            if (!isValid) {
+                e.preventDefault();
+                formError.style.display = "block";
+                formError.innerText = "⚠ Please fill all required fields before adding the product.";
+            }
+        });
+
+
+
+
+    </script>
+<br>
+<br>
+
+<footer class="footer">
+    © 2026 Product Dashboard | All Rights Reserved
+</footer>
+</body>
+
+</html>

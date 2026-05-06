@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Add to Cart Table & Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ================= BODY ================= */
+        body {
+            font-family: "Segoe UI", sans-serif;
+            padding: 30px;
+   background:#d4f4f8; 
+            min-height: 100vh;
+            color: #111827;
+        }
+
+        .main-content {
+            padding: 20px 30px;
+            border-radius: 12px;
+            background: transparent;
+            padding-bottom: 80px; /* space for footer */
+        }
+
+        /* ================= CARD STYLES ================= */
+        .card-table,
+        .card-chart {
+            background: #fff;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .form-title {
+            font-weight: 700;
+            font-size: 24px;
+            letter-spacing: 1px;
+            color: #4f46e5;
+            text-align: center;
+            padding: 12px 0;
+            border-bottom: 3px solid #cbd5e1;
+            margin-bottom: 25px;
+            border-radius: 8px 8px 0 0;
+            background: linear-gradient(135deg, #e0e7ff, #f3f4f6);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .form-title::after {
+            content: "";
+            display: block;
+            width: 60px;
+            height: 4px;
+            margin: 8px auto 0 auto;
+            background: #10b981;
+            border-radius: 2px;
+        }
+
+        /* ================= TABLE STYLES ================= */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #4f46e5;
+            color: white;
+        }
+
+        tr:hover {
+            background: #f1f5ff;
+        }
+
+        /* ================= DATE ================= */
+        #currentDate {
+            position: absolute;
+            right: 20px;
+            top: 0;
+            font-weight: bold;
+            color: #374151;
+            font-size: 16px;
+        }
+
+        /* ================= FOOTER ================= */
+    .footer{
+    position:fixed;
+
+    bottom:0;
+    left:0;
+
+    width:100%;
+    height:60px;
+
+    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+
+    z-index:1000;
+}
+
+
+.header-btn{
+    padding:8px 16px;
+
+    border-radius:8px;
+    border:2px solid #cbd5e1;
+
+    background:white;
+    color:#1e293b;
+
+    text-decoration:none;
+    font-weight:600;
+
+    transition:all 0.25s ease;
+}
+
+.header-btn:hover{
+    background:linear-gradient(135deg,#f97316,#f59e0b);
+    color:white;
+    border-color:#f97316;
+}
+
+.container{
+    margin-top:100px;
+}
+/* ================= HEADER ================= */
+
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:70px;
+
+    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+
+    border-bottom:3px solid #1e293b;
+
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+
+    display:flex;
+    justify-content:center;
+
+    z-index:3000;
+}
+
+/* header inner container */
+.header-container{
+    width:100%;
+    max-width:1200px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 20px;
+}
+
+.header-left h2{
+    font-weight:700;
+    color:#1e293b;
+}
+
+.header-right{
+    display:flex;
+    gap:10px;
+}
+.main-content{
+    max-width:1200px;
+    margin:auto;
+    padding-top:100px;
+}
+    </style>
+</head>
+
+<body>
+
+<header class="header">
+
+    <div class="header-container">
+
+        <div class="header-left">
+            <h2>📦 Add to Cart Table</h2>
+        </div>
+
+        <div class="header-right">
+            <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+        </div>
+
+    </div>
+
+</header>
+    <div class="main-content">
+
+        <!-- Add-to-Cart Table Card -->
+        <div class="card-table">
+            <h2 class="form-title">Add to Cart Table</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cart ID</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Today's Addtocart Count</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="6">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Current Date Display (between table & chart) -->
+        <div style="position: relative; height: 30px; margin-bottom: 20px;">
+            <span id="currentDate"></span>
+        </div>
+
+        <!-- Add-to-Cart Chart Card -->
+        <div class="card-chart">
+            <h2 class="form-title">📈 Add to Cart Trend</h2>
+            <canvas id="addtocartChart" width="800" height="400"></canvas>
+        </div>
+
+    </div>
+
+    <!-- ================= SCRIPT ================= -->
+    <script>
+        let addtocartChart = null;
+        let previousCounts = {};
+        let lastTimes = {};
+
+        function utcToISTPlus1Hour(timeString) {
+            if (!timeString || timeString === "N/A") return "N/A";
+            return timeString; // backend already sends correct IST time
+        }
+
+        async function loadAddtocartTableAndChart() {
+            try {
+                const xmlRes = await fetch("/user-addtocart-trend-xml");
+                const xmlText = await xmlRes.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(xmlText, "text/xml");
+                const records = Array.from(xml.getElementsByTagName("record"));
+
+                const body = document.getElementById("tableBody");
+                body.innerHTML = "";
+
+                const labels = [];
+                const counts = [];
+                let index = 1;
+
+                if (!records.length) {
+                    body.innerHTML = `<tr><td colspan="6">No data available</td></tr>`;
+                    return;
+                }
+
+                for (let rec of records) {
+                    const pid = rec.getElementsByTagName("product_id")[0]?.textContent || "";
+                    const name = rec.getElementsByTagName("name")[0]?.textContent || "";
+                    const category = rec.getElementsByTagName("category")[0]?.textContent || "";
+                    const addVC = rec.getElementsByTagName("count")[0]?.textContent || "0";
+                    const lastTimeUTC = rec.getElementsByTagName("time")[0]?.textContent || "";
+                    let formattedTime = lastTimes[pid] || utcToISTPlus1Hour(lastTimeUTC);
+
+                    const prevCount = previousCounts[pid] || 0;
+                    if (addVC > prevCount) {
+                        formattedTime = utcToISTPlus1Hour(lastTimeUTC);
+                        lastTimes[pid] = formattedTime;
+                    }
+
+                    previousCounts[pid] = addVC;
+
+                    body.innerHTML += `
+                        <tr>
+                            <td>${index++}</td>
+                            <td>${pid}</td>
+                            <td>${name}</td>
+                            <td>${category}</td>
+                            <td>${addVC}</td>
+                            <td>${formattedTime}</td>
+                        </tr>`;
+
+                    if (addVC > 0) {
+                        labels.push(name);
+                        counts.push(addVC);
+                    }
+                }
+
+                const ctx = document.getElementById('addtocartChart').getContext('2d');
+                if (addtocartChart) addtocartChart.destroy();
+                addtocartChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: "Today's Addtocart Count",
+                            data: counts,
+                            borderWidth: 2,
+                            backgroundColor: 'rgba(79,70,229,0.6)',
+                            borderColor: 'rgba(79,70,229,1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: "Count" } },
+                            x: { title: { display: true, text: "Product Name" } }
+                        }
+                    }
+                });
+
+            } catch (err) {
+                console.error("Error loading Add-to-Cart data:", err);
+                const body = document.getElementById("tableBody");
+                body.innerHTML = `<tr><td colspan="6">Error loading data</td></tr>`;
+            }
+        }
+
+        loadAddtocartTableAndChart();
+        setInterval(loadAddtocartTableAndChart, 5000);
+
+        const today = new Date();
+        document.getElementById("currentDate").textContent = today.toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    </script>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="footer">
+        © 2026 Product Dashboard | All Rights Reserved
+    </footer>
+</body>
+
+</html>
