@@ -4,3 +4,4 @@ mysql-connector-python
 razorpay
 openpyxl
 Werkzeug
+Flask-Mail
