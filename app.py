@@ -2,6 +2,7 @@ print("🔥 app.py LOADED FROM:", __file__)
 
 import os
 import razorpay
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask import (
     Flask, render_template, request, jsonify,
     redirect, url_for, session, send_from_directory,
@@ -71,6 +72,8 @@ def get_db_connection():
         database="project",
         autocommit=True
     )
+    
+ 
 # =====================================================
 # 🔥 VC XML (Add from VC = Today's Addtocart Count)
 # =====================================================
