@@ -66,14 +66,13 @@ print("🔥 Flask looking for templates in:", app.template_folder)
 # ---------------- DATABASE CONNECTION ----------------
 def get_db_connection():
     return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="root006",
-        database="project",
+        host=os.getenv("MYSQLHOST"),
+        user=os.getenv("MYSQLUSER"),
+        password=os.getenv("MYSQLPASSWORD"),
+        database=os.getenv("MYSQLDATABASE"),
+        port=int(os.getenv("MYSQLPORT")),
         autocommit=True
     )
-    
- 
 # =====================================================
 # 🔥 VC XML (Add from VC = Today's Addtocart Count)
 # =====================================================
