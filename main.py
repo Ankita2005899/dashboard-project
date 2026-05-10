@@ -2329,6 +2329,173 @@ def test_db():
         return jsonify({"error": str(e)})
 
 
+#---------------------deployment of project------------------------------------------------
+
+@app.route("/create-tables")
+def create_tables_route():
+    try:
+        db = get_db_connection()
+        cursor = db.cursor()
+        
+        cursor.execute("""CREATE TABLE IF NOT EXISTS user (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(255),
+            email VARCHAR(255) UNIQUE,
+            password VARCHAR(255)
+        )""")
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS user_activity (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(255),
+            email VARCHAR(255),
+            password VARCHAR(255),
+            mode VARCHAR(50),
+            action_date DATE,
+            action_time TIME
+        )""")
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS strong_password (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            password VARCHAR(255),
+            is_used TINYINT DEFAULT 0
+        )""")
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS card (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255),
+            image VARCHAR(255),
+            video VARCHAR(255),
+            availability INT,
+            price DECIMAL(10,2),
+            detail TEXT,
+            uploaded_at DATE,
+            address VARCHAR(255),
+            material VARCHAR(255),
+            category VARCHAR(100),
+            searched_count INT DEFAULT 0,
+            last_searched_time DATETIME,
+            last_addtocart_time DATETIME,
+            last_addtocart_count INT DEFAULT 0,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )""")
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS study_material (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255),
+            image VARCHAR(255),
+            video VARCHAR(255),
+            availability INT,
+            price DECIMAL(10,2),
+            detail TEXT,
+            uploaded_at DATE,
+            address VARCHAR(255),
+            material VARCHAR(255),
+            category VARCHAR(100),
+            searched_count INT DEFAULT 0,
+            last_searched_time DATETIME,
+            last_addtocart_time DATETIME,
+            last_addtocart_count INT DEFAULT 0
+        )""")
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS food_items (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255),
+            image VARCHAR(255),
+            video VARCHAR(255),
+            availability INT,
+            price DECIMAL(10,2),
+            detail TEXT,
+            uploaded_at DATE,
+            address VARCHAR(255),
+            material VARCHAR(255),
+            category VARCHAR(100),
+            searched_count INT DEFAULT 0,
+            last_searched_time DATETIME,
+            last_addtocart_time DATETIME,
+            last_addtocart_count INT DEFAULT 0
+        )""")
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS product_availability (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            dash_item_name VARCHAR(255),
+            actual_availability INT,
+            removed INT DEFAULT 0,
+            product_id INT,
+            category VARCHAR(100),
+            available INT,
+            sub_vc INT DEFAULT 0,
+            total_dash INT,
+            remain_in_dash INT
+        )""")
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS product_availability_sql (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            product_id INT UNIQUE,
+            name VARCHAR(255),
+            category VARCHAR(100),
+            cart_availability INT
+        )""")
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS store_data (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT,
+            product_id INT,
+            category VARCHAR(100),
+            name VARCHAR(255),
+            price DECIMAL(10,2),
+            availability INT,
+            detail TEXT,
+            address VARCHAR(255),
+            purchased_by VARCHAR(255),
+            uploaded_at DATETIME,
+            image VARCHAR(255),
+            video VARCHAR(255),
+            quantity INT DEFAULT 1,
+            date DATETIME DEFAULT CURRENT_TIMESTAMP
+        )""")
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS cart_summary (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT,
+            purchased_by VARCHAR(255),
+            total DECIMAL(10,2),
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )""")
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS save_detail (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255),
+            age INT,
+            phone1 VARCHAR(20),
+            phone2 VARCHAR(20),
+            address1 VARCHAR(255),
+            address2 VARCHAR(255),
+            email VARCHAR(255),
+            profile_image VARCHAR(255)
+        )""")
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS search_logs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT,
+            product_id INT,
+            category VARCHAR(100),
+            search_time DATETIME
+        )""")
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS support_sd (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(255),
+            email VARCHAR(255)
+        )""")
+
+        db.commit()
+        cursor.close()
+        db.close()
+        return "✅ All tables created successfully!"
+
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
+
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
