@@ -2495,7 +2495,32 @@ def create_tables_route():
 
     except Exception as e:
         return f"❌ Error: {str(e)}"
-
+#-------------backup database-----------------
+@app.route("/import-backup")
+def import_backup():
+    try:
+        import os
+        db = get_db_connection()
+        cursor = db.cursor()
+        
+        with open("backup.sql", "r", encoding="utf-8") as f:
+            sql = f.read()
+        
+        for statement in sql.split(";"):
+            statement = statement.strip()
+            if statement:
+                try:
+                    cursor.execute(statement)
+                except Exception as e:
+                    print(f"Skipping: {e}")
+        
+        db.commit()
+        cursor.close()
+        db.close()
+        return "✅ Backup imported successfully!"
+    
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
