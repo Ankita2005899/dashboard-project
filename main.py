@@ -765,20 +765,8 @@ def buynow():
 def send_owner_otp():
     otp = random.randint(100000000, 999999999)
     session["owner_otp"] = str(otp)
-
-    try:
-        msg = Message(
-            "Owner Login OTP",
-            sender=app.config['MAIL_USERNAME'],
-            recipients=[OWNER_EMAIL]
-        )
-        msg.body = f"Your Owner Login OTP is: {otp}"
-        mail.send(msg)
-        print("✅ OTP sent successfully:", otp)
-        return jsonify({"success": True})
-    except Exception as e:
-        print("❌ Error sending OTP:", e)
-        return jsonify({"success": False, "error": str(e)})
+    print(f"🔑 OWNER OTP: {otp}")
+    return jsonify({"success": True})
 
 
 @app.route("/verify-owner-otp", methods=["POST"])
