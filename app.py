@@ -114,10 +114,10 @@ def ensure_user_table(username, user_id):
             video VARCHAR(255),
             availability INT,
             detail TEXT,
-            uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            uploaded_at DATETIME NULL DEFAULT NULL,
             address VARCHAR(255),
             quantity INT DEFAULT 1,
-            date DATETIME DEFAULT CURRENT_TIMESTAMP,
+            date DATETIME NULL DEFAULT NULL,
             total DECIMAL(10,2),
             mode VARCHAR(20),
             sub_vc_item INT DEFAULT 0
