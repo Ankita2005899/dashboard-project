@@ -5,3 +5,4 @@ razorpay
 openpyxl
 Werkzeug
 Flask-Mail
+python-dotenv
