@@ -7,6 +7,8 @@ import random
 import time
 import re
 import xml.etree.ElementTree as ET
+# otp section sathi threading has been import 
+import threading
 
 import razorpay
 import mysql.connector
@@ -763,25 +765,31 @@ def buynow():
 # ============================================================
 # ROUTES — OWNER OTP
 # ============================================================
+
 @app.route("/send-owner-otp")
 def send_owner_otp():
     otp = random.randint(100000000, 999999999)
     session["owner_otp"] = str(otp)
     print(f"🔑 OWNER OTP: {otp}")
     
-    try:
-        msg = Message(
-            "Owner Login OTP",
-            sender=app.config['MAIL_USERNAME'],
-            recipients=[OWNER_EMAIL]
-        )
-        msg.body = f"Your Owner Login OTP is: {otp}"
-        mail.send(msg)
-        print("✅ OTP sent successfully to email")
-        return jsonify({"success": True})
-    except Exception as e:
-        print("❌ Error sending OTP:", e)
-        return jsonify({"success": False, "error": str(e)})
+    def send_email():
+        try:
+            with app.app_context():
+                msg = Message(
+                    "Owner Login OTP",
+                    sender=app.config['MAIL_USERNAME'],
+                    recipients=[OWNER_EMAIL]
+                )
+                msg.body = f"Your Owner Login OTP is: {otp}"
+                mail.send(msg)
+                print("✅ OTP sent successfully")
+        except Exception as e:
+            print("❌ Email error:", e)
+    
+    thread = threading.Thread(target=send_email)
+    thread.start()
+    
+    return jsonify({"success": True})
 
 
 @app.route("/verify-owner-otp", methods=["POST"])
