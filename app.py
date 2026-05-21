@@ -51,7 +51,7 @@ app.config['MAIL_DEFAULT_SENDER'] = 'ankitabandal45@gmail.com'
 
 mail = Mail(app)
 
-OWNER_EMAIL = app.config['MAIL_USERNAME']
+OWNER_EMAIL = app.config['ankitabandal45@gmail.com']
 
 # Excel file path
 EXCEL_FILE = "User_Profile_Data.xlsx"
