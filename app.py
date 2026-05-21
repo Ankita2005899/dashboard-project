@@ -42,7 +42,7 @@ app.secret_key = "secret123"
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USERNAME'] = 'ankitabandal45@gmail.com'
-app.config['MAIL_PASSWORD'] = 'ucat irvs zxyp lypu'
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD', 'fafaayfwchgfeevu')
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 
@@ -768,7 +768,20 @@ def send_owner_otp():
     otp = random.randint(100000000, 999999999)
     session["owner_otp"] = str(otp)
     print(f"🔑 OWNER OTP: {otp}")
-    return jsonify({"success": True})
+    
+    try:
+        msg = Message(
+            "Owner Login OTP",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[OWNER_EMAIL]
+        )
+        msg.body = f"Your Owner Login OTP is: {otp}"
+        mail.send(msg)
+        print("✅ OTP sent successfully to email")
+        return jsonify({"success": True})
+    except Exception as e:
+        print("❌ Error sending OTP:", e)
+        return jsonify({"success": False, "error": str(e)})
 
 
 @app.route("/verify-owner-otp", methods=["POST"])
