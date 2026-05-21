@@ -42,11 +42,12 @@ app.secret_key = "secret123"
 
 # ================= EMAIL CONFIGURATION =================
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USERNAME'] = 'ankitabandal45@gmail.com'
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD', 'fafaayfwchgfeevu')
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_DEFAULT_SENDER'] = 'ankitabandal45@gmail.com'
 
 mail = Mail(app)
 
