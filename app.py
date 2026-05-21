@@ -23,8 +23,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font
 from dotenv import load_dotenv
 
-load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "databasehandler.env"))
-
+load_dotenv()
 # ---- DEFINE PATHS ----
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
