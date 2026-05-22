@@ -9,7 +9,9 @@ import re
 import xml.etree.ElementTree as ET
 # otp section sathi threading has been import 
 import threading
-
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import razorpay
 import mysql.connector
 
@@ -18,7 +20,6 @@ from flask import (
     redirect, url_for, session, send_from_directory,
     Response, render_template_string, flash
 )
-from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from openpyxl import Workbook, load_workbook
@@ -41,15 +42,7 @@ app = Flask(__name__, template_folder=TEMPLATE_DIR)
 app.secret_key = "secret123"
 
 # ================= EMAIL CONFIGURATION =================
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'ankitabandal45@gmail.com'
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD', 'eplorronxoysxury')
-app.config['MAIL_DEFAULT_SENDER'] = 'ankitabandal45@gmail.com'
 
-mail = Mail(app)
 
 OWNER_EMAIL = 'ankitabandal45@gmail.com'
 
@@ -773,22 +766,22 @@ def send_owner_otp():
     session["owner_otp"] = str(otp)
     print(f"🔑 OWNER OTP: {otp}")
     
-    def send_email():
-        try:
-            with app.app_context():
-                msg = Message(
-                    "Owner Login OTP",
-                    sender=app.config['MAIL_USERNAME'],
-                    recipients=[OWNER_EMAIL]
-                )
-                msg.body = f"Your Owner Login OTP is: {otp}"
-                mail.send(msg)
-                print("✅ OTP sent successfully")
-        except Exception as e:
-            print("❌ Email error:", e)
-    
-    thread = threading.Thread(target=send_email)
-    thread.start()
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = 'ankitabandal45@gmail.com'
+        msg['To'] = OWNER_EMAIL
+        msg['Subject'] = 'Owner Login OTP'
+        msg.attach(MIMEText(f'Your Owner Login OTP is: {otp}', 'plain'))
+        
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login('ankitabandal45@gmail.com', 
+                     os.getenv('MAIL_PASSWORD', 'eplorronxoysxury'))
+        server.sendmail('ankitabandal45@gmail.com', OWNER_EMAIL, msg.as_string())
+        server.quit()
+        print("✅ OTP sent successfully")
+    except Exception as e:
+        print("❌ Email error:", e)
     
     return jsonify({"success": True})
 
