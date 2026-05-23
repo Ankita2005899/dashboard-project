@@ -6,3 +6,4 @@ openpyxl
 Werkzeug
 Flask-Mail
 python-dotenv
+Flask-Mail
