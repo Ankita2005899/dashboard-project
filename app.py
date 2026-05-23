@@ -45,7 +45,7 @@ app.secret_key = "secret123"
 
 
 # Change this temporarily to test
-OWNER_EMAIL = 'bandalsanket24@gmail.com'  # use any other email you have access to
+OWNER_EMAIL = 'bandalankita45@gmail.com'  # use any other email you have access to
 
 # Excel file path
 EXCEL_FILE = "User_Profile_Data.xlsx"
