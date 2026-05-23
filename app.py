@@ -759,7 +759,6 @@ def buynow():
 # ============================================================
 # ROUTES — OWNER OTP
 # ============================================================
-
 @app.route("/send-owner-otp")
 def send_owner_otp():
     otp = random.randint(100000000, 999999999)
@@ -767,23 +766,33 @@ def send_owner_otp():
     print(f"🔑 OWNER OTP: {otp}")
     
     try:
-        msg = MIMEMultipart()
-        msg['From'] = 'ankitabandal45@gmail.com'
-        msg['To'] = OWNER_EMAIL
-        msg['Subject'] = 'Owner Login OTP'
-        msg.attach(MIMEText(f'Your Owner Login OTP is: {otp}', 'plain'))
+        import urllib.request
+        import json
         
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login('ankitabandal45@gmail.com', 
-                     os.getenv('MAIL_PASSWORD', 'eplorronxoysxury'))
-        server.sendmail('ankitabandal45@gmail.com', OWNER_EMAIL, msg.as_string())
-        server.quit()
+        payload = json.dumps({
+            "personalizations": [{"to": [{"email": OWNER_EMAIL}]}],
+            "from": {"email": "ankitabandal45@gmail.com"},
+            "subject": "Owner Login OTP",
+            "content": [{"type": "text/plain",
+                         "value": f"Your Owner Login OTP is: {otp}"}]
+        }).encode()
+        
+        req = urllib.request.Request(
+            "https://api.sendgrid.com/v3/mail/send",
+            data=payload,
+            headers={
+                "Authorization": f"Bearer {os.getenv('SENDGRID_API_KEY')}",
+                "Content-Type": "application/json"
+            }
+        )
+        urllib.request.urlopen(req)
         print("✅ OTP sent successfully")
     except Exception as e:
         print("❌ Email error:", e)
     
     return jsonify({"success": True})
+
+
 
 
 @app.route("/verify-owner-otp", methods=["POST"])
