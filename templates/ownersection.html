@@ -74,19 +74,27 @@ button{
 </div>
 
 <script>
+
 function sendOTP(){
+    // First wake up the server
     fetch("/send-owner-otp")
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) throw new Error("Server error");
+        return res.json();
+    })
     .then(data => {
         if(data.success){
-            // show alert popup
             alert("✅ OTP sent to owner email. Please check your inbox.");
         } else {
             alert("❌ Failed to send OTP. " + (data.error || ""));
         }
     })
     .catch(err => {
-        alert("❌ Error sending OTP: " + err);
+        // Server was sleeping, try again after 3 seconds
+        setTimeout(() => {
+            alert("⏳ Server was sleeping, trying again...");
+            sendOTP();
+        }, 3000);
     });
 }
 
