@@ -51,8 +51,8 @@ OWNER_EMAIL = 'ankitabandal45@gmail.com'  # use any other email you have access 
 EXCEL_FILE = "User_Profile_Data.xlsx"
 
 # Razorpay keys
-KEY_ID = "rzp_live_Ssp8TIAZMAPYBP"
-KEY_SECRET = "m3AODC3n5f7d9KDHgnE2xI5D"
+KEY_ID = os.environ.get("RAZORPAY_KEY_ID")
+KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET")
 
 client = razorpay.Client(auth=(KEY_ID, KEY_SECRET))
 
