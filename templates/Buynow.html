@@ -561,7 +561,19 @@
     </div>
 
 
-
+<!-- Scanner Popup -->
+<div class="scanner-popup" id="scannerPopup">
+    <span class="close-btn" onclick="document.getElementById('scannerPopup').style.display='none'">&times;</span>
+    <h3>📱 Scan & Pay</h3>
+    <div class="scanner-section">
+        <p>Scan this QR code with any UPI app to pay</p>
+        <div class="scanner-box">
+            <img src="/static/upi_qr.png" class="scanner-img" alt="UPI QR Code">
+        </div>
+        <p><strong>UPI ID:</strong> ankitabandal45@oksbi</p>
+        <button class="done-btn" onclick="document.getElementById('scannerPopup').style.display='none'">✅ Done - Payment Complete</button>
+    </div>
+</div>
 
     <script>
 
