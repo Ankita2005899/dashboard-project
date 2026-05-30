@@ -26,7 +26,8 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv("databasehandler.env")
+
 # ---- DEFINE PATHS ----
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
@@ -443,7 +444,12 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 # ============================================================
 # ROUTES — AUTH
 # ============================================================
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
     print("👉 ROUTE HIT:", request.path)
 

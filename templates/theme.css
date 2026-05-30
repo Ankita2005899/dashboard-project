@@ -1,0 +1,116 @@
+/* ============================================
+   THEME.CSS — Global Theme Variables
+   Controls colors for ALL pages
+   ============================================ */
+
+/* ---- LIGHT THEME (default) ---- */
+:root {
+  --bg:           #d4f4f8;
+  --card-bg:      #ffffff;
+  --text:         #1a1a2e;
+  --text-muted:   #7a8094;
+  --input-bg:     #f5f7fa;
+  --input-border: #e0e0e0;
+  --btn-bg:       #0f766e;
+  --btn-text:     #ffffff;
+  --link:         #0f766e;
+  --footer-bg:    linear-gradient(90deg, #111827, #1f2937, #0f766e);
+  --footer-text:  #ffffff;
+  --error:        #e05260;
+  --success:      #22c55e;
+  --border:       #eaecf0;
+  --shadow:       0 4px 24px rgba(0,0,0,0.08);
+  --teal:         #4FC3C8;
+  --teal-dark:    #2AABB0;
+}
+
+/* ---- DARK THEME ---- */
+[data-theme="dark"] {
+  --bg:           #07090d;
+  --card-bg:      #111827;
+  --text:         #f1f5f9;
+  --text-muted:   #94a3b8;
+  --input-bg:     #1e293b;
+  --input-border: #334155;
+  --btn-bg:       #4FC3C8;
+  --btn-text:     #ffffff;
+  --link:         #4FC3C8;
+  --footer-bg:    linear-gradient(90deg, #020617, #0f172a, #134e4a);
+  --footer-text:  #cbd5e1;
+  --error:        #f87171;
+  --success:      #4ade80;
+  --border:       #1e293b;
+  --shadow:       0 4px 24px rgba(0,0,0,0.4);
+  --teal:         #4FC3C8;
+  --teal-dark:    #2AABB0;
+}
+
+/* ============================================
+   GLOBAL STYLES using variables
+   ============================================ */
+body {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.box, .card, .login-box {
+  background: var(--card-bg) !important;
+  color: var(--text) !important;
+  box-shadow: var(--shadow) !important;
+  transition: background 0.3s ease;
+}
+
+input, textarea, select {
+  background: var(--input-bg) !important;
+  color: var(--text) !important;
+  border-color: var(--input-border) !important;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+button[type="submit"], .main-btn, .btn {
+  background: var(--btn-bg) !important;
+  color: var(--btn-text) !important;
+  transition: background 0.3s ease;
+}
+
+a { color: var(--link) !important; }
+
+.footer {
+  background: var(--footer-bg) !important;
+  color: var(--footer-text) !important;
+}
+
+.error { color: var(--error) !important; }
+
+/* ============================================
+   TOGGLE BUTTON STYLE
+   ============================================ */
+#themeToggle {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 9999;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 50px;
+  padding: 7px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: Arial, sans-serif;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+}
+
+#themeToggle:hover {
+  box-shadow: 0 6px 20px rgba(79,195,200,0.25);
+  border-color: var(--teal);
+}
