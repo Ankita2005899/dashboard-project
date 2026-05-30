@@ -2,8 +2,44 @@
 <html>
 <head>
     <title>Terms & Conditions</title>
+    <style>
+/* ================= THEME SYNC (matches index.html toggle) ================= */
+:root {
+    --th-body-bg:   #d4f4f8;
+    --th-text:      #111827;
+    --th-grid-lines:rgba(0,0,0,0.06);
+}
+
+[data-theme="dark"] {
+    --th-body-bg:   #0a0a0f;
+    --th-text:      #f0eee8;
+    --th-grid-lines:rgba(255,255,255,0.04);
+}
+
+body {
+    font-family: "Segoe UI", sans-serif;
+    background-color: var(--th-body-bg);
+    background-image:
+        linear-gradient(var(--th-grid-lines) 1px, transparent 1px),
+        linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px);
+    background-size: 60px 60px;
+    color: var(--th-text);
+    padding: 40px;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+}
+
+h1 { color: var(--th-text); }
+    </style>
 </head>
 <body>
+<!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
+<script>
+  (function(){
+    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
     <h1>Terms & Conditions</h1>
 
     <p>By using this website, you agree to the following terms:</p>

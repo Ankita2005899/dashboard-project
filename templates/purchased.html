@@ -112,10 +112,65 @@ th{ background:#facc15; color:white; }
     padding-top:100px;
 }
 
+/* ================= THEME SYNC (matches index.html toggle) ================= */
+:root {
+    --th-body-bg:     #d4f4f8;
+    --th-header-bg:   linear-gradient(135deg,#e0f2fe,#f0fdfa);
+    --th-border:      #cbd5e1;
+    --th-header-text: #1e293b;
+    --th-btn-bg:      white;
+    --th-btn-color:   #1e293b;
+    --th-text:        #111827;
+    --th-table-bg:    white;
+    --th-th-bg:       #facc15;
+    --th-td-border:   #ddd;
+    --th-progress-bg: #f1f3f6;
+    --th-grid-lines:  rgba(0,0,0,0.06);
+}
 
+[data-theme="dark"] {
+    --th-body-bg:     #0a0a0f;
+    --th-header-bg:   linear-gradient(135deg,#12121a,#1a1a26);
+    --th-border:      rgba(255,255,255,0.12);
+    --th-header-text: #f0eee8;
+    --th-btn-bg:      #1a1a26;
+    --th-btn-color:   #f0eee8;
+    --th-text:        #f0eee8;
+    --th-table-bg:    #12121a;
+    --th-th-bg:       #78350f;
+    --th-td-border:   rgba(255,255,255,0.08);
+    --th-progress-bg: #1e1e2e;
+    --th-grid-lines:  rgba(255,255,255,0.04);
+}
+
+body {
+    background-color: var(--th-body-bg) !important;
+    background-image:
+        linear-gradient(var(--th-grid-lines) 1px, transparent 1px),
+        linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important;
+    background-size: 60px 60px !important;
+    color: var(--th-text) !important;
+    transition: background 0.3s, color 0.3s;
+}
+.header { background: var(--th-header-bg) !important; border-bottom-color: var(--th-border) !important; transition: background 0.3s; }
+.header-left h2 { color: var(--th-header-text) !important; }
+.header-btn { background: var(--th-btn-bg) !important; color: var(--th-btn-color) !important; border-color: var(--th-border) !important; transition: background 0.3s, color 0.3s; }
+h1 { color: var(--th-text) !important; }
+table { background: var(--th-table-bg) !important; }
+th { background: var(--th-th-bg) !important; }
+td { border-bottom-color: var(--th-td-border) !important; color: var(--th-text) !important; }
+[data-theme="dark"] tr:hover { background: #1a1a2e !important; }
+.progress-wrapper { background: var(--th-progress-bg) !important; }
 </style>
 </head>
 <body>
+<!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
+<script>
+  (function(){
+    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 
     <!-- ================= HEADER ================= -->
 <header class="header">
