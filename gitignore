@@ -31,3 +31,5 @@ copy
 # OS files
 .DS_Store
 Thumbs.db
+.env
+ca.pem
