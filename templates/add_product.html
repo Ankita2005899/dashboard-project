@@ -262,11 +262,107 @@ form button[type="submit"]:hover {
     border-color:#4f46e5;
 }
 
+/* ================= THEME SYNC (matches index.html toggle) ================= */
+/* Light mode = default (no attribute needed) */
+:root {
+    --th-body-bg:    #d4f4f8;
+    --th-header-bg:  linear-gradient(135deg,#e0f2fe,#f0fdfa);
+    --th-card-bg:    #ffffff;
+    --th-form-bg:    #ffffff;
+    --th-input-bg:   #ffffff;
+    --th-input-color:#111827;
+    --th-border:     #cbd5e1;
+    --th-text:       #1e293b;
+    --th-label:      #374151;
+    --th-title-bg:   linear-gradient(135deg,#e0e7ff,#f3f4f6);
+    --th-title-color:#4f46e5;
+    --th-upload-bg:  #ffffff;
+    --th-grid-lines: rgba(0,0,0,0.06);
+}
+
+/* Dark mode — activated when index.html toggle sets data-theme="dark" */
+[data-theme="dark"] {
+    --th-body-bg:    #0a0a0f;
+    --th-header-bg:  linear-gradient(135deg,#12121a,#1a1a26);
+    --th-card-bg:    #12121a;
+    --th-form-bg:    #12121a;
+    --th-input-bg:   #1e1e2e;
+    --th-input-color:#f0eee8;
+    --th-border:     rgba(255,255,255,0.12);
+    --th-text:       #f0eee8;
+    --th-label:      #a0a0b0;
+    --th-title-bg:   linear-gradient(135deg,#1a1a2e,#12121a);
+    --th-title-color:#FF6B2B;
+    --th-upload-bg:  #1e1e2e;
+    --th-grid-lines: rgba(255,255,255,0.04);
+}
+
+/* Apply variables to elements */
+body {
+    background-color: var(--th-body-bg) !important;
+    background-image:
+        linear-gradient(var(--th-grid-lines) 1px, transparent 1px),
+        linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important;
+    background-size: 60px 60px !important;
+    color: var(--th-text) !important;
+    transition: background 0.3s, color 0.3s;
+}
+.header {
+    background: var(--th-header-bg) !important;
+    border-bottom-color: var(--th-border) !important;
+    transition: background 0.3s;
+}
+.header-left h2 { color: var(--th-text) !important; }
+.header-btn {
+    background: var(--th-card-bg) !important;
+    color: var(--th-text) !important;
+    border-color: var(--th-border) !important;
+    transition: background 0.3s, color 0.3s;
+}
+.card {
+    background: var(--th-card-bg) !important;
+    border-color: var(--th-border) !important;
+    transition: background 0.3s;
+}
+form {
+    background: var(--th-form-bg) !important;
+    border-color: var(--th-border) !important;
+    transition: background 0.3s;
+}
+.form-title {
+    background: var(--th-title-bg) !important;
+    color: var(--th-title-color) !important;
+    border-bottom-color: var(--th-border) !important;
+    transition: background 0.3s, color 0.3s;
+}
+.upload-box {
+    background: var(--th-upload-bg) !important;
+    border-color: var(--th-border) !important;
+    transition: background 0.3s;
+}
+.form-control, .form-check-input {
+    background-color: var(--th-input-bg) !important;
+    color: var(--th-input-color) !important;
+    border-color: var(--th-border) !important;
+    transition: background 0.3s, color 0.3s;
+}
+.form-label, .form-check-label, label {
+    color: var(--th-label) !important;
+}
+[data-theme="dark"] .form-control::placeholder { color: #4a4a6a; }
+[data-theme="dark"] .sub-title { color: #FF6B2B !important; }
 
     </style>
 </head>
 
 <body>
+<!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
+<script>
+  (function(){
+    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 <!-- ================= HEADER ================= -->
 <header class="header">
 
