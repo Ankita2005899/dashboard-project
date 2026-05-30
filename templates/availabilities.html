@@ -2,9 +2,78 @@
 <html>
 <head>
     <title>Product Availabilities</title>
+    <style>
+/* ================= THEME SYNC (matches index.html toggle) ================= */
+:root {
+    --th-body-bg:   #d4f4f8;
+    --th-text:      #111827;
+    --th-table-bg:  #ffffff;
+    --th-th-bg:     #4f46e5;
+    --th-th-color:  #ffffff;
+    --th-td-border: #cbd5e1;
+    --th-tr-hover:  #f1f5ff;
+    --th-grid-lines:rgba(0,0,0,0.06);
+}
+
+[data-theme="dark"] {
+    --th-body-bg:   #0a0a0f;
+    --th-text:      #f0eee8;
+    --th-table-bg:  #12121a;
+    --th-th-bg:     #1e1e3a;
+    --th-th-color:  #f0eee8;
+    --th-td-border: rgba(255,255,255,0.08);
+    --th-tr-hover:  #1a1a2e;
+    --th-grid-lines:rgba(255,255,255,0.04);
+}
+
+body {
+    font-family: "Segoe UI", sans-serif;
+    background-color: var(--th-body-bg);
+    background-image:
+        linear-gradient(var(--th-grid-lines) 1px, transparent 1px),
+        linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px);
+    background-size: 60px 60px;
+    color: var(--th-text);
+    padding: 30px;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+}
+
+h1 { color: var(--th-text); margin-bottom: 20px; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--th-table-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid var(--th-td-border);
+    text-align: center;
+    color: var(--th-text);
+}
+
+th {
+    background: var(--th-th-bg);
+    color: var(--th-th-color);
+}
+
+tr:hover { background: var(--th-tr-hover); }
+    </style>
 </head>
 
 <body>
+<!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
+<script>
+  (function(){
+    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 
 
 

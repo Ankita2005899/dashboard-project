@@ -759,14 +759,60 @@ body{
     </style>
 
     <style>
-  [data-theme="light"] {
-    background: #D5F5F5 !important;
-    color: #1A1A26 !important;
-  }
-  [data-theme="dark"] {
-    background: #0A0A0F !important;
-    color: #F0EEE8 !important;
-  }
+/* ================= THEME SYNC (matches index.html toggle) ================= */
+:root {
+    --th-body-bg:      linear-gradient(135deg,#072a4d,#08293f,#f0fdfa);
+    --th-main-bg:      #d4f4f8;
+    --th-header-bg:    linear-gradient(135deg,#e0f2fe,#f0fdfa);
+    --th-sidebar-bg:   linear-gradient(180deg,#a8bcee,#bcc2c3,#81f5e8);
+    --th-border:       #cbd5e1;
+    --th-text:         #1e293b;
+    --th-card-bg:      #ffffff;
+    --th-cart-bg:      #ffffff;
+    --th-modal-bg:     #ffffff;
+    --th-btn-bg:       rgba(255,255,255,0.9);
+    --th-btn-color:    #1e293b;
+    --th-input-bg:     #ffffff;
+    --th-input-color:  #1e293b;
+    --th-section-title:#1e293b;
+    --th-grid-lines:   rgba(0,0,0,0.06);
+}
+
+[data-theme="dark"] {
+    --th-body-bg:      #0a0a0f;
+    --th-main-bg:      #0a0a0f;
+    --th-header-bg:    linear-gradient(135deg,#12121a,#1a1a26);
+    --th-sidebar-bg:   linear-gradient(180deg,#12121a,#1a1a26,#0f1f1a);
+    --th-border:       rgba(255,255,255,0.12);
+    --th-text:         #f0eee8;
+    --th-card-bg:      #12121a;
+    --th-cart-bg:      #1a1a26;
+    --th-modal-bg:     #12121a;
+    --th-btn-bg:       rgba(255,255,255,0.06);
+    --th-btn-color:    #f0eee8;
+    --th-input-bg:     #1e1e2e;
+    --th-input-color:  #f0eee8;
+    --th-section-title:#f0eee8;
+    --th-grid-lines:   rgba(255,255,255,0.04);
+}
+
+body { background: var(--th-body-bg) !important; color: var(--th-text) !important; transition: background 0.3s, color 0.3s; }
+.header { background: var(--th-header-bg) !important; border-bottom-color: var(--th-border) !important; transition: background 0.3s; }
+.header h1 { color: var(--th-text) !important; }
+.sidebar { background: var(--th-sidebar-bg) !important; transition: background 0.3s; }
+.sidebar button { background: var(--th-btn-bg) !important; color: var(--th-btn-color) !important; border-color: var(--th-border) !important; transition: background 0.3s, color 0.3s; }
+.main { background: var(--th-main-bg) !important; background-image: linear-gradient(var(--th-grid-lines) 1px, transparent 1px), linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important; background-size: 60px 60px !important; transition: background 0.3s; }
+.card { background: var(--th-card-bg) !important; border-color: var(--th-border) !important; color: var(--th-text) !important; transition: background 0.3s; }
+.card h3, .card p, .card h4 { color: var(--th-text) !important; }
+.cart { background: var(--th-cart-bg) !important; border-color: var(--th-border) !important; color: var(--th-text) !important; transition: background 0.3s; }
+.modal-content { background: var(--th-modal-bg) !important; border-color: var(--th-border) !important; color: var(--th-text) !important; transition: background 0.3s; }
+.section-title { color: var(--th-section-title) !important; }
+.search-wrapper input { background: var(--th-input-bg) !important; color: var(--th-input-color) !important; border-color: var(--th-border) !important; }
+.header-right .sidebar-btn, .header-right .owner-btn { background: var(--th-btn-bg) !important; color: var(--th-btn-color) !important; border-color: var(--th-border) !important; transition: background 0.3s, color 0.3s; }
+[data-theme="dark"] .search-wrapper input::placeholder { color: #4a4a6a; }
+[data-theme="dark"] .close-btn { color: var(--th-text) !important; border-color: var(--th-border) !important; }
+[data-theme="dark"] .modal-right hr { border-top-color: rgba(255,255,255,0.08) !important; }
+[data-theme="dark"] .card-actions button:disabled { background: #1e1e2e !important; color: #6a6a7a !important; border-color: rgba(255,255,255,0.08) !important; }
 </style>
 
 </head>

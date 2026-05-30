@@ -169,11 +169,53 @@
     padding-top:100px;
 }
 
-    </style>
+/* ================= THEME SYNC (matches index.html toggle) ================= */
+:root {
+    --th-body-bg:      linear-gradient(135deg,#072a4d,#08293f,#f0fdfa);
+    --th-content-bg:   #d4f4f8;
+    --th-header-bg:    linear-gradient(135deg,#e0f2fe,#f0fdfa);
+    --th-sidebar-bg:   linear-gradient(180deg,#a8bcee,#bcc2c3,#81f5e8);
+    --th-border:       #cbd5e1;
+    --th-header-text:  #1e293b;
+    --th-btn-bg:       rgba(255,255,255,0.9);
+    --th-btn-color:    #1e293b;
+    --th-hdr-btn-bg:   white;
+    --th-hdr-btn-color:#1e293b;
+    --th-grid-lines:   rgba(0,0,0,0.06);
+}
+
+[data-theme="dark"] {
+    --th-body-bg:      #0a0a0f;
+    --th-content-bg:   #0a0a0f;
+    --th-header-bg:    linear-gradient(135deg,#12121a,#1a1a26);
+    --th-sidebar-bg:   linear-gradient(180deg,#12121a,#1a1a26,#0f1f1a);
+    --th-border:       rgba(255,255,255,0.12);
+    --th-header-text:  #f0eee8;
+    --th-btn-bg:       rgba(255,255,255,0.06);
+    --th-btn-color:    #f0eee8;
+    --th-hdr-btn-bg:   #1a1a26;
+    --th-hdr-btn-color:#f0eee8;
+    --th-grid-lines:   rgba(255,255,255,0.04);
+}
+
+body { background: var(--th-body-bg) !important; transition: background 0.3s; }
+.header { background: var(--th-header-bg) !important; border-bottom-color: var(--th-border) !important; transition: background 0.3s; }
+.header-left h2 { color: var(--th-header-text) !important; }
+.header-btn { background: var(--th-hdr-btn-bg) !important; color: var(--th-hdr-btn-color) !important; border-color: var(--th-border) !important; transition: background 0.3s, color 0.3s; }
+.sidebar { background: var(--th-sidebar-bg) !important; transition: background 0.3s; }
+.sidebar button { background: var(--th-btn-bg) !important; color: var(--th-btn-color) !important; border-color: var(--th-border) !important; transition: background 0.3s, color 0.3s; }
+.content { background: var(--th-content-bg) !important; background-image: linear-gradient(var(--th-grid-lines) 1px, transparent 1px), linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important; background-size: 60px 60px !important; transition: background 0.3s; }
+</style>
 </head>
 
 <body>
-
+<!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
+<script>
+  (function(){
+    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 
        <header class="header">
 
