@@ -28,23 +28,31 @@
     --subtitle-color: #6b7280;
     --signup-color: #6b7280;
     --brand-color: #1a1a2e;
+    --placeholder-color: #9ca3af;
+    --grid-bg: linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+    --grid-size: 60px 60px;
 }
 
 /* ── DARK MODE ── */
 [data-theme="dark"] {
     --body-bg: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #0f0f1a 100%);
     --card-bg: #12121a;
-    --input-bg: #1a1a26;
+    --input-bg: #1e1e2e;
     --input-color: #f0eee8;
-    --border: rgba(255,255,255,0.1);
+    --border: rgba(255,255,255,0.15);
     --label-color: #a0a0b0;
     --heading-color: #f0eee8;
     --subtitle-color: #6a6a7a;
     --signup-color: #6a6a7a;
     --brand-color: #f0eee8;
     --muted: #6a6a7a;
-    --surface: #1a1a26;
+    --surface: #1e1e2e;
     --dark: #f0eee8;
+    --placeholder-color: #4a4a6a;
+    --grid-bg: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    --grid-size: 60px 60px;
 }
 
 body {
@@ -54,9 +62,26 @@ body {
     align-items: center;
     justify-content: center;
     background: var(--body-bg);
+    background-image: var(--body-bg), var(--grid-bg);
     padding: 20px 20px 80px;
     overflow-x: hidden;
     transition: background 0.3s;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--grid-bg);
+    background-size: var(--grid-size);
+    pointer-events: none;
+}
+
+.box {
+    position: relative;
+    z-index: 1;
 }
 
 /* ── CARD ── */
@@ -86,6 +111,8 @@ body {
     display: flex;
     flex-direction: column;
     padding: 52px 44px 44px;
+    background: var(--card-bg);
+    transition: background 0.3s;
     animation: fadeUp 0.8s 0.15s cubic-bezier(.22,1,.36,1) both;
 }
 
@@ -196,11 +223,13 @@ input {
 input:focus {
     border-color: var(--orange);
     box-shadow: 0 0 0 3px rgba(255,107,43,0.12);
-    background: #fff;
+    background: var(--input-bg);
 }
 input:focus ~ .focus-bar { transform: scaleX(1); }
 .input-wrap:focus-within .icon { color: var(--orange); }
-input::placeholder { color: #9ca3af; }
+input::placeholder { color: var(--placeholder-color); }
+
+[data-theme="dark"] input::placeholder { color: #4a4a5a; }
 
 .focus-bar {
     height: 2px;
