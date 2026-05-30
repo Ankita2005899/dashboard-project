@@ -4,11 +4,91 @@
 <meta charset="UTF-8">
 <title>Owner Dashboard</title>
 <style>
+/* ===== THEME VARIABLES ===== */
+:root {
+  /* Light mode (default) — matches existing design */
+  --page-bg:        #d4f4f8;
+  --sidebar-bg:     linear-gradient(180deg,#a8bcee,#bcc2c3,#81f5e8);
+  --header-bg:      linear-gradient(135deg,#e0f2fe,#f0fdfa);
+  --header-border:  #1e293b;
+  --card-bg:        #ffffff;
+  --card-text-h2:   #0f172a;
+  --card-text-h3:   #64748b;
+  --section-bg:     #ffffff;
+  --table-th-bg:    #f8fafc;
+  --modal-bg:       #ffffff;
+  --grid-bg: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+             linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+  --grid-size: 50px 50px;
+  --sidebar-btn-bg:    rgba(255,255,255,0.9);
+  --sidebar-btn-color: #1e293b;
+  --sidebar-btn-border:#cbd5e1;
+  --header-btn-bg:     #ffffff;
+  --header-btn-color:  #1e293b;
+  --search-border:     #ccc;
+  --input-bg:          #ffffff;
+  --input-color:       #1e293b;
+  --churn-card-bg:     #ffffff;
+  --reward-left-border:#e5e7eb;
+  --user-item-border:  #e5e7eb;
+  --user-item-hover:   #f8fafc;
+  --user-chart-card-bg:#f8fafc;
+  --metric-bar-bg:     #e5e7eb;
+  --graph-h3:          #0f172a;
+  --graph-p:           #64748b;
+  --churn-hr:          #e5e7eb;
+}
+
+[data-theme="dark"] {
+  --page-bg:        #0a0a0f;
+  --sidebar-bg:     linear-gradient(180deg,#1a1a2e,#16213e,#0f3460);
+  --header-bg:      linear-gradient(135deg,#0a0a0f,#12121a);
+  --header-border:  #2d2d3d;
+  --card-bg:        #12121a;
+  --card-text-h2:   #f0eee8;
+  --card-text-h3:   #8a8a9a;
+  --section-bg:     #12121a;
+  --table-th-bg:    #1a1a26;
+  --modal-bg:       #12121a;
+  --grid-bg: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+             linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  --grid-size: 50px 50px;
+  --sidebar-btn-bg:    rgba(255,255,255,0.06);
+  --sidebar-btn-color: #d0d0e0;
+  --sidebar-btn-border:rgba(255,255,255,0.12);
+  --header-btn-bg:     #1a1a26;
+  --header-btn-color:  #d0d0e0;
+  --search-border:     rgba(255,255,255,0.15);
+  --input-bg:          #1e1e2e;
+  --input-color:       #f0eee8;
+  --churn-card-bg:     #1a1a26;
+  --reward-left-border:rgba(255,255,255,0.1);
+  --user-item-border:  rgba(255,255,255,0.1);
+  --user-item-hover:   #1e1e2e;
+  --user-chart-card-bg:#1a1a26;
+  --metric-bar-bg:     #2a2a3a;
+  --graph-h3:          #f0eee8;
+  --graph-p:           #8a8a9a;
+  --churn-hr:          rgba(255,255,255,0.1);
+}
+
+/* Grid pattern overlay — same technique as login.html */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--grid-bg);
+  background-size: var(--grid-size);
+  pointer-events: none;
+}
+
 /* ===== General Styles ===== */
 body{
     font-family:"Segoe UI",sans-serif;
-    background:#d4f4f8;
+    background:var(--page-bg);
     margin:0;
+    transition:background 0.3s;
 }
 
 .container{
@@ -19,7 +99,7 @@ body{
 .sidebar{
     width:260px;
 
-    background:linear-gradient(180deg,#a8bcee,#bcc2c3,#81f5e8);
+    background:var(--sidebar-bg);
 
     padding:20px;
 
@@ -42,10 +122,10 @@ body{
 
     border-radius:10px;
 
-    border:2px solid #cbd5e1;
+    border:2px solid var(--sidebar-btn-border);
 
-    background:rgba(255,255,255,0.9);
-    color:#1e293b;
+    background:var(--sidebar-btn-bg);
+    color:var(--sidebar-btn-color);
 
     text-align:left;
     font-size:14px;
@@ -86,7 +166,7 @@ body{
     padding-bottom:90px;
     padding-left:0;   /* remove left padding */
 
-    background:#d4f4f8;
+    background:var(--page-bg);
     overflow-x:auto;
     box-sizing:border-box;
 }
@@ -161,7 +241,7 @@ body{
 
 /* Better modal sizing */
 .buyers-modal{
-    background:white;
+    background:var(--modal-bg);
     width:95%;
     max-width:1400px;
 
@@ -191,7 +271,7 @@ body{
 .modal-overlay { display:none; position: fixed; inset:0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); z-index:9999; justify-content:center; align-items:center; }
 
 /* ===== Modal Content ===== */
-.modal-content { background:white; width:400px; max-height:80vh; overflow-y:auto; border-radius:12px; position:relative; box-shadow:0 15px 40px rgba(0,0,0,0.25); transform: translateY(-50px); opacity:0; animation: popup 0.3s forwards ease-out; }
+.modal-content { background:var(--modal-bg); width:400px; max-height:80vh; overflow-y:auto; border-radius:12px; position:relative; box-shadow:0 15px 40px rgba(0,0,0,0.25); transform: translateY(-50px); opacity:0; animation: popup 0.3s forwards ease-out; }
 @keyframes popup{ from{transform:translateY(-50px); opacity:0;} to{transform:translateY(0); opacity:1;} }
 
 .modal-header { background-color: #007bff; color:white; padding:15px 20px; font-size:18px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; border-top-left-radius:12px; border-top-right-radius:12px; }
@@ -244,10 +324,10 @@ body{
     padding:8px 16px;
 
     border-radius:8px;
-    border:2px solid #cbd5e1;
+    border:2px solid var(--sidebar-btn-border);
 
-    background:white;
-    color:#1e293b;
+    background:var(--header-btn-bg);
+    color:var(--header-btn-color);
 
     text-decoration:none;
     font-weight:600;
@@ -271,9 +351,9 @@ body{
     width:100%;
     height:70px;
 
-    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+    background:var(--header-bg);
 
-    border-bottom:3px solid #1e293b;
+    border-bottom:3px solid var(--header-border);
 
     box-shadow:0 4px 10px rgba(0,0,0,0.08);
 
@@ -297,7 +377,7 @@ body{
 
 .header-left h2{
     font-weight:700;
-    color:#1e293b;
+    color:var(--card-text-h2);
 }
 
 .header-right{
@@ -326,7 +406,7 @@ body{
 }
 
 .card{
-    background:white;
+    background:var(--card-bg);
     padding:25px;
     border-radius:15px;
     box-shadow:0 8px 20px rgba(0,0,0,0.08);
@@ -359,7 +439,7 @@ body{
 
 .card h3{
     font-size:15px;
-    color:#64748b;
+    color:var(--card-text-h3);
     margin-bottom:15px;
     font-weight:600;
 }
@@ -367,7 +447,7 @@ body{
 .card h2{
     font-size:34px;
     font-weight:800;
-    color:#0f172a;
+    color:var(--card-text-h2);
     margin-bottom:12px;
 }
 
@@ -408,15 +488,17 @@ body{
 .search-box{
     width:100%;
     padding:12px;
-    border:1px solid #ccc;
+    border:1px solid var(--search-border);
     border-radius:8px;
     margin-bottom:20px;
+    background:var(--input-bg);
+    color:var(--input-color);
 }
 
 
 
 .buyers-table th{
-    background:#f8fafc;
+    background:var(--table-th-bg);
 }
 .customer-info{
     display:flex;
@@ -468,7 +550,7 @@ body{
 }
 .buyers-section{
     margin-top:40px;
-    background:white;
+    background:var(--section-bg);
     padding:20px;
     border-radius:15px;
     margin-left: 90px;
@@ -553,7 +635,7 @@ body{
 
 .churn-card hr{
     border:none;
-    border-top:1px solid #e5e7eb;
+    border-top:1px solid var(--churn-hr);
     margin:15px 0;
 }
 
@@ -576,7 +658,7 @@ body{
 
 .graph-section{
     margin:35px 0 0 90px;
-    background:white;
+    background:var(--section-bg);
     padding:25px;
     border-radius:15px;
     box-shadow:0 8px 20px rgba(0,0,0,0.08);
@@ -588,12 +670,12 @@ body{
 .graph-header h3{
     margin:0;
     font-size:22px;
-    color:#0f172a;
+    color:var(--graph-h3);
 }
 
 .graph-header p{
     margin-top:8px;
-    color:#64748b;
+    color:var(--graph-p);
     font-size:14px;
 }
 
@@ -756,7 +838,7 @@ body{
     width:95%;
     max-width:1400px;
     height:85vh;
-    background:white;
+    background:var(--modal-bg);
     border-radius:18px;
     display:flex;
     overflow:hidden;
@@ -764,7 +846,7 @@ body{
 
 .reward-left{
     width:35%;
-    border-right:1px solid #e5e7eb;
+    border-right:1px solid var(--reward-left-border);
     padding:20px;
     display:flex;
     flex-direction:column;
@@ -787,14 +869,14 @@ body{
     align-items:center;
     gap:12px;
     padding:14px;
-    border:1px solid #e5e7eb;
+    border:1px solid var(--user-item-border);
     border-radius:10px;
     margin-bottom:12px;
     cursor:pointer;
 }
 
 .reward-user-item:hover{
-    background:#f8fafc;
+    background:var(--user-item-hover);
 }
 
 .reward-user-item input{
@@ -820,10 +902,10 @@ body{
 }
 
 .user-chart-card{
-    background:#f8fafc;
+    background:var(--user-chart-card-bg);
     border-radius:14px;
     padding:20px;
-    border:1px solid #e5e7eb;
+    border:1px solid var(--user-item-border);
 }
 
 .metric{
@@ -841,7 +923,7 @@ body{
 .metric-bar{
     width:100%;
     height:10px;
-    background:#e5e7eb;
+    background:var(--metric-bar-bg);
     border-radius:10px;
     overflow:hidden;
 }
@@ -855,6 +937,13 @@ body{
 </style>
 </head>
 <body>
+
+<script>
+  (function(){
+    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 
        <header class="header">
 

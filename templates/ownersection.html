@@ -4,28 +4,75 @@
 <meta charset="UTF-8">
 <title>Owner Verification</title>
 <style>
+/* ===== THEME VARIABLES ===== */
+:root {
+    --page-bg:     #d4f4f8;
+    --card-bg:     #ffffff;
+    --card-text:   #1a1a2e;
+    --input-bg:    #ffffff;
+    --input-color: #1a1a2e;
+    --input-border:#ccc;
+    --grid-bg: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+    --grid-size: 50px 50px;
+}
+
+[data-theme="dark"] {
+    --page-bg:     #0a0a0f;
+    --card-bg:     #12121a;
+    --card-text:   #f0eee8;
+    --input-bg:    #1e1e2e;
+    --input-color: #f0eee8;
+    --input-border:rgba(255,255,255,0.15);
+    --grid-bg: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    --grid-size: 50px 50px;
+}
+
+/* Grid pattern overlay */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--grid-bg);
+    background-size: var(--grid-size);
+    pointer-events: none;
+}
+
 body{
     font-family:"Segoe UI";
-    background: #d4f4f8;
+    background: var(--page-bg);
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
+    transition: background 0.3s;
 }
 .box{
-    background:white;
+    background:var(--card-bg);
+    color:var(--card-text);
     padding:40px;
     border-radius:12px;
     width:400px;
     text-align:center;
     box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    position:relative;
+    z-index:1;
+    transition: background 0.3s, color 0.3s;
+}
+.box h2, .box p {
+    color:var(--card-text);
 }
 input{
     width:100%;
     padding:10px;
     margin-top:15px;
     border-radius:8px;
-    border:1px solid #ccc;
+    border:1px solid var(--input-border);
+    background:var(--input-bg);
+    color:var(--input-color);
+    transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
 button{
     margin-top:20px;
@@ -63,6 +110,13 @@ button{
 </style>
 </head>
 <body>
+
+<script>
+  (function(){
+    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 
 <div class="box">
 <h2>👑 Owner Verification</h2>
