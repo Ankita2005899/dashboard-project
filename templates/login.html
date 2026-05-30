@@ -67,7 +67,16 @@
         z-index: 1000;
     }
 </style>
-
+<style>
+  [data-theme="light"] {
+    background: #D5F5F5 !important;
+    color: #1A1A26 !important;
+  }
+  [data-theme="dark"] {
+    background: #0A0A0F !important;
+    color: #F0EEE8 !important;
+  }
+</style>
 <body>
 
     <div class="box">
@@ -87,6 +96,14 @@
 
         <p>Don't have an account? <a href="/signup">Signup</a></p>
     </div>
+
+    <script>
+  // Apply saved theme immediately (before page renders)
+  (function(){
+    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
     <footer class="footer">
         © 2026 Product Dashboard | All Rights Reserved
     </footer>

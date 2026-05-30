@@ -757,6 +757,18 @@ body{
     cursor: pointer;
 }
     </style>
+
+    <style>
+  [data-theme="light"] {
+    background: #D5F5F5 !important;
+    color: #1A1A26 !important;
+  }
+  [data-theme="dark"] {
+    background: #0A0A0F !important;
+    color: #F0EEE8 !important;
+  }
+</style>
+
 </head>
 
 <body>
@@ -1310,7 +1322,13 @@ searchInput.addEventListener("input", function () {
 });
 
     </script>
-
+<script>
+  // Apply saved theme immediately (before page renders)
+  (function(){
+    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 
     <!-- SUCCESS POPUP -->
 
