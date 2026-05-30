@@ -70,10 +70,11 @@ def get_db_connection():
         password=os.getenv("MYSQLPASSWORD"),
         database=os.getenv("MYSQLDATABASE"),
         port=int(os.getenv("MYSQLPORT")),
+        ssl_ca=None,
+        ssl_verify_cert=False,
+        ssl_verify_identity=False,
         autocommit=True
     )
-
-
 # ============================================================
 # PASSWORD VALIDATION
 # ============================================================
