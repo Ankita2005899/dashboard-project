@@ -6,6 +6,58 @@
     <title>My Cart</title>
 
     <style>
+        /* ===== THEME VARIABLES ===== */
+        :root {
+            --page-bg:        #d4f4f8;
+            --card-bg:        #ffffff;
+            --card-text:      #111827;
+            --muted:          #555;
+            --border:         #ddd;
+            --input-bg:       #ffffff;
+            --input-color:    #111827;
+            --header-bg:      linear-gradient(135deg,#e0f2fe,#f0fdfa);
+            --header-border:  #1e293b;
+            --header-btn-bg:  #ffffff;
+            --header-btn-clr: #1e293b;
+            --header-btn-bdr: #cbd5e1;
+            --modal-bg:       #ffffff;
+            --tr-hover:       #f1f5ff;
+            --grid-bg: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+            --grid-size: 50px 50px;
+        }
+
+        [data-theme="dark"] {
+            --page-bg:        #0a0a0f;
+            --card-bg:        #12121a;
+            --card-text:      #f0eee8;
+            --muted:          #8a8a9a;
+            --border:         rgba(255,255,255,0.1);
+            --input-bg:       #1e1e2e;
+            --input-color:    #f0eee8;
+            --header-bg:      linear-gradient(135deg,#0a0a0f,#12121a);
+            --header-border:  #2d2d3d;
+            --header-btn-bg:  #1a1a26;
+            --header-btn-clr: #d0d0e0;
+            --header-btn-bdr: rgba(255,255,255,0.12);
+            --modal-bg:       #12121a;
+            --tr-hover:       #1a1a26;
+            --grid-bg: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            --grid-size: 50px 50px;
+        }
+
+        /* Grid pattern overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image: var(--grid-bg);
+            background-size: var(--grid-size);
+            pointer-events: none;
+        }
+
         /* ================= RESET ================= */
         * {
             box-sizing: border-box;
@@ -14,7 +66,7 @@
 
         body {
             margin: 0;
-            background: #d4f4f8;
+            background: var(--page-bg);
         }
 
         /* ================= PAGE ================= */
@@ -98,7 +150,7 @@
         .card p {
             margin: 0;
             font-size: 14px;
-            color: #555;
+            color: var(--muted);
         }
 
         .card h4 {
@@ -180,7 +232,7 @@
     padding-bottom: 80px;   /* ✅ space for footer */
 }
         .modal-content {
-    background: white;
+    background: var(--modal-bg);
     width: 420px;
     border-radius: 14px;
     padding: 18px;
@@ -398,10 +450,10 @@
     padding:8px 16px;
 
     border-radius:8px;
-    border:2px solid #cbd5e1;
+    border:2px solid var(--header-btn-bdr);
 
-    background:white;
-    color:#1e293b;
+    background:var(--header-btn-bg);
+    color:var(--header-btn-clr);
 
     text-decoration:none;
     font-weight:600;
@@ -427,9 +479,9 @@
     width:100%;
     height:70px;
 
-    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+    background:var(--header-bg);
 
-    border-bottom:3px solid #1e293b;
+    border-bottom:3px solid var(--header-border);
 
     box-shadow:0 4px 10px rgba(0,0,0,0.08);
 
@@ -453,7 +505,7 @@
 
 .header-left h2{
     font-weight:700;
-    color:#1e293b;
+    color:var(--card-text);
 }
 
 .header-right{
@@ -475,6 +527,12 @@
 </head>
 
 <body>
+<script>
+  (function(){
+    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 <header class="header">
 
     <div class="header-container">
