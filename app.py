@@ -139,86 +139,8 @@ def get_db():
     return mysql.connector.connect(**config)
 
 
-# ── PAGE ROUTES ───────────────────────────────────────────────────────────────
-
-@app.route("/add-product")
-@app.route("/add-product.html")
-def add_product_page():
-    if "user_email" not in session:
-        return redirect(url_for("index"))
-    return render_template("add-product.html")
-
-@app.route("/add-product/submit", methods=["POST"])
-def add_product_submit():
-    if "user_email" not in session:
-        return redirect(url_for("index"))
-    name        = request.form.get("name")
-    price       = request.form.get("price")
-    description = request.form.get("description")
-    image_url   = request.form.get("image_url")
-    category    = request.form.get("category")
-    conn = get_db()
-    cur  = conn.cursor()
-    cur.execute("""
-        INSERT INTO products (name, price, description, image_url, category)
-        VALUES (%s, %s, %s, %s, %s)
-    """, (name, price, description, image_url, category))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return redirect(url_for("dashboard"))
-
-@app.route("/addtocard")
-@app.route("/addtocard.html")
-def addtocard():
-    if "user_email" not in session:
-        return redirect(url_for("index"))
-    conn = get_db()
-    cur  = conn.cursor(dictionary=True)
-    cur.execute("SELECT * FROM products")
-    products = cur.fetchall()
-    cur.close()
-    conn.close()
-    return render_template("addtocard.html", products=products)
 
 
-
-@app.route("/cart")
-@app.route("/Addtocard-table.html")
-def cart():
-    if "user_email" not in session:
-        return redirect(url_for("index"))
-    conn = get_db()
-    cur  = conn.cursor(dictionary=True)
-    cur.execute("""
-        SELECT p.name, p.price, p.image_url, c.quantity,
-               (p.price * c.quantity) AS total, c.id AS cart_id
-        FROM cart c
-        JOIN products p ON c.product_id = p.id
-        WHERE c.user_email = %s
-    """, (session["user_email"],))
-    items = cur.fetchall()
-    cur.close()
-    conn.close()
-    grand_total = sum(item["total"] for item in items)
-    return render_template("Addtocard-table.html", items=items, grand_total=grand_total)
-
-@app.route("/remove-from-cart/<int:cart_id>", methods=["POST"])
-def remove_from_cart(cart_id):
-    conn = get_db()
-    cur  = conn.cursor()
-    cur.execute("DELETE FROM cart WHERE id = %s", (cart_id,))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return redirect(url_for("cart"))
-
-@app.route("/view-card")
-@app.route("/view_card.html")
-def view_card():
-    if "user_email" not in session:
-        return redirect(url_for("index"))
-    return render_template("view_card.html")
 
 
 # ── Firebase Auth (Google / GitHub / Email → save to MySQL) ───────────────────
