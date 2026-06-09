@@ -141,30 +141,6 @@ def get_db():
 
 # ── PAGE ROUTES ───────────────────────────────────────────────────────────────
 
-@app.route("/")
-@app.route("/index.html")
-def index():
-    return render_template("index.html")
-
-@app.route("/login")
-@app.route("/login.html")
-def login_page():
-    return render_template("login.html")
-
-@app.route("/signup")
-@app.route("/signup.html")
-def signup():
-    return render_template("signup.html")
-
-@app.route("/dashboard")
-@app.route("/dashboard.html")
-def dashboard():
-    if "user_email" not in session:
-        return redirect(url_for("index"))
-    return render_template("dashboard.html",
-                           username=session.get("username", "User"),
-                           email=session.get("user_email"))
-
 @app.route("/add-product")
 @app.route("/add-product.html")
 def add_product_page():
