@@ -181,21 +181,7 @@ def addtocard():
     conn.close()
     return render_template("addtocard.html", products=products)
 
-@app.route("/add-to-cart/<int:product_id>", methods=["POST"])
-def add_to_cart(product_id):
-    if "user_email" not in session:
-        return jsonify({"success": False, "message": "Not logged in"}), 401
-    conn = get_db()
-    cur  = conn.cursor()
-    cur.execute("""
-        INSERT INTO cart (user_email, product_id, quantity)
-        VALUES (%s, %s, 1)
-        ON DUPLICATE KEY UPDATE quantity = quantity + 1
-    """, (session["user_email"], product_id))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return jsonify({"success": True, "message": "Added to cart!"})
+
 
 @app.route("/cart")
 @app.route("/Addtocard-table.html")
