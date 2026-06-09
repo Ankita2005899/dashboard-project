@@ -487,10 +487,15 @@ def login():
         session["username"] = user[1]
         session["user_obj_id"] = user[0]
 
+        # CORRECT — no password in log
+    try:
         cursor.execute("""
-            INSERT INTO user_activity (username, email, password, mode, action_date, action_time)
-            VALUES (%s, %s, %s, 'login', CURDATE(), CURTIME())
-        """, (user[1], email, password))
+            INSERT INTO user_activity (username, email, mode, action_date, action_time)
+            VALUES (%s, %s, 'login', CURDATE(), CURTIME())
+        """, (user[1], email))
+    except Exception as e:
+        print("Activity log error:", e)
+    
 
         db.commit()
 
@@ -505,68 +510,115 @@ def login():
 
     return render_template("login.html")
 
-
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     print("👉 ROUTE HIT:", request.path)
 
     if request.method == "POST":
-        username = request.form["username"].strip()
-        email = request.form["email"].strip()
-        password = request.form["password"].strip()
-        confirm = request.form["confirm_password"].strip()
+        username = request.form.get("username", "").strip()
+        email    = request.form.get("email", "").strip()
+        password = request.form.get("password", "").strip()
+        confirm  = request.form.get("confirm_password", "").strip()
 
+        # ---- Check 1: all fields filled ----
+        if not username or not email or not password:
+            return render_template("signup.html", error="❌ All fields are required")
+
+        # ---- Check 2: passwords match ----
         if password != confirm:
             return render_template("signup.html", error="❌ Passwords do not match")
 
-        db = get_db_connection()
+        # ---- Check 3: basic email format ----
+        if "@" not in email or "." not in email:
+            return render_template("signup.html", error="❌ Invalid email format")
+
+        db     = get_db_connection()
         cursor = db.cursor()
 
-        cursor.execute("SELECT id FROM strong_password WHERE password=%s AND is_used=0", (password,))
-        auto_pwd = cursor.fetchone()
+        try:
+            # ---- Check 4: email already exists ----
+            cursor.execute("SELECT id FROM user WHERE email=%s", (email,))
+            if cursor.fetchone():
+                cursor.close()
+                db.close()
+                return render_template("signup.html",
+                    error="This email is already registered. Try logging in.")
 
-        if not auto_pwd and not is_strong_password(password):
+            # ---- Check 5: strong password table ----
+            auto_pwd = None
+            try:
+                cursor.execute("""
+                    SELECT id FROM strong_password
+                    WHERE password=%s AND is_used=0
+                """, (password,))
+                auto_pwd = cursor.fetchone()
+            except Exception as e:
+                print("strong_password table error:", e)
+                auto_pwd = None
+
+            # ---- Check 6: password strength ----
+            if not auto_pwd and not is_strong_password(password):
+                cursor.close()
+                db.close()
+                return render_template("signup.html",
+                    error="❌ Weak password. Need 8+ chars, 1 uppercase, 1 lowercase, 1 digit, 3 special chars")
+
+            # ---- All checks passed — create user ----
+            cursor.execute("""
+                INSERT INTO user (username, email, password)
+                VALUES (%s, %s, %s)
+            """, (username, email, password))
+            user_id = cursor.lastrowid
+
+            # Create personal cart table
+            ensure_user_table(username, user_id)
+
+            # Create personal ML activity table
+            create_user_product_activity_table(username, user_id)
+
+            # Log signup — no password stored
+            try:
+                cursor.execute("""
+                    INSERT INTO user_activity
+                    (username, email, mode, action_date, action_time)
+                    VALUES (%s, %s, 'signup', CURDATE(), CURTIME())
+                """, (username, email))
+            except Exception as e:
+                print("user_activity log error:", e)
+
+            # Mark pre-approved password as used
+            if auto_pwd:
+                cursor.execute("""
+                    UPDATE strong_password SET is_used=1
+                    WHERE id=%s
+                """, (auto_pwd[0],))
+
+            db.commit()
             cursor.close()
             db.close()
-            return render_template("signup.html", error="❌ Weak password")
 
-        cursor.execute("SELECT id FROM user WHERE email=%s", (email,))
-        if cursor.fetchone():
-            cursor.close()
-            db.close()
-            return render_template("signup.html", error="❌ Email already registered")
+            # Log user in immediately
+            session.clear()
+            session["user_id"]       = user_id
+            session["user_obj_id"]   = user_id
+            session["username"]      = username
+            session["user_email"]    = email
+            session["flash_message"] = f"🎉 Welcome {username}! Account created 😊"
 
-        cursor.execute(
-            "INSERT INTO user (username, email, password) VALUES (%s,%s,%s)",
-            (username, email, password)
-        )
-        user_id = cursor.lastrowid
+            return redirect(url_for("home"))
 
-        ensure_user_table(username, user_id)
-        create_user_product_activity_table(username, user_id)
-
-        cursor.execute("""
-            INSERT INTO user_activity (username, email, password, mode, action_date, action_time)
-            VALUES (%s, %s, %s, 'signup', CURDATE(), CURTIME())
-        """, (username, email, password))
-
-        if auto_pwd:
-            cursor.execute("UPDATE strong_password SET is_used=1 WHERE password=%s", (password,))
-
-        db.commit()
-        cursor.close()
-        db.close()
-
-        session.clear()
-        session["user_id"] = user_id
-        session["user_obj_id"] = user_id
-        session["username"] = username
-        session["flash_message"] = f"🎉 Signup Successful, {username}! Your account is created 😊"
-
-        return redirect(url_for("home"))
+        except Exception as e:
+            print("❌ SIGNUP ERROR:", e)
+            try:
+                db.rollback()
+                cursor.close()
+                db.close()
+            except:
+                pass
+            return render_template("signup.html",
+                error=f"❌ Something went wrong: {str(e)}")
 
     return render_template("signup.html")
-
 
 # ============================================================
 # ROUTES — PAGES
