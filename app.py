@@ -25,6 +25,10 @@ from datetime import datetime
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font
 from dotenv import load_dotenv
+#firebase database sathi
+import mysql.connector
+import random
+import string
 
 load_dotenv("databasehandler.env")
 
@@ -41,6 +45,297 @@ print("HTML file exists?", os.path.exists(html_file_path))
 # ---- SINGLE Flask app definition ----
 app = Flask(__name__, template_folder=TEMPLATE_DIR)
 app.secret_key = "secret123"
+app.secret_key = "shopco_secret_key_2026"
+
+
+# ── Create database and tables ────────────────────────────────────────────────
+def init_db():
+    conn = mysql.connector.connect(**DB_CONFIG)
+    cur  = conn.cursor()
+    cur.execute("CREATE DATABASE IF NOT EXISTS shopco_db")
+    cur.execute("USE shopco_db")
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id           INT AUTO_INCREMENT PRIMARY KEY,
+            firebase_uid VARCHAR(128) UNIQUE,
+            username     VARCHAR(100),
+            email        VARCHAR(150) UNIQUE NOT NULL,
+            provider     VARCHAR(50) DEFAULT 'email',
+            created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # ✅ FIX: Login table (was missing — caused crash in login_auth)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS Login (
+            id       INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(100),
+            email    VARCHAR(150) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL
+        )
+    """)
+
+    # ✅ FIX: CreateAccount audit table (was missing — caused crash in login_auth)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS CreateAccount (
+            id          INT AUTO_INCREMENT PRIMARY KEY,
+            username    VARCHAR(100),
+            email       VARCHAR(150),
+            password    VARCHAR(255),
+            mode        VARCHAR(20),
+            action_date DATE,
+            action_time TIME
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS products (
+            id          INT AUTO_INCREMENT PRIMARY KEY,
+            name        VARCHAR(200) NOT NULL,
+            price       DECIMAL(10,2) NOT NULL,
+            description TEXT,
+            image_url   VARCHAR(500),
+            category    VARCHAR(100),
+            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS cart (
+            id         INT AUTO_INCREMENT PRIMARY KEY,
+            user_email VARCHAR(150) NOT NULL,
+            product_id INT NOT NULL,
+            quantity   INT DEFAULT 1,
+            added_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS strong_passwords (
+            id       INT AUTO_INCREMENT PRIMARY KEY,
+            password VARCHAR(100) NOT NULL
+        )
+    """)
+
+    cur.execute("SELECT COUNT(*) FROM strong_passwords")
+    if cur.fetchone()[0] == 0:
+        for p in ["Sh0p@Secure#2026!", "Buy$Mart!Pass#99", "Cart&Safe@2026#X",
+                  "Shop!Buy#Secure$1", "Pass@Word#Shop$22", "Secure!Cart#Buy$3",
+                  "Main@Project#007!", "Strong$Pass!Buy#4", "Safe@Shop#2026$X",
+                  "Buy!Secure@Cart#5"]:
+            cur.execute("INSERT INTO strong_passwords (password) VALUES (%s)", (p,))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    print("✅ Database ready!")
+
+
+def get_db():
+    config = DB_CONFIG.copy()
+    config["database"] = "shopco_db"
+    return mysql.connector.connect(**config)
+
+
+# ── PAGE ROUTES ───────────────────────────────────────────────────────────────
+
+@app.route("/")
+@app.route("/index.html")
+def index():
+    return render_template("index.html")
+
+@app.route("/login")
+@app.route("/login.html")
+def login_page():
+    return render_template("login.html")
+
+@app.route("/signup")
+@app.route("/signup.html")
+def signup():
+    return render_template("signup.html")
+
+@app.route("/dashboard")
+@app.route("/dashboard.html")
+def dashboard():
+    if "user_email" not in session:
+        return redirect(url_for("index"))
+    return render_template("dashboard.html",
+                           username=session.get("username", "User"),
+                           email=session.get("user_email"))
+
+@app.route("/add-product")
+@app.route("/add-product.html")
+def add_product_page():
+    if "user_email" not in session:
+        return redirect(url_for("index"))
+    return render_template("add-product.html")
+
+@app.route("/add-product/submit", methods=["POST"])
+def add_product_submit():
+    if "user_email" not in session:
+        return redirect(url_for("index"))
+    name        = request.form.get("name")
+    price       = request.form.get("price")
+    description = request.form.get("description")
+    image_url   = request.form.get("image_url")
+    category    = request.form.get("category")
+    conn = get_db()
+    cur  = conn.cursor()
+    cur.execute("""
+        INSERT INTO products (name, price, description, image_url, category)
+        VALUES (%s, %s, %s, %s, %s)
+    """, (name, price, description, image_url, category))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect(url_for("dashboard"))
+
+@app.route("/addtocard")
+@app.route("/addtocard.html")
+def addtocard():
+    if "user_email" not in session:
+        return redirect(url_for("index"))
+    conn = get_db()
+    cur  = conn.cursor(dictionary=True)
+    cur.execute("SELECT * FROM products")
+    products = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template("addtocard.html", products=products)
+
+@app.route("/add-to-cart/<int:product_id>", methods=["POST"])
+def add_to_cart(product_id):
+    if "user_email" not in session:
+        return jsonify({"success": False, "message": "Not logged in"}), 401
+    conn = get_db()
+    cur  = conn.cursor()
+    cur.execute("""
+        INSERT INTO cart (user_email, product_id, quantity)
+        VALUES (%s, %s, 1)
+        ON DUPLICATE KEY UPDATE quantity = quantity + 1
+    """, (session["user_email"], product_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return jsonify({"success": True, "message": "Added to cart!"})
+
+@app.route("/cart")
+@app.route("/Addtocard-table.html")
+def cart():
+    if "user_email" not in session:
+        return redirect(url_for("index"))
+    conn = get_db()
+    cur  = conn.cursor(dictionary=True)
+    cur.execute("""
+        SELECT p.name, p.price, p.image_url, c.quantity,
+               (p.price * c.quantity) AS total, c.id AS cart_id
+        FROM cart c
+        JOIN products p ON c.product_id = p.id
+        WHERE c.user_email = %s
+    """, (session["user_email"],))
+    items = cur.fetchall()
+    cur.close()
+    conn.close()
+    grand_total = sum(item["total"] for item in items)
+    return render_template("Addtocard-table.html", items=items, grand_total=grand_total)
+
+@app.route("/remove-from-cart/<int:cart_id>", methods=["POST"])
+def remove_from_cart(cart_id):
+    conn = get_db()
+    cur  = conn.cursor()
+    cur.execute("DELETE FROM cart WHERE id = %s", (cart_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect(url_for("cart"))
+
+@app.route("/view-card")
+@app.route("/view_card.html")
+def view_card():
+    if "user_email" not in session:
+        return redirect(url_for("index"))
+    return render_template("view_card.html")
+
+
+# ── Firebase Auth (Google / GitHub / Email → save to MySQL) ───────────────────
+@app.route("/auth/firebase-login", methods=["POST"])
+def firebase_login():
+    data     = request.get_json()
+    email    = data.get("email")
+    username = data.get("username", email.split("@")[0] if email else "User")
+    uid      = data.get("uid")
+    provider = data.get("provider", "email")
+
+    if not email:
+        return jsonify({"success": False, "message": "No email provided"}), 400
+
+    conn = get_db()
+    cur  = conn.cursor()
+    cur.execute("""
+        INSERT INTO users (firebase_uid, username, email, provider)
+        VALUES (%s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+            firebase_uid = VALUES(firebase_uid),
+            username     = VALUES(username),
+            provider     = VALUES(provider)
+    """, (uid, username, email, provider))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    session["user_email"] = email
+    session["username"]   = username
+    session["uid"]        = uid
+    return jsonify({"success": True, "redirect": "/dashboard"})
+
+
+# ── Login (email+password via Login table) ────────────────────────────────────
+@app.route("/auth/login", methods=["GET", "POST"])
+def login_auth():
+    if request.method == "POST":
+        email    = request.form["email"].strip()
+        password = request.form["password"].strip()
+
+        db     = get_db()
+        cursor = db.cursor()
+        cursor.execute("SELECT id, username, password FROM Login WHERE email=%s", (email,))
+        user = cursor.fetchone()
+
+        if not user:
+            cursor.close(); db.close()
+            return render_template("login.html", error="❌ Email not registered")
+
+        if password != user[2]:
+            cursor.close(); db.close()
+            return render_template("login.html", error="❌ Incorrect password")
+
+        # Log the login action
+        cursor.execute("""
+            INSERT INTO CreateAccount (username, email, password, mode, action_date, action_time)
+            VALUES (%s, %s, %s, 'login', CURDATE(), CURTIME())
+        """, (user[1], email, password))
+        db.commit()
+        cursor.close()
+        db.close()
+
+        session.clear()
+        session["user_id"]    = user[0]
+        session["username"]   = user[1]
+        session["user_email"] = email          # ✅ FIX: set user_email so dashboard works
+
+        session["flash_message"] = f"🎉 Login Successful, {user[1]} 😊"
+        return redirect(url_for("dashboard"))
+
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("index"))
+
 
 # ================= EMAIL CONFIGURATION =================
 
@@ -2219,9 +2514,9 @@ def create_order():
 def verify_payment():
     data = request.get_json()
 
-    razorpay_order_id = data["razorpay_order_id"]
+    razorpay_order_id   = data["razorpay_order_id"]
     razorpay_payment_id = data["razorpay_payment_id"]
-    razorpay_signature = data["razorpay_signature"]
+    razorpay_signature  = data["razorpay_signature"]
 
     body = razorpay_order_id + "|" + razorpay_payment_id
 
@@ -2232,6 +2527,18 @@ def verify_payment():
     ).hexdigest()
 
     if expected_signature == razorpay_signature:
+        # ✅ ADD THIS — Save order to MySQL
+        db = get_db_connection()
+        cursor = db.cursor()
+        cursor.execute("""
+            INSERT INTO orders 
+            (user_email, razorpay_payment_id, razorpay_order_id, status)
+            VALUES (%s, %s, %s, 'PAID')
+        """, (session.get("user_email"), razorpay_payment_id, razorpay_order_id))
+        db.commit()
+        cursor.close()
+        db.close()
+
         return jsonify({"status": "success", "message": "Payment Successful"})
     else:
         return jsonify({"status": "failed", "message": "Payment Failed"})
