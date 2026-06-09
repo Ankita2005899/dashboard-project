@@ -578,11 +578,12 @@ def signup():
 
             # Log signup — no password stored
             try:
+                # FIXED — includes password to avoid NOT NULL error
                 cursor.execute("""
                     INSERT INTO user_activity
-                    (username, email, mode, action_date, action_time)
-                    VALUES (%s, %s, 'signup', CURDATE(), CURTIME())
-                """, (username, email))
+                    (username, email, password, mode, action_date, action_time)
+                    VALUES (%s, %s, %s, 'signup', CURDATE(), CURTIME())
+                """, (username, email, password))
             except Exception as e:
                 print("user_activity log error:", e)
 
