@@ -241,27 +241,8 @@ input::placeholder { color: var(--placeholder-color); }
     transition: transform 0.3s cubic-bezier(.4,0,.2,1);
 }
 
-/* ── ERROR ── */
-.error {
-    color: #ef4444;
-    font-size: 13px;
-    padding: 9px 12px;
-    background: #fef2f2;
-    border-radius: 8px;
-    border: 1px solid #fecaca;
-    margin-bottom: 16px;
-    display: flex; align-items: center; gap: 7px;
-    animation: shakeIn 0.4s ease;
-}
-@keyframes shakeIn {
-    0%   { transform: translateX(-6px); opacity: 0; }
-    40%  { transform: translateX(4px); }
-    70%  { transform: translateX(-3px); }
-    100% { transform: translateX(0); opacity: 1; }
-}
-
 /* ── SUBMIT ── */
-button[type="submit"] {
+button[type="submit"], #loginBtn {
     width: 100%;
     padding: 13px;
     background: linear-gradient(135deg, var(--orange), var(--amber));
@@ -277,16 +258,16 @@ button[type="submit"] {
     position: relative; overflow: hidden;
     animation: fieldSlide 0.6s 0.45s cubic-bezier(.22,1,.36,1) both;
 }
-button[type="submit"]::after {
+button[type="submit"]::after, #loginBtn::after {
     content: '';
     position: absolute; inset: 0;
     background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
     transform: translateX(-100%);
     transition: transform 0.55s ease;
 }
-button[type="submit"]:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,107,43,0.45); }
-button[type="submit"]:hover::after { transform: translateX(100%); }
-button[type="submit"]:active { transform: translateY(0); }
+button[type="submit"]:hover, #loginBtn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,107,43,0.45); }
+button[type="submit"]:hover::after, #loginBtn:hover::after { transform: translateX(100%); }
+button[type="submit"]:active, #loginBtn:active { transform: translateY(0); }
 
 /* ── SIGNUP LINK ── */
 .signup-row {
@@ -408,6 +389,71 @@ a:hover { text-decoration: underline; }
     .right-panel { display: none; }
     .form-side { padding: 36px 28px 32px; }
 }
+
+/* ── GOOGLE BUTTON ── */
+.soc-btn {
+    width: 100%;
+    height: 46px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: var(--input-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 600;
+    color: var(--input-color);
+    cursor: pointer;
+    transition: all 0.22s;
+    margin-bottom: 16px;
+}
+.soc-btn:hover {
+    border-color: #EA4335;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+}
+.soc-btn img { width: 18px; height: 18px; object-fit: contain; }
+
+/* ── DIVIDER ── */
+.divider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.divider-row::before, .divider-row::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+.divider-row span {
+    font-size: 11.5px;
+    color: var(--muted);
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+/* ── MSG BOX ── */
+.msg-box {
+    width: 100%; padding: 10px 14px;
+    border-radius: 8px; font-size: 13px;
+    font-family: inherit; line-height: 1.6;
+    display: none; margin-bottom: 12px; margin-top: 2px;
+    animation: shakeIn 0.4s ease;
+}
+.msg-box.show { display: block; }
+.msg-box.error   { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
+.msg-box.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+
+@keyframes shakeIn {
+    0%   { transform: translateX(-6px); opacity: 0; }
+    40%  { transform: translateX(4px); }
+    70%  { transform: translateX(-3px); }
+    100% { transform: translateX(0); opacity: 1; }
+}
 </style>
 <body>
 <script>
@@ -437,7 +483,16 @@ a:hover { text-decoration: underline; }
         <h2>Welcome back 👋</h2>
         <p class="subtitle">Sign in to your account to continue</p>
 
-        <form method="POST" autocomplete="off">
+        <!-- Google login button -->
+        <button type="button" class="soc-btn google" id="gBtn">
+            <img src="https://www.google.com/favicon.ico" alt="Google"
+                onerror="this.outerHTML='<svg viewBox=\'0 0 24 24\' width=\'18\' height=\'18\'><path fill=\'#EA4335\' d=\'M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z\'/><path fill=\'#34A853\' d=\'M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z\'/><path fill=\'#FBBC05\' d=\'M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z\'/><path fill=\'#EA4335\' d=\'M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z\'/></svg>'">
+            <span>Continue with Google</span>
+        </button>
+
+        <div class="divider-row"><span>or sign in with email</span></div>
+
+        <form id="loginForm" autocomplete="off">
 
             <!-- Email -->
             <div class="field">
@@ -465,18 +520,11 @@ a:hover { text-decoration: underline; }
                 </div>
             </div>
 
-            <!-- Error (Jinja2 template) -->
-            {% if error %}
-            <div class="error">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-                {{ error }}
-            </div>
-            {% endif %}
+            <!-- Error / success message box — hidden until needed -->
+            <div class="msg-box" id="msgBox"></div>
 
             <!-- Submit -->
-            <button type="submit">Login →</button>
+            <button type="button" id="loginBtn" onclick="handleEmailLogin()">Login →</button>
 
         </form>
 
@@ -646,6 +694,122 @@ a:hover { text-decoration: underline; }
     }
 })();
 
+</script>
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+    firebase.initializeApp({
+        apiKey: "AIzaSyCB1zPWX23hkXKdjbF1FfDW2NZjydikGcY",
+        authDomain: "main-project-526e0.firebaseapp.com",
+        projectId: "main-project-526e0",
+        storageBucket: "main-project-526e0.firebasestorage.app",
+        messagingSenderId: "996713410889",
+        appId: "1:996713410889:web:7d6ba7b39f8da2673daa98"
+    });
+    var auth = firebase.auth();
+    var googleProvider = new firebase.auth.GoogleAuthProvider();
+
+    function showMsg(html, type) {
+        var b = document.getElementById('msgBox');
+        b.innerHTML = html;
+        b.className = 'msg-box show ' + type;
+        setTimeout(function () { b.classList.remove('show'); }, 6000);
+    }
+
+    function handleEmailLogin() {
+        var email = document.getElementById('email').value.trim();
+        var pw    = document.getElementById('password').value;
+        var btn   = document.getElementById('loginBtn');
+
+        if (!email) { showMsg('Please enter your email address.', 'error'); return; }
+        if (!pw)    { showMsg('Please enter your password.', 'error'); return; }
+
+        btn.disabled = true;
+        btn.textContent = 'Signing in...';
+
+        auth.signInWithEmailAndPassword(email, pw)
+            .then(function (result) {
+                var user = result.user;
+                showMsg('Signed in as ' + user.email + ' ✅', 'success');
+                return fetch('/auth/firebase-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: user.email,
+                        username: user.displayName || user.email.split('@')[0],
+                        uid: user.uid,
+                        provider: 'email'
+                    })
+                });
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    showMsg('Login successful! Redirecting...', 'success');
+                    setTimeout(function () { window.location.href = '/dashboard'; }, 1000);
+                } else {
+                    showMsg(data.message || 'Login failed.', 'error');
+                    resetBtn();
+                }
+            })
+            .catch(function (e) {
+                showMsg(friendlyLogin(e.code), 'error');
+                resetBtn();
+            });
+    }
+
+    function resetBtn() {
+        var btn = document.getElementById('loginBtn');
+        btn.disabled = false;
+        btn.textContent = 'Login →';
+    }
+
+    function friendlyLogin(code) {
+        var map = {
+            'auth/invalid-email':        'Invalid email address.',
+            'auth/user-not-found':       'No account found with this email.',
+            'auth/wrong-password':       'Incorrect password. Please try again.',
+            'auth/invalid-credential':   'Incorrect email or password.',
+            'auth/too-many-requests':    'Too many attempts. Please try again later.',
+            'auth/network-request-failed': 'Network error. Check your connection.',
+            'auth/user-disabled':        'This account has been disabled.',
+            'auth/popup-closed-by-user': 'Sign-in was cancelled.'
+        };
+        return map[code] || 'Something went wrong. Please try again.';
+    }
+
+    document.getElementById('gBtn').addEventListener('click', function () {
+        showMsg('Opening Google sign-in...', 'success');
+        auth.signInWithPopup(googleProvider)
+            .then(function (result) {
+                var user = result.user;
+                showMsg('Signed in as ' + user.email + ' ✅', 'success');
+                return fetch('/auth/firebase-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: user.email,
+                        username: user.displayName || user.email.split('@')[0],
+                        uid: user.uid,
+                        provider: 'google'
+                    })
+                });
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    showMsg('Login successful! Redirecting...', 'success');
+                    setTimeout(function () { window.location.href = '/dashboard'; }, 1000);
+                } else {
+                    showMsg(data.message || 'Login failed', 'error');
+                }
+            })
+            .catch(function (e) {
+                console.error('Google login error:', e);
+                showMsg('Error: ' + (e.message || e.code), 'error');
+            });
+    });
 </script>
 </body>
 </html>
