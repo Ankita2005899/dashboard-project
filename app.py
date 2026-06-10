@@ -522,7 +522,7 @@ def signup():
                     INSERT INTO user_activity
                     (username, email, password, mode, action_date, action_time)
                     VALUES (%s, %s, %s, 'signup', CURDATE(), CURTIME())
-                """, (username, email, ""))
+                """, (username, email, password))
                 print("✅ user_activity signup logged")
             except Exception as e:
                 print("❌ user_activity log error:", e)
