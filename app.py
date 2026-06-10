@@ -618,6 +618,106 @@ def login():
 
     return render_template("login.html")
 
+
+#===============================firebase==================
+
+@app.route("/auth/firebase-login", methods=["POST"])
+def firebase_login():
+    data     = request.get_json()
+    email    = data.get("email", "").strip()
+    username = data.get("username", "").strip()
+    uid      = data.get("uid", "").strip()
+    provider = data.get("provider", "").strip()
+    source   = data.get("source", "").strip()  # "signup" or "login"
+
+    db     = get_db_connection()
+    cursor = db.cursor()
+
+    try:
+        if source == "signup":
+            # Check if already registered in user_activity
+            cursor.execute("SELECT id FROM user_activity WHERE email=%s", (email,))
+            if cursor.fetchone():
+                cursor.close()
+                db.close()
+                return jsonify({"success": False, "message": "This email is already registered. Try logging in."})
+
+            # Save to user_activity
+            cursor.execute("""
+                INSERT INTO user_activity
+                (username, email, password, mode, action_date, action_time)
+                VALUES (%s, %s, %s, %s, CURDATE(), CURTIME())
+            """, (username, email, "", provider))
+            user_id = cursor.lastrowid
+
+            ensure_user_table(username, user_id)
+            create_user_product_activity_table(username, user_id)
+
+            db.commit()
+            cursor.close()
+            db.close()
+
+            session.clear()
+            session["user_id"]       = user_id
+            session["user_obj_id"]   = user_id
+            session["username"]      = username
+            session["user_email"]    = email
+            session["flash_message"] = f"🎉 Welcome {username}! Account created 😊"
+
+            return jsonify({"success": True})
+
+        elif source == "login":
+            # Check if user exists in user table
+            cursor.execute("SELECT id, username FROM user WHERE email=%s", (email,))
+            existing = cursor.fetchone()
+
+            if not existing:
+                # First time Google login — auto register in user table
+                cursor.execute("""
+                    INSERT INTO user (username, email, password)
+                    VALUES (%s, %s, %s)
+                """, (username, email, ""))
+                user_id = cursor.lastrowid
+            else:
+                user_id  = existing[0]
+                username = existing[1]
+
+            # Log to user table activity
+            cursor.execute("""
+                INSERT INTO user_activity
+                (username, email, password, mode, action_date, action_time)
+                VALUES (%s, %s, %s, 'login', CURDATE(), CURTIME())
+            """, (username, email, ""))
+
+            ensure_user_table(username, user_id)
+            create_user_product_activity_table(username, user_id)
+
+            db.commit()
+            cursor.close()
+            db.close()
+
+            session.clear()
+            session["user_id"]       = user_id
+            session["user_obj_id"]   = user_id
+            session["username"]      = username
+            session["user_email"]    = email
+            session["flash_message"] = f"🎉 Login Successful, {username} 😊"
+
+            return jsonify({"success": True})
+
+        else:
+            return jsonify({"success": False, "message": "Invalid source"})
+
+    except Exception as e:
+        print("❌ firebase_login error:", e)
+        try:
+            db.rollback()
+            cursor.close()
+            db.close()
+        except:
+            pass
+        return jsonify({"success": False, "message": str(e)})
+
 # ============================================================
 # ROUTES — PAGES
 # ============================================================
@@ -631,10 +731,6 @@ def home():
     username = session.get("username")
     return render_template("dashboard.html", message=message, username=username)
 
-
-@app.route("/dashboard")
-def dashboard():
-    return render_template("dashboard.html")
 
 
 @app.route("/analytics")
