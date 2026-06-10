@@ -463,13 +463,14 @@ def login():
     print("👉 ROUTE HIT:", request.path)
 
     if request.method == "POST":
-        email = request.form["email"].strip()
+        email    = request.form["email"].strip()
         password = request.form["password"].strip()
 
-        db = get_db_connection()
+        db     = get_db_connection()
         cursor = db.cursor()
 
-        cursor.execute("SELECT id, username, password FROM user WHERE email=%s", (email,))
+        # Check user_activity for registered email
+        cursor.execute("SELECT id, username, password FROM user_activity WHERE email=%s AND mode='signup'", (email,))
         user = cursor.fetchone()
 
         if not user:
@@ -477,7 +478,11 @@ def login():
             db.close()
             return render_template("login.html", error="❌ Email not registered")
 
-        if password != user[2]:
+        # Fetch actual password from user table for verification
+        cursor.execute("SELECT password FROM user WHERE email=%s", (email,))
+        user_pw = cursor.fetchone()
+
+        if not user_pw or password != user_pw[0]:
             cursor.close()
             db.close()
             return render_template("login.html", error="❌ Incorrect password")
@@ -487,13 +492,17 @@ def login():
         session["username"]    = user[1]
         session["user_obj_id"] = user[0]
 
+        # INSERT login activity into user table
         try:
+            print(f"📝 Logging login: username={user[1]}, email={email}")
             cursor.execute("""
-                INSERT INTO user_activity (username, email, password, mode, action_date, action_time)
-                VALUES (%s, %s, %s, 'login', CURDATE(), CURTIME())
+                INSERT INTO user
+                (username, email, password)
+                VALUES (%s, %s, %s)
             """, (user[1], email, ""))
+            print("✅ user login log success")
         except Exception as e:
-            print("Activity log error:", e)
+            print("❌ user login log error:", e)
 
         db.commit()
         cursor.close()
@@ -517,15 +526,12 @@ def signup():
         password = request.form.get("password", "").strip()
         confirm  = request.form.get("confirm_password", "").strip()
 
-        # ---- Check 1: all fields filled ----
         if not username or not email or not password:
             return render_template("signup.html", error="❌ All fields are required")
 
-        # ---- Check 2: passwords match ----
         if password != confirm:
             return render_template("signup.html", error="❌ Passwords do not match")
 
-        # ---- Check 3: basic email format ----
         if "@" not in email or "." not in email:
             return render_template("signup.html", error="❌ Invalid email format")
 
@@ -533,15 +539,15 @@ def signup():
         cursor = db.cursor()
 
         try:
-            # ---- Check 4: email already exists ----
-            cursor.execute("SELECT id FROM user WHERE email=%s", (email,))
+            # Check if email already exists in user_activity
+            cursor.execute("SELECT id FROM user_activity WHERE email=%s", (email,))
             if cursor.fetchone():
                 cursor.close()
                 db.close()
                 return render_template("signup.html",
                     error="This email is already registered. Try logging in.")
 
-            # ---- Check 5: strong password table ----
+            # Check strong password table
             auto_pwd = None
             try:
                 cursor.execute("""
@@ -553,39 +559,28 @@ def signup():
                 print("strong_password table error:", e)
                 auto_pwd = None
 
-            # ---- Check 6: password strength ----
+            # Check password strength
             if not auto_pwd and not is_strong_password(password):
                 cursor.close()
                 db.close()
                 return render_template("signup.html",
                     error="❌ Weak password. Need 8+ chars, 1 uppercase, 1 lowercase, 1 digit, 3 special chars")
 
-            # ---- All checks passed — create user ----
+            # INSERT into user_activity
+            print(f"📝 Inserting signup: username={username}, email={email}")
             cursor.execute("""
-                INSERT INTO user (username, email, password)
-                VALUES (%s, %s, %s)
-            """, (username, email, password))
+                INSERT INTO user_activity
+                (username, email, password, mode, action_date, action_time)
+                VALUES (%s, %s, %s, 'signup', CURDATE(), CURTIME())
+            """, (username, email, ""))
             user_id = cursor.lastrowid
+            print("✅ user_activity insert success")
 
-            # Create personal cart table
+            # Create personal tables
             ensure_user_table(username, user_id)
-
-            # Create personal ML activity table
             create_user_product_activity_table(username, user_id)
 
-            # ---- Log signup activity ----
-            try:
-                print(f"📝 Logging activity: username={username}, email={email}")
-                cursor.execute("""
-                    INSERT INTO user_activity
-                    (username, email, password, mode, action_date, action_time)
-                    VALUES (%s, %s, %s, 'signup', CURDATE(), CURTIME())
-                """, (username, email, ""))
-                print("✅ user_activity logged successfully")
-            except Exception as e:
-                print("❌ user_activity log error:", e)
-
-            # ---- Mark pre-approved password as used ----
+            # Mark pre-approved password as used
             if auto_pwd:
                 cursor.execute("""
                     UPDATE strong_password SET is_used=1
@@ -596,7 +591,6 @@ def signup():
             cursor.close()
             db.close()
 
-            # ---- Log user in immediately ----
             session.clear()
             session["user_id"]       = user_id
             session["user_obj_id"]   = user_id
