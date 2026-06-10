@@ -483,27 +483,24 @@ def login():
             return render_template("login.html", error="❌ Incorrect password")
 
         session.clear()
-        session["user_id"] = user[0]
-        session["username"] = user[1]
+        session["user_id"]     = user[0]
+        session["username"]    = user[1]
         session["user_obj_id"] = user[0]
 
-        # CORRECT — no password in log
-    try:
-        cursor.execute("""
-            INSERT INTO user_activity (username, email, mode, action_date, action_time)
-            VALUES (%s, %s, 'login', CURDATE(), CURTIME())
-        """, (user[1], email))
-    except Exception as e:
-        print("Activity log error:", e)
-    
+        try:
+            cursor.execute("""
+                INSERT INTO user_activity (username, email, password, mode, action_date, action_time)
+                VALUES (%s, %s, %s, 'login', CURDATE(), CURTIME())
+            """, (user[1], email, ""))
+        except Exception as e:
+            print("Activity log error:", e)
 
         db.commit()
+        cursor.close()
+        db.close()
 
         ensure_user_table(user[1], user[0])
         create_user_product_activity_table(user[1], user[0])
-
-        cursor.close()
-        db.close()
 
         session["flash_message"] = f"🎉 Login Successful, {user[1]} 😊"
         return redirect(url_for("home"))
@@ -583,7 +580,7 @@ def signup():
                     INSERT INTO user_activity
                     (username, email, password, mode, action_date, action_time)
                     VALUES (%s, %s, %s, 'signup', CURDATE(), CURTIME())
-                """, (username, email, password))
+                """, (username, email, ""))
             except Exception as e:
                 print("user_activity log error:", e)
 
