@@ -749,7 +749,7 @@ a:hover { text-decoration: underline; }
             .then(function (data) {
                 if (data.success) {
                     showMsg('Account created! Redirecting...', 'success');
-                    setTimeout(function () { window.location.href = '/dashboard'; }, 1000);
+                    setTimeout(function () { window.location.href = '/home'; }, 1000);
                 } else {
                     showMsg(data.message || 'Server error', 'error');
                 }
@@ -841,7 +841,7 @@ a:hover { text-decoration: underline; }
             .then(function (data) {
                 if (data.success) {
                     showMsg('Account created! Redirecting...', 'success');
-                    setTimeout(function () { window.location.href = '/dashboard'; }, 1000);
+                    setTimeout(function () { window.location.href = '/home'; }, 1000);
                 } else {
                     showMsg(data.message || 'Server error', 'error');
                     resetBtn();
