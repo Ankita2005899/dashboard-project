@@ -573,18 +573,19 @@ def signup():
             # Create personal ML activity table
             create_user_product_activity_table(username, user_id)
 
-            # Log signup — no password stored
+            # ---- Log signup activity ----
             try:
-                # FIXED — includes password to avoid NOT NULL error
+                print(f"📝 Logging activity: username={username}, email={email}")
                 cursor.execute("""
                     INSERT INTO user_activity
                     (username, email, password, mode, action_date, action_time)
                     VALUES (%s, %s, %s, 'signup', CURDATE(), CURTIME())
                 """, (username, email, ""))
+                print("✅ user_activity logged successfully")
             except Exception as e:
-                print("user_activity log error:", e)
+                print("❌ user_activity log error:", e)
 
-            # Mark pre-approved password as used
+            # ---- Mark pre-approved password as used ----
             if auto_pwd:
                 cursor.execute("""
                     UPDATE strong_password SET is_used=1
@@ -595,7 +596,7 @@ def signup():
             cursor.close()
             db.close()
 
-            # Log user in immediately
+            # ---- Log user in immediately ----
             session.clear()
             session["user_id"]       = user_id
             session["user_obj_id"]   = user_id
