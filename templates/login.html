@@ -739,7 +739,8 @@ a:hover { text-decoration: underline; }
                         email: user.email,
                         username: user.displayName || user.email.split('@')[0],
                         uid: user.uid,
-                        provider: 'email'
+                        provider: 'email',
+                        source: 'login'
                     })
                 });
             })
@@ -792,7 +793,8 @@ a:hover { text-decoration: underline; }
                         email: user.email,
                         username: user.displayName || user.email.split('@')[0],
                         uid: user.uid,
-                        provider: 'google'
+                        provider: 'google',
+                        source: 'login'
                     })
                 });
             })
