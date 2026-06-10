@@ -458,64 +458,6 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    print("👉 ROUTE HIT:", request.path)
-
-    if request.method == "POST":
-        email    = request.form["email"].strip()
-        password = request.form["password"].strip()
-
-        db     = get_db_connection()
-        cursor = db.cursor()
-
-        # Check user_activity for registered email
-        cursor.execute("SELECT id, username, password FROM user_activity WHERE email=%s AND mode='signup'", (email,))
-        user = cursor.fetchone()
-
-        if not user:
-            cursor.close()
-            db.close()
-            return render_template("login.html", error="❌ Email not registered")
-
-        # Fetch actual password from user table for verification
-        cursor.execute("SELECT password FROM user WHERE email=%s", (email,))
-        user_pw = cursor.fetchone()
-
-        if not user_pw or password != user_pw[0]:
-            cursor.close()
-            db.close()
-            return render_template("login.html", error="❌ Incorrect password")
-
-        session.clear()
-        session["user_id"]     = user[0]
-        session["username"]    = user[1]
-        session["user_obj_id"] = user[0]
-
-        # INSERT login activity into user table
-        try:
-            print(f"📝 Logging login: username={user[1]}, email={email}")
-            cursor.execute("""
-                INSERT INTO user
-                (username, email, password)
-                VALUES (%s, %s, %s)
-            """, (user[1], email, ""))
-            print("✅ user login log success")
-        except Exception as e:
-            print("❌ user login log error:", e)
-
-        db.commit()
-        cursor.close()
-        db.close()
-
-        ensure_user_table(user[1], user[0])
-        create_user_product_activity_table(user[1], user[0])
-
-        session["flash_message"] = f"🎉 Login Successful, {user[1]} 😊"
-        return redirect(url_for("home"))
-
-    return render_template("login.html")
-
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     print("👉 ROUTE HIT:", request.path)
@@ -539,8 +481,8 @@ def signup():
         cursor = db.cursor()
 
         try:
-            # Check if email already exists in user_activity
-            cursor.execute("SELECT id FROM user_activity WHERE email=%s", (email,))
+            # Check if email already exists in user table
+            cursor.execute("SELECT id FROM user WHERE email=%s", (email,))
             if cursor.fetchone():
                 cursor.close()
                 db.close()
@@ -566,15 +508,24 @@ def signup():
                 return render_template("signup.html",
                     error="❌ Weak password. Need 8+ chars, 1 uppercase, 1 lowercase, 1 digit, 3 special chars")
 
-            # INSERT into user_activity
-            print(f"📝 Inserting signup: username={username}, email={email}")
+            # Save to user table (for login auth)
             cursor.execute("""
-                INSERT INTO user_activity
-                (username, email, password, mode, action_date, action_time)
-                VALUES (%s, %s, %s, 'signup', CURDATE(), CURTIME())
-            """, (username, email, ""))
+                INSERT INTO user (username, email, password)
+                VALUES (%s, %s, %s)
+            """, (username, email, password))
             user_id = cursor.lastrowid
-            print("✅ user_activity insert success")
+            print(f"✅ user inserted: id={user_id}, username={username}, email={email}")
+
+            # Save to user_activity table (for logging)
+            try:
+                cursor.execute("""
+                    INSERT INTO user_activity
+                    (username, email, password, mode, action_date, action_time)
+                    VALUES (%s, %s, %s, 'signup', CURDATE(), CURTIME())
+                """, (username, email, ""))
+                print("✅ user_activity signup logged")
+            except Exception as e:
+                print("❌ user_activity log error:", e)
 
             # Create personal tables
             ensure_user_table(username, user_id)
@@ -612,6 +563,60 @@ def signup():
                 error=f"❌ Something went wrong: {str(e)}")
 
     return render_template("signup.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    print("👉 ROUTE HIT:", request.path)
+
+    if request.method == "POST":
+        email    = request.form["email"].strip()
+        password = request.form["password"].strip()
+
+        db     = get_db_connection()
+        cursor = db.cursor()
+
+        # Verify from user table
+        cursor.execute("SELECT id, username, password FROM user WHERE email=%s", (email,))
+        user = cursor.fetchone()
+
+        if not user:
+            cursor.close()
+            db.close()
+            return render_template("login.html", error="❌ Email not registered")
+
+        if password != user[2]:
+            cursor.close()
+            db.close()
+            return render_template("login.html", error="❌ Incorrect password")
+
+        session.clear()
+        session["user_id"]     = user[0]
+        session["username"]    = user[1]
+        session["user_obj_id"] = user[0]
+
+        # Log login to user_activity
+        try:
+            cursor.execute("""
+                INSERT INTO user_activity
+                (username, email, password, mode, action_date, action_time)
+                VALUES (%s, %s, %s, 'login', CURDATE(), CURTIME())
+            """, (user[1], email, ""))
+            print("✅ user_activity login logged")
+        except Exception as e:
+            print("❌ user_activity login log error:", e)
+
+        db.commit()
+        cursor.close()
+        db.close()
+
+        ensure_user_table(user[1], user[0])
+        create_user_product_activity_table(user[1], user[0])
+
+        session["flash_message"] = f"🎉 Login Successful, {user[1]} 😊"
+        return redirect(url_for("home"))
+
+    return render_template("login.html")
 
 # ============================================================
 # ROUTES — PAGES
