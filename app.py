@@ -487,15 +487,17 @@ def signup():
         cursor = db.cursor()
 
         try:
-            cursor.execute("SELECT id, password FROM user WHERE email=%s", (email,))
+            # Check if email already exists in user_activity table
+            cursor.execute("SELECT id FROM user_activity WHERE email=%s", (email,))
             existing = cursor.fetchone()
+            cursor.fetchall()
             if existing:
-                if existing[1] == password:
-                    cursor.close()
-                    db.close()
-                    return render_template("signup.html",
-                        error="This email is already registered. Try logging in.")
+                cursor.close()
+                db.close()
+                return render_template("signup.html",
+                    error="This email is already registered. Try logging in.")
 
+            # Check strong password table
             auto_pwd = None
             try:
                 cursor.execute("""
@@ -507,32 +509,27 @@ def signup():
                 print("strong_password table error:", e)
                 auto_pwd = None
 
+            # Check password strength
             if not auto_pwd and not is_strong_password(password):
                 cursor.close()
                 db.close()
                 return render_template("signup.html",
                     error="❌ Weak password. Need 8+ chars, 1 uppercase, 1 lowercase, 1 digit, 3 special chars")
 
+            # Save to user_activity table only
             cursor.execute("""
-                INSERT INTO user (username, email, password, action)
-                VALUES (%s, %s, %s, %s)
-            """, (username, email, password, "manual"))  # ← changed
+                INSERT INTO user_activity
+                (username, email, password, mode, action, action_date, action_time)
+                VALUES (%s, %s, %s, 'signup', %s, CURDATE(), CURTIME())
+            """, (username, email, password, "manual"))
             user_id = cursor.lastrowid
-            print(f"✅ user inserted: id={user_id}, username={username}, email={email}")
+            print(f"✅ user_activity inserted: id={user_id}, username={username}, email={email}")
 
-            try:
-                cursor.execute("""
-                    INSERT INTO user_activity
-                    (username, email, password, mode, action, action_date, action_time)
-                    VALUES (%s, %s, %s, 'signup', %s, CURDATE(), CURTIME())
-                """, (username, email, password, "manual"))  # ← changed
-                print("✅ user_activity signup logged")
-            except Exception as e:
-                print("❌ user_activity log error:", e)
-
+            # Create personal tables
             ensure_user_table(username, user_id)
             create_user_product_activity_table(username, user_id)
 
+            # Mark pre-approved password as used
             if auto_pwd:
                 cursor.execute("""
                     UPDATE strong_password SET is_used=1
@@ -577,37 +574,51 @@ def login():
         db     = get_db_connection()
         cursor = db.cursor()
 
-        cursor.execute("SELECT id, username, password FROM user WHERE email=%s", (email,))
+        # Check user_activity for manual signup
+        cursor.execute("""
+            SELECT id, username, password FROM user_activity
+            WHERE email=%s AND action='manual'
+            ORDER BY id ASC LIMIT 1
+        """, (email,))
         user = cursor.fetchone()
+        cursor.fetchall()
 
         if not user:
             cursor.close()
             db.close()
-            return render_template("login.html", error="❌ Email not registered")
+            return render_template("login.html", error="❌ Email not registered or not signed up manually")
 
         if password != user[2]:
             cursor.close()
             db.close()
             return render_template("login.html", error="❌ Incorrect password")
 
-        session.clear()
-        session["user_id"]     = user[0]
-        session["username"]    = user[1]
-        session["user_obj_id"] = user[0]
+        # Save login to user table
+        try:
+            cursor.execute("""
+                INSERT INTO user (username, email, password, action)
+                VALUES (%s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE username=username
+            """, (user[1], email, password, "manual"))
+            db.commit()
+        except Exception as e:
+            print("user table insert error:", e)
 
-    
-
-        db.commit()
         cursor.close()
         db.close()
 
         ensure_user_table(user[1], user[0])
         create_user_product_activity_table(user[1], user[0])
 
+        session.clear()
+        session["user_id"]     = user[0]
+        session["username"]    = user[1]
+        session["user_obj_id"] = user[0]
         session["flash_message"] = f"🎉 Login Successful, {user[1]} 😊"
         return redirect(url_for("home"))
 
     return render_template("login.html")
+
 
 
 #===============================firebase==================
@@ -626,6 +637,7 @@ def firebase_login():
 
     try:
         if source == "signup":
+            # Check if email already exists in user_activity
             cursor.execute("SELECT id FROM user_activity WHERE email=%s", (email,))
             existing = cursor.fetchone()
             cursor.fetchall()
@@ -634,6 +646,7 @@ def firebase_login():
                 db.close()
                 return jsonify({"success": False, "message": "This email is already registered. Try logging in."})
 
+            # Save to user_activity only
             cursor.execute("""
                 INSERT INTO user_activity
                 (username, email, password, mode, action, action_date, action_time)
@@ -658,9 +671,9 @@ def firebase_login():
             return jsonify({"success": True})
 
         elif source == "login":
-            # Check if email exists in user_activity with action='google'
+            # Check user_activity for google signup
             cursor.execute("""
-                SELECT id, username FROM user_activity 
+                SELECT id, username FROM user_activity
                 WHERE email=%s AND action='google'
                 ORDER BY id ASC LIMIT 1
             """, (email,))
@@ -675,11 +688,13 @@ def firebase_login():
             user_id  = existing[0]
             username = existing[1]
 
+            # Save login to user table
             cursor.execute("""
                 INSERT INTO user (username, email, password, action)
                 VALUES (%s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE username=username
             """, (username, email, "", "google"))
+
             ensure_user_table(username, user_id)
             create_user_product_activity_table(username, user_id)
 
@@ -709,9 +724,7 @@ def firebase_login():
             pass
         return jsonify({"success": False, "message": str(e)})
 
-#=========================login github entry  ====================
 
-# ── Verify OTP ──
 @app.route("/auth/verify-otp", methods=["POST"])
 def verify_otp():
     data  = request.get_json()
@@ -724,23 +737,25 @@ def verify_otp():
     db     = get_db_connection()
     cursor = db.cursor()
     cursor.execute("""
-        SELECT id, username FROM user_activity 
-        WHERE email=%s AND mode='github' 
+        SELECT id, username FROM user_activity
+        WHERE email=%s AND action='github'
         ORDER BY id ASC LIMIT 1
     """, (email,))
     user = cursor.fetchone()
+    cursor.fetchall()
 
     if not user:
         cursor.close()
         db.close()
-        return jsonify({"success": False, "message": "User not found"})
+        return jsonify({"success": False, "message": "No GitHub account found with this email."})
 
+    # Save login to user table
     try:
         cursor.execute("""
-            INSERT INTO user_activity
-            (username, email, password, mode, action, action_date, action_time)
-            VALUES (%s, %s, %s, 'login', %s, CURDATE(), CURTIME())
-        """, (user[1], email, "", "github"))  # ← action added
+            INSERT INTO user (username, email, password, action)
+            VALUES (%s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE username=username
+        """, (user[1], email, "", "github"))
         db.commit()
     except Exception as e:
         print("Activity log error:", e)
@@ -757,7 +772,7 @@ def verify_otp():
 
     return jsonify({"success": True})
 
-# ── Flask email/password login (JSON) ──
+
 @app.route("/auth/flask-login", methods=["POST"])
 def flask_login():
     data     = request.get_json()
@@ -766,25 +781,33 @@ def flask_login():
 
     db     = get_db_connection()
     cursor = db.cursor()
-    cursor.execute("SELECT id, username, password FROM user WHERE email=%s", (email,))
+
+    # Check user_activity for manual signup
+    cursor.execute("""
+        SELECT id, username, password FROM user_activity
+        WHERE email=%s AND action='manual'
+        ORDER BY id ASC LIMIT 1
+    """, (email,))
     user = cursor.fetchone()
+    cursor.fetchall()
 
     if not user:
         cursor.close()
         db.close()
-        return jsonify({"success": False, "message": "❌ Email not registered"})
+        return jsonify({"success": False, "message": "❌ Email not registered or not signed up manually"})
 
     if password != user[2]:
         cursor.close()
         db.close()
         return jsonify({"success": False, "message": "❌ Incorrect password"})
 
+    # Save login to user table
     try:
         cursor.execute("""
-            INSERT INTO user_activity
-            (username, email, password, mode, action, action_date, action_time)
-            VALUES (%s, %s, %s, 'login', %s, CURDATE(), CURTIME())
-        """, (user[1], email, "", "manual"))  # ← changed
+            INSERT INTO user (username, email, password, action)
+            VALUES (%s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE username=username
+        """, (user[1], email, password, "manual"))
         db.commit()
     except Exception as e:
         print("Activity log error:", e)
@@ -804,21 +827,22 @@ def flask_login():
 
     return jsonify({"success": True})
 
+
 # ── Send OTP ──
 @app.route("/auth/send-otp", methods=["POST"])
 def send_otp():
     data  = request.get_json()
     email = data.get("email", "").strip()
 
-    # Check email exists with github mode
     db     = get_db_connection()
     cursor = db.cursor()
     cursor.execute("""
-        SELECT id, username FROM user_activity 
-        WHERE email=%s AND mode='github' 
+        SELECT id, username FROM user_activity
+        WHERE email=%s AND action='github'
         ORDER BY id ASC LIMIT 1
     """, (email,))
     user = cursor.fetchone()
+    cursor.fetchall()
     cursor.close()
     db.close()
 
@@ -849,7 +873,6 @@ def send_otp():
     except Exception as e:
         print("❌ OTP send error:", e)
         return jsonify({"success": False, "message": "Failed to send OTP"})
-    
     
 # ============================================================
 # ROUTES — PAGES
