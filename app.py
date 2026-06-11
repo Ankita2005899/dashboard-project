@@ -676,11 +676,10 @@ def firebase_login():
             username = existing[1]
 
             cursor.execute("""
-                INSERT INTO user_activity
-                (username, email, password, mode, action, action_date, action_time)
-                VALUES (%s, %s, %s, 'login', %s, CURDATE(), CURTIME())
+                INSERT INTO user (username, email, password, action)
+                VALUES (%s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE username=username
             """, (username, email, "", "google"))
-
             ensure_user_table(username, user_id)
             create_user_product_activity_table(username, user_id)
 
