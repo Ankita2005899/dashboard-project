@@ -521,7 +521,7 @@ a:hover { text-decoration: underline; }
         <div class="divider"><span>or fill in your details</span></div>
 
         <!-- Form fields -->
-        <form method="POST" action="/signup">
+        <form method="POST" action="/signup" id="signupForm">
         <input type="hidden" name="username" id="h_username">
         <input type="hidden" name="email" id="h_email">
         <input type="hidden" name="password" id="h_password">
@@ -836,7 +836,7 @@ a:hover { text-decoration: underline; }
         document.getElementById('h_email').value = email;
         document.getElementById('h_password').value = pw;
         document.getElementById('h_confirm').value = cpw;
-        document.querySelector('form').submit();
+        document.getElementById('signupForm').submit();
     }
 
     function resetBtn() {
