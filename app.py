@@ -722,56 +722,6 @@ def firebase_login():
 
 
 #=========================login github entry  ====================
-import random
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-
-# ── Send OTP ──
-@app.route("/auth/send-otp", methods=["POST"])
-def send_otp():
-    data  = request.get_json()
-    email = data.get("email", "").strip()
-
-    # Check email exists with github mode
-    db     = get_db_connection()
-    cursor = db.cursor()
-    cursor.execute("""
-        SELECT id, username FROM user_activity 
-        WHERE email=%s AND mode='github' 
-        ORDER BY id ASC LIMIT 1
-    """, (email,))
-    user = cursor.fetchone()
-    cursor.close()
-    db.close()
-
-    if not user:
-        return jsonify({"success": False, "message": "No GitHub account found with this email."})
-
-    otp = str(random.randint(100000, 999999))
-    session["otp"]       = otp
-    session["otp_email"] = email
-
-    try:
-        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-        message = Mail(
-            from_email=os.getenv("SENDER_EMAIL"),
-            to_emails=email,
-            subject="ShopSphere Login OTP",
-            html_content=f"""
-            <div style="font-family:sans-serif;padding:20px;max-width:400px">
-                <h2 style="color:#FF6B2B">ShopSphere Login OTP</h2>
-                <p>Your one-time password is:</p>
-                <h1 style="letter-spacing:8px;color:#1a1a2e">{otp}</h1>
-                <p style="color:#666">This OTP is valid for 10 minutes.</p>
-            </div>
-            """
-        )
-        sg.send(message)
-        return jsonify({"success": True})
-    except Exception as e:
-        print("❌ OTP send error:", e)
-        return jsonify({"success": False, "message": "Failed to send OTP"})
-
 
 # ── Verify OTP ──
 @app.route("/auth/verify-otp", methods=["POST"])
