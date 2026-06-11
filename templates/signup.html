@@ -874,6 +874,18 @@ a:hover { text-decoration: underline; }
             panel.appendChild(p);
         }
     })();
+
+//-----------for error message if user entering the email emailand password to create a account which is allready exist --------
+
+// Show Flask error on page load
+window.addEventListener('load', function() {
+    var flaskError = "{{ error if error else '' }}";
+    if (flaskError) {
+        showMsg(flaskError, 'error');
+    }
+});
+
+
 </script>
 </body>
 </html>
