@@ -15,6 +15,12 @@ from email.mime.multipart import MIMEMultipart
 import razorpay
 import mysql.connector
 
+#----------------login github entry-------------------------
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
+#------------------------------
+
 from flask import (
     Flask, render_template, request, jsonify,
     redirect, url_for, session, send_from_directory,
@@ -713,6 +719,165 @@ def firebase_login():
         except:
             pass
         return jsonify({"success": False, "message": str(e)})
+
+
+#=========================login github entry  ====================
+
+
+# ── Check login type ──
+@app.route("/auth/check-login-type", methods=["POST"])
+def check_login_type():
+    data  = request.get_json()
+    email = data.get("email", "").strip()
+
+    db     = get_db_connection()
+    cursor = db.cursor()
+
+    cursor.execute("""
+        SELECT mode FROM user_activity 
+        WHERE email=%s 
+        ORDER BY id ASC LIMIT 1
+    """, (email,))
+    row = cursor.fetchone()
+    cursor.close()
+    db.close()
+
+    if row:
+        return jsonify({"type": row[0]})  # 'github', 'google', 'email', 'signup'
+    return jsonify({"type": "unknown"})
+
+
+# ── Send OTP ──
+@app.route("/auth/send-otp", methods=["POST"])
+def send_otp():
+    data  = request.get_json()
+    email = data.get("email", "").strip()
+
+    otp = str(random.randint(100000, 999999))
+    session["otp"]       = otp
+    session["otp_email"] = email
+
+    try:
+        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+        message = Mail(
+            from_email=os.getenv("SENDER_EMAIL"),
+            to_emails=email,
+            subject="ShopSphere Login OTP",
+            html_content=f"""
+            <div style="font-family:sans-serif;padding:20px;max-width:400px">
+                <h2 style="color:#FF6B2B">ShopSphere Login OTP</h2>
+                <p>Your one-time password is:</p>
+                <h1 style="letter-spacing:8px;color:#1a1a2e">{otp}</h1>
+                <p style="color:#666">This OTP is valid for 10 minutes.</p>
+            </div>
+            """
+        )
+        sg.send(message)
+        return jsonify({"success": True})
+    except Exception as e:
+        print("❌ OTP send error:", e)
+        return jsonify({"success": False, "message": "Failed to send OTP"})
+
+
+# ── Verify OTP ──
+@app.route("/auth/verify-otp", methods=["POST"])
+def verify_otp():
+    data  = request.get_json()
+    email = data.get("email", "").strip()
+    otp   = data.get("otp", "").strip()
+
+    if session.get("otp") != otp or session.get("otp_email") != email:
+        return jsonify({"success": False, "message": "Invalid or expired OTP"})
+
+    # OTP correct — log them in
+    db     = get_db_connection()
+    cursor = db.cursor()
+
+    cursor.execute("""
+        SELECT id, username FROM user_activity 
+        WHERE email=%s AND mode='github' 
+        ORDER BY id ASC LIMIT 1
+    """, (email,))
+    user = cursor.fetchone()
+
+    if not user:
+        cursor.close()
+        db.close()
+        return jsonify({"success": False, "message": "User not found"})
+
+    # Log login activity
+    try:
+        cursor.execute("""
+            INSERT INTO user_activity
+            (username, email, password, mode, action_date, action_time)
+            VALUES (%s, %s, %s, 'login', CURDATE(), CURTIME())
+        """, (user[1], email, ""))
+        db.commit()
+    except Exception as e:
+        print("Activity log error:", e)
+
+    cursor.close()
+    db.close()
+
+    session.clear()
+    session["user_id"]       = user[0]
+    session["user_obj_id"]   = user[0]
+    session["username"]      = user[1]
+    session["user_email"]    = email
+    session["flash_message"] = f"🎉 Login Successful, {user[1]} 😊"
+
+    return jsonify({"success": True})
+
+
+# ── Flask email/password login (JSON) ──
+@app.route("/auth/flask-login", methods=["POST"])
+def flask_login():
+    data     = request.get_json()
+    email    = data.get("email", "").strip()
+    password = data.get("password", "").strip()
+
+    db     = get_db_connection()
+    cursor = db.cursor()
+
+    cursor.execute("SELECT id, username, password FROM user WHERE email=%s", (email,))
+    user = cursor.fetchone()
+
+    if not user:
+        cursor.close()
+        db.close()
+        return jsonify({"success": False, "message": "❌ Email not registered"})
+
+    if password != user[2]:
+        cursor.close()
+        db.close()
+        return jsonify({"success": False, "message": "❌ Incorrect password"})
+
+    try:
+        cursor.execute("""
+            INSERT INTO user_activity
+            (username, email, password, mode, action_date, action_time)
+            VALUES (%s, %s, %s, 'login', CURDATE(), CURTIME())
+        """, (user[1], email, ""))
+        db.commit()
+    except Exception as e:
+        print("Activity log error:", e)
+
+    cursor.close()
+    db.close()
+
+    ensure_user_table(user[1], user[0])
+    create_user_product_activity_table(user[1], user[0])
+
+    session.clear()
+    session["user_id"]       = user[0]
+    session["user_obj_id"]   = user[0]
+    session["username"]      = user[1]
+    session["user_email"]    = email
+    session["flash_message"] = f"🎉 Login Successful, {user[1]} 😊"
+
+    return jsonify({"success": True})
+
+
 
 # ============================================================
 # ROUTES — PAGES
