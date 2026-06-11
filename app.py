@@ -516,9 +516,9 @@ def signup():
 
             # Save to user table (for login auth)
             cursor.execute("""
-                INSERT INTO user (username, email, password)
-                VALUES (%s, %s, %s)
-            """, (username, email, password))
+                INSERT INTO user (username, email, password, action)
+                VALUES (%s, %s, %s, %s)
+            """, (username, email, password, "email"))  # ← action added
             user_id = cursor.lastrowid
             print(f"✅ user inserted: id={user_id}, username={username}, email={email}")
 
@@ -526,9 +526,9 @@ def signup():
             try:
                 cursor.execute("""
                     INSERT INTO user_activity
-                    (username, email, password, mode, action_date, action_time)
-                    VALUES (%s, %s, %s, 'signup', CURDATE(), CURTIME())
-                """, (username, email, password))
+                    (username, email, password, mode, action, action_date, action_time)
+                    VALUES (%s, %s, %s, 'signup', %s, CURDATE(), CURTIME())
+                """, (username, email, password, "email"))  # ← action added
                 print("✅ user_activity signup logged")
             except Exception as e:
                 print("❌ user_activity log error:", e)
@@ -626,7 +626,6 @@ def login():
 
 
 #===============================firebase==================
-
 @app.route("/auth/firebase-login", methods=["POST"])
 def firebase_login():
     data     = request.get_json()
@@ -635,7 +634,7 @@ def firebase_login():
     uid      = data.get("uid", "").strip()
     provider = data.get("provider", "").strip()
     source   = data.get("source", "").strip()
-    password = data.get("password", "").strip()  # ← ADD THIS LINE HERE
+    password = data.get("password", "").strip()
 
     db     = get_db_connection()
     cursor = db.cursor()
@@ -650,9 +649,9 @@ def firebase_login():
 
             cursor.execute("""
                 INSERT INTO user_activity
-                (username, email, password, mode, action_date, action_time)
-                VALUES (%s, %s, %s, %s, CURDATE(), CURTIME())
-            """, (username, email, password, provider))  # ← CHANGE "" TO password HERE
+                (username, email, password, mode, action, action_date, action_time)
+                VALUES (%s, %s, %s, %s, %s, CURDATE(), CURTIME())
+            """, (username, email, password, provider, provider))  # ← action added
             user_id = cursor.lastrowid
 
             ensure_user_table(username, user_id)
@@ -677,9 +676,9 @@ def firebase_login():
 
             if not existing:
                 cursor.execute("""
-                    INSERT INTO user (username, email, password)
-                    VALUES (%s, %s, %s)
-                """, (username, email, ""))
+                    INSERT INTO user (username, email, password, action)
+                    VALUES (%s, %s, %s, %s)
+                """, (username, email, "", provider))  # ← action added
                 user_id = cursor.lastrowid
             else:
                 user_id  = existing[0]
@@ -687,9 +686,9 @@ def firebase_login():
 
             cursor.execute("""
                 INSERT INTO user_activity
-                (username, email, password, mode, action_date, action_time)
-                VALUES (%s, %s, %s, 'login', CURDATE(), CURTIME())
-            """, (username, email, ""))
+                (username, email, password, mode, action, action_date, action_time)
+                VALUES (%s, %s, %s, 'login', %s, CURDATE(), CURTIME())
+            """, (username, email, "", provider))  # ← action added
 
             ensure_user_table(username, user_id)
             create_user_product_activity_table(username, user_id)
@@ -720,7 +719,6 @@ def firebase_login():
             pass
         return jsonify({"success": False, "message": str(e)})
 
-
 #=========================login github entry  ====================
 
 # ── Verify OTP ──
@@ -750,9 +748,9 @@ def verify_otp():
     try:
         cursor.execute("""
             INSERT INTO user_activity
-            (username, email, password, mode, action_date, action_time)
-            VALUES (%s, %s, %s, 'login', CURDATE(), CURTIME())
-        """, (user[1], email, ""))
+            (username, email, password, mode, action, action_date, action_time)
+            VALUES (%s, %s, %s, 'login', %s, CURDATE(), CURTIME())
+        """, (user[1], email, "", "github"))  # ← action added
         db.commit()
     except Exception as e:
         print("Activity log error:", e)
@@ -768,7 +766,6 @@ def verify_otp():
     session["flash_message"] = f"🎉 Login Successful, {user[1]} 😊"
 
     return jsonify({"success": True})
-
 
 # ── Flask email/password login (JSON) ──
 @app.route("/auth/flask-login", methods=["POST"])
@@ -795,9 +792,9 @@ def flask_login():
     try:
         cursor.execute("""
             INSERT INTO user_activity
-            (username, email, password, mode, action_date, action_time)
-            VALUES (%s, %s, %s, 'login', CURDATE(), CURTIME())
-        """, (user[1], email, ""))
+            (username, email, password, mode, action, action_date, action_time)
+            VALUES (%s, %s, %s, 'login', %s, CURDATE(), CURTIME())
+        """, (user[1], email, "", "email"))  # ← action added
         db.commit()
     except Exception as e:
         print("Activity log error:", e)
