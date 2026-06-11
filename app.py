@@ -757,8 +757,9 @@ def verify_otp():
             ON DUPLICATE KEY UPDATE username=username
         """, (user[1], email, "", "github"))
         db.commit()
+        print(f"✅ user table insert success: {email}")
     except Exception as e:
-        print("Activity log error:", e)
+        print(f"❌ user table insert error: {e}")
 
     cursor.close()
     db.close()
