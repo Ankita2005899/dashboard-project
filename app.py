@@ -487,12 +487,14 @@ def signup():
         cursor = db.cursor()
 
         try:
-            cursor.execute("SELECT id FROM user WHERE email=%s", (email,))
-            if cursor.fetchone():
-                cursor.close()
-                db.close()
-                return render_template("signup.html",
-                    error="This email is already registered. Try logging in.")
+            cursor.execute("SELECT id, password FROM user WHERE email=%s", (email,))
+            existing = cursor.fetchone()
+            if existing:
+                if existing[1] == password:
+                    cursor.close()
+                    db.close()
+                    return render_template("signup.html",
+                        error="This email is already registered. Try logging in.")
 
             auto_pwd = None
             try:
