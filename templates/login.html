@@ -507,6 +507,28 @@ a:hover { text-decoration: underline; }
                 </div>
             </div>
 
+            <!-- GitHub checkbox -->
+            <div style="display:flex;align-items:center;gap:8px;margin:-4px 0 10px 2px;">
+                <input type="checkbox" id="githubCheck" style="width:15px;height:15px;accent-color:#FF6B2B;cursor:pointer;">
+                <label for="githubCheck" style="font-size:12px;color:var(--muted);cursor:pointer;user-select:none;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:3px;"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                    Signed up with GitHub? Login with OTP
+                </label>
+            </div>
+
+            <!-- OTP field — hidden by default -->
+            <div class="field" id="otpField" style="display:none;">
+                <label for="otp">Enter OTP sent to your email</label>
+                <div class="input-wrap">
+                    <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="6" width="20" height="12" rx="2"/>
+                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                    <input type="text" id="otp" placeholder="Enter 6-digit OTP" maxlength="6" autocomplete="off">
+                    <div class="focus-bar"></div>
+                </div>
+            </div>
+
             <!-- Password -->
             <div class="field">
                 <label for="password">Password</label>
@@ -515,20 +537,7 @@ a:hover { text-decoration: underline; }
                         <rect x="3" y="11" width="18" height="11" rx="2"/>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
-                    <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="new-password">
-                    <div class="focus-bar"></div>
-                </div>
-            </div>
-
-            <!-- OTP field — hidden by default, shown for GitHub users -->
-            <div class="field" id="otpField" style="display:none;">
-                <label for="otp">Enter OTP sent to your email</label>
-                <div class="input-wrap">
-                    <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="6" width="20" height="12" rx="2"/>
-                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                    </svg>
-                    <input type="text" id="otp" name="otp" placeholder="Enter 6-digit OTP" maxlength="6" autocomplete="off">
+                    <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="new-password" required>
                     <div class="focus-bar"></div>
                 </div>
             </div>
@@ -730,107 +739,112 @@ a:hover { text-decoration: underline; }
         setTimeout(function () { b.classList.remove('show'); }, 6000);
     }
 
-    var otpPending = false; // tracks if we are in OTP verification mode
+    var otpSent = false;
+
+    // Show/hide password field based on checkbox
+    document.getElementById('githubCheck').addEventListener('change', function () {
+        var pwField  = document.getElementById('password').closest('.field');
+        var otpField = document.getElementById('otpField');
+        if (this.checked) {
+            pwField.style.display  = 'none';
+            otpField.style.display = 'none';
+            otpSent = false;
+            document.getElementById('loginBtn').textContent = 'Send OTP →';
+        } else {
+            pwField.style.display  = 'block';
+            otpField.style.display = 'none';
+            otpSent = false;
+            document.getElementById('loginBtn').textContent = 'Login →';
+        }
+    });
 
     function handleEmailLogin() {
-        var email = document.getElementById('email').value.trim();
-        var pw    = document.getElementById('password').value;
-        var otp   = document.getElementById('otp').value.trim();
-        var btn   = document.getElementById('loginBtn');
+        var email     = document.getElementById('email').value.trim();
+        var btn       = document.getElementById('loginBtn');
+        var isGithub  = document.getElementById('githubCheck').checked;
 
         if (!email) { showMsg('Please enter your email address.', 'error'); return; }
 
-        // ── OTP verification mode ──
-        if (otpPending) {
-            if (!otp) { showMsg('Please enter the OTP sent to your email.', 'error'); return; }
-            btn.disabled = true;
-            btn.textContent = 'Verifying OTP...';
-            fetch('/auth/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email, otp: otp })
-            })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                if (data.success) {
-                    showMsg('OTP verified! Redirecting...', 'success');
-                    setTimeout(function () { window.location.href = '/home'; }, 1000);
-                } else {
-                    showMsg(data.message || 'Invalid OTP. Please try again.', 'error');
-                    resetBtn();
-                }
-            })
-            .catch(function () {
-                showMsg('Something went wrong. Please try again.', 'error');
-                resetBtn();
-            });
-            return;
-        }
+        // ── GitHub OTP flow ──
+        if (isGithub) {
+            var otp = document.getElementById('otp').value.trim();
 
-        // ── Normal email/password login ──
-        if (!pw) { showMsg('Please enter your password.', 'error'); return; }
-
-        btn.disabled = true;
-        btn.textContent = 'Signing in...';
-
-        // First check if this is a GitHub user
-        fetch('/auth/check-login-type', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email })
-        })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.type === 'github') {
-                // Send OTP and show OTP field
-                return fetch('/auth/send-otp', {
+            if (otpSent) {
+                // Step 2 — verify OTP
+                if (!otp) { showMsg('Please enter the OTP sent to your email.', 'error'); return; }
+                btn.disabled = true;
+                btn.textContent = 'Verifying...';
+                fetch('/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, otp: otp })
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        showMsg('OTP verified! Redirecting...', 'success');
+                        setTimeout(function () { window.location.href = '/home'; }, 1000);
+                    } else {
+                        showMsg(data.message || 'Invalid OTP.', 'error');
+                        resetBtn('Verify OTP →');
+                    }
+                })
+                .catch(function () { showMsg('Something went wrong.', 'error'); resetBtn('Verify OTP →'); });
+            } else {
+                // Step 1 — send OTP
+                btn.disabled = true;
+                btn.textContent = 'Sending OTP...';
+                fetch('/auth/send-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email })
                 })
                 .then(function (r) { return r.json(); })
-                .then(function (otpData) {
-                    if (otpData.success) {
-                        otpPending = true;
+                .then(function (data) {
+                    if (data.success) {
+                        otpSent = true;
                         document.getElementById('otpField').style.display = 'block';
-                        document.getElementById('password').closest('.field').style.display = 'none';
-                        btn.disabled = false;
-                        btn.textContent = 'Verify OTP →';
                         showMsg('OTP sent to ' + email + '. Check your inbox!', 'success');
+                        resetBtn('Verify OTP →');
                     } else {
-                        showMsg(otpData.message || 'Failed to send OTP.', 'error');
-                        resetBtn();
+                        showMsg(data.message || 'Failed to send OTP.', 'error');
+                        resetBtn('Send OTP →');
                     }
-                });
-            } else {
-                // Normal email/password login via Flask
-                return fetch('/auth/flask-login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, password: pw })
                 })
-                .then(function (r) { return r.json(); })
-                .then(function (loginData) {
-                    if (loginData.success) {
-                        showMsg('Login successful! Redirecting...', 'success');
-                        setTimeout(function () { window.location.href = '/home'; }, 1000);
-                    } else {
-                        showMsg(loginData.message || 'Login failed.', 'error');
-                        resetBtn();
-                    }
-                });
+                .catch(function () { showMsg('Something went wrong.', 'error'); resetBtn('Send OTP →'); });
+            }
+            return;
+        }
+
+        // ── Normal email/password login ──
+        var pw = document.getElementById('password').value;
+        if (!pw) { showMsg('Please enter your password.', 'error'); return; }
+
+        btn.disabled = true;
+        btn.textContent = 'Signing in...';
+
+        fetch('/auth/flask-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, password: pw })
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                showMsg('Login successful! Redirecting...', 'success');
+                setTimeout(function () { window.location.href = '/home'; }, 1000);
+            } else {
+                showMsg(data.message || 'Login failed.', 'error');
+                resetBtn('Login →');
             }
         })
-        .catch(function () {
-            showMsg('Something went wrong. Please try again.', 'error');
-            resetBtn();
-        });
+        .catch(function () { showMsg('Something went wrong.', 'error'); resetBtn('Login →'); });
     }
 
-    function resetBtn() {
+    function resetBtn(text) {
         var btn = document.getElementById('loginBtn');
         btn.disabled = false;
-        btn.textContent = 'Login →';
+        btn.textContent = text || 'Login →';
     }
 
     function friendlyLogin(code) {
