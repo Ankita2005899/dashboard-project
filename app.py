@@ -633,11 +633,13 @@ def firebase_login():
     try:
         if source == "signup":
             cursor.execute("SELECT id FROM user_activity WHERE email=%s", (email,))
-            if cursor.fetchone():
+            existing = cursor.fetchone()
+            cursor.fetchall()  # ← clear unread results
+            if existing:
                 cursor.close()
                 db.close()
                 return jsonify({"success": False, "message": "This email is already registered. Try logging in."})
-
+          
             cursor.execute("""
                 INSERT INTO user_activity
                 (username, email, password, mode, action, action_date, action_time)
