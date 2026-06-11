@@ -487,7 +487,6 @@ def signup():
         cursor = db.cursor()
 
         try:
-            # Check if email already exists in user table
             cursor.execute("SELECT id FROM user WHERE email=%s", (email,))
             if cursor.fetchone():
                 cursor.close()
@@ -495,7 +494,6 @@ def signup():
                 return render_template("signup.html",
                     error="This email is already registered. Try logging in.")
 
-            # Check strong password table
             auto_pwd = None
             try:
                 cursor.execute("""
@@ -507,37 +505,32 @@ def signup():
                 print("strong_password table error:", e)
                 auto_pwd = None
 
-            # Check password strength
             if not auto_pwd and not is_strong_password(password):
                 cursor.close()
                 db.close()
                 return render_template("signup.html",
                     error="❌ Weak password. Need 8+ chars, 1 uppercase, 1 lowercase, 1 digit, 3 special chars")
 
-            # Save to user table (for login auth)
             cursor.execute("""
                 INSERT INTO user (username, email, password, action)
                 VALUES (%s, %s, %s, %s)
-            """, (username, email, password, "email"))  # ← action added
+            """, (username, email, password, "manual"))  # ← changed
             user_id = cursor.lastrowid
             print(f"✅ user inserted: id={user_id}, username={username}, email={email}")
 
-            # Save to user_activity table (for logging)
             try:
                 cursor.execute("""
                     INSERT INTO user_activity
                     (username, email, password, mode, action, action_date, action_time)
                     VALUES (%s, %s, %s, 'signup', %s, CURDATE(), CURTIME())
-                """, (username, email, password, "email"))  # ← action added
+                """, (username, email, password, "manual"))  # ← changed
                 print("✅ user_activity signup logged")
             except Exception as e:
                 print("❌ user_activity log error:", e)
 
-            # Create personal tables
             ensure_user_table(username, user_id)
             create_user_product_activity_table(username, user_id)
 
-            # Mark pre-approved password as used
             if auto_pwd:
                 cursor.execute("""
                     UPDATE strong_password SET is_used=1
@@ -582,7 +575,6 @@ def login():
         db     = get_db_connection()
         cursor = db.cursor()
 
-        # Verify from user table
         cursor.execute("SELECT id, username, password FROM user WHERE email=%s", (email,))
         user = cursor.fetchone()
 
@@ -601,13 +593,12 @@ def login():
         session["username"]    = user[1]
         session["user_obj_id"] = user[0]
 
-        # Log login to user_activity
         try:
             cursor.execute("""
                 INSERT INTO user_activity
                 (username, email, password, mode, action, action_date, action_time)
                 VALUES (%s, %s, %s, 'login', %s, CURDATE(), CURTIME())
-            """, (user[1], email, "", "email"))
+            """, (user[1], email, "", "manual"))  # ← changed
             print("✅ user_activity login logged")
         except Exception as e:
             print("❌ user_activity login log error:", e)
@@ -794,7 +785,7 @@ def flask_login():
             INSERT INTO user_activity
             (username, email, password, mode, action, action_date, action_time)
             VALUES (%s, %s, %s, 'login', %s, CURDATE(), CURTIME())
-        """, (user[1], email, "", "email"))  # ← action added
+        """, (user[1], email, "", "manual"))  # ← changed
         db.commit()
     except Exception as e:
         print("Activity log error:", e)
