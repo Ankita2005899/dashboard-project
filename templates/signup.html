@@ -1062,7 +1062,19 @@
         // GitHub
         document.getElementById('ghBtn').addEventListener('click', function () {
             showMsg('Opening GitHub sign-in...', 'success');
+            githubProvider.setCustomParameters({ 'allow_signup': 'true' });
             auth.signInWithPopup(githubProvider)
+                .catch(function(e) {
+                    if (e.code === 'auth/account-exists-with-different-credential') {
+                    // Get the email and link accounts
+                    var email = e.email;
+                    auth.fetchSignInMethodsForEmail(email).then(function(methods) {
+                        showMsg('This email is already registered with ' + methods[0] + '. Please use that to sign in.', 'error');
+                    });
+                    return Promise.reject(e);
+                }
+                return Promise.reject(e);
+            })
                 .then(function (result) {
                     var user = result.user;
                     return fetch('/auth/firebase-login', {
@@ -1081,9 +1093,43 @@
                     }
                 })
                 .catch(function (e) {
-                    console.error('GitHub error:', e);
-                    showMsg('Error: ' + (e.message || e.code), 'error');
-                });
+    console.error('GitHub error:', e);
+    if (e.code === 'auth/account-exists-with-different-credential') {
+        // Firebase has this email with another provider
+        // But we still want to allow GitHub signup if not in our user_activity
+        var email = e.email || '';
+        if (!email) {
+            showMsg('GitHub sign-in failed. Please try again.', 'error');
+            return;
+        }
+        // Call our backend to check and register
+        fetch('/auth/firebase-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: email,
+                username: email.split('@')[0],
+                uid: '',
+                provider: 'github',
+                source: 'signup'
+            })
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                showMsg('Account created! Redirecting...', 'success');
+                setTimeout(function () { window.location.href = '/home'; }, 1000);
+            } else {
+                showMsg(data.message || 'Server error', 'error');
+            }
+        })
+        .catch(function () {
+            showMsg('Something went wrong. Please try again.', 'error');
+        });
+    } else {
+        showMsg('Error: ' + (e.message || e.code), 'error');
+    }
+});
         });
 
         // Password toggles
