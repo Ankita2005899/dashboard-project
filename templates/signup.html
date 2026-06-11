@@ -808,25 +808,6 @@ a:hover { text-decoration: underline; }
         if (!pw) { showMsg('Password cannot be empty.', 'error'); return; }
         if (pw !== cpw) { showMsg('Passwords do not match.', 'error'); return; }
 
-        var pattern = /^(?=(.*[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]){3,})(?=(.*\d){2,})(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
-        if (!autoApplied && !pattern.test(pw)) {
-            weakAttempts++;
-            showMsg('Password must contain:<br>• 1 Uppercase &nbsp;• 1 Lowercase<br>• 2 Numbers &nbsp;• 3 Special characters<br>• Minimum 8 characters', 'error');
-            if (weakAttempts >= 2) {
-                if (!confirm('Your password is weak.\n\nDo you want us to generate a strong password?')) return;
-                fetch('/get-strong-password', { cache: 'no-store' })
-                    .then(function (r) { return r.json(); })
-                    .then(function (d) {
-                        if (!d.password) { alert('No strong passwords available'); return; }
-                        document.getElementById('password').value = d.password;
-                        document.getElementById('confirm_password').value = d.password;
-                        autoApplied = true; checkStrength();
-                        showMsg('Strong password auto-generated! Click Create Account again.', 'success');
-                    }).catch(function () { alert('Server error'); });
-            }
-            return;
-        }
-
         var btn = document.getElementById('submitBtn');
         btn.disabled = true;
         btn.textContent = 'Creating...';
