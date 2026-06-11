@@ -595,15 +595,7 @@ def login():
         session["username"]    = user[1]
         session["user_obj_id"] = user[0]
 
-        try:
-            cursor.execute("""
-                INSERT INTO user_activity
-                (username, email, password, mode, action, action_date, action_time)
-                VALUES (%s, %s, %s, 'login', %s, CURDATE(), CURTIME())
-            """, (user[1], email, "", "manual"))  # ← changed
-            print("✅ user_activity login logged")
-        except Exception as e:
-            print("❌ user_activity login log error:", e)
+    
 
         db.commit()
         cursor.close()
@@ -636,17 +628,17 @@ def firebase_login():
         if source == "signup":
             cursor.execute("SELECT id FROM user_activity WHERE email=%s", (email,))
             existing = cursor.fetchone()
-            cursor.fetchall()  # ← clear unread results
+            cursor.fetchall()
             if existing:
                 cursor.close()
                 db.close()
                 return jsonify({"success": False, "message": "This email is already registered. Try logging in."})
-          
+
             cursor.execute("""
                 INSERT INTO user_activity
                 (username, email, password, mode, action, action_date, action_time)
                 VALUES (%s, %s, %s, %s, %s, CURDATE(), CURTIME())
-            """, (username, email, password, provider, provider))  # ← action added
+            """, (username, email, password, provider, provider))
             user_id = cursor.lastrowid
 
             ensure_user_table(username, user_id)
@@ -666,24 +658,28 @@ def firebase_login():
             return jsonify({"success": True})
 
         elif source == "login":
-            cursor.execute("SELECT id, username FROM user WHERE email=%s", (email,))
+            # Check if email exists in user_activity with action='google'
+            cursor.execute("""
+                SELECT id, username FROM user_activity 
+                WHERE email=%s AND action='google'
+                ORDER BY id ASC LIMIT 1
+            """, (email,))
             existing = cursor.fetchone()
+            cursor.fetchall()
 
             if not existing:
-                cursor.execute("""
-                    INSERT INTO user (username, email, password, action)
-                    VALUES (%s, %s, %s, %s)
-                """, (username, email, "", provider))  # ← action added
-                user_id = cursor.lastrowid
-            else:
-                user_id  = existing[0]
-                username = existing[1]
+                cursor.close()
+                db.close()
+                return jsonify({"success": False, "message": "No Google account found. Please sign up first."})
+
+            user_id  = existing[0]
+            username = existing[1]
 
             cursor.execute("""
                 INSERT INTO user_activity
                 (username, email, password, mode, action, action_date, action_time)
                 VALUES (%s, %s, %s, 'login', %s, CURDATE(), CURTIME())
-            """, (username, email, "", provider))  # ← action added
+            """, (username, email, "", "google"))
 
             ensure_user_table(username, user_id)
             create_user_product_activity_table(username, user_id)
