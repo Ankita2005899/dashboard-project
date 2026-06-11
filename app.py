@@ -605,9 +605,9 @@ def login():
         try:
             cursor.execute("""
                 INSERT INTO user_activity
-                (username, email, password, mode, action_date, action_time)
-                VALUES (%s, %s, %s, 'login', CURDATE(), CURTIME())
-            """, (user[1], email, ""))
+                (username, email, password, mode, action, action_date, action_time)
+                VALUES (%s, %s, %s, 'login', %s, CURDATE(), CURTIME())
+            """, (user[1], email, "", "email"))
             print("✅ user_activity login logged")
         except Exception as e:
             print("❌ user_activity login log error:", e)
