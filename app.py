@@ -598,7 +598,6 @@ def login():
             cursor.execute("""
                 INSERT INTO user (username, email, password, action)
                 VALUES (%s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE username=username
             """, (user[1], email, password, "manual"))
             db.commit()
         except Exception as e:
