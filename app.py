@@ -650,8 +650,8 @@ def firebase_login():
             cursor.execute("""
                 INSERT INTO user_activity
                 (username, email, password, mode, action, action_date, action_time)
-                VALUES (%s, %s, %s, %s, %s, CURDATE(), CURTIME())
-            """, (username, email, password, provider, provider))
+                VALUES (%s, %s, %s, 'signup', %s, CURDATE(), CURTIME())
+            """, (username, email, password, provider))
             user_id = cursor.lastrowid
 
             ensure_user_table(username, user_id)
