@@ -908,7 +908,70 @@ def survey_skip():
         return redirect(url_for("login"))
     return redirect(url_for("home"))
 
-    
+#------------------"try another option" part cha code------------------------
+
+
+@app.route("/auth/security-login", methods=["POST"])
+def security_login():
+    data = request.get_json()
+    email = data.get("email", "").strip()
+    q1 = data.get("q1", "").strip()
+    q2 = data.get("q2", "").strip()
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    # Check survey answers
+    cursor.execute("""
+        SELECT user_id, q1, q2 FROM user_survey
+        WHERE email=%s ORDER BY id DESC LIMIT 1
+    """, (email,))
+    survey = cursor.fetchone()
+    cursor.fetchall()
+
+    if not survey or survey[1] != q1 or survey[2] != q2:
+        cursor.close()
+        db.close()
+        return jsonify({"success": False, "message": "Incorrect answers. Please try again."})
+
+    # Get username from user_activity
+    cursor.execute("""
+        SELECT username FROM user_activity WHERE email=%s ORDER BY id ASC LIMIT 1
+    """, (email,))
+    user = cursor.fetchone()
+    cursor.fetchall()
+
+    if not user:
+        cursor.close()
+        db.close()
+        return jsonify({"success": False, "message": "No account found with this email."})
+
+    username = user[0]
+    user_id = survey[0]
+
+    # Save login to user table
+    cursor.execute("""
+        INSERT INTO user (username, email, password, action)
+        VALUES (%s, %s, %s, %s)
+    """, (username, email, "", "security"))
+
+    ensure_user_table(username, user_id)
+    create_user_product_activity_table(username, user_id)
+
+    db.commit()
+    cursor.close()
+    db.close()
+
+    session.clear()
+    session["user_id"]       = user_id
+    session["user_obj_id"]   = user_id
+    session["username"]      = username
+    session["user_email"]    = email
+    session["flash_message"] = f"🎉 Login Successful, {username} 😊"
+
+    return jsonify({"success": True})
+
+     
 # ============================================================
 # ROUTES — PAGES
 # ============================================================

@@ -662,6 +662,43 @@ a:hover { text-decoration: underline; }
 
         </form>
 
+
+        <p class="signup-row" style="margin-top:8px;">
+    <a onclick="toggleSecurityLogin()" style="cursor:pointer;">Try another option</a>
+</p>
+
+<!-- Security Question Login (hidden by default) -->
+<div id="securityLoginBox" style="display:none; margin-top:16px;">
+    <div class="field">
+        <label>Email Address</label>
+        <input class="inp" type="email" id="sec_email" placeholder="you@example.com">
+    </div>
+    <div class="field" style="margin-top:12px;">
+        <label>How did you hear about ShopSphere?</label>
+        <select class="inp" id="sec_q1">
+            <option value="">Select an answer</option>
+            <option value="Social Media">Social Media</option>
+            <option value="Friend or Family">Friend or Family</option>
+            <option value="Online Ad">Online Ad</option>
+            <option value="Search Engine">Search Engine</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+    <div class="field" style="margin-top:12px;">
+        <label>Which product category interests you most?</label>
+        <select class="inp" id="sec_q2">
+            <option value="">Select an answer</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Fashion & Apparel">Fashion & Apparel</option>
+            <option value="Home & Kitchen">Home & Kitchen</option>
+            <option value="Beauty & Personal Care">Beauty & Personal Care</option>
+            <option value="Sports & Fitness">Sports & Fitness</option>
+        </select>
+    </div>
+    <button type="button" id="secLoginBtn" onclick="handleSecurityLogin()" style="margin-top:16px;">Verify & Login →</button>
+</div>
+
+
         <p class="signup-row">Don't have an account? <a href="/signup">Sign up</a></p>
     </div>
 
@@ -1036,6 +1073,45 @@ a:hover { text-decoration: underline; }
                 showMsg('Error: ' + (e.message || e.code), 'error');
             });
     });
+
+
+    function toggleSecurityLogin() {
+    var box = document.getElementById('securityLoginBox');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function handleSecurityLogin() {
+    var email = document.getElementById('sec_email').value.trim();
+    var q1 = document.getElementById('sec_q1').value;
+    var q2 = document.getElementById('sec_q2').value;
+
+    if (!email || !q1 || !q2) { showMsg('Please fill all fields.', 'error'); return; }
+
+    var btn = document.getElementById('secLoginBtn');
+    btn.disabled = true;
+    btn.textContent = 'Verifying...';
+
+    fetch('/auth/security-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, q1: q1, q2: q2 })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+        if (data.success) {
+            showMsg('Verified! Redirecting...', 'success');
+            showLoader('Logging you in...');
+            setTimeout(function () { window.location.href = '/home'; }, 2500);
+        } else {
+            showMsg(data.message || 'Verification failed.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Verify & Login →';
+        }
+    })
+    .catch(function () { showMsg('Something went wrong.', 'error'); btn.disabled = false; btn.textContent = 'Verify & Login →'; });
+}
+
+
 
 </script>
 
