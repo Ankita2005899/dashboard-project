@@ -692,7 +692,6 @@ def firebase_login():
             cursor.execute("""
                 INSERT INTO user (username, email, password, action)
                 VALUES (%s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE username=username
             """, (username, email, "", "google"))
 
             ensure_user_table(username, user_id)
@@ -754,7 +753,6 @@ def verify_otp():
         cursor.execute("""
             INSERT INTO user (username, email, password, action)
             VALUES (%s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE username=username
         """, (user[1], email, "", "github"))
         db.commit()
         print(f"✅ user table insert success: {email}")
@@ -807,7 +805,6 @@ def flask_login():
         cursor.execute("""
             INSERT INTO user (username, email, password, action)
             VALUES (%s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE username=username
         """, (user[1], email, password, "manual"))
         db.commit()
     except Exception as e:
