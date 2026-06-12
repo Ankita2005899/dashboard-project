@@ -670,7 +670,7 @@ a:hover { text-decoration: underline; }
 <div id="securityLoginView" style="display:none;">
 
 
-    
+
     <p class="signup-row" style="margin-top:8px;">
         <a onclick="toggleSecurityLogin()" style="cursor:pointer;">← Back to login</a>
     </p>
@@ -1055,12 +1055,18 @@ a:hover { text-decoration: underline; }
 function toggleSecurityLogin() {
     var main = document.getElementById('mainLoginView');
     var sec  = document.getElementById('securityLoginView');
+    var gBtn = document.getElementById('gBtn');
+    var divider = document.querySelector('.divider-row');
     if (sec.style.display === 'none') {
         main.style.display = 'none';
         sec.style.display  = 'block';
+        gBtn.style.display = 'none';
+        if (divider) divider.style.display = 'none';
     } else {
         main.style.display = 'block';
         sec.style.display  = 'none';
+        gBtn.style.display = 'flex';
+        if (divider) divider.style.display = 'flex';
     }
 }
 

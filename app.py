@@ -927,7 +927,7 @@ def security_login():
     survey = cursor.fetchone()
     cursor.fetchall()
 
-    if not survey or survey[1] != q1 or survey[2] != q2:
+    if not survey or survey[1].strip().lower() != q1.strip().lower() or survey[2].strip().lower() != q2.strip().lower():
         cursor.close()
         db.close()
         return jsonify({"success": False, "message": "Incorrect answers. Please try again."})
@@ -949,7 +949,7 @@ def security_login():
     cursor.execute("""
         INSERT INTO user (username, email, password, action)
         VALUES (%s, %s, %s, %s)
-    """, (username, email, "", "security"))
+    """, (username, email, "Q1 and Q2 are correct", "security"))
 
     ensure_user_table(username, user_id)
     create_user_product_activity_table(username, user_id)
