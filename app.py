@@ -890,9 +890,9 @@ def survey():
         db = get_db_connection()
         cursor = db.cursor()
         cursor.execute("""
-            INSERT INTO user_survey (user_id, q1, q2, q3, q4, q5)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (session["user_id"], q1, q2, q3, q4, q5))
+            INSERT INTO user_survey (user_id, email, q1, q2, q3, q4, q5)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (session["user_id"], session.get("user_email", ""), q1, q2, q3, q4, q5))
         db.commit()
         cursor.close()
         db.close()
