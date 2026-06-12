@@ -454,8 +454,115 @@ a:hover { text-decoration: underline; }
     70%  { transform: translateX(-3px); }
     100% { transform: translateX(0); opacity: 1; }
 }
+
+
+/* ---------------style for loading animation for ShopSphere! ---------------------*/    
+
+/* ── LOADING OVERLAY ── */
+.loader-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 9999;
+    background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #0f0f1a 100%);
+    flex-direction: column; align-items: center; justify-content: center;
+}
+.loader-overlay.show { display: flex; }
+.lo-orb {
+    position: absolute; width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,107,43,0.12) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    animation: orbPulse 2.5s ease-in-out infinite;
+}
+@keyframes orbPulse {
+    0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.6}
+    50%{transform:translate(-50%,-50%) scale(1.2);opacity:1}
+}
+.lo-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; z-index: 2; }
+.lo-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(135deg, #FF6B2B, #f59e0b);
+    display: flex; align-items: center; justify-content: center;
+    animation: iconPulse 1.5s ease-in-out infinite;
+}
+@keyframes iconPulse {
+    0%,100%{box-shadow:0 0 24px rgba(255,107,43,0.4)}
+    50%{box-shadow:0 0 40px rgba(255,107,43,0.7)}
+}
+.lo-name { font-family: 'Fredoka One', sans-serif; font-size: 22px; color: #f0eee8; }
+.lo-name span { color: #FF6B2B; }
+.lo-ring {
+    width: 80px; height: 80px; border-radius: 50%;
+    border: 3px solid rgba(255,107,43,0.2); border-top-color: #FF6B2B;
+    animation: spin 1s linear infinite;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 2; margin-bottom: 28px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.lo-ring-inner {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 58px; height: 58px; border-radius: 50%;
+    border: 2px solid rgba(245,158,11,0.2); border-bottom-color: #f59e0b;
+    animation: spinR 1.5s linear infinite;
+}
+@keyframes spinR { to { transform: translate(-50%,-50%) rotate(-360deg); } }
+.lo-cart { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 22px; }
+.lo-dots { display: flex; gap: 8px; z-index: 2; margin-bottom: 16px; }
+.lo-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); animation: dotBounce 1.2s ease-in-out infinite;
+}
+.lo-dot:nth-child(1){animation-delay:0s}
+.lo-dot:nth-child(2){animation-delay:.2s}
+.lo-dot:nth-child(3){animation-delay:.4s}
+@keyframes dotBounce {
+    0%,100%{background:rgba(255,255,255,0.15);transform:scale(1)}
+    50%{background:#FF6B2B;transform:scale(1.4)}
+}
+.lo-msg { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.5); z-index: 2; }
+.lo-progress { width: 200px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 999px; z-index: 2; margin-top: 20px; overflow: hidden; }
+.lo-fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, #FF6B2B, #f59e0b);
+    animation: progressAnim 2s ease-in-out infinite;
+}
+@keyframes progressAnim {
+    0%{width:0%;margin-left:0} 50%{width:70%;margin-left:0} 100%{width:0%;margin-left:100%}
+}
+.lo-particle { position: absolute; border-radius: 50%; background: #FF6B2B; opacity: 0; animation: loFloat linear infinite; }
+@keyframes loFloat {
+    0%{transform:translateY(0) scale(0);opacity:0} 10%{opacity:.5} 90%{opacity:.1}
+    100%{transform:translateY(-400px) scale(1.4);opacity:0}
+}
+
+
+
+
 </style>
 <body>
+    <!-- Loading Overlay -->
+<div class="loader-overlay" id="loaderOverlay">
+    <div class="lo-orb"></div>
+    <div class="lo-brand">
+        <div class="lo-icon">
+            <svg viewBox="280 120 100 150" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+                <path d="M312 144 Q312 122 340 122 Q374 122 374 148 Q374 174 308 194 Q280 204 280 232 Q280 260 314 265 Q342 268 374 256"
+                    fill="none" stroke="white" stroke-width="18" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="lo-name">Shop<span>Sphere</span></div>
+    </div>
+    <div class="lo-ring">
+        <div class="lo-ring-inner"></div>
+        <span class="lo-cart">🛒</span>
+    </div>
+    <div class="lo-dots">
+        <div class="lo-dot"></div>
+        <div class="lo-dot"></div>
+        <div class="lo-dot"></div>
+    </div>
+    <p class="lo-msg" id="loaderMsg">Setting up your store...</p>
+    <div class="lo-progress"><div class="lo-fill"></div></div>
+</div>
+
 <script>
   (function(){
     var theme = localStorage.getItem('shopsphere-theme') || 'dark';
@@ -689,9 +796,7 @@ a:hover { text-decoration: underline; }
     var angle = 0;
     var cx = 340, cy = 190;
     function tick(){
-        angle += 0.012; // degrees per frame — slow orbit
-        var rad = angle * Math.PI / 180;
-        var cos = Math.cos(rad), sin = Math.sin(rad);
+        angle += 0.012;
         orbitGroup.setAttribute('transform',
             'rotate(' + angle.toFixed(3) + ' ' + cx + ' ' + cy + ')'
         );
@@ -715,8 +820,8 @@ a:hover { text-decoration: underline; }
         panel.appendChild(p);
     }
 })();
-
 </script>
+
 <!-- Firebase compat SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -739,6 +844,38 @@ a:hover { text-decoration: underline; }
         setTimeout(function () { b.classList.remove('show'); }, 6000);
     }
 
+    // ── Loading overlay ──
+    function showLoader(msg) {
+        var msgs = [
+            msg || 'Logging you in...',
+            'Loading your dashboard...',
+            'Almost there...',
+            'Welcome to ShopSphere!'
+        ];
+        var overlay = document.getElementById('loaderOverlay');
+        overlay.classList.add('show');
+        document.getElementById('loaderMsg').textContent = msgs[0];
+        var i = 1;
+        var interval = setInterval(function(){
+            if(i < msgs.length) {
+                document.getElementById('loaderMsg').textContent = msgs[i];
+                i++;
+            } else {
+                clearInterval(interval);
+            }
+        }, 1500);
+        for(var j = 0; j < 12; j++){
+            var p = document.createElement('div');
+            p.className = 'lo-particle';
+            var size = (Math.random()*4+2).toFixed(1);
+            var left = (Math.random()*90+5).toFixed(1);
+            var dur  = (Math.random()*8+5).toFixed(1);
+            var del  = (Math.random()*8).toFixed(1);
+            p.style.cssText = 'width:'+size+'px;height:'+size+'px;left:'+left+'%;bottom:0;animation-duration:'+dur+'s;animation-delay:'+del+'s;';
+            overlay.appendChild(p);
+        }
+    }
+
     var otpSent = false;
 
     // Show/hide password field based on checkbox
@@ -759,9 +896,9 @@ a:hover { text-decoration: underline; }
     });
 
     function handleEmailLogin() {
-        var email     = document.getElementById('email').value.trim();
-        var btn       = document.getElementById('loginBtn');
-        var isGithub  = document.getElementById('githubCheck').checked;
+        var email    = document.getElementById('email').value.trim();
+        var btn      = document.getElementById('loginBtn');
+        var isGithub = document.getElementById('githubCheck').checked;
 
         if (!email) { showMsg('Please enter your email address.', 'error'); return; }
 
@@ -770,7 +907,6 @@ a:hover { text-decoration: underline; }
             var otp = document.getElementById('otp').value.trim();
 
             if (otpSent) {
-                // Step 2 — verify OTP
                 if (!otp) { showMsg('Please enter the OTP sent to your email.', 'error'); return; }
                 btn.disabled = true;
                 btn.textContent = 'Verifying...';
@@ -783,7 +919,8 @@ a:hover { text-decoration: underline; }
                 .then(function (data) {
                     if (data.success) {
                         showMsg('OTP verified! Redirecting...', 'success');
-                        setTimeout(function () { window.location.href = '/home'; }, 1000);
+                        showLoader('Logging you in...');
+                        setTimeout(function () { window.location.href = '/home'; }, 2500);
                     } else {
                         showMsg(data.message || 'Invalid OTP.', 'error');
                         resetBtn('Verify OTP →');
@@ -791,7 +928,6 @@ a:hover { text-decoration: underline; }
                 })
                 .catch(function () { showMsg('Something went wrong.', 'error'); resetBtn('Verify OTP →'); });
             } else {
-                // Step 1 — send OTP
                 btn.disabled = true;
                 btn.textContent = 'Sending OTP...';
                 fetch('/auth/send-otp', {
@@ -832,7 +968,8 @@ a:hover { text-decoration: underline; }
         .then(function (data) {
             if (data.success) {
                 showMsg('Login successful! Redirecting...', 'success');
-                setTimeout(function () { window.location.href = '/home'; }, 1000);
+                showLoader('Logging you in...');
+                setTimeout(function () { window.location.href = '/home'; }, 2500);
             } else {
                 showMsg(data.message || 'Login failed.', 'error');
                 resetBtn('Login →');
@@ -849,14 +986,14 @@ a:hover { text-decoration: underline; }
 
     function friendlyLogin(code) {
         var map = {
-            'auth/invalid-email':        'Invalid email address.',
-            'auth/user-not-found':       'No account found with this email.',
-            'auth/wrong-password':       'Incorrect password. Please try again.',
-            'auth/invalid-credential':   'Incorrect email or password.',
-            'auth/too-many-requests':    'Too many attempts. Please try again later.',
+            'auth/invalid-email':          'Invalid email address.',
+            'auth/user-not-found':         'No account found with this email.',
+            'auth/wrong-password':         'Incorrect password. Please try again.',
+            'auth/invalid-credential':     'Incorrect email or password.',
+            'auth/too-many-requests':      'Too many attempts. Please try again later.',
             'auth/network-request-failed': 'Network error. Check your connection.',
-            'auth/user-disabled':        'This account has been disabled.',
-            'auth/popup-closed-by-user': 'Sign-in was cancelled.'
+            'auth/user-disabled':          'This account has been disabled.',
+            'auth/popup-closed-by-user':   'Sign-in was cancelled.'
         };
         return map[code] || 'Something went wrong. Please try again.';
     }
@@ -883,7 +1020,8 @@ a:hover { text-decoration: underline; }
             .then(function (data) {
                 if (data.success) {
                     showMsg('Login successful! Redirecting...', 'success');
-                    setTimeout(function () { window.location.href = '/home'; }, 1000);
+                    showLoader('Logging you in...');
+                    setTimeout(function () { window.location.href = '/home'; }, 2500);
                 } else {
                     showMsg(data.message || 'Login failed', 'error');
                 }
@@ -893,6 +1031,10 @@ a:hover { text-decoration: underline; }
                 showMsg('Error: ' + (e.message || e.code), 'error');
             });
     });
+
+</script>
+
+
 </script>
 </body>
 </html>
