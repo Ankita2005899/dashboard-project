@@ -601,7 +601,7 @@ a:hover { text-decoration: underline; }
                 onerror="this.outerHTML='<svg viewBox=\'0 0 24 24\' width=\'18\' height=\'18\'><path fill=\'#EA4335\' d=\'M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z\'/><path fill=\'#34A853\' d=\'M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z\'/><path fill=\'#FBBC05\' d=\'M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z\'/><path fill=\'#EA4335\' d=\'M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z\'/></svg>'">
             <span>Continue with Google</span>
         </button>
-
+    <div id="mainLoginView">
         <div class="divider-row"><span>or sign in with email</span></div>
 
         <form id="loginForm" autocomplete="off">
@@ -661,7 +661,7 @@ a:hover { text-decoration: underline; }
             <button type="button" id="loginBtn" onclick="handleEmailLogin()">Login →</button>
 
         </form>
-
+    </div>
 
         <p class="signup-row" style="margin-top:8px;">
     <a onclick="toggleSecurityLogin()" style="cursor:pointer;">Try another option</a>
@@ -699,7 +699,63 @@ a:hover { text-decoration: underline; }
 </div>
 
 
-        <p class="signup-row">Don't have an account? <a href="/signup">Sign up</a></p>
+        <p class="signup-row" style="margin-top:8px;">
+    <a onclick="toggleSecurityLogin()" style="cursor:pointer;">Try another option</a>
+</p>
+
+<!-- Security Question Login -->
+<div id="securityLoginView" style="display:none;">
+
+    <div class="field">
+        <label for="sec_email">Email Address</label>
+        <div class="input-wrap">
+            <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+            <input type="email" id="sec_email" placeholder="you@example.com" autocomplete="off">
+            <div class="focus-bar"></div>
+        </div>
+    </div>
+
+    <div class="field">
+        <label for="sec_q1">How did you hear about ShopSphere?</label>
+        <div class="input-wrap">
+            <select id="sec_q1" style="width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--input-color);background:var(--input-bg);outline:none;">
+                <option value="">Select an answer</option>
+                <option value="Social Media">Social Media</option>
+                <option value="Friend or Family">Friend or Family</option>
+                <option value="Online Ad">Online Ad</option>
+                <option value="Search Engine">Search Engine</option>
+                <option value="Other">Other</option>
+            </select>
+            <div class="focus-bar"></div>
+        </div>
+    </div>
+
+    <div class="field">
+        <label for="sec_q2">Which product category interests you most?</label>
+        <div class="input-wrap">
+            <select id="sec_q2" style="width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--input-color);background:var(--input-bg);outline:none;">
+                <option value="">Select an answer</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Fashion & Apparel">Fashion & Apparel</option>
+                <option value="Home & Kitchen">Home & Kitchen</option>
+                <option value="Beauty & Personal Care">Beauty & Personal Care</option>
+                <option value="Sports & Fitness">Sports & Fitness</option>
+            </select>
+            <div class="focus-bar"></div>
+        </div>
+    </div>
+
+    <button type="button" id="secLoginBtn" onclick="handleSecurityLogin()">Verify & Login →</button>
+
+    <p class="signup-row" style="margin-top:8px;">
+        <a onclick="toggleSecurityLogin()" style="cursor:pointer;">← Back to login</a>
+    </p>
+</div>
+
+
     </div>
 
     <!-- ══ RIGHT: ShopSphere logo panel ══ -->
@@ -1075,9 +1131,16 @@ a:hover { text-decoration: underline; }
     });
 
 
-    function toggleSecurityLogin() {
-    var box = document.getElementById('securityLoginBox');
-    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+function toggleSecurityLogin() {
+    var main = document.getElementById('mainLoginView');
+    var sec  = document.getElementById('securityLoginView');
+    if (sec.style.display === 'none') {
+        main.style.display = 'none';
+        sec.style.display  = 'block';
+    } else {
+        main.style.display = 'block';
+        sec.style.display  = 'none';
+    }
 }
 
 function handleSecurityLogin() {
@@ -1110,9 +1173,6 @@ function handleSecurityLogin() {
     })
     .catch(function () { showMsg('Something went wrong.', 'error'); btn.disabled = false; btn.textContent = 'Verify & Login →'; });
 }
-
-
-
 </script>
 
 

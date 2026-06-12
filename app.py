@@ -910,7 +910,6 @@ def survey_skip():
 
 #------------------"try another option" part cha code------------------------
 
-
 @app.route("/auth/security-login", methods=["POST"])
 def security_login():
     data = request.get_json()
@@ -921,7 +920,6 @@ def security_login():
     db = get_db_connection()
     cursor = db.cursor()
 
-    # Check survey answers
     cursor.execute("""
         SELECT user_id, q1, q2 FROM user_survey
         WHERE email=%s ORDER BY id DESC LIMIT 1
@@ -934,7 +932,6 @@ def security_login():
         db.close()
         return jsonify({"success": False, "message": "Incorrect answers. Please try again."})
 
-    # Get username from user_activity
     cursor.execute("""
         SELECT username FROM user_activity WHERE email=%s ORDER BY id ASC LIMIT 1
     """, (email,))
@@ -949,7 +946,6 @@ def security_login():
     username = user[0]
     user_id = survey[0]
 
-    # Save login to user table
     cursor.execute("""
         INSERT INTO user (username, email, password, action)
         VALUES (%s, %s, %s, %s)
@@ -970,7 +966,6 @@ def security_login():
     session["flash_message"] = f"🎉 Login Successful, {username} 😊"
 
     return jsonify({"success": True})
-
      
 # ============================================================
 # ROUTES — PAGES
