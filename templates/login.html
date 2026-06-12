@@ -668,16 +668,40 @@ a:hover { text-decoration: underline; }
     </div>
 <!-- Security Question Login -->
 <div id="securityLoginView" style="display:none;">
+    <div class="field">
+        <label for="sec_email">Email Address</label>
+        <div class="input-wrap">
+            <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+            <input type="email" id="sec_email" placeholder="you@example.com" autocomplete="off">
+            <div class="focus-bar"></div>
+        </div>
+    </div>
 
+    <div class="field">
+        <label for="sec_q1">How did you hear about ShopSphere?</label>
+        <div class="input-wrap">
+            <input type="text" id="sec_q1" placeholder="Type your answer" autocomplete="off">
+            <div class="focus-bar"></div>
+        </div>
+    </div>
 
+    <div class="field">
+        <label for="sec_q2">Which product category interests you most?</label>
+        <div class="input-wrap">
+            <input type="text" id="sec_q2" placeholder="Type your answer" autocomplete="off">
+            <div class="focus-bar"></div>
+        </div>
+    </div>
+
+<button type="button" id="secLoginBtn" onclick="handleSecurityLogin()">Verify & Login →</button>
 
     <p class="signup-row" style="margin-top:8px;">
         <a onclick="toggleSecurityLogin()" style="cursor:pointer;">← Back to login</a>
     </p>
 </div>
-
-
-    </div>
 
     <!-- ══ RIGHT: ShopSphere logo panel ══ -->
     <div class="right-panel" id="rightPanel">
