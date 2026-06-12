@@ -871,6 +871,43 @@ def send_otp():
     except Exception as e:
         print("❌ OTP send error:", e)
         return jsonify({"success": False, "message": "Failed to send OTP"})
+
+
+#------------------question page sathi --------------------------
+
+@app.route("/survey", methods=["GET", "POST"])
+def survey():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        q1 = request.form.get("q1", "")
+        q2 = request.form.get("q2", "")
+        q3 = request.form.get("q3", "")
+        q4 = request.form.get("q4", "")
+        q5 = request.form.get("q5", "")
+
+        db = get_db_connection()
+        cursor = db.cursor()
+        cursor.execute("""
+            INSERT INTO user_survey (user_id, q1, q2, q3, q4, q5)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (session["user_id"], q1, q2, q3, q4, q5))
+        db.commit()
+        cursor.close()
+        db.close()
+
+        return redirect(url_for("home"))
+
+    return render_template("survey.html")
+
+
+@app.route("/survey/skip")
+def survey_skip():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    return redirect(url_for("home"))
+
     
 # ============================================================
 # ROUTES — PAGES
