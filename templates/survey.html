@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Survey – ShopSphere</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka+One&display=swap"
+        rel="stylesheet">
+</head>
+<style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+        --orange: #FF6B2B;
+        --amber:  #f59e0b;
+        --dark:   #1a1a2e;
+        --muted:  #6b7280;
+        --border: #e5e7eb;
+        --surface:#f9fafb;
+        --body-bg: linear-gradient(135deg, #fde8d8 0%, #d4f4f8 50%, #f5e6ff 100%);
+        --card-bg: #ffffff;
+        --input-bg: #f9fafb;
+        --input-color: #1a1a2e;
+        --label-color: #374151;
+        --heading-color: #1a1a2e;
+        --subtitle-color: #6b7280;
+        --brand-color: #1a1a2e;
+        --grid-bg: linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+                   linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+        --grid-size: 60px 60px;
+    }
+
+    [data-theme="dark"] {
+        --body-bg: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #0f0f1a 100%);
+        --card-bg: #12121a;
+        --input-bg: #1e1e2e;
+        --input-color: #f0eee8;
+        --border: rgba(255,255,255,0.15);
+        --label-color: #a0a0b0;
+        --heading-color: #f0eee8;
+        --subtitle-color: #6a6a7a;
+        --brand-color: #f0eee8;
+        --muted: #6a6a7a;
+        --surface: #1e1e2e;
+        --dark: #f0eee8;
+        --grid-bg: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                   linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+        --grid-size: 60px 60px;
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--body-bg);
+        padding: 20px;
+        overflow: hidden;
+        transition: background 0.3s;
+        position: relative;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background-image: var(--grid-bg);
+        background-size: var(--grid-size);
+        pointer-events: none;
+    }
+
+    /* ── Floating e-commerce icons ── */
+    .float-icon {
+        position: fixed;
+        z-index: 0;
+        opacity: 0;
+        pointer-events: none;
+        animation: floatUpIcon linear infinite;
+        filter: blur(0.2px);
+    }
+    @keyframes floatUpIcon {
+        0%   { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
+        10%  { opacity: 0.18; }
+        50%  { transform: translateY(-50vh) rotate(15deg) scale(1.1); }
+        90%  { opacity: 0.10; }
+        100% { transform: translateY(-100vh) rotate(-10deg) scale(0.9); opacity: 0; }
+    }
+    [data-theme="dark"] .float-icon {
+        filter: blur(0.2px) brightness(1.6) drop-shadow(0 0 6px rgba(255,107,43,0.35));
+    }
+
+
+    .box {
+        position: relative;
+        z-index: 1;
+        width: 620px;
+        max-width: 100%;
+        background: var(--card-bg);
+        border-radius: 28px;
+        transition: background 0.3s;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.14);
+        padding: 44px 48px 40px;
+        animation: cardIn 0.7s cubic-bezier(.22,1,.36,1) both;
+        min-height: 480px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    @keyframes cardIn {
+        from { opacity: 0; transform: translateY(40px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .brand-mark {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .brand-icon {
+        width: 38px; height: 38px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--orange), var(--amber));
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 14px rgba(255,107,43,0.35);
+    }
+    .brand-icon svg { width: 24px; height: 24px; }
+    .brand-name {
+        font-family: 'Fredoka One', sans-serif;
+        font-size: 20px; color: var(--brand-color); letter-spacing: -0.3px;
+    }
+    .brand-name span { color: var(--orange); }
+
+    h2 {
+        font-size: 24px; font-weight: 800; color: var(--heading-color);
+        margin-bottom: 4px; line-height: 1.2;
+    }
+    .subtitle {
+        font-size: 13px; color: var(--subtitle-color); margin-bottom: 24px;
+    }
+
+    .progress-bar {
+        width: 100%; height: 6px; background: var(--border);
+        border-radius: 999px; margin-bottom: 28px; overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%; border-radius: 999px;
+        background: linear-gradient(90deg, var(--orange), var(--amber));
+        width: 20%; transition: width 0.4s ease;
+    }
+
+    /* ── Question steps ── */
+    .q-steps {
+        position: relative;
+        flex: 1;
+    }
+    .q-block {
+        display: none;
+        animation: fieldSlide 0.45s cubic-bezier(.22,1,.36,1) both;
+    }
+    .q-block.active { display: block; }
+    @keyframes fieldSlide {
+        from { opacity: 0; transform: translateX(24px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .q-title {
+        font-size: 17px; font-weight: 800; color: var(--heading-color);
+        margin-bottom: 18px; display: flex; align-items: center; gap: 10px;
+    }
+    .q-num {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 26px; height: 26px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--orange), var(--amber));
+        color: white; font-size: 13px; font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .opt-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+    }
+
+    .opt { position: relative; }
+    .opt input { position: absolute; opacity: 0; pointer-events: none; }
+    .opt label {
+        display: block;
+        padding: 16px 14px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        background: var(--input-bg);
+        color: var(--input-color);
+        font-size: 14px; font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s;
+    }
+    .opt label:hover {
+        border-color: var(--orange);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255,107,43,0.15);
+    }
+    .opt input:checked + label {
+        border-color: var(--orange);
+        background: linear-gradient(135deg, rgba(255,107,43,0.12), rgba(245,158,11,0.12));
+        color: var(--orange);
+        box-shadow: 0 4px 14px rgba(255,107,43,0.2);
+    }
+
+    /* ── Nav buttons ── */
+    .nav-row {
+        display: flex; gap: 12px; margin-top: 28px;
+    }
+    .main-btn {
+        flex: 1;
+        padding: 13px;
+        background: linear-gradient(135deg, var(--orange), var(--amber));
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px; font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        letter-spacing: 0.5px;
+        transition: transform 0.25s, box-shadow 0.25s;
+        box-shadow: 0 6px 20px rgba(255,107,43,0.3);
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .main-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,107,43,0.45); }
+    .main-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .back-btn {
+        flex: 0 0 110px;
+        padding: 13px;
+        background: var(--input-bg);
+        color: var(--label-color);
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font-size: 14px; font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .back-btn:hover { border-color: var(--orange); color: var(--orange); }
+    .back-btn:disabled { opacity: 0; pointer-events: none; }
+
+    .skip-row {
+        text-align: center; margin-top: 16px;
+        font-size: 12.5px; color: var(--subtitle-color);
+    }
+    .skip-row a { color: var(--orange); text-decoration: none; font-weight: 700; cursor: pointer; }
+    .skip-row a:hover { text-decoration: underline; }
+
+    .msg-box {
+        width: 100%; padding: 10px 14px;
+        border-radius: 8px; font-size: 13px;
+        line-height: 1.6; display: none; margin-bottom: 14px;
+    }
+    .msg-box.show { display: block; }
+    .msg-box.error { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
+
+    @media(max-width:640px){
+        .box { padding: 32px 24px; min-height: 440px; }
+        .opt-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+
+<body>
+<script>
+    (function () {
+        var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+    })();
+</script>
+
+<div class="box">
+
+    <div class="brand-mark">
+        <div class="brand-icon">
+            <svg viewBox="280 120 100 150" xmlns="http://www.w3.org/2000/svg">
+                <path d="M312 144 Q312 122 340 122 Q374 122 374 148 Q374 174 308 194 Q280 204 280 232 Q280 260 314 265 Q342 268 374 256"
+                    fill="none" stroke="white" stroke-width="18" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="brand-name">Shop<span>Sphere</span></div>
+    </div>
+
+    <h2>Just a few quick questions 🎯</h2>
+    <p class="subtitle">Help us personalise ShopSphere for you</p>
+
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="msg-box" id="msgBox"></div>
+
+    <form method="POST" action="/survey" id="surveyForm">
+
+        <div class="q-steps">
+            <div class="q-block active" data-step="1">
+                <div class="q-title"><span class="q-num">1</span>How did you hear about ShopSphere?</div>
+                <div class="opt-grid">
+                    <div class="opt"><input type="radio" name="q1" id="q1a" value="Social Media"><label for="q1a">📱 Social Media</label></div>
+                    <div class="opt"><input type="radio" name="q1" id="q1b" value="Friend or Family"><label for="q1b">👥 Friend or Family</label></div>
+                    <div class="opt"><input type="radio" name="q1" id="q1c" value="Online Ad"><label for="q1c">📢 Online Ad</label></div>
+                    <div class="opt"><input type="radio" name="q1" id="q1d" value="Search Engine"><label for="q1d">🔍 Search Engine</label></div>
+                    <div class="opt"><input type="radio" name="q1" id="q1e" value="Other"><label for="q1e">✨ Other</label></div>
+                </div>
+            </div>
+
+            <div class="q-block" data-step="2">
+                <div class="q-title"><span class="q-num">2</span>Which product category interests you most?</div>
+                <div class="opt-grid">
+                    <div class="opt"><input type="radio" name="q2" id="q2a" value="Electronics"><label for="q2a">💻 Electronics</label></div>
+                    <div class="opt"><input type="radio" name="q2" id="q2b" value="Fashion & Apparel"><label for="q2b">👗 Fashion & Apparel</label></div>
+                    <div class="opt"><input type="radio" name="q2" id="q2c" value="Home & Kitchen"><label for="q2c">🏠 Home & Kitchen</label></div>
+                    <div class="opt"><input type="radio" name="q2" id="q2d" value="Beauty & Personal Care"><label for="q2d">💄 Beauty & Care</label></div>
+                    <div class="opt"><input type="radio" name="q2" id="q2e" value="Sports & Fitness"><label for="q2e">⚽ Sports & Fitness</label></div>
+                </div>
+            </div>
+
+            <div class="q-block" data-step="3">
+                <div class="q-title"><span class="q-num">3</span>How often do you shop online?</div>
+                <div class="opt-grid">
+                    <div class="opt"><input type="radio" name="q3" id="q3a" value="Daily"><label for="q3a">🗓️ Daily</label></div>
+                    <div class="opt"><input type="radio" name="q3" id="q3b" value="Weekly"><label for="q3b">📅 Weekly</label></div>
+                    <div class="opt"><input type="radio" name="q3" id="q3c" value="Monthly"><label for="q3c">🗒️ Monthly</label></div>
+                    <div class="opt"><input type="radio" name="q3" id="q3d" value="Rarely"><label for="q3d">🌙 Rarely</label></div>
+                </div>
+            </div>
+
+            <div class="q-block" data-step="4">
+                <div class="q-title"><span class="q-num">4</span>What's your preferred price range?</div>
+                <div class="opt-grid">
+                    <div class="opt"><input type="radio" name="q4" id="q4a" value="Budget-friendly"><label for="q4a">💰 Budget-friendly</label></div>
+                    <div class="opt"><input type="radio" name="q4" id="q4b" value="Mid-range"><label for="q4b">💳 Mid-range</label></div>
+                    <div class="opt"><input type="radio" name="q4" id="q4c" value="Premium"><label for="q4c">💎 Premium</label></div>
+                    <div class="opt"><input type="radio" name="q4" id="q4d" value="No preference"><label for="q4d">🤷 No preference</label></div>
+                </div>
+            </div>
+
+            <div class="q-block" data-step="5">
+                <div class="q-title"><span class="q-num">5</span>What matters most when shopping online?</div>
+                <div class="opt-grid">
+                    <div class="opt"><input type="radio" name="q5" id="q5a" value="Fast delivery"><label for="q5a">🚚 Fast delivery</label></div>
+                    <div class="opt"><input type="radio" name="q5" id="q5b" value="Best price"><label for="q5b">🏷️ Best price</label></div>
+                    <div class="opt"><input type="radio" name="q5" id="q5c" value="Product quality"><label for="q5c">⭐ Product quality</label></div>
+                    <div class="opt"><input type="radio" name="q5" id="q5d" value="Easy returns"><label for="q5d">↩️ Easy returns</label></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-row">
+            <button type="button" class="back-btn" id="backBtn" disabled onclick="goStep(-1)">← Back</button>
+            <button type="button" class="main-btn" id="nextBtn" disabled onclick="goStep(1)">Next →</button>
+            <button type="submit" class="main-btn" id="submitBtn" style="display:none;">Continue to Dashboard →</button>
+        </div>
+
+    </form>
+
+    <div class="skip-row">
+        Prefer not to answer? <a onclick="skipSurvey()">Skip for now</a>
+    </div>
+
+</div>
+
+<script>
+    var TOTAL_STEPS = 5;
+    var currentStep = 1;
+
+    function showStep(step) {
+        document.querySelectorAll('.q-block').forEach(function (b) {
+            b.classList.toggle('active', parseInt(b.dataset.step) === step);
+        });
+        document.getElementById('backBtn').disabled = (step === 1);
+
+        var isLast = step === TOTAL_STEPS;
+        document.getElementById('nextBtn').style.display = isLast ? 'none' : 'flex';
+        document.getElementById('submitBtn').style.display = isLast ? 'flex' : 'none';
+
+        updateNextState();
+        updateProgress();
+    }
+
+    function updateNextState() {
+        var checked = document.querySelector('input[name="q' + currentStep + '"]:checked');
+        document.getElementById('nextBtn').disabled = !checked;
+        document.getElementById('submitBtn').disabled = !checked;
+    }
+
+    function updateProgress() {
+        document.getElementById('progressFill').style.width = (currentStep / TOTAL_STEPS * 100) + '%';
+    }
+
+    function goStep(dir) {
+        var next = currentStep + dir;
+        if (next < 1 || next > TOTAL_STEPS) return;
+        currentStep = next;
+        showStep(currentStep);
+    }
+
+    document.querySelectorAll('input[type="radio"]').forEach(function (r) {
+        r.addEventListener('change', function () {
+            updateNextState();
+            // auto-advance after short delay (except last step)
+            if (currentStep < TOTAL_STEPS) {
+                setTimeout(function(){ goStep(1); }, 350);
+            }
+        });
+    });
+
+    document.getElementById('surveyForm').addEventListener('submit', function () {
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').textContent = 'Saving...';
+    });
+
+    function skipSurvey() {
+        window.location.href = '/survey/skip';
+    }
+
+    // Show Flask error on page load
+    window.addEventListener('load', function () {
+        var flaskError = "{{ error if error else '' }}";
+        if (flaskError) {
+            var b = document.getElementById('msgBox');
+            b.textContent = flaskError;
+            b.className = 'msg-box show error';
+        }
+    });
+
+    // ── Floating e-commerce icons background ──
+    (function () {
+        var icons = ['🛒','🛍️','📦','💳','🎁','⭐','💰','🏷️','👜','📱'];
+        for (var i = 0; i < 14; i++) {
+            var el = document.createElement('div');
+            el.className = 'float-icon';
+            el.textContent = icons[Math.floor(Math.random() * icons.length)];
+            var size = (Math.random() * 18 + 18).toFixed(0);
+            var left = (Math.random() * 96).toFixed(1);
+            var dur  = (Math.random() * 14 + 14).toFixed(1);
+            var del  = (Math.random() * 18).toFixed(1);
+            el.style.cssText = 'font-size:' + size + 'px; left:' + left + '%; bottom:-60px; animation-duration:' + dur + 's; animation-delay:' + del + 's;';
+            document.body.appendChild(el);
+        }
+    })();
+
+    showStep(1);
+</script>
+</body>
+</html>
