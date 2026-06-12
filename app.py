@@ -547,7 +547,7 @@ def signup():
             session["user_email"]    = email
             session["flash_message"] = f"🎉 Welcome {username}! Account created 😊"
 
-            return redirect(url_for("home"))
+            return redirect(url_for("survey"))
 
         except Exception as e:
             print("❌ SIGNUP ERROR:", e)
