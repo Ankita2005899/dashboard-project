@@ -756,9 +756,15 @@
     display: none;
     position: fixed; inset: 0; z-index: 9999;
     background: var(--body-bg);
-    background-image: var(--body-bg), var(--grid-bg);
-    background-size: auto, var(--grid-size), var(--grid-size);
     flex-direction: column; align-items: center; justify-content: center;
+}
+.loader-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--grid-bg);
+    background-size: var(--grid-size);
+    pointer-events: none;
 }
 .loader-overlay.show { display: flex; }
 .lo-orb {
