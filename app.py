@@ -78,7 +78,7 @@ print("🔥 Flask looking for templates in:", app.template_folder)
 # DATABASE CONNECTION
 # ============================================================
 def get_db_connection():
-    return mysql.connector.connect(
+    conn = mysql.connector.connect(
         host=os.getenv("MYSQLHOST"),
         user=os.getenv("MYSQLUSER"),
         password=os.getenv("MYSQLPASSWORD"),
@@ -89,6 +89,12 @@ def get_db_connection():
         ssl_verify_identity=False,
         autocommit=True
     )
+    
+    
+    cursor = conn.cursor()
+    cursor.execute("SET time_zone = '+05:30';")
+    cursor.close()
+    return conn
 # ============================================================
 # PASSWORD VALIDATION
 # ============================================================
