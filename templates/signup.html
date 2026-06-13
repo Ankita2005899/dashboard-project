@@ -1294,6 +1294,43 @@
         if (!pw) { showMsg('Password cannot be empty.', 'error'); return; }
         if (pw !== cpw) { showMsg('Passwords do not match.', 'error'); return; }
 
+
+        var strongPattern = /^(?=(.*[!@#$%^&*()_+\-=\[\]{};'":\\|,.<>\/?]){3,})(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!strongPattern.test(pw)) {
+            var attempts = parseInt(sessionStorage.getItem('pwAttempts') || '0') + 1;
+            sessionStorage.setItem('pwAttempts', attempts);
+
+            if (attempts === 1) {
+                showMsg('❌ Weak password. Please try a stronger password.', 'error');
+                return;
+            } else if (attempts === 2) {
+                showMsg('Password must contain:<br>• 8+ characters<br>• 1 uppercase letter<br>• 1 lowercase letter<br>• 1 digit<br>• 3 special characters (!@#$%^&* etc.)', 'error');
+                return;
+            } else {
+                if (confirm('Your password is still weak.\n\nWould you like us to auto-generate a strong password for you?')) {
+                    fetch('/get-strong-password')
+                        .then(function(r){ return r.json(); })
+                        .then(function(data){
+                            if (data.password) {
+                                document.getElementById('password').value = data.password;
+                                document.getElementById('confirm_password').value = data.password;
+                                checkStrength();
+                                sessionStorage.removeItem('pwAttempts');
+                                showMsg('✅ Strong password generated! Click Create Account again.', 'success');
+                            } else {
+                                showMsg('No auto-generated passwords available. Please try a different password.', 'error');
+                            }
+                        })
+                        .catch(function(){ showMsg('Something went wrong fetching password.', 'error'); });
+                } else {
+                    showMsg('Please enter a stronger password to continue.', 'error');
+                }
+                return;
+            }
+        }
+
+        sessionStorage.removeItem('pwAttempts');
+
         var btn = document.getElementById('submitBtn');
         btn.disabled = true;
         btn.textContent = 'Creating...';
