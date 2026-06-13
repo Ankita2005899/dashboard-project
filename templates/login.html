@@ -1,1133 +1,1589 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login – ShopSphere</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka+One&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka+One&display=swap"
+        rel="stylesheet">
 
 </head>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-/* ── LIGHT MODE (default) ── */
-:root {
-    --orange: #FF6B2B;
-    --amber:  #f59e0b;
-    --dark:   #1a1a2e;
-    --muted:  #6b7280;
-    --border: #e5e7eb;
-    --surface:#f9fafb;
-    --body-bg: linear-gradient(135deg, #fde8d8 0%, #d4f4f8 50%, #f5e6ff 100%);
-    --card-bg: #ffffff;
-    --input-bg: #f9fafb;
-    --input-color: #1a1a2e;
-    --label-color: #374151;
-    --heading-color: #1a1a2e;
-    --subtitle-color: #6b7280;
-    --signup-color: #6b7280;
-    --brand-color: #1a1a2e;
-    --placeholder-color: #9ca3af;
-    --grid-bg: linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
-               linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
-    --grid-size: 60px 60px;
-}
+    /* ── LIGHT MODE (default) ── */
+    :root {
+        --orange: #FF6B2B;
+        --amber: #f59e0b;
+        --dark: #1a1a2e;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --surface: #f9fafb;
+        --body-bg: linear-gradient(135deg, #fde8d8 0%, #d4f4f8 50%, #f5e6ff 100%);
+        --card-bg: #ffffff;
+        --input-bg: #f9fafb;
+        --input-color: #1a1a2e;
+        --label-color: #374151;
+        --heading-color: #1a1a2e;
+        --subtitle-color: #6b7280;
+        --signup-color: #6b7280;
+        --brand-color: #1a1a2e;
+        --placeholder-color: #9ca3af;
+        --grid-bg: linear-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+        --grid-size: 60px 60px;
+    }
 
-/* ── DARK MODE ── */
-[data-theme="dark"] {
-    --body-bg: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #0f0f1a 100%);
-    --card-bg: #12121a;
-    --input-bg: #1e1e2e;
-    --input-color: #f0eee8;
-    --border: rgba(255,255,255,0.15);
-    --label-color: #a0a0b0;
-    --heading-color: #f0eee8;
-    --subtitle-color: #6a6a7a;
-    --signup-color: #6a6a7a;
-    --brand-color: #f0eee8;
-    --muted: #6a6a7a;
-    --surface: #1e1e2e;
-    --dark: #f0eee8;
-    --placeholder-color: #4a4a6a;
-    --grid-bg: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-               linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-    --grid-size: 60px 60px;
-}
+    /* ── DARK MODE ── */
+    [data-theme="dark"] {
+        --body-bg: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #0f0f1a 100%);
+        --card-bg: #12121a;
+        --input-bg: #1e1e2e;
+        --input-color: #f0eee8;
+        --border: rgba(255, 255, 255, 0.15);
+        --label-color: #a0a0b0;
+        --heading-color: #f0eee8;
+        --subtitle-color: #6a6a7a;
+        --signup-color: #6a6a7a;
+        --brand-color: #f0eee8;
+        --muted: #6a6a7a;
+        --surface: #1e1e2e;
+        --dark: #f0eee8;
+        --placeholder-color: #4a4a6a;
+        --grid-bg: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        --grid-size: 60px 60px;
+    }
 
-body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--body-bg);
-    background-image: var(--body-bg), var(--grid-bg);
-    padding: 20px 20px 80px;
-    overflow-x: hidden;
-    transition: background 0.3s;
-    position: relative;
-}
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--body-bg);
+        background-image: var(--body-bg), var(--grid-bg);
+        padding: 20px 20px 80px;
+        overflow-x: hidden;
+        transition: background 0.3s;
+        position: relative;
+    }
 
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    background-image: var(--grid-bg);
-    background-size: var(--grid-size);
-    pointer-events: none;
-}
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background-image: var(--grid-bg);
+        background-size: var(--grid-size);
+        pointer-events: none;
+    }
 
-.box {
-    position: relative;
-    z-index: 1;
-}
+    .box {
+        position: relative;
+        z-index: 1;
+    }
 
-/* ── CARD ── */
-.box {
-    width: 900px;
-    max-width: 100%;
-    min-height: 540px;
-    background: var(--card-bg);
-    border-radius: 28px;
-    transition: background 0.3s;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.14);
-    display: grid;
-    grid-template-columns: 1fr 420px;
-    overflow: hidden;
-    position: relative;
-    animation: cardIn 0.7s cubic-bezier(.22,1,.36,1) both;
-}
+    /* ── CARD ── */
+    .box {
+        width: 900px;
+        max-width: 100%;
+        min-height: 540px;
+        background: var(--card-bg);
+        border-radius: 28px;
+        transition: background 0.3s;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.14);
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        overflow: hidden;
+        position: relative;
+        animation: cardIn 0.7s cubic-bezier(.22, 1, .36, 1) both;
+    }
 
-@keyframes cardIn {
-    from { opacity: 0; transform: translateY(40px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-}
+    @keyframes cardIn {
+        from {
+            opacity: 0;
+            transform: translateY(40px) scale(0.97);
+        }
 
-/* ── LEFT column ── */
-.form-side {
-    grid-column: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 52px 44px 44px;
-    background: var(--card-bg);
-    transition: background 0.3s;
-    animation: fadeUp 0.8s 0.15s cubic-bezier(.22,1,.36,1) both;
-}
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
 
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
+    /* ── LEFT column ── */
+    .form-side {
+        grid-column: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 52px 44px 44px;
+        background: var(--card-bg);
+        transition: background 0.3s;
+        animation: fadeUp 0.8s 0.15s cubic-bezier(.22, 1, .36, 1) both;
+    }
 
-/* Brand mark row */
-.brand-mark {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 32px;
-}
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
 
-.brand-icon {
-    width: 38px; height: 38px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--orange), var(--amber));
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 14px rgba(255,107,43,0.35);
-    position: relative;
-    animation: iconPop 0.6s 0.4s cubic-bezier(.34,1.56,.64,1) both;
-    overflow: hidden;
-}
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-/* Mini S inside brand icon */
-.brand-icon svg { width: 24px; height: 24px; }
+    /* Brand mark row */
+    .brand-mark {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 32px;
+    }
 
-@keyframes iconPop {
-    from { opacity: 0; transform: scale(0.5) rotate(-15deg); }
-    to   { opacity: 1; transform: scale(1) rotate(0deg); }
-}
+    .brand-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--orange), var(--amber));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 14px rgba(255, 107, 43, 0.35);
+        position: relative;
+        animation: iconPop 0.6s 0.4s cubic-bezier(.34, 1.56, .64, 1) both;
+        overflow: hidden;
+    }
 
-.brand-icon::after {
-    content: '';
-    position: absolute;
-    inset: -3px;
-    border-radius: 12px;
-    border: 2px solid rgba(255,107,43,0.3);
-    animation: ringPulse 2s 1s ease-in-out infinite;
-}
+    /* Mini S inside brand icon */
+    .brand-icon svg {
+        width: 24px;
+        height: 24px;
+    }
 
-@keyframes ringPulse {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50%       { opacity: 0.7; transform: scale(1.08); }
-}
+    @keyframes iconPop {
+        from {
+            opacity: 0;
+            transform: scale(0.5) rotate(-15deg);
+        }
 
-.brand-name {
-    font-family: 'Fredoka One', sans-serif;
-    font-size: 20px; font-weight: 400; color: var(--brand-color); letter-spacing: -0.3px;
-}
-.brand-name span { color: var(--orange); }
+        to {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+    }
 
-/* Heading */
-.form-side h2 {
-    font-size: 28px; font-weight: 800; color: var(--heading-color);
-    margin-bottom: 6px; line-height: 1.2;
-}
-.form-side .subtitle {
-    font-size: 13px; color: var(--subtitle-color); margin-bottom: 28px;
-}
+    .brand-icon::after {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 12px;
+        border: 2px solid rgba(255, 107, 43, 0.3);
+        animation: ringPulse 2s 1s ease-in-out infinite;
+    }
 
-/* ── FORM ── */
-form { display: flex; flex-direction: column; }
+    @keyframes ringPulse {
 
-.field {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 16px;
-    animation: fieldSlide 0.6s cubic-bezier(.22,1,.36,1) both;
-}
-.field:nth-child(1) { animation-delay: 0.25s; }
-.field:nth-child(2) { animation-delay: 0.35s; }
+        0%,
+        100% {
+            opacity: 0.3;
+            transform: scale(1);
+        }
 
-@keyframes fieldSlide {
-    from { opacity: 0; transform: translateX(-14px); }
-    to   { opacity: 1; transform: translateX(0); }
-}
+        50% {
+            opacity: 0.7;
+            transform: scale(1.08);
+        }
+    }
 
-.field label {
-    font-size: 12px; font-weight: 700; color: var(--label-color);
-    letter-spacing: 0.3px; margin-bottom: 6px;
-}
+    .brand-name {
+        font-family: 'Fredoka One', sans-serif;
+        font-size: 20px;
+        font-weight: 400;
+        color: var(--brand-color);
+        letter-spacing: -0.3px;
+    }
 
-.input-wrap { position: relative; }
+    .brand-name span {
+        color: var(--orange);
+    }
 
-.input-wrap .icon {
-    position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
-    color: #9ca3af; pointer-events: none;
-    transition: color 0.2s;
-    display: flex; align-items: center;
-}
+    /* Heading */
+    .form-side h2 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--heading-color);
+        margin-bottom: 6px;
+        line-height: 1.2;
+    }
 
-input {
-    width: 100%;
-    padding: 12px 16px 12px 40px;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    font-size: 14px;
-    font-family: inherit;
-    color: var(--input-color);
-    background: var(--input-bg);
-    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-    outline: none;
-}
-input:focus {
-    border-color: var(--orange);
-    box-shadow: 0 0 0 3px rgba(255,107,43,0.12);
-    background: var(--input-bg);
-}
-input:focus ~ .focus-bar { transform: scaleX(1); }
-.input-wrap:focus-within .icon { color: var(--orange); }
-input::placeholder { color: var(--placeholder-color); }
+    .form-side .subtitle {
+        font-size: 13px;
+        color: var(--subtitle-color);
+        margin-bottom: 28px;
+    }
 
-[data-theme="dark"] input::placeholder { color: #4a4a5a; }
+    /* ── FORM ── */
+    form {
+        display: flex;
+        flex-direction: column;
+    }
 
-.focus-bar {
-    height: 2px;
-    background: linear-gradient(90deg, var(--orange), var(--amber));
-    border-radius: 999px;
-    margin-top: 3px;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
-}
+    .field {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 16px;
+        animation: fieldSlide 0.6s cubic-bezier(.22, 1, .36, 1) both;
+    }
 
-/* ── SUBMIT ── */
-button[type="submit"], #loginBtn, #secLoginBtn {
-    width: 100%;
-    padding: 13px;
-    background: linear-gradient(135deg, var(--orange), var(--amber));
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px; font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    transition: transform 0.25s, box-shadow 0.25s;
-    box-shadow: 0 6px 20px rgba(255,107,43,0.3);
-    position: relative; overflow: hidden;
-    animation: fieldSlide 0.6s 0.45s cubic-bezier(.22,1,.36,1) both;
-}
-button[type="submit"]::after, #loginBtn::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
-    transform: translateX(-100%);
-    transition: transform 0.55s ease;
-}
-button[type="submit"]:hover, #loginBtn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,107,43,0.45); }
-button[type="submit"]:hover::after, #loginBtn:hover::after { transform: translateX(100%); }
-button[type="submit"]:active, #loginBtn:active { transform: translateY(0); }
+    .field:nth-child(1) {
+        animation-delay: 0.25s;
+    }
 
-/* ── SIGNUP LINK ── */
-.signup-row {
-    margin-top: 18px;
-    font-size: 13px; color: var(--signup-color); text-align: center;
-    animation: fieldSlide 0.6s 0.55s cubic-bezier(.22,1,.36,1) both;
-}
-a { color: var(--orange); text-decoration: none; font-weight: 700; }
-a:hover { text-decoration: underline; }
+    .field:nth-child(2) {
+        animation-delay: 0.35s;
+    }
 
-/* ══════════════════════════════════
+    @keyframes fieldSlide {
+        from {
+            opacity: 0;
+            transform: translateX(-14px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .field label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--label-color);
+        letter-spacing: 0.3px;
+        margin-bottom: 6px;
+    }
+
+    .input-wrap {
+        position: relative;
+    }
+
+    .input-wrap .icon {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        pointer-events: none;
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px 16px 12px 40px;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font-size: 14px;
+        font-family: inherit;
+        color: var(--input-color);
+        background: var(--input-bg);
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        outline: none;
+    }
+
+    input:focus {
+        border-color: var(--orange);
+        box-shadow: 0 0 0 3px rgba(255, 107, 43, 0.12);
+        background: var(--input-bg);
+    }
+
+    input:focus~.focus-bar {
+        transform: scaleX(1);
+    }
+
+    .input-wrap:focus-within .icon {
+        color: var(--orange);
+    }
+
+    input::placeholder {
+        color: var(--placeholder-color);
+    }
+
+    [data-theme="dark"] input::placeholder {
+        color: #4a4a5a;
+    }
+
+    .focus-bar {
+        height: 2px;
+        background: linear-gradient(90deg, var(--orange), var(--amber));
+        border-radius: 999px;
+        margin-top: 3px;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    /* ── SUBMIT ── */
+    button[type="submit"],
+    #loginBtn,
+    #secLoginBtn {
+        width: 100%;
+        padding: 13px;
+        background: linear-gradient(135deg, var(--orange), var(--amber));
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        letter-spacing: 0.5px;
+        transition: transform 0.25s, box-shadow 0.25s;
+        box-shadow: 0 6px 20px rgba(255, 107, 43, 0.3);
+        position: relative;
+        overflow: hidden;
+        animation: fieldSlide 0.6s 0.45s cubic-bezier(.22, 1, .36, 1) both;
+    }
+
+    button[type="submit"]::after,
+    #loginBtn::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.25) 50%, transparent 70%);
+        transform: translateX(-100%);
+        transition: transform 0.55s ease;
+    }
+
+    button[type="submit"]:hover,
+    #loginBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(255, 107, 43, 0.45);
+    }
+
+    button[type="submit"]:hover::after,
+    #loginBtn:hover::after {
+        transform: translateX(100%);
+    }
+
+    button[type="submit"]:active,
+    #loginBtn:active {
+        transform: translateY(0);
+    }
+
+    /* ── SIGNUP LINK ── */
+    .signup-row {
+        margin-top: 18px;
+        font-size: 13px;
+        color: var(--signup-color);
+        text-align: center;
+        animation: fieldSlide 0.6s 0.55s cubic-bezier(.22, 1, .36, 1) both;
+    }
+
+    a {
+        color: var(--orange);
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    /* ══════════════════════════════════
    RIGHT PANEL
 ═══════════════════════════════════ */
-.right-panel {
-    grid-column: 2;
-    background: linear-gradient(145deg, #160330 0%, #240852 45%, #130d38 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 28px 20px 32px;
-    position: relative;
-    overflow: hidden;
-}
+    .right-panel {
+        grid-column: 2;
+        background: linear-gradient(145deg, #160330 0%, #240852 45%, #130d38 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 28px 20px 32px;
+        position: relative;
+        overflow: hidden;
+    }
 
-/* deep glow orb behind logo */
-.right-panel::before {
-    content: '';
-    position: absolute;
-    width: 320px; height: 320px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,107,43,0.18) 0%, transparent 68%);
-    top: 50%; left: 50%; transform: translate(-50%, -58%);
-    animation: orbPulse 3.5s ease-in-out infinite;
-}
-@keyframes orbPulse {
-    0%, 100% { transform: translate(-50%,-58%) scale(1);   opacity: 0.7; }
-    50%       { transform: translate(-50%,-58%) scale(1.18); opacity: 1; }
-}
+    /* deep glow orb behind logo */
+    .right-panel::before {
+        content: '';
+        position: absolute;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 107, 43, 0.18) 0%, transparent 68%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -58%);
+        animation: orbPulse 3.5s ease-in-out infinite;
+    }
 
-/* Floating particles */
-.particle {
-    position: absolute;
-    border-radius: 50%;
-    background: var(--orange);
-    opacity: 0;
-    animation: floatUp linear infinite;
-}
-@keyframes floatUp {
-    0%   { transform: translateY(0) scale(0); opacity: 0; }
-    10%  { opacity: 0.55; }
-    90%  { opacity: 0.15; }
-    100% { transform: translateY(-340px) scale(1.4); opacity: 0; }
-}
+    @keyframes orbPulse {
 
-/* Logo wrapper — clips & centres the SVG */
-.logo-wrap {
-    position: relative; z-index: 2;
-    width: 100%;
-    max-width: 340px;
-    /* Animate orbiting items on the logo */
-}
+        0%,
+        100% {
+            transform: translate(-50%, -58%) scale(1);
+            opacity: 0.7;
+        }
 
-/* Orbit ring animation applied to logo's orbit group via JS class */
-.logo-wrap svg .orbit-group {
-    transform-origin: 170px 95px; /* centre of the logo icon area (scaled) */
-    animation: logoOrbit 20s linear infinite;
-}
-@keyframes logoOrbit {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-}
+        50% {
+            transform: translate(-50%, -58%) scale(1.18);
+            opacity: 1;
+        }
+    }
 
-/* Subtle float on whole logo */
-.logo-float {
-    animation: logoFloat 4s ease-in-out infinite;
-}
-@keyframes logoFloat {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-8px); }
-}
+    /* Floating particles */
+    .particle {
+        position: absolute;
+        border-radius: 50%;
+        background: var(--orange);
+        opacity: 0;
+        animation: floatUp linear infinite;
+    }
 
-/* Pills row */
-.pills {
-    display: flex; gap: 7px; flex-wrap: wrap; justify-content: center;
-    position: relative; z-index: 2;
-    margin-top: 4px;
-}
-.pill {
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 999px;
-    padding: 5px 12px;
-    font-size: 11px; color: #c4b5d4; font-weight: 600;
-    backdrop-filter: blur(4px);
-    animation: pillFade 0.5s ease both;
-}
-.pill:nth-child(1) { animation-delay: 0.9s; }
-.pill:nth-child(2) { animation-delay: 1.05s; }
-.pill:nth-child(3) { animation-delay: 1.2s; }
-@keyframes pillFade {
-    from { opacity: 0; transform: scale(0.85) translateY(6px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
-}
+    @keyframes floatUp {
+        0% {
+            transform: translateY(0) scale(0);
+            opacity: 0;
+        }
 
-/* ── FOOTER ── */
-.footer {
-    position: fixed; bottom: 0; left: 0;
-    width: 100%; height: 52px;
-    background: linear-gradient(90deg, #111827, #1f2937, #0f766e);
-    color: white;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; z-index: 1000; font-family: inherit;
-}
+        10% {
+            opacity: 0.55;
+        }
 
+        90% {
+            opacity: 0.15;
+        }
 
+        100% {
+            transform: translateY(-340px) scale(1.4);
+            opacity: 0;
+        }
+    }
 
-@media(max-width:700px){
-    .box { grid-template-columns: 1fr; }
-    .right-panel { display: none; }
-    .form-side { padding: 36px 28px 32px; }
-}
+    /* Logo wrapper — clips & centres the SVG */
+    .logo-wrap {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 340px;
+        /* Animate orbiting items on the logo */
+    }
 
-/* ── GOOGLE BUTTON ── */
-.soc-btn {
-    width: 100%;
-    height: 46px;
-    border-radius: 10px;
-    border: 2px solid var(--border);
-    background: var(--input-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-size: 14px;
-    font-family: inherit;
-    font-weight: 600;
-    color: var(--input-color);
-    cursor: pointer;
-    transition: all 0.22s;
-    margin-bottom: 16px;
-}
-.soc-btn:hover {
-    border-color: #EA4335;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.10);
-}
-.soc-btn img { width: 18px; height: 18px; object-fit: contain; }
+    /* Orbit ring animation applied to logo's orbit group via JS class */
+    .logo-wrap svg .orbit-group {
+        transform-origin: 170px 95px;
+        /* centre of the logo icon area (scaled) */
+        animation: logoOrbit 20s linear infinite;
+    }
 
-/* ── DIVIDER ── */
-.divider-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-.divider-row::before, .divider-row::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-}
-.divider-row span {
-    font-size: 11.5px;
-    color: var(--muted);
-    white-space: nowrap;
-    font-weight: 600;
-}
+    @keyframes logoOrbit {
+        from {
+            transform: rotate(0deg);
+        }
 
-/* ── MSG BOX ── */
-.msg-box {
-    width: 100%; padding: 10px 14px;
-    border-radius: 8px; font-size: 13px;
-    font-family: inherit; line-height: 1.6;
-    display: none; margin-bottom: 12px; margin-top: 2px;
-    animation: shakeIn 0.4s ease;
-}
-.msg-box.show { display: block; }
-.msg-box.error   { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
-.msg-box.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        to {
+            transform: rotate(360deg);
+        }
+    }
 
-@keyframes shakeIn {
-    0%   { transform: translateX(-6px); opacity: 0; }
-    40%  { transform: translateX(4px); }
-    70%  { transform: translateX(-3px); }
-    100% { transform: translateX(0); opacity: 1; }
-}
+    /* Subtle float on whole logo */
+    .logo-float {
+        animation: logoFloat 4s ease-in-out infinite;
+    }
 
+    @keyframes logoFloat {
 
-/* ---------------style for loading animation for ShopSphere! ---------------------*/    
-/* ── LOADING OVERLAY ── */
-.loader-overlay {
-    display: none;
-    position: fixed; inset: 0; z-index: 9999;
-    background: var(--body-bg);
-    flex-direction: column; align-items: center; justify-content: center;
-}
-.loader-overlay::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: var(--grid-bg);
-    background-size: var(--grid-size);
-    pointer-events: none;
-}
-.loader-overlay.show { display: flex; }
-.lo-orb {
-    position: absolute; width: 300px; height: 300px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,107,43,0.12) 0%, transparent 70%);
-    top: 50%; left: 50%; transform: translate(-50%, -50%);
-    animation: orbPulse 2.5s ease-in-out infinite;
-}
-@keyframes orbPulse {
-    0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.6}
-    50%{transform:translate(-50%,-50%) scale(1.2);opacity:1}
-}
-.lo-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; z-index: 2; }
-.lo-icon {
-    width: 40px; height: 40px; border-radius: 12px;
-    background: linear-gradient(135deg, #FF6B2B, #f59e0b);
-    display: flex; align-items: center; justify-content: center;
-    animation: iconPulse 1.5s ease-in-out infinite;
-}
-@keyframes iconPulse {
-    0%,100%{box-shadow:0 0 24px rgba(255,107,43,0.4)}
-    50%{box-shadow:0 0 40px rgba(255,107,43,0.7)}
-}
-.lo-name { font-family: 'Fredoka One', sans-serif; font-size: 22px; color: var(--heading-color); }
-.lo-name span { color: #FF6B2B; }
-.lo-ring {
-    width: 80px; height: 80px; border-radius: 50%;
-    border: 3px solid rgba(255,107,43,0.2); border-top-color: #FF6B2B;
-    animation: spin 1s linear infinite;
-    display: flex; align-items: center; justify-content: center;
-    position: relative; z-index: 2; margin-bottom: 28px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.lo-ring-inner {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-    width: 58px; height: 58px; border-radius: 50%;
-    border: 2px solid rgba(245,158,11,0.2); border-bottom-color: #f59e0b;
-    animation: spinR 1.5s linear infinite;
-}
-@keyframes spinR { to { transform: translate(-50%,-50%) rotate(-360deg); } }
-.lo-cart { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 22px; }
-.lo-dots { display: flex; gap: 8px; z-index: 2; margin-bottom: 16px; }
-.lo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); animation: dotBounce 1.2s ease-in-out infinite; }
+        0%,
+        100% {
+            transform: translateY(0);
+        }
 
-.lo-dot:nth-child(1){animation-delay:0s}
-.lo-dot:nth-child(2){animation-delay:.2s}
-.lo-dot:nth-child(3){animation-delay:.4s}
-@keyframes dotBounce {
-    0%,100%{transform:scale(1)}
-    50%{background:#FF6B2B;transform:scale(1.4)}
-}
-.lo-msg { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: var(--subtitle-color); z-index: 2; }
-.lo-progress { width: 200px; height: 3px; background: var(--border); border-radius: 999px; z-index: 2; margin-top: 20px; overflow: hidden; }
+        50% {
+            transform: translateY(-8px);
+        }
+    }
 
-.lo-fill {
-    height: 100%; border-radius: 999px;
-    background: linear-gradient(90deg, #FF6B2B, #f59e0b);
-    animation: progressAnim 2s ease-in-out infinite;
-}
-@keyframes progressAnim {
-    0%{width:0%;margin-left:0} 50%{width:70%;margin-left:0} 100%{width:0%;margin-left:100%}
-}
-.lo-particle { position: absolute; border-radius: 50%; background: #FF6B2B; opacity: 0; animation: loFloat linear infinite; }
-@keyframes loFloat {
-    0%{transform:translateY(0) scale(0);opacity:0} 10%{opacity:.5} 90%{opacity:.1}
-    100%{transform:translateY(-400px) scale(1.4);opacity:0}
-}
+    /* Pills row */
+    .pills {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+        margin-top: 4px;
+    }
+
+    .pill {
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        padding: 5px 12px;
+        font-size: 11px;
+        color: #c4b5d4;
+        font-weight: 600;
+        backdrop-filter: blur(4px);
+        animation: pillFade 0.5s ease both;
+    }
+
+    .pill:nth-child(1) {
+        animation-delay: 0.9s;
+    }
+
+    .pill:nth-child(2) {
+        animation-delay: 1.05s;
+    }
+
+    .pill:nth-child(3) {
+        animation-delay: 1.2s;
+    }
+
+    @keyframes pillFade {
+        from {
+            opacity: 0;
+            transform: scale(0.85) translateY(6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 52px;
+        background: linear-gradient(90deg, #111827, #1f2937, #0f766e);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        z-index: 1000;
+        font-family: inherit;
+    }
 
 
 
+    @media(max-width:700px) {
+        .box {
+            grid-template-columns: 1fr;
+        }
+
+        .right-panel {
+            display: none;
+        }
+
+        .form-side {
+            padding: 36px 28px 32px;
+        }
+    }
+
+    /* ── GOOGLE BUTTON ── */
+    .soc-btn {
+        width: 100%;
+        height: 46px;
+        border-radius: 10px;
+        border: 2px solid var(--border);
+        background: var(--input-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 14px;
+        font-family: inherit;
+        font-weight: 600;
+        color: var(--input-color);
+        cursor: pointer;
+        transition: all 0.22s;
+        margin-bottom: 16px;
+    }
+
+    .soc-btn:hover {
+        border-color: #EA4335;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10);
+    }
+
+    .soc-btn img {
+        width: 18px;
+        height: 18px;
+        object-fit: contain;
+    }
+
+    /* ── DIVIDER ── */
+    .divider-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .divider-row::before,
+    .divider-row::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+    .divider-row span {
+        font-size: 11.5px;
+        color: var(--muted);
+        white-space: nowrap;
+        font-weight: 600;
+    }
+
+    /* ── MSG BOX ── */
+    .msg-box {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: inherit;
+        line-height: 1.6;
+        display: none;
+        margin-bottom: 12px;
+        margin-top: 2px;
+        animation: shakeIn 0.4s ease;
+    }
+
+    .msg-box.show {
+        display: block;
+    }
+
+    .msg-box.error {
+        background: #fef2f2;
+        color: #ef4444;
+        border: 1px solid #fecaca;
+    }
+
+    .msg-box.success {
+        background: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
+    }
+
+    @keyframes shakeIn {
+        0% {
+            transform: translateX(-6px);
+            opacity: 0;
+        }
+
+        40% {
+            transform: translateX(4px);
+        }
+
+        70% {
+            transform: translateX(-3px);
+        }
+
+        100% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+
+    /* ---------------style for loading animation for ShopSphere! ---------------------*/
+    /* ── LOADING OVERLAY ── */
+    .loader-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: var(--body-bg);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loader-overlay::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: var(--grid-bg);
+        background-size: var(--grid-size);
+        pointer-events: none;
+    }
+
+    .loader-overlay.show {
+        display: flex;
+    }
+
+    .lo-orb {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 107, 43, 0.12) 0%, transparent 70%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: orbPulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes orbPulse {
+
+        0%,
+        100% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: .6
+        }
+
+        50% {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 1
+        }
+    }
+
+    .lo-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 32px;
+        z-index: 2;
+    }
+
+    .lo-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #FF6B2B, #f59e0b);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: iconPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes iconPulse {
+
+        0%,
+        100% {
+            box-shadow: 0 0 24px rgba(255, 107, 43, 0.4)
+        }
+
+        50% {
+            box-shadow: 0 0 40px rgba(255, 107, 43, 0.7)
+        }
+    }
+
+    .lo-name {
+        font-family: 'Fredoka One', sans-serif;
+        font-size: 22px;
+        color: var(--heading-color);
+    }
+
+    .lo-name span {
+        color: #FF6B2B;
+    }
+
+    .lo-ring {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 107, 43, 0.2);
+        border-top-color: #FF6B2B;
+        animation: spin 1s linear infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+        margin-bottom: 28px;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .lo-ring-inner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        border: 2px solid rgba(245, 158, 11, 0.2);
+        border-bottom-color: #f59e0b;
+        animation: spinR 1.5s linear infinite;
+    }
+
+    @keyframes spinR {
+        to {
+            transform: translate(-50%, -50%) rotate(-360deg);
+        }
+    }
+
+    .lo-cart {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 22px;
+    }
+
+    .lo-dots {
+        display: flex;
+        gap: 8px;
+        z-index: 2;
+        margin-bottom: 16px;
+    }
+
+    .lo-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--border);
+        animation: dotBounce 1.2s ease-in-out infinite;
+    }
+
+    .lo-dot:nth-child(1) {
+        animation-delay: 0s
+    }
+
+    .lo-dot:nth-child(2) {
+        animation-delay: .2s
+    }
+
+    .lo-dot:nth-child(3) {
+        animation-delay: .4s
+    }
+
+    @keyframes dotBounce {
+
+        0%,
+        100% {
+            transform: scale(1)
+        }
+
+        50% {
+            background: #FF6B2B;
+            transform: scale(1.4)
+        }
+    }
+
+    .lo-msg {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13px;
+        color: var(--subtitle-color);
+        z-index: 2;
+    }
+
+    .lo-progress {
+        width: 200px;
+        height: 3px;
+        background: var(--border);
+        border-radius: 999px;
+        z-index: 2;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+
+    .lo-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #FF6B2B, #f59e0b);
+        animation: progressAnim 2s ease-in-out infinite;
+    }
+
+    @keyframes progressAnim {
+        0% {
+            width: 0%;
+            margin-left: 0
+        }
+
+        50% {
+            width: 70%;
+            margin-left: 0
+        }
+
+        100% {
+            width: 0%;
+            margin-left: 100%
+        }
+    }
+
+    .lo-particle {
+        position: absolute;
+        border-radius: 50%;
+        background: #FF6B2B;
+        opacity: 0;
+        animation: loFloat linear infinite;
+    }
+
+    @keyframes loFloat {
+        0% {
+            transform: translateY(0) scale(0);
+            opacity: 0
+        }
+
+        10% {
+            opacity: .5
+        }
+
+        90% {
+            opacity: .1
+        }
+
+        100% {
+            transform: translateY(-400px) scale(1.4);
+            opacity: 0
+        }
+    }
 </style>
+
 <body>
     <!-- Loading Overlay -->
-<div class="loader-overlay" id="loaderOverlay">
-    <div class="lo-orb"></div>
-    <div class="lo-brand">
-        <div class="lo-icon">
-            <svg viewBox="280 120 100 150" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
-                <path d="M312 144 Q312 122 340 122 Q374 122 374 148 Q374 174 308 194 Q280 204 280 232 Q280 260 314 265 Q342 268 374 256"
-                    fill="none" stroke="white" stroke-width="18" stroke-linecap="round"/>
-            </svg>
-        </div>
-        <div class="lo-name">Shop<span>Sphere</span></div>
-    </div>
-    <div class="lo-ring">
-        <div class="lo-ring-inner"></div>
-        <span class="lo-cart">🛒</span>
-    </div>
-    <div class="lo-dots">
-        <div class="lo-dot"></div>
-        <div class="lo-dot"></div>
-        <div class="lo-dot"></div>
-    </div>
-    <p class="lo-msg" id="loaderMsg">Setting up your store...</p>
-    <div class="lo-progress"><div class="lo-fill"></div></div>
-</div>
-
-<script>
-  (function(){
-    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-  })();
-</script>
-
-<div class="box">
-
-    <!-- ══ LEFT: Form side ══ -->
-    <div class="form-side">
-
-        <!-- Brand mark: mini logo icon + wordmark -->
-        <div class="brand-mark">
-            <div class="brand-icon">
-                <!-- Mini S path from the logo, white on orange -->
-                <svg viewBox="280 120 100 150" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M312 144 Q312 122 340 122 Q374 122 374 148 Q374 174 308 194 Q280 204 280 232 Q280 260 314 265 Q342 268 374 256"
-                          fill="none" stroke="white" stroke-width="18" stroke-linecap="round"/>
+    <div class="loader-overlay" id="loaderOverlay">
+        <div class="lo-orb"></div>
+        <div class="lo-brand">
+            <div class="lo-icon">
+                <svg viewBox="280 120 100 150" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M312 144 Q312 122 340 122 Q374 122 374 148 Q374 174 308 194 Q280 204 280 232 Q280 260 314 265 Q342 268 374 256"
+                        fill="none" stroke="white" stroke-width="18" stroke-linecap="round" />
                 </svg>
             </div>
-            <div class="brand-name">Shop<span>Sphere</span></div>
+            <div class="lo-name">Shop<span>Sphere</span></div>
         </div>
+        <div class="lo-ring">
+            <div class="lo-ring-inner"></div>
+            <span class="lo-cart">🛒</span>
+        </div>
+        <div class="lo-dots">
+            <div class="lo-dot"></div>
+            <div class="lo-dot"></div>
+            <div class="lo-dot"></div>
+        </div>
+        <p class="lo-msg" id="loaderMsg">Setting up your store...</p>
+        <div class="lo-progress">
+            <div class="lo-fill"></div>
+        </div>
+    </div>
 
-        <h2>Welcome back 👋</h2>
-        <p class="subtitle">Sign in to your account to continue</p>
+    <script>
+        (function () {
+            var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 
-        <!-- Google login button -->
-        <button type="button" class="soc-btn google" id="gBtn">
-            <img src="https://www.google.com/favicon.ico" alt="Google"
-                onerror="this.outerHTML='<svg viewBox=\'0 0 24 24\' width=\'18\' height=\'18\'><path fill=\'#EA4335\' d=\'M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z\'/><path fill=\'#34A853\' d=\'M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z\'/><path fill=\'#FBBC05\' d=\'M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z\'/><path fill=\'#EA4335\' d=\'M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z\'/></svg>'">
-            <span>Continue with Google</span>
-        </button>
-    <div id="mainLoginView">
-        <div class="divider-row"><span>or sign in with email</span></div>
+    <div class="box">
 
-        <form id="loginForm" autocomplete="off">
+        <!-- ══ LEFT: Form side ══ -->
+        <div class="form-side">
 
-            <!-- Email -->
-            <div class="field">
-                <label for="email">Email Address</label>
-                <div class="input-wrap">
-                    <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="4" width="20" height="16" rx="2"/>
-                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            <!-- Brand mark: mini logo icon + wordmark -->
+            <div class="brand-mark">
+                <div class="brand-icon">
+                    <!-- Mini S path from the logo, white on orange -->
+                    <svg viewBox="280 120 100 150" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M312 144 Q312 122 340 122 Q374 122 374 148 Q374 174 308 194 Q280 204 280 232 Q280 260 314 265 Q342 268 374 256"
+                            fill="none" stroke="white" stroke-width="18" stroke-linecap="round" />
                     </svg>
-                    <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="off" required>
-                    <div class="focus-bar"></div>
                 </div>
+                <div class="brand-name">Shop<span>Sphere</span></div>
             </div>
 
-            <!-- GitHub checkbox -->
-            <div style="display:flex;align-items:center;gap:8px;margin:-4px 0 10px 2px;">
-                <input type="checkbox" id="githubCheck" style="width:15px;height:15px;accent-color:#FF6B2B;cursor:pointer;">
-                <label for="githubCheck" style="font-size:12px;color:var(--muted);cursor:pointer;user-select:none;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:3px;"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                    Signed up with GitHub? Login with OTP
-                </label>
-            </div>
+            <h2>Welcome back 👋</h2>
+            <p class="subtitle">Sign in to your account to continue</p>
 
-            <!-- OTP field — hidden by default -->
-            <div class="field" id="otpField" style="display:none;">
-                <label for="otp">Enter OTP sent to your email</label>
-                <div class="input-wrap">
-                    <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="6" width="20" height="12" rx="2"/>
-                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                    </svg>
-                    <input type="text" id="otp" placeholder="Enter 6-digit OTP" maxlength="6" autocomplete="off">
-                    <div class="focus-bar"></div>
-                </div>
-            </div>
-
-            <!-- Password -->
-            <div class="field">
-                <label for="password">Password</label>
-                <div class="input-wrap">
-                    <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2"/>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                    </svg>
-                    <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="new-password" required>
-                    <div class="focus-bar"></div>
-                </div>
-            </div>
-
-            <!-- Error / success message box — hidden until needed -->
+            <!-- Google login button -->
+            <button type="button" class="soc-btn google" id="gBtn">
+                <img src="https://www.google.com/favicon.ico" alt="Google"
+                    onerror="this.outerHTML='<svg viewBox=\'0 0 24 24\' width=\'18\' height=\'18\'><path fill=\'#EA4335\' d=\'M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z\'/><path fill=\'#34A853\' d=\'M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z\'/><path fill=\'#FBBC05\' d=\'M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z\'/><path fill=\'#EA4335\' d=\'M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z\'/></svg>'">
+                <span>Continue with Google</span>
+            </button>
             <div class="msg-box" id="msgBox"></div>
+            <div id="mainLoginView">
+                <div class="divider-row"><span>or sign in with email</span></div>
 
-            <!-- Submit -->
-            <button type="button" id="loginBtn" onclick="handleEmailLogin()">Login →</button>
+                <form id="loginForm" autocomplete="off">
 
-        </form>
-        <p class="signup-row" style="margin-top:8px;">
-    <a onclick="toggleSecurityLogin()" style="cursor:pointer;">Try another option</a>
-</p>
-        <p class="signup-row">Don't have an account? <a href="/signup">Sign up</a></p>
-    </div>
-<!-- Security Question Login -->
-<div id="securityLoginView" style="display:none;">
-    <div class="field">
-        <label for="sec_email">Email Address</label>
-        <div class="input-wrap">
-            <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2"/>
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-            </svg>
-            <input type="email" id="sec_email" placeholder="you@example.com" autocomplete="off">
-            <div class="focus-bar"></div>
+                    <!-- Email -->
+                    <div class="field">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrap">
+                            <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="4" width="20" height="16" rx="2" />
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                            </svg>
+                            <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="off"
+                                required>
+                            <div class="focus-bar"></div>
+                        </div>
+                    </div>
+
+                    <!-- GitHub checkbox -->
+                    <div style="display:flex;align-items:center;gap:8px;margin:-4px 0 10px 2px;">
+                        <input type="checkbox" id="githubCheck"
+                            style="width:15px;height:15px;accent-color:#FF6B2B;cursor:pointer;">
+                        <label for="githubCheck"
+                            style="font-size:12px;color:var(--muted);cursor:pointer;user-select:none;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"
+                                style="vertical-align:middle;margin-right:3px;">
+                                <path
+                                    d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                            </svg>
+                            Signed up with GitHub? Login with OTP
+                        </label>
+                    </div>
+
+                    <!-- OTP field — hidden by default -->
+                    <div class="field" id="otpField" style="display:none;">
+                        <label for="otp">Enter OTP sent to your email</label>
+                        <div class="input-wrap">
+                            <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="6" width="20" height="12" rx="2" />
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                            </svg>
+                            <input type="text" id="otp" placeholder="Enter 6-digit OTP" maxlength="6"
+                                autocomplete="off">
+                            <div class="focus-bar"></div>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <div class="input-wrap">
+                            <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                            <input type="password" id="password" name="password" placeholder="••••••••"
+                                autocomplete="new-password" required>
+                            <div class="focus-bar"></div>
+                        </div>
+                    </div>
+
+
+                    <!-- Submit -->
+                    <button type="button" id="loginBtn" onclick="handleEmailLogin()">Login →</button>
+
+                </form>
+                <p class="signup-row" style="margin-top:8px;">
+                    <a onclick="toggleSecurityLogin()" style="cursor:pointer;">Try another option</a>
+                </p>
+                <p class="signup-row">Don't have an account? <a href="/signup">Sign up</a></p>
+            </div>
+            <!-- Security Question Login -->
+            <div id="securityLoginView" style="display:none;">
+                <div class="field">
+                    <label for="sec_email">Email Address</label>
+                    <div class="input-wrap">
+                        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="4" width="20" height="16" rx="2" />
+                            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                        </svg>
+                        <input type="email" id="sec_email" placeholder="you@example.com" autocomplete="off">
+                        <div class="focus-bar"></div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="sec_q1">How did you hear about ShopSphere?</label>
+                    <div class="input-wrap">
+                        <input type="text" id="sec_q1" placeholder="Type your answer" autocomplete="off">
+                        <div class="focus-bar"></div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="sec_q2">Which product category interests you most?</label>
+                    <div class="input-wrap">
+                        <input type="text" id="sec_q2" placeholder="Type your answer" autocomplete="off">
+                        <div class="focus-bar"></div>
+                    </div>
+                </div>
+
+                <button type="button" id="secLoginBtn" onclick="handleSecurityLogin()">Verify & Login →</button>
+
+                <p class="signup-row" style="margin-top:8px;">
+                    <a onclick="toggleSecurityLogin()" style="cursor:pointer;">← Back to login</a>
+                </p>
+            </div>
         </div>
-    </div>
 
-    <div class="field">
-        <label for="sec_q1">How did you hear about ShopSphere?</label>
-        <div class="input-wrap">
-            <input type="text" id="sec_q1" placeholder="Type your answer" autocomplete="off">
-            <div class="focus-bar"></div>
-        </div>
-    </div>
+        <!-- ══ RIGHT: ShopSphere logo panel ══ -->
+        <div class="right-panel" id="rightPanel">
 
-    <div class="field">
-        <label for="sec_q2">Which product category interests you most?</label>
-        <div class="input-wrap">
-            <input type="text" id="sec_q2" placeholder="Type your answer" autocomplete="off">
-            <div class="focus-bar"></div>
-        </div>
-    </div>
+            <!-- Full ShopSphere logo SVG, adapted for dark panel -->
+            <div class="logo-wrap logo-float">
+                <svg viewBox="130 30 420 460" xmlns="http://www.w3.org/2000/svg">
 
-<button type="button" id="secLoginBtn" onclick="handleSecurityLogin()">Verify & Login →</button>
+                    <!-- Glow rings around icon -->
+                    <circle cx="340" cy="190" r="148" fill="#FF6B2B" opacity="0.03" />
+                    <circle cx="340" cy="190" r="134" fill="#FF6B2B" opacity="0.05" />
 
-<p class="signup-row" style="margin-top:8px;">
-        <a onclick="toggleSecurityLogin()" style="cursor:pointer;">← Back to login</a>
-    </p>
-</div>
-    </div>
+                    <!-- Thick ring -->
+                    <circle cx="340" cy="190" r="118" fill="none" stroke="#FF6B2B" stroke-width="18" opacity="0.10" />
+                    <circle cx="340" cy="190" r="118" fill="none" stroke="#FFB547" stroke-width="6" opacity="0.22"
+                        stroke-dasharray="12 8" />
+                    <circle cx="340" cy="190" r="118" fill="none" stroke="#FF6B2B" stroke-width="2.5" opacity="0.55" />
 
-    <!-- ══ RIGHT: ShopSphere logo panel ══ -->
-    <div class="right-panel" id="rightPanel">
+                    <!-- Inner plate — translucent on dark bg -->
+                    <circle cx="340" cy="190" r="100" fill="rgba(255,247,237,0.07)" />
+                    <circle cx="340" cy="190" r="100" fill="none" stroke="#FF6B2B" stroke-width="2" opacity="0.25" />
+                    <circle cx="340" cy="190" r="86" fill="none" stroke="#FF6B2B" stroke-width="1"
+                        stroke-dasharray="6 5" opacity="0.20" />
 
-        <!-- Full ShopSphere logo SVG, adapted for dark panel -->
-        <div class="logo-wrap logo-float">
-            <svg viewBox="130 30 420 460" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Giant S — bright on dark -->
+                    <path
+                        d="M312 144 Q312 122 340 122 Q374 122 374 148 Q374 174 308 194 Q280 204 280 232 Q280 260 314 265 Q342 268 374 256"
+                        fill="none" stroke="#FF6B2B" stroke-width="26" stroke-linecap="round" opacity="0.18" />
+                    <path
+                        d="M312 144 Q312 122 340 122 Q374 122 374 148 Q374 174 308 194 Q280 204 280 232 Q280 260 314 265 Q342 268 374 256"
+                        fill="none" stroke="#FF6B2B" stroke-width="16" stroke-linecap="round" />
+                    <path
+                        d="M312 144 Q312 122 340 122 Q374 122 374 148 Q374 174 308 194 Q280 204 280 232 Q280 260 314 265 Q342 268 374 256"
+                        fill="none" stroke="#FFDABC" stroke-width="5" stroke-linecap="round" opacity="0.75" />
 
-                <!-- Glow rings around icon -->
-                <circle cx="340" cy="190" r="148" fill="#FF6B2B" opacity="0.03"/>
-                <circle cx="340" cy="190" r="134" fill="#FF6B2B" opacity="0.05"/>
+                    <!-- Orbit group — spins via CSS -->
+                    <g id="orbitGroup">
+                        <!-- TOP: % badge -->
+                        <circle cx="340" cy="58" r="22" fill="#FFB547" />
+                        <circle cx="340" cy="58" r="16" fill="#FFD580" />
+                        <text x="340" y="64" text-anchor="middle" font-family="Arial" font-size="16" font-weight="900"
+                            fill="#7a4500">%</text>
+                        <line x1="340" y1="30" x2="340" y2="22" stroke="#FFB547" stroke-width="3" stroke-linecap="round"
+                            opacity="0.7" />
+                        <line x1="362" y1="36" x2="368" y2="28" stroke="#FFB547" stroke-width="3" stroke-linecap="round"
+                            opacity="0.7" />
+                        <line x1="318" y1="36" x2="312" y2="28" stroke="#FFB547" stroke-width="3" stroke-linecap="round"
+                            opacity="0.7" />
 
-                <!-- Thick ring -->
-                <circle cx="340" cy="190" r="118" fill="none" stroke="#FF6B2B" stroke-width="18" opacity="0.10"/>
-                <circle cx="340" cy="190" r="118" fill="none" stroke="#FFB547" stroke-width="6"  opacity="0.22" stroke-dasharray="12 8"/>
-                <circle cx="340" cy="190" r="118" fill="none" stroke="#FF6B2B" stroke-width="2.5" opacity="0.55"/>
+                        <!-- RIGHT: Shopping bag -->
+                        <g transform="translate(455,172)">
+                            <rect x="-24" y="0" width="48" height="40" rx="9" fill="#FF6B2B" />
+                            <rect x="-24" y="0" width="48" height="14" rx="9" fill="#FF8C55" opacity="0.6" />
+                            <path d="M-12,0 Q-12,-18 0,-18 Q12,-18 12,0" fill="none" stroke="white" stroke-width="4"
+                                stroke-linecap="round" />
+                            <circle cx="8" cy="37" r="5" fill="#130d38" />
+                            <circle cx="8" cy="37" r="3" fill="#FF6B2B" />
+                            <circle cx="-8" cy="37" r="5" fill="#130d38" />
+                            <circle cx="-8" cy="37" r="3" fill="#FF6B2B" />
+                        </g>
 
-                <!-- Inner plate — translucent on dark bg -->
-                <circle cx="340" cy="190" r="100" fill="rgba(255,247,237,0.07)"/>
-                <circle cx="340" cy="190" r="100" fill="none" stroke="#FF6B2B" stroke-width="2" opacity="0.25"/>
-                <circle cx="340" cy="190" r="86"  fill="none" stroke="#FF6B2B" stroke-width="1" stroke-dasharray="6 5" opacity="0.20"/>
+                        <!-- LEFT: Price tag -->
+                        <g transform="translate(222,172)">
+                            <rect x="-26" y="-18" width="52" height="36" rx="9" fill="#FFB547" />
+                            <circle cx="-16" cy="0" r="5" fill="white" opacity="0.55" />
+                            <line x1="-8" y1="-7" x2="18" y2="-7" stroke="white" stroke-width="2.5"
+                                stroke-linecap="round" opacity="0.7" />
+                            <line x1="-8" y1="1" x2="14" y2="1" stroke="white" stroke-width="2.5" stroke-linecap="round"
+                                opacity="0.5" />
+                            <line x1="-8" y1="9" x2="10" y2="9" stroke="white" stroke-width="2.5" stroke-linecap="round"
+                                opacity="0.35" />
+                        </g>
 
-                <!-- Giant S — bright on dark -->
-                <path d="M312 144 Q312 122 340 122 Q374 122 374 148 Q374 174 308 194 Q280 204 280 232 Q280 260 314 265 Q342 268 374 256"
-                      fill="none" stroke="#FF6B2B" stroke-width="26" stroke-linecap="round" opacity="0.18"/>
-                <path d="M312 144 Q312 122 340 122 Q374 122 374 148 Q374 174 308 194 Q280 204 280 232 Q280 260 314 265 Q342 268 374 256"
-                      fill="none" stroke="#FF6B2B" stroke-width="16" stroke-linecap="round"/>
-                <path d="M312 144 Q312 122 340 122 Q374 122 374 148 Q374 174 308 194 Q280 204 280 232 Q280 260 314 265 Q342 268 374 256"
-                      fill="none" stroke="#FFDABC" stroke-width="5" stroke-linecap="round" opacity="0.75"/>
+                        <!-- BOTTOM-RIGHT: Cart -->
+                        <g transform="translate(428,278)">
+                            <rect x="-28" y="-26" width="56" height="44" rx="10" fill="#1a1a2e" opacity="0.88" />
+                            <path d="M-16,-10 L-8,-10 L0,10 L18,10 L24,-4 L-4,-4" fill="none" stroke="#FF6B2B"
+                                stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <circle cx="4" cy="17" r="4" fill="#FFB547" />
+                            <circle cx="16" cy="17" r="4" fill="#FFB547" />
+                        </g>
 
-                <!-- Orbit group — spins via CSS -->
-                <g id="orbitGroup">
-                    <!-- TOP: % badge -->
-                    <circle cx="340" cy="58" r="22" fill="#FFB547"/>
-                    <circle cx="340" cy="58" r="16" fill="#FFD580"/>
-                    <text x="340" y="64" text-anchor="middle" font-family="Arial" font-size="16" font-weight="900" fill="#7a4500">%</text>
-                    <line x1="340" y1="30" x2="340" y2="22" stroke="#FFB547" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
-                    <line x1="362" y1="36" x2="368" y2="28" stroke="#FFB547" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
-                    <line x1="318" y1="36" x2="312" y2="28" stroke="#FFB547" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+                        <!-- BOTTOM-LEFT: Heart -->
+                        <g transform="translate(252,278)">
+                            <rect x="-28" y="-26" width="56" height="44" rx="10" fill="#FF6B2B" />
+                            <path d="M0,12 Q-22,-4 -18,-16 Q-14,-26 0,-14 Q14,-26 18,-16 Q22,-4 0,12Z" fill="white"
+                                opacity="0.9" />
+                        </g>
 
-                    <!-- RIGHT: Shopping bag -->
-                    <g transform="translate(455,172)">
-                        <rect x="-24" y="0" width="48" height="40" rx="9" fill="#FF6B2B"/>
-                        <rect x="-24" y="0" width="48" height="14" rx="9" fill="#FF8C55" opacity="0.6"/>
-                        <path d="M-12,0 Q-12,-18 0,-18 Q12,-18 12,0" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
-                        <circle cx="8"  cy="37" r="5" fill="#130d38"/><circle cx="8"  cy="37" r="3" fill="#FF6B2B"/>
-                        <circle cx="-8" cy="37" r="5" fill="#130d38"/><circle cx="-8" cy="37" r="3" fill="#FF6B2B"/>
+                        <!-- Dashed orbit -->
+                        <circle cx="340" cy="190" r="118" fill="none" stroke="#FF6B2B" stroke-width="1"
+                            stroke-dasharray="5 6" opacity="0.20" />
+
+                        <!-- Dot accents on orbit -->
+                        <circle cx="490" cy="192" r="5" fill="#FF6B2B" opacity="0.30" />
+                        <circle cx="190" cy="192" r="5" fill="#FFB547" opacity="0.30" />
                     </g>
 
-                    <!-- LEFT: Price tag -->
-                    <g transform="translate(222,172)">
-                        <rect x="-26" y="-18" width="52" height="36" rx="9" fill="#FFB547"/>
-                        <circle cx="-16" cy="0" r="5" fill="white" opacity="0.55"/>
-                        <line x1="-8" y1="-7" x2="18" y2="-7" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
-                        <line x1="-8" y1="1"  x2="14" y2="1"  stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
-                        <line x1="-8" y1="9"  x2="10" y2="9"  stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.35"/>
+                    <!-- Sparkles -->
+                    <g transform="translate(490,100)">
+                        <line x1="0" y1="-11" x2="0" y2="11" stroke="#FFB547" stroke-width="3" stroke-linecap="round" />
+                        <line x1="-11" y1="0" x2="11" y2="0" stroke="#FFB547" stroke-width="3" stroke-linecap="round" />
+                        <line x1="-7" y1="-7" x2="7" y2="7" stroke="#FFB547" stroke-width="2" stroke-linecap="round"
+                            opacity="0.5" />
+                        <line x1="7" y1="-7" x2="-7" y2="7" stroke="#FFB547" stroke-width="2" stroke-linecap="round"
+                            opacity="0.5" />
+                    </g>
+                    <g transform="translate(188,100)">
+                        <line x1="0" y1="-9" x2="0" y2="9" stroke="#FF6B2B" stroke-width="2.5" stroke-linecap="round" />
+                        <line x1="-9" y1="0" x2="9" y2="0" stroke="#FF6B2B" stroke-width="2.5" stroke-linecap="round" />
+                        <line x1="-6" y1="-6" x2="6" y2="6" stroke="#FF6B2B" stroke-width="1.5" stroke-linecap="round"
+                            opacity="0.45" />
+                        <line x1="6" y1="-6" x2="-6" y2="6" stroke="#FF6B2B" stroke-width="1.5" stroke-linecap="round"
+                            opacity="0.45" />
+                    </g>
+                    <g transform="translate(500,280)">
+                        <line x1="0" y1="-7" x2="0" y2="7" stroke="#FFB547" stroke-width="2" stroke-linecap="round" />
+                        <line x1="-7" y1="0" x2="7" y2="0" stroke="#FFB547" stroke-width="2" stroke-linecap="round" />
+                    </g>
+                    <g transform="translate(182,280)">
+                        <line x1="0" y1="-7" x2="0" y2="7" stroke="#FF6B2B" stroke-width="2" stroke-linecap="round" />
+                        <line x1="-7" y1="0" x2="7" y2="0" stroke="#FF6B2B" stroke-width="2" stroke-linecap="round" />
                     </g>
 
-                    <!-- BOTTOM-RIGHT: Cart -->
-                    <g transform="translate(428,278)">
-                        <rect x="-28" y="-26" width="56" height="44" rx="10" fill="#1a1a2e" opacity="0.88"/>
-                        <path d="M-16,-10 L-8,-10 L0,10 L18,10 L24,-4 L-4,-4" fill="none" stroke="#FF6B2B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="4"  cy="17" r="4" fill="#FFB547"/>
-                        <circle cx="16" cy="17" r="4" fill="#FFB547"/>
-                    </g>
+                    <!-- Wordmark -->
+                    <text x="340" y="404" text-anchor="middle" font-family="'Fredoka One', Nunito, sans-serif"
+                        font-size="76" font-weight="900">
+                        <tspan fill="#F0EEE8">Shop</tspan>
+                        <tspan fill="#FF6B2B">Sphere</tspan>
+                    </text>
 
-                    <!-- BOTTOM-LEFT: Heart -->
-                    <g transform="translate(252,278)">
-                        <rect x="-28" y="-26" width="56" height="44" rx="10" fill="#FF6B2B"/>
-                        <path d="M0,12 Q-22,-4 -18,-16 Q-14,-26 0,-14 Q14,-26 18,-16 Q22,-4 0,12Z" fill="white" opacity="0.9"/>
-                    </g>
+                    <!-- Underline bars -->
+                    <rect x="178" y="414" width="152" height="4" rx="2" fill="white" opacity="0.12" />
+                    <rect x="334" y="414" width="168" height="4" rx="2" fill="#FF6B2B" opacity="0.55" />
 
-                    <!-- Dashed orbit -->
-                    <circle cx="340" cy="190" r="118" fill="none" stroke="#FF6B2B" stroke-width="1" stroke-dasharray="5 6" opacity="0.20"/>
+                    <!-- Sub text -->
+                    <text x="340" y="442" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif"
+                        font-size="11" font-weight="700" letter-spacing="5" fill="#8A8A9A">E · C O M M E R C E</text>
+                    <text x="340" y="466" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif"
+                        font-size="12" font-weight="500" fill="#6d6d82">Every smart feature. One platform.</text>
+                </svg>
+            </div>
 
-                    <!-- Dot accents on orbit -->
-                    <circle cx="490" cy="192" r="5" fill="#FF6B2B" opacity="0.30"/>
-                    <circle cx="190" cy="192" r="5" fill="#FFB547" opacity="0.30"/>
-                </g>
-
-                <!-- Sparkles -->
-                <g transform="translate(490,100)">
-                    <line x1="0" y1="-11" x2="0" y2="11"  stroke="#FFB547" stroke-width="3"   stroke-linecap="round"/>
-                    <line x1="-11" y1="0" x2="11" y2="0"  stroke="#FFB547" stroke-width="3"   stroke-linecap="round"/>
-                    <line x1="-7"  y1="-7" x2="7" y2="7"  stroke="#FFB547" stroke-width="2"   stroke-linecap="round" opacity="0.5"/>
-                    <line x1="7"   y1="-7" x2="-7" y2="7" stroke="#FFB547" stroke-width="2"   stroke-linecap="round" opacity="0.5"/>
-                </g>
-                <g transform="translate(188,100)">
-                    <line x1="0" y1="-9" x2="0" y2="9"   stroke="#FF6B2B" stroke-width="2.5" stroke-linecap="round"/>
-                    <line x1="-9" y1="0" x2="9" y2="0"   stroke="#FF6B2B" stroke-width="2.5" stroke-linecap="round"/>
-                    <line x1="-6" y1="-6" x2="6" y2="6"  stroke="#FF6B2B" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>
-                    <line x1="6"  y1="-6" x2="-6" y2="6" stroke="#FF6B2B" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>
-                </g>
-                <g transform="translate(500,280)">
-                    <line x1="0" y1="-7" x2="0" y2="7"  stroke="#FFB547" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="-7" y1="0" x2="7" y2="0"  stroke="#FFB547" stroke-width="2" stroke-linecap="round"/>
-                </g>
-                <g transform="translate(182,280)">
-                    <line x1="0" y1="-7" x2="0" y2="7"  stroke="#FF6B2B" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="-7" y1="0" x2="7" y2="0"  stroke="#FF6B2B" stroke-width="2" stroke-linecap="round"/>
-                </g>
-
-                <!-- Wordmark -->
-                <text x="340" y="404" text-anchor="middle" font-family="'Fredoka One', Nunito, sans-serif" font-size="76" font-weight="900">
-                    <tspan fill="#F0EEE8">Shop</tspan><tspan fill="#FF6B2B">Sphere</tspan>
-                </text>
-
-                <!-- Underline bars -->
-                <rect x="178" y="414" width="152" height="4" rx="2" fill="white" opacity="0.12"/>
-                <rect x="334" y="414" width="168" height="4" rx="2" fill="#FF6B2B" opacity="0.55"/>
-
-                <!-- Sub text -->
-                <text x="340" y="442" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" letter-spacing="5" fill="#8A8A9A">E · C O M M E R C E</text>
-                <text x="340" y="466" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="500" fill="#6d6d82">Every smart feature. One platform.</text>
-            </svg>
-        </div>
-
-        <!-- Feature pills -->
-        <div class="pills">
-            <div class="pill">⚡ Fast Checkout</div>
-            <div class="pill">🔒 Secure</div>
-            <div class="pill">📊 Analytics</div>
+            <!-- Feature pills -->
+            <div class="pills">
+                <div class="pill">⚡ Fast Checkout</div>
+                <div class="pill">🔒 Secure</div>
+                <div class="pill">📊 Analytics</div>
+            </div>
         </div>
     </div>
-</div>
 
-<footer class="footer">© 2026 ShopSphere | All Rights Reserved</footer>
+    <footer class="footer">© 2026 ShopSphere | All Rights Reserved</footer>
 
 
-<script>
-// ── Orbit animation on the logo group ──
-(function(){
-    var orbitGroup = document.getElementById('orbitGroup');
-    if(!orbitGroup) return;
-    var angle = 0;
-    var cx = 340, cy = 190;
-    function tick(){
-        angle += 0.012;
-        orbitGroup.setAttribute('transform',
-            'rotate(' + angle.toFixed(3) + ' ' + cx + ' ' + cy + ')'
-        );
-        requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-})();
-
-// ── Floating particles ──
-(function(){
-    var panel = document.getElementById('rightPanel');
-    if(!panel) return;
-    for(var i = 0; i < 16; i++){
-        var p = document.createElement('div');
-        p.className = 'particle';
-        var size  = (Math.random() * 5 + 2).toFixed(1);
-        var left  = (Math.random() * 90 + 5).toFixed(1);
-        var dur   = (Math.random() * 9 + 6).toFixed(1);
-        var delay = (Math.random() * 9).toFixed(1);
-        p.style.cssText = 'width:'+size+'px;height:'+size+'px;left:'+left+'%;bottom:0;animation-duration:'+dur+'s;animation-delay:'+delay+'s;';
-        panel.appendChild(p);
-    }
-})();
-</script>
-
-<!-- Firebase compat SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script>
-    firebase.initializeApp({
-        apiKey: "AIzaSyCB1zPWX23hkXKdjbF1FfDW2NZjydikGcY",
-        authDomain: "main-project-526e0.firebaseapp.com",
-        projectId: "main-project-526e0",
-        storageBucket: "main-project-526e0.firebasestorage.app",
-        messagingSenderId: "996713410889",
-        appId: "1:996713410889:web:7d6ba7b39f8da2673daa98"
-    });
-    var auth = firebase.auth();
-    var googleProvider = new firebase.auth.GoogleAuthProvider();
-
-    function showMsg(html, type) {
-        var b = document.getElementById('msgBox');
-        b.innerHTML = html;
-        b.className = 'msg-box show ' + type;
-        setTimeout(function () { b.classList.remove('show'); }, 6000);
-    }
-
-    // ── Loading overlay ──
-    function showLoader(msg) {
-        var msgs = [
-            msg || 'Logging you in...',
-            'Loading your dashboard...',
-            'Almost there...',
-            'Welcome to ShopSphere!'
-        ];
-        var overlay = document.getElementById('loaderOverlay');
-        overlay.classList.add('show');
-        document.getElementById('loaderMsg').textContent = msgs[0];
-        var i = 1;
-        var interval = setInterval(function(){
-            if(i < msgs.length) {
-                document.getElementById('loaderMsg').textContent = msgs[i];
-                i++;
-            } else {
-                clearInterval(interval);
+    <script>
+        // ── Orbit animation on the logo group ──
+        (function () {
+            var orbitGroup = document.getElementById('orbitGroup');
+            if (!orbitGroup) return;
+            var angle = 0;
+            var cx = 340, cy = 190;
+            function tick() {
+                angle += 0.012;
+                orbitGroup.setAttribute('transform',
+                    'rotate(' + angle.toFixed(3) + ' ' + cx + ' ' + cy + ')'
+                );
+                requestAnimationFrame(tick);
             }
-        }, 1500);
-        for(var j = 0; j < 12; j++){
-            var p = document.createElement('div');
-            p.className = 'lo-particle';
-            var size = (Math.random()*4+2).toFixed(1);
-            var left = (Math.random()*90+5).toFixed(1);
-            var dur  = (Math.random()*8+5).toFixed(1);
-            var del  = (Math.random()*8).toFixed(1);
-            p.style.cssText = 'width:'+size+'px;height:'+size+'px;left:'+left+'%;bottom:0;animation-duration:'+dur+'s;animation-delay:'+del+'s;';
-            overlay.appendChild(p);
+            requestAnimationFrame(tick);
+        })();
+
+        // ── Floating particles ──
+        (function () {
+            var panel = document.getElementById('rightPanel');
+            if (!panel) return;
+            for (var i = 0; i < 16; i++) {
+                var p = document.createElement('div');
+                p.className = 'particle';
+                var size = (Math.random() * 5 + 2).toFixed(1);
+                var left = (Math.random() * 90 + 5).toFixed(1);
+                var dur = (Math.random() * 9 + 6).toFixed(1);
+                var delay = (Math.random() * 9).toFixed(1);
+                p.style.cssText = 'width:' + size + 'px;height:' + size + 'px;left:' + left + '%;bottom:0;animation-duration:' + dur + 's;animation-delay:' + delay + 's;';
+                panel.appendChild(p);
+            }
+        })();
+    </script>
+
+    <!-- Firebase compat SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script>
+        firebase.initializeApp({
+            apiKey: "AIzaSyCB1zPWX23hkXKdjbF1FfDW2NZjydikGcY",
+            authDomain: "main-project-526e0.firebaseapp.com",
+            projectId: "main-project-526e0",
+            storageBucket: "main-project-526e0.firebasestorage.app",
+            messagingSenderId: "996713410889",
+            appId: "1:996713410889:web:7d6ba7b39f8da2673daa98"
+        });
+        var auth = firebase.auth();
+        var googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        function showMsg(html, type) {
+            var b = document.getElementById('msgBox');
+            b.innerHTML = html;
+            b.className = 'msg-box show ' + type;
+            setTimeout(function () { b.classList.remove('show'); }, 6000);
         }
-    }
 
-    var otpSent = false;
-
-    // Show/hide password field based on checkbox
-    document.getElementById('githubCheck').addEventListener('change', function () {
-        var pwField  = document.getElementById('password').closest('.field');
-        var otpField = document.getElementById('otpField');
-        if (this.checked) {
-            pwField.style.display  = 'none';
-            otpField.style.display = 'none';
-            otpSent = false;
-            document.getElementById('loginBtn').textContent = 'Send OTP →';
-        } else {
-            pwField.style.display  = 'block';
-            otpField.style.display = 'none';
-            otpSent = false;
-            document.getElementById('loginBtn').textContent = 'Login →';
+        // ── Loading overlay ──
+        function showLoader(msg) {
+            var msgs = [
+                msg || 'Logging you in...',
+                'Loading your dashboard...',
+                'Almost there...',
+                'Welcome to ShopSphere!'
+            ];
+            var overlay = document.getElementById('loaderOverlay');
+            overlay.classList.add('show');
+            document.getElementById('loaderMsg').textContent = msgs[0];
+            var i = 1;
+            var interval = setInterval(function () {
+                if (i < msgs.length) {
+                    document.getElementById('loaderMsg').textContent = msgs[i];
+                    i++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 1500);
+            for (var j = 0; j < 12; j++) {
+                var p = document.createElement('div');
+                p.className = 'lo-particle';
+                var size = (Math.random() * 4 + 2).toFixed(1);
+                var left = (Math.random() * 90 + 5).toFixed(1);
+                var dur = (Math.random() * 8 + 5).toFixed(1);
+                var del = (Math.random() * 8).toFixed(1);
+                p.style.cssText = 'width:' + size + 'px;height:' + size + 'px;left:' + left + '%;bottom:0;animation-duration:' + dur + 's;animation-delay:' + del + 's;';
+                overlay.appendChild(p);
+            }
         }
-    });
 
-    function handleEmailLogin() {
-        var email    = document.getElementById('email').value.trim();
-        var btn      = document.getElementById('loginBtn');
-        var isGithub = document.getElementById('githubCheck').checked;
+        var otpSent = false;
 
-        if (!email) { showMsg('Please enter your email address.', 'error'); return; }
+        // Show/hide password field based on checkbox
+        document.getElementById('githubCheck').addEventListener('change', function () {
+            var pwField = document.getElementById('password').closest('.field');
+            var otpField = document.getElementById('otpField');
+            if (this.checked) {
+                pwField.style.display = 'none';
+                otpField.style.display = 'none';
+                otpSent = false;
+                document.getElementById('loginBtn').textContent = 'Send OTP →';
+            } else {
+                pwField.style.display = 'block';
+                otpField.style.display = 'none';
+                otpSent = false;
+                document.getElementById('loginBtn').textContent = 'Login →';
+            }
+        });
 
-        // ── GitHub OTP flow ──
-        if (isGithub) {
-            var otp = document.getElementById('otp').value.trim();
+        function handleEmailLogin() {
+            var email = document.getElementById('email').value.trim();
+            var btn = document.getElementById('loginBtn');
+            var isGithub = document.getElementById('githubCheck').checked;
 
-            if (otpSent) {
-                if (!otp) { showMsg('Please enter the OTP sent to your email.', 'error'); return; }
-                btn.disabled = true;
-                btn.textContent = 'Verifying...';
-                fetch('/auth/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, otp: otp })
-                })
+            if (!email) { showMsg('Please enter your email address.', 'error'); return; }
+
+            // ── GitHub OTP flow ──
+            if (isGithub) {
+                var otp = document.getElementById('otp').value.trim();
+
+                if (otpSent) {
+                    if (!otp) { showMsg('Please enter the OTP sent to your email.', 'error'); return; }
+                    btn.disabled = true;
+                    btn.textContent = 'Verifying...';
+                    fetch('/auth/verify-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email, otp: otp })
+                    })
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) {
+                            if (data.success) {
+                                showMsg('OTP verified! Redirecting...', 'success');
+                                showLoader('Logging you in...');
+                                setTimeout(function () { window.location.href = '/home'; }, 2500);
+                            } else {
+                                showMsg(data.message || 'Invalid OTP.', 'error');
+                                resetBtn('Verify OTP →');
+                            }
+                        })
+                        .catch(function () { showMsg('Something went wrong.', 'error'); resetBtn('Verify OTP →'); });
+                } else {
+                    btn.disabled = true;
+                    btn.textContent = 'Sending OTP...';
+                    fetch('/auth/send-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email })
+                    })
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) {
+                            if (data.success) {
+                                otpSent = true;
+                                document.getElementById('otpField').style.display = 'block';
+                                showMsg('OTP sent to ' + email + '. Check your inbox!', 'success');
+                                resetBtn('Verify OTP →');
+                            } else {
+                                showMsg(data.message || 'Failed to send OTP.', 'error');
+                                resetBtn('Send OTP →');
+                            }
+                        })
+                        .catch(function () { showMsg('Something went wrong.', 'error'); resetBtn('Send OTP →'); });
+                }
+                return;
+            }
+
+            // ── Normal email/password login ──
+            var pw = document.getElementById('password').value;
+            if (!pw) { showMsg('Please enter your password.', 'error'); return; }
+
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+
+            fetch('/auth/flask-login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, password: pw })
+            })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     if (data.success) {
-                        showMsg('OTP verified! Redirecting...', 'success');
+                        showMsg('Login successful! Redirecting...', 'success');
                         showLoader('Logging you in...');
                         setTimeout(function () { window.location.href = '/home'; }, 2500);
                     } else {
-                        showMsg(data.message || 'Invalid OTP.', 'error');
-                        resetBtn('Verify OTP →');
+                        showMsg(data.message || 'Login failed.', 'error');
+                        resetBtn('Login →');
                     }
                 })
-                .catch(function () { showMsg('Something went wrong.', 'error'); resetBtn('Verify OTP →'); });
-            } else {
-                btn.disabled = true;
-                btn.textContent = 'Sending OTP...';
-                fetch('/auth/send-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email })
+                .catch(function () { showMsg('Something went wrong.', 'error'); resetBtn('Login →'); });
+        }
+
+        function resetBtn(text) {
+            var btn = document.getElementById('loginBtn');
+            btn.disabled = false;
+            btn.textContent = text || 'Login →';
+        }
+
+        function friendlyLogin(code) {
+            var map = {
+                'auth/invalid-email': 'Invalid email address.',
+                'auth/user-not-found': 'No account found with this email.',
+                'auth/wrong-password': 'Incorrect password. Please try again.',
+                'auth/invalid-credential': 'Incorrect email or password.',
+                'auth/too-many-requests': 'Too many attempts. Please try again later.',
+                'auth/network-request-failed': 'Network error. Check your connection.',
+                'auth/user-disabled': 'This account has been disabled.',
+                'auth/popup-closed-by-user': 'Sign-in was cancelled.'
+            };
+            return map[code] || 'Something went wrong. Please try again.';
+        }
+
+        document.getElementById('gBtn').addEventListener('click', function () {
+            showMsg('Opening Google sign-in...', 'success');
+            auth.signInWithPopup(googleProvider)
+                .then(function (result) {
+                    var user = result.user;
+                    showMsg('Signed in as ' + user.email + ' ✅', 'success');
+                    return fetch('/auth/firebase-login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: user.email,
+                            username: user.displayName || user.email.split('@')[0],
+                            uid: user.uid,
+                            provider: 'google',
+                            source: 'login'
+                        })
+                    });
                 })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     if (data.success) {
-                        otpSent = true;
-                        document.getElementById('otpField').style.display = 'block';
-                        showMsg('OTP sent to ' + email + '. Check your inbox!', 'success');
-                        resetBtn('Verify OTP →');
+                        showMsg('Login successful! Redirecting...', 'success');
+                        showLoader('Logging you in...');
+                        setTimeout(function () { window.location.href = '/home'; }, 2500);
                     } else {
-                        showMsg(data.message || 'Failed to send OTP.', 'error');
-                        resetBtn('Send OTP →');
+                        showMsg(data.message || 'Login failed', 'error');
                     }
                 })
-                .catch(function () { showMsg('Something went wrong.', 'error'); resetBtn('Send OTP →'); });
-            }
-            return;
-        }
-
-        // ── Normal email/password login ──
-        var pw = document.getElementById('password').value;
-        if (!pw) { showMsg('Please enter your password.', 'error'); return; }
-
-        btn.disabled = true;
-        btn.textContent = 'Signing in...';
-
-        fetch('/auth/flask-login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email, password: pw })
-        })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) {
-                showMsg('Login successful! Redirecting...', 'success');
-                showLoader('Logging you in...');
-                setTimeout(function () { window.location.href = '/home'; }, 2500);
-            } else {
-                showMsg(data.message || 'Login failed.', 'error');
-                resetBtn('Login →');
-            }
-        })
-        .catch(function () { showMsg('Something went wrong.', 'error'); resetBtn('Login →'); });
-    }
-
-    function resetBtn(text) {
-        var btn = document.getElementById('loginBtn');
-        btn.disabled = false;
-        btn.textContent = text || 'Login →';
-    }
-
-    function friendlyLogin(code) {
-        var map = {
-            'auth/invalid-email':          'Invalid email address.',
-            'auth/user-not-found':         'No account found with this email.',
-            'auth/wrong-password':         'Incorrect password. Please try again.',
-            'auth/invalid-credential':     'Incorrect email or password.',
-            'auth/too-many-requests':      'Too many attempts. Please try again later.',
-            'auth/network-request-failed': 'Network error. Check your connection.',
-            'auth/user-disabled':          'This account has been disabled.',
-            'auth/popup-closed-by-user':   'Sign-in was cancelled.'
-        };
-        return map[code] || 'Something went wrong. Please try again.';
-    }
-
-    document.getElementById('gBtn').addEventListener('click', function () {
-        showMsg('Opening Google sign-in...', 'success');
-        auth.signInWithPopup(googleProvider)
-            .then(function (result) {
-                var user = result.user;
-                showMsg('Signed in as ' + user.email + ' ✅', 'success');
-                return fetch('/auth/firebase-login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: user.email,
-                        username: user.displayName || user.email.split('@')[0],
-                        uid: user.uid,
-                        provider: 'google',
-                        source: 'login'
-                    })
+                .catch(function (e) {
+                    console.error('Google login error:', e);
+                    showMsg('Error: ' + (e.message || e.code), 'error');
                 });
-            })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                if (data.success) {
-                    showMsg('Login successful! Redirecting...', 'success');
-                    showLoader('Logging you in...');
-                    setTimeout(function () { window.location.href = '/home'; }, 2500);
-                } else {
-                    showMsg(data.message || 'Login failed', 'error');
-                }
-            })
-            .catch(function (e) {
-                console.error('Google login error:', e);
-                showMsg('Error: ' + (e.message || e.code), 'error');
-            });
-    });
+        });
 
 
-function toggleSecurityLogin() {
-    var main = document.getElementById('mainLoginView');
-    var sec  = document.getElementById('securityLoginView');
-    var gBtn = document.getElementById('gBtn');
-    var divider = document.querySelector('.divider-row');
-    if (sec.style.display === 'none') {
-        main.style.display = 'none';
-        sec.style.display  = 'block';
-        gBtn.style.display = 'none';
-        if (divider) divider.style.display = 'none';
-    } else {
-        main.style.display = 'block';
-        sec.style.display  = 'none';
-        gBtn.style.display = 'flex';
-        if (divider) divider.style.display = 'flex';
-    }
-}
-
-function handleSecurityLogin() {
-    var email = document.getElementById('sec_email').value.trim();
-    var q1 = document.getElementById('sec_q1').value;
-    var q2 = document.getElementById('sec_q2').value;
-
-    if (!email || !q1 || !q2) { showMsg('Please fill all fields.', 'error'); return; }
-
-    var btn = document.getElementById('secLoginBtn');
-    btn.disabled = true;
-    btn.textContent = 'Verifying...';
-
-    fetch('/auth/security-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, q1: q1, q2: q2 })
-    })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-        if (data.success) {
-            showMsg('Verified! Redirecting...', 'success');
-            showLoader('Logging you in...');
-            setTimeout(function () { window.location.href = '/home'; }, 2500);
-        } else {
-            showMsg(data.message || 'Verification failed.', 'error');
-            btn.disabled = false;
-            btn.textContent = 'Verify & Login →';
+        function toggleSecurityLogin() {
+            var main = document.getElementById('mainLoginView');
+            var sec = document.getElementById('securityLoginView');
+            var gBtn = document.getElementById('gBtn');
+            var divider = document.querySelector('.divider-row');
+            if (sec.style.display === 'none') {
+                main.style.display = 'none';
+                sec.style.display = 'block';
+                gBtn.style.display = 'none';
+                if (divider) divider.style.display = 'none';
+            } else {
+                main.style.display = 'block';
+                sec.style.display = 'none';
+                gBtn.style.display = 'flex';
+                if (divider) divider.style.display = 'flex';
+            }
         }
-    })
-    .catch(function () { showMsg('Something went wrong.', 'error'); btn.disabled = false; btn.textContent = 'Verify & Login →'; });
-}
-</script>
+
+        function handleSecurityLogin() {
+            var email = document.getElementById('sec_email').value.trim();
+            var q1 = document.getElementById('sec_q1').value;
+            var q2 = document.getElementById('sec_q2').value;
+
+            if (!email || !q1 || !q2) { showMsg('Please fill all fields.', 'error'); return; }
+
+            var btn = document.getElementById('secLoginBtn');
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+
+            fetch('/auth/security-login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, q1: q1, q2: q2 })
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        showMsg('Verified! Redirecting...', 'success');
+                        showLoader('Logging you in...');
+                        setTimeout(function () { window.location.href = '/home'; }, 2500);
+                    } else {
+                        showMsg(data.message || 'Verification failed.', 'error');
+                        btn.disabled = false;
+                        btn.textContent = 'Verify & Login →';
+                    }
+                })
+                .catch(function () { showMsg('Something went wrong.', 'error'); btn.disabled = false; btn.textContent = 'Verify & Login →'; });
+        }
+    </script>
 
 
-</script>
+    </script>
 </body>
+
 </html>
