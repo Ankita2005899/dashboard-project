@@ -953,6 +953,17 @@
             opacity: 0
         }
     }
+
+
+    .countdown-badge {
+    position: absolute; top: 16px; right: 16px;
+    background: linear-gradient(135deg, var(--orange), var(--amber));
+    color: white; font-weight: 800; font-size: 13px;
+    padding: 4px 12px; border-radius: 999px;
+    box-shadow: 0 4px 12px rgba(255,107,43,0.3);
+}
+
+
 </style>
 
 <body>
@@ -1095,7 +1106,8 @@
                 <p class="signup-row">Don't have an account? <a href="/signup">Sign up</a></p>
             </div>
             <!-- Security Question Login -->
-            <div id="securityLoginView" style="display:none;">
+            <div id="securityLoginView" style="display:none; position:relative;">
+                <div class="countdown-badge" id="countdownBadge">30s</div>
                 <div class="field">
                     <label for="sec_email">Email Address</label>
                     <div class="input-wrap">
@@ -1533,22 +1545,29 @@
 
 
         function toggleSecurityLogin() {
-            var main = document.getElementById('mainLoginView');
-            var sec = document.getElementById('securityLoginView');
-            var gBtn = document.getElementById('gBtn');
-            var divider = document.querySelector('.divider-row');
-            if (sec.style.display === 'none') {
-                main.style.display = 'none';
-                sec.style.display = 'block';
-                gBtn.style.display = 'none';
-                if (divider) divider.style.display = 'none';
-            } else {
-                main.style.display = 'block';
-                sec.style.display = 'none';
-                gBtn.style.display = 'flex';
-                if (divider) divider.style.display = 'flex';
-            }
+    var main = document.getElementById('mainLoginView');
+    var sec  = document.getElementById('securityLoginView');
+    var gBtn = document.getElementById('gBtn');
+    var divider = document.querySelector('.divider-row');
+
+    if (sec.style.display === 'none') {
+        if (securityExpired) {
+            showMsg('This option is closed. Please reload the page to try again.', 'error');
+            return;
         }
+        main.style.display = 'none';
+        sec.style.display  = 'block';
+        gBtn.style.display = 'none';
+        if (divider) divider.style.display = 'none';
+        startSecurityCountdown();
+    } else {
+        main.style.display = 'block';
+        sec.style.display  = 'none';
+        gBtn.style.display = 'flex';
+        if (divider) divider.style.display = 'flex';
+        if (securityTimer) clearInterval(securityTimer);
+    }
+}
 
         function handleSecurityLogin() {
             var email = document.getElementById('sec_email').value.trim();
@@ -1569,6 +1588,7 @@
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     if (data.success) {
+                        if (securityTimer) clearInterval(securityTimer);
                         showMsg('Verified! Redirecting...', 'success');
                         showLoader('Logging you in...');
                         setTimeout(function () { window.location.href = '/home'; }, 2500);
@@ -1580,10 +1600,39 @@
                 })
                 .catch(function () { showMsg('Something went wrong.', 'error'); btn.disabled = false; btn.textContent = 'Verify & Login →'; });
         }
+
+
+
+    var securityTimer = null;
+var securityExpired = false;
+
+function startSecurityCountdown() {
+    var seconds = 30;
+    var badge = document.getElementById('countdownBadge');
+    badge.textContent = seconds + 's';
+
+    securityTimer = setInterval(function() {
+        seconds--;
+        badge.textContent = seconds + 's';
+        if (seconds <= 0) {
+            clearInterval(securityTimer);
+            securityExpired = true;
+            document.getElementById('sec_email').disabled = true;
+            document.getElementById('sec_q1').disabled = true;
+            document.getElementById('sec_q2').disabled = true;
+            document.getElementById('secLoginBtn').disabled = true;
+            badge.textContent = 'Expired';
+            showMsg('Time expired. Please reload the page to try again.', 'error');
+        }
+    }, 1000);
+}
+
+
+
     </script>
 
 
-    </script>
+    
 </body>
 
 </html>
