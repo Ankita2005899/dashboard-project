@@ -1621,12 +1621,16 @@ function startSecurityCountdown() {
         if (seconds <= 0) {
             clearInterval(securityTimer);
             securityExpired = true;
-            document.getElementById('sec_email').disabled = true;
-            document.getElementById('sec_q1').disabled = true;
-            document.getElementById('sec_q2').disabled = true;
-            document.getElementById('secLoginBtn').disabled = true;
-            badge.textContent = 'Expired';
-            showMsg('Time expired. Please reload the page to try again.', 'error');
+
+            var sec = document.getElementById('securityLoginView');
+            sec.innerHTML = '<div style="text-align:center; padding:60px 20px;">' +
+                '<div style="font-size:28px; font-weight:800; color:var(--orange); margin-bottom:10px;">⏰ Time\'s Up!</div>' +
+                '<div style="font-size:14px; color:var(--subtitle-color);">Redirecting to login...</div>' +
+                '</div>';
+
+            setTimeout(function() {
+                window.location.href = '/login';
+            }, 2000);
         }
     }, 1000);
 }
