@@ -1551,7 +1551,7 @@
         });
 
 
-        function toggleSecurityLogin() {
+    function toggleSecurityLogin() {
     var main = document.getElementById('mainLoginView');
     var sec  = document.getElementById('securityLoginView');
     var gBtn = document.getElementById('gBtn');
@@ -1636,13 +1636,16 @@ function startSecurityCountdown() {
         '<div style="font-size:14px; color:var(--subtitle-color);">This option is now closed.</div>' +
         '</div>';
 
-    setTimeout(function() {
+    ssetTimeout(function() {
         sec.style.display = 'none';
         main.style.display = 'block';
         gBtn.style.display = 'flex';
         if (divider) divider.style.display = 'flex';
     }, 2000);
+        }
+    }, 1000);
 }
+
 
 
     </script>
