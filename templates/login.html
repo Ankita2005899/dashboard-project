@@ -1105,8 +1105,11 @@
 
                 </form>
                 <p class="signup-row" style="margin-top:8px;">
-                    <a onclick="toggleSecurityLogin()" style="cursor:pointer;">Try another option</a>
-                </p>
+    <a onclick="toggleSecurityLogin()" style="cursor:pointer;">Try another option</a>
+</p>
+<div id="reloadMsg" style="display:none; text-align:center; font-size:12px; color:var(--orange); margin-top:-4px; margin-bottom:8px;">
+    Please reload the page to use this option.
+</div>
                 <p class="signup-row">Don't have an account? <a href="/signup">Sign up</a></p>
             </div>
             <!-- Security Question Login -->
@@ -1554,11 +1557,12 @@
     var gBtn = document.getElementById('gBtn');
     var divider = document.querySelector('.divider-row');
 
+    if (securityExpired) {
+        document.getElementById('reloadMsg').style.display = 'block';
+        return;
+    }
+
     if (sec.style.display === 'none') {
-        if (securityExpired) {
-            showMsg('This option is closed. Please reload the page to try again.', 'error');
-            return;
-        }
         main.style.display = 'none';
         sec.style.display  = 'block';
         gBtn.style.display = 'none';
