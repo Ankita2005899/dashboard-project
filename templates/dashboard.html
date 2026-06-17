@@ -835,12 +835,15 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
             <span class="search-icon">🔍</span>
         </div>
     </div>
-<div id="searchGrid" style="
-    display:none;
-    grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
-    gap:15px;
-    padding:20px;
-"></div>
+<div id="searchResultsSection" style="display:none; padding:10px;">
+    <h2 class="section-title">🔍 Search Results</h2>
+    <div id="searchGrid" style="
+        display:grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+        gap:15px;
+        padding:20px;
+    "></div>
+</div>
     <div class="header-right">
         <a href="/owner-section">
             <button class="owner-btn sidebar-btn">👑 Owner Section</button>
@@ -1316,26 +1319,26 @@ function loadProducts(query = "") {
     fetch(`/products/search?q=${encodeURIComponent(query)}`)
         .then(res => res.json())
         .then(results => {
-
+            const section = document.getElementById("searchResultsSection");
             searchGrid.innerHTML = "";
 
             if (!results || results.length === 0) {
                 searchGrid.innerHTML = "<p>No products found</p>";
+                section.style.display = "block";
                 return;
             }
 
-            results.forEach(p => {
+            section.style.display = "block";  // show section
 
+            results.forEach(p => {
                 const card = document.createElement("div");
                 card.className = "card";
-
                 card.innerHTML = `
-    <h3>${p.name}</h3>
-    <p>${p.category}</p>
-    <p>₹${p.price}</p>
-    <p>Searched: ${p.searched_count || 0} times</p>
-`;
-
+                    <h3>${p.name}</h3>
+                    <p><b>Category:</b> ${p.category}</p>
+                    <p><b>Price:</b> ₹${p.price}</p>
+                    <p>🔍 Searched: ${p.searched_count || 0} times</p>
+                `;
                 searchGrid.appendChild(card);
             });
         });
@@ -1356,9 +1359,10 @@ searchInput.addEventListener("input", function () {
     searchTimer = setTimeout(() => {
 
         if (query === "") {
-            searchGrid.innerHTML = "";
-            return;
-        }
+    searchGrid.innerHTML = "";
+    document.getElementById("searchResultsSection").style.display = "none";
+    return;
+}
 
         trackSearch(query);   // ✅ ONLY COUNT
         loadProducts(query);  // ✅ ONLY DISPLAY
