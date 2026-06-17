@@ -1330,10 +1330,11 @@ function loadProducts(query = "") {
                 card.className = "card";
 
                 card.innerHTML = `
-                    <h3>${p.name}</h3>
-                    <p>${p.category}</p>
-                    <p>Count: ${p.searched_count || 0}</p>
-                `;
+    <h3>${p.name}</h3>
+    <p>${p.category}</p>
+    <p>₹${p.price}</p>
+    <p>Searched: ${p.searched_count || 0} times</p>
+`;
 
                 searchGrid.appendChild(card);
             });

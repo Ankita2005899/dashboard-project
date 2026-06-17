@@ -2129,16 +2129,55 @@ def products_search():
     cursor = conn.cursor(dictionary=True)
     like_pattern = f"%{query}%"
 
-    cursor.execute("""
-        SELECT id, name, category, COALESCE(searched_count,0) AS searched_count, last_searched_time
-        FROM (
-            SELECT id, name, category, searched_count, last_searched_time FROM card WHERE name LIKE %s
-            UNION ALL
-            SELECT id, name, category, searched_count, last_searched_time FROM study_material WHERE name LIKE %s
-            UNION ALL
-            SELECT id, name, category, searched_count, last_searched_time FROM food_items WHERE name LIKE %s
-        ) AS combined
-    """, (like_pattern, like_pattern, like_pattern))
+    # "steel pan of 500" → ["steel pan", "500"]
+    price_filter = None
+    name_query = query
+    if " of " in query.lower():
+        parts = query.lower().split(" of ")
+        name_query = parts[0].strip()
+        try:
+            price_filter = float(parts[-1].strip())
+        except:
+            pass
+
+    name_pattern = f"%{name_query}%"
+
+    # Price search bhi handle karo
+    try:
+        direct_price = float(query)
+        price_filter = direct_price
+        name_pattern = "%%" 
+    except:
+        pass
+
+    if price_filter is not None:
+        cursor.execute("""
+            SELECT id, name, price, category, COALESCE(searched_count,0) AS searched_count
+            FROM (
+                SELECT id, name, price, category, searched_count FROM card 
+                    WHERE name LIKE %s AND price = %s
+                UNION ALL
+                SELECT id, name, price, category, searched_count FROM study_material 
+                    WHERE name LIKE %s AND price = %s
+                UNION ALL
+                SELECT id, name, price, category, searched_count FROM food_items 
+                    WHERE name LIKE %s AND price = %s
+            ) AS combined
+            ORDER BY searched_count DESC
+        """, (name_pattern, price_filter, name_pattern, price_filter, name_pattern, price_filter))
+    else:
+        cursor.execute("""
+            SELECT id, name, price, category, COALESCE(searched_count,0) AS searched_count
+            FROM (
+                SELECT id, name, price, category, searched_count FROM card WHERE name LIKE %s
+                UNION ALL
+                SELECT id, name, price, category, searched_count FROM study_material WHERE name LIKE %s
+                UNION ALL
+                SELECT id, name, price, category, searched_count FROM food_items WHERE name LIKE %s
+            ) AS combined
+            ORDER BY searched_count DESC
+        """, (like_pattern, like_pattern, like_pattern))
+
     results = cursor.fetchall()
     cursor.close()
     conn.close()
