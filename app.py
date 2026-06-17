@@ -985,11 +985,6 @@ def home():
     username = session.get("username")
     return render_template("dashboard.html", message=message, username=username)
 
-@app.route("/dashboard")
-def dashboard():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-    return redirect(url_for("home"))
 
 @app.route("/analytics")
 def analytics():
