@@ -1406,7 +1406,7 @@ def add_product():
     cursor.close()
     db.close()
 
-    return redirect(url_for("home"))
+    return redirect(url_for("dashboard"))
 
 
 # ============================================================
