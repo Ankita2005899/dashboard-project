@@ -1135,6 +1135,10 @@ def owner_dashboard():
         return "Unauthorized Access", 403
     return render_template("owner_dashboard.html")
 
+@app.route("/dashboard")
+def dashboard_redirect():
+    return redirect(url_for("home"))
+
 
 @app.route("/addtocartfortheownersection")
 def addtocart_owner_section():
