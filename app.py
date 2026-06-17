@@ -1137,7 +1137,7 @@ def owner_dashboard():
 
 @app.route("/dashboard")
 def dashboard_redirect():
-    return redirect(url_for("home"))
+    return render_template("dashboard.html")
 
 
 @app.route("/addtocartfortheownersection")
