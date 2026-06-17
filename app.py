@@ -1249,7 +1249,8 @@ def get_products():
             "price": row["price"],
             "uploaded_at": row["uploaded_at"].strftime("%Y-%m-%d") if row["uploaded_at"] else None,
             "address": row["address"],
-            "material": row["material"]
+            "material": row["material"],
+            "keywords": row.get("keywords", "")
         })
 
     cursor.close()
@@ -1367,7 +1368,9 @@ def add_product():
     harmful = request.form.get("harmful_activity")
     precautions = request.form.get("precautions")
     product_types = request.form.getlist("product_type[]")
-
+    keywords = request.form.get("keywords", "")
+    
+    
     if not product_types:
         return "Product type is required", 400
 
@@ -1380,9 +1383,9 @@ def add_product():
 
     def insert_product_and_availability(table, category):
         cursor.execute(f"""
-            INSERT INTO {table} (name, image, video, availability, price, detail, uploaded_at, address, material)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """, (name, image_name, video_name, availability, price, detail, uploaded_date, address, made_of))
+            INSERT INTO {table} (name, image, video, availability, price, detail, uploaded_at, address, material, keywords)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (name, image_name, video_name, availability, price, detail, uploaded_date, address, made_of, keywords))
         pid = cursor.lastrowid
         cursor.execute("""
             INSERT INTO product_availability (dash_item_name, actual_availability, removed, product_id, category)
