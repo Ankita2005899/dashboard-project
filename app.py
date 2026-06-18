@@ -20,7 +20,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 #------------------------------
-
+from datetime import date, timedelta
 from flask import (
     Flask, render_template, request, jsonify,
     redirect, url_for, session, send_from_directory,
@@ -3054,93 +3054,72 @@ def import_backup():
 def get_owner_customers():
     conn = None
     try:
-        conn   = get_db()
+        conn   = get_db_connection()          # ← your existing function
         cursor = conn.cursor(dictionary=True)
- 
-        # ── 1. All customers — live, newest first ────────────────────────────
+
+        # All customers — live, newest first
         cursor.execute("""
-            SELECT
-                id,
-                username,
-                email,
-                password,
-                mode,
-                action_date,
-                action_time,
-                action
+            SELECT id, username, email, password,
+                   mode, action_date, action_time, action
             FROM user_activity
             ORDER BY action_date DESC, action_time DESC
         """)
         customers = cursor.fetchall()
- 
-        # Serialize dates / times so JSON doesn't choke on Python objects
+
+        # Serialize date/time objects for JSON
         for row in customers:
             if isinstance(row.get("action_date"), date):
                 row["action_date"] = row["action_date"].strftime("%Y-%m-%d")
-            if isinstance(row.get("action_time"), datetime):
-                row["action_time"] = row["action_time"].strftime("%H:%M:%S")
- 
+            if isinstance(row.get("action_time"), timedelta):
+                total_seconds = int(row["action_time"].total_seconds())
+                h = total_seconds // 3600
+                m = (total_seconds % 3600) // 60
+                s = total_seconds % 60
+                row["action_time"] = f"{h:02}:{m:02}:{s:02}"
+
         total = len(customers)
- 
-        # ── 2. Month-over-month change (ML: baseline trend detection) ────────
+
+        # Month-over-month % change (ML: baseline trend detection)
         today      = date.today()
         this_month = today.month
         this_year  = today.year
- 
-        # Last month with year rollover (e.g. Jan → Dec of previous year)
-        if this_month == 1:
-            last_month      = 12
-            last_month_year = this_year - 1
-        else:
-            last_month      = this_month - 1
-            last_month_year = this_year
- 
+        last_month      = 12 if this_month == 1 else this_month - 1
+        last_month_year = this_year - 1 if this_month == 1 else this_year
+
         cursor.execute("""
-            SELECT COUNT(*) AS cnt
-            FROM user_activity
-            WHERE MONTH(action_date) = %s
-              AND YEAR(action_date)  = %s
+            SELECT COUNT(*) AS cnt FROM user_activity
+            WHERE MONTH(action_date)=%s AND YEAR(action_date)=%s
         """, (this_month, this_year))
         this_count = cursor.fetchone()["cnt"]
- 
+
         cursor.execute("""
-            SELECT COUNT(*) AS cnt
-            FROM user_activity
-            WHERE MONTH(action_date) = %s
-              AND YEAR(action_date)  = %s
+            SELECT COUNT(*) AS cnt FROM user_activity
+            WHERE MONTH(action_date)=%s AND YEAR(action_date)=%s
         """, (last_month, last_month_year))
         last_count = cursor.fetchone()["cnt"]
- 
-        if last_count == 0:
-            # No prior-month baseline → can't compute a meaningful % yet
-            percent_change = 0.0
-        else:
-            percent_change = round(
-                ((this_count - last_count) / last_count) * 100, 1
-            )
- 
+
+        percent_change = 0.0 if last_count == 0 else round(
+            ((this_count - last_count) / last_count) * 100, 1
+        )
+
         cursor.close()
- 
         return jsonify({
             "total_customers": total,
             "percent_change":  percent_change,
             "customers":       customers
         })
- 
+
     except Exception as e:
         return jsonify({
-            "error":    str(e),
+            "error": str(e),
             "customers": [],
             "total_customers": 0,
-            "percent_change":  0.0
+            "percent_change": 0.0
         }), 500
- 
+
     finally:
         if conn and conn.is_connected():
             conn.close()
- 
-
-
 
 
 
