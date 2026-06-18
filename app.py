@@ -3124,32 +3124,6 @@ def get_owner_customers():
 
 #--------------delete option for user_activity part -------------------
 
-@app.route("/api/owner/customers/<int:customer_id>", methods=["DELETE"])
-def delete_customer(customer_id):
-    conn = None
-    try:
-        conn   = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute(
-            "DELETE FROM user_activity WHERE id = %s",
-            (customer_id,)
-        )
-        conn.commit()
-
-        if cursor.rowcount == 0:
-            return jsonify({"error": "Customer not found"}), 404
-
-        cursor.close()
-        return jsonify({"message": f"Customer {customer_id} deleted successfully"}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-    finally:
-        if conn and conn.is_connected():
-            conn.close()
-            
 #----------------------------delete ML technique----------------------------------    
 
 # ── SOFT DELETE → moves to deleted_customers (ML scores computed here) ────────
