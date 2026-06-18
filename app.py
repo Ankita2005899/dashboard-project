@@ -2192,7 +2192,7 @@ def products_search():
 
 @app.route("/track-search")
 def track_search():
-    query = request.args.get("q", "").strip()
+    query = request.args.get("q", "").strip().lower()
     if not query:
         return jsonify({"status": "empty"})
 
@@ -2201,36 +2201,35 @@ def track_search():
     cursor = conn.cursor(dictionary=True)
 
     for table in ["card", "study_material", "food_items"]:
-        # Name exact match OR keyword match (comma separated)
-        cursor.execute(f"""
-            SELECT id, name FROM {table} 
-            WHERE name = %s 
-            OR keywords LIKE %s
-            OR keywords LIKE %s
-            OR keywords LIKE %s
-            OR keywords = %s
-        """, (
-            query,
-            f"{query},%",      # start mein
-            f"%, {query},%",   # beech mein
-            f"%, {query}",     # end mein
-            query              # exact single keyword
-        ))
-        
+        cursor.execute(f"SELECT id, name, keywords FROM {table}")
         rows = cursor.fetchall()
+
         for row in rows:
-            cursor.execute(f"""
-                UPDATE {table} 
-                SET searched_count = COALESCE(searched_count, 0) + 1, 
-                    last_searched_time = NOW()
-                WHERE id = %s
-            """, (row["id"],))
-            
-            if user_id:
-                cursor.execute("""
-                    INSERT INTO search_logs (user_id, product_id, category, search_time) 
-                    VALUES (%s, %s, %s, NOW())
-                """, (user_id, row["id"], table))
+            matched = False
+
+            # Name exact match
+            if row["name"] and row["name"].strip().lower() == query:
+                matched = True
+
+            # Keyword match - comma split karke check karo
+            if not matched and row["keywords"]:
+                keywords_list = [k.strip().lower() for k in row["keywords"].split(",")]
+                if query in keywords_list:
+                    matched = True
+
+            if matched:
+                cursor.execute(f"""
+                    UPDATE {table} 
+                    SET searched_count = COALESCE(searched_count, 0) + 1, 
+                        last_searched_time = NOW()
+                    WHERE id = %s
+                """, (row["id"],))
+
+                if user_id:
+                    cursor.execute("""
+                        INSERT INTO search_logs (user_id, product_id, category, search_time) 
+                        VALUES (%s, %s, %s, NOW())
+                    """, (user_id, row["id"], table))
 
     conn.commit()
     cursor.close()
