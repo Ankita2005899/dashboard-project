@@ -2082,7 +2082,7 @@ def search_products():
             UNION ALL
             SELECT id, name, category, searched_count, last_searched_time FROM food_items WHERE name LIKE %s
         ) AS combined
-    """, (like_pattern, like_pattern, like_pattern))
+    """, (like_pattern,like_pattern,like_pattern))
     results = cursor.fetchall()
 
     processed = set()
