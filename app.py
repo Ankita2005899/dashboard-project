@@ -1259,9 +1259,9 @@ def get_products():
             "uploaded_at": row["uploaded_at"].strftime("%Y-%m-%d") if row["uploaded_at"] else None,
             "address": row["address"],
             "material": row["material"],
+            "detail": row.get("detail", ""),
             "keywords": row.get("keywords", "")
         })
-
     cursor.close()
     db.close()
     return jsonify(products)
