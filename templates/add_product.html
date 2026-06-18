@@ -542,7 +542,9 @@ form {
 
                                 <div class="mb-3">
                                     <label class="form-label">Product Made Up Of</label>
-                                    <textarea name="made_of" class="form-control" rows="2" required></textarea>
+                                    <textarea name="made_of" class="form-control" rows="2" required 
+                                    oninput="countWords(this, 'madeOfCount')"></textarea>
+                                    <small id="madeOfCount" class="text-muted">0 / 250 words</small>
                                 </div>
 
                                 <div class="mb-3">
@@ -643,7 +645,26 @@ form {
                     field.style.border = "1px solid #ced4da";
                 }
             });
+// 🔴 250 WORDS VALIDATION for detail fields
+const detailFields = [
+    { name: "made_of", label: "Product Made Up Of" },
+    { name: "used_for", label: "Mostly Used For" },
+    { name: "harmful_activity", label: "Harmful Activities / Misuse" },
+    { name: "precautions", label: "Safety Precautions" }
+];
 
+detailFields.forEach(f => {
+    const field = document.querySelector(`textarea[name="${f.name}"]`);
+    const wordCount = field.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+    if (wordCount < 250) {
+        field.style.border = "1px solid red";
+        isValid = false;
+        formError.style.display = "block";
+        formError.innerText = `⚠ "${f.label}" must have at least 250 words. Currently: ${wordCount} words.`;
+    } else {
+        field.style.border = "1px solid #ced4da";
+    }
+});
             // ❌ STOP SUBMISSION
             if (!isValid) {
                 e.preventDefault();
@@ -652,7 +673,12 @@ form {
             }
         });
 
-
+function countWords(textarea, counterId) {
+    const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+    const el = document.getElementById(counterId);
+    el.innerText = `${words} / 250 words`;
+    el.style.color = words >= 250 ? "green" : "red";
+}
 
 
     </script>
