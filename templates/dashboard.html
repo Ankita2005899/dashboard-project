@@ -929,15 +929,30 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
 
       <div class="modal-body" style="display:flex; gap:20px; align-items:flex-start; flex-wrap:nowrap;">     
 
-              <div class="modal-left" style="flex:0 0 280px; display:flex; flex-direction:column; gap:12px;">
+<div class="modal-left" style="flex:0 0 280px; display:flex; flex-direction:column; gap:12px;">
     <img id="modalImage">
     <video id="modalVideo" controls style="display:none;">
         <source id="modalVideoSource" src="" type="video/mp4">
     </video>
+    <div id="noVideoMsg" style="display:none; background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:8px; padding:12px; text-align:center; color:#94a3b8; font-size:13px;">
+        📵 Video not uploaded
+    </div>
+
+    <!-- Rating Section -->
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+        <p style="font-weight:700; color:#4f46e5; margin-bottom:8px; font-size:14px;">⭐ Rate this Product</p>
+        <div id="starRating" style="display:flex; gap:6px; font-size:24px; cursor:pointer;">
+            <span class="star" data-value="1">☆</span>
+            <span class="star" data-value="2">☆</span>
+            <span class="star" data-value="3">☆</span>
+            <span class="star" data-value="4">☆</span>
+            <span class="star" data-value="5">☆</span>
+        </div>
+        <p id="ratingMsg" style="font-size:12px; color:#64748b; margin-top:6px;"></p>
+    </div>
 </div>
 
-<div class="modal-right" style="flex:1; overflow-y:visible; padding-right:8px;">
-    <h2 id="modalName" style="font-size:18px; margin-bottom:10px;"></h2>
+<div class="modal-right" style="flex:1; overflow-y:auto; max-height:600px; padding-right:8px;">    <h2 id="modalName" style="font-size:18px; margin-bottom:10px;"></h2>
     <p><b>Available:</b> <span id="modalAvailability"></span></p>
         <p><b>Price:</b> ₹<span id="modalPrice"></span></p>
     <hr>
@@ -1045,15 +1060,21 @@ document.getElementById("modalMaterial").innerHTML = detailHTML;
             const video = document.getElementById("modalVideo");
             const videoSource = document.getElementById("modalVideoSource");
 
-            if (p.video && typeof p.video === "string" && p.video.trim() !== "") {
-                videoSource.src = p.video;   // <-- IMPORTANT
-                video.style.display = "block";
-                video.load();
-            } else {
-                video.style.display = "none";
-                videoSource.src = "";
-            }
+            
+        if (p.video && typeof p.video === "string" && p.video.trim() !== "") {
+    videoSource.src = p.video;
+    video.style.display = "block";
+    video.load();
+    document.getElementById("noVideoMsg").style.display = "none";
+} else {
+    video.style.display = "none";
+    videoSource.src = "";
+    document.getElementById("noVideoMsg").style.display = "block";
+}
 
+// Reset stars
+document.querySelectorAll(".star").forEach(s => s.textContent = "☆");
+document.getElementById("ratingMsg").innerText = "";
 
 
             document.getElementById("productModal").style.display = "flex";
@@ -1402,6 +1423,22 @@ searchInput.addEventListener("input", function () {
     var theme = localStorage.getItem('shopsphere-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', theme);
   })();
+
+
+  // Star Rating
+document.getElementById("starRating").addEventListener("click", function(e) {
+    if (e.target.classList.contains("star")) {
+        const val = parseInt(e.target.dataset.value);
+        document.querySelectorAll(".star").forEach((s, i) => {
+            s.textContent = i < val ? "⭐" : "☆";
+        });
+        const msgs = ["😞 Poor", "😐 Fair", "🙂 Good", "😊 Very Good", "🤩 Excellent!"];
+        document.getElementById("ratingMsg").innerText = msgs[val - 1];
+    }
+});
+
+
+
 </script>
 
     <!-- SUCCESS POPUP -->
