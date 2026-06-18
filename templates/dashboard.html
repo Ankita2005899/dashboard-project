@@ -1064,16 +1064,17 @@ document.getElementById("modalMaterial").innerHTML = detailHTML;
             const videoSource = document.getElementById("modalVideoSource");
 
             
-        if (p.video && typeof p.video === "string" && p.video.trim() !== "") {
-    videoSource.src = p.video;
-    video.style.display = "block";
-    video.load();
-    document.getElementById("noVideoMsg").style.display = "none";
-} else {
-    video.style.display = "none";
-    videoSource.src = "";
-    document.getElementById("noVideoMsg").style.display = "block";
-}
+const videoUrl = p.video ? (p.video.startsWith('http') ? p.video : p.video.startsWith('/') ? p.video : '/static/uploads/' + p.video) : null;
+        if (videoUrl) {
+            videoSource.src = videoUrl;
+            video.style.display = "block";
+            video.load();
+            document.getElementById("noVideoMsg").style.display = "none";
+        } else {
+            video.style.display = "none";
+            videoSource.src = "";
+            document.getElementById("noVideoMsg").style.display = "block";
+        }
 
 // Reset stars
 document.querySelectorAll(".star").forEach(s => s.textContent = "☆");
