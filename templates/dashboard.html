@@ -842,8 +842,7 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
 </header>
 
 <!-- Search Results Section -->
-<div id="searchResultsSection" style="display:none; padding:10px; margin-left:260px; margin-top:70px; background:#d4f4f8;">
-    <h2 class="section-title">🔍 Search Results</h2>
+<div id="searchResultsSection" style="display:none; padding:10px; margin-left:260px; background:#d4f4f8; position:relative; z-index:100;">    <h2 class="section-title">🔍 Search Results</h2>
     <div id="searchGrid" style="
         display:grid;
         grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
@@ -1317,6 +1316,8 @@ function loadProducts(query = "") {
             if (!results || results.length === 0) {
                 searchGrid.innerHTML = "<p>No products found</p>";
                 section.style.display = "block";
+                document.querySelector(".main").style.display = "none"; // main hide karo
+
                 return;
             }
 
@@ -1367,6 +1368,7 @@ searchInput.addEventListener("input", function () {
         if (query === "") {
     searchGrid.innerHTML = "";
     document.getElementById("searchResultsSection").style.display = "none";
+    document.querySelector(".main").style.display = "block"; // main wapas
     return;
 }
 
