@@ -1302,8 +1302,7 @@ def get_food_items():
     cursor.execute("SELECT * FROM food_items")
     rows = cursor.fetchall()
 
-    products = []SELECT id, name, price, image, category, COALESCE(searched_count,0) AS searched_count
-
+    products = []
     for row in rows:
         products.append({
             "id": row["id"],
