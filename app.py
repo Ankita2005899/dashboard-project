@@ -3258,23 +3258,20 @@ def restore_customer(customer_id):
     try:
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
+
         cursor.execute("SELECT * FROM deleted_customers WHERE id = %s", (customer_id,))
         customer = cursor.fetchone()
         if not customer:
             return jsonify({"error": "Not found in recycle bin"}), 404
 
-        cursor.execute("""
-            INSERT INTO user_activity (id, username, email, password, mode, action_date, action_time, action)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            customer["id"], customer["username"], customer["email"],
-            customer["password"], customer["mode"],
-            customer["action_date"], customer["action_time"], customer["action"]
-        ))
+        # Row already exists in user_activity (soft delete keeps it there)
+        # So just remove from deleted_customers — no INSERT needed
         cursor.execute("DELETE FROM deleted_customers WHERE id = %s", (customer_id,))
         conn.commit()
         cursor.close()
+
         return jsonify({"message": "Customer restored successfully"}), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
