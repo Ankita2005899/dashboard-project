@@ -8,3 +8,4 @@ Flask-Mail
 python-dotenv
 requests
 sendgrid
+cloudinary

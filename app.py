@@ -35,6 +35,8 @@ from dotenv import load_dotenv
 import mysql.connector
 import random
 import string
+import cloudinary
+import cloudinary.uploader
 
 load_dotenv("databasehandler.env")
 
@@ -53,7 +55,11 @@ app = Flask(__name__, template_folder=TEMPLATE_DIR)
 app.secret_key = "secret123"
 app.secret_key = "shopco_secret_key_2026"
 
-
+cloudinary.config(
+    cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key = os.getenv("CLOUDINARY_API_KEY"),
+    api_secret = os.getenv("CLOUDINARY_API_SECRET")
+)
 # ── Create database and tables ────────────────────────────────────────────────
 
 # ================= EMAIL CONFIGURATION =================
@@ -1352,15 +1358,14 @@ def add_product():
     image_file = request.files.get("image")
     image_name = None
     if image_file and image_file.filename:
-        image_name = secure_filename(image_file.filename)
-        image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], image_name))
+        upload_result = cloudinary.uploader.upload(image_file)
+        image_name = upload_result["secure_url"]
 
     video_file = request.files.get("video")
     video_name = None
     if video_file and video_file.filename:
-        video_name = secure_filename(video_file.filename)
-        video_file.save(os.path.join(app.config["UPLOAD_FOLDER"], video_name))
-
+        upload_result_video = cloudinary.uploader.upload(video_file, resource_type="video")
+        video_name = upload_result_video["secure_url"]
     name = request.form.get("product_name")
     price = request.form.get("product_price")
     availability = request.form.get("availability_count")
