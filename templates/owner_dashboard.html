@@ -2074,7 +2074,13 @@ tbody.appendChild(panelTr);
 }
 
 loadTotalCustomers();
-setInterval(loadTotalCustomers, 5000);
+setInterval(() => {
+    // Don't rebuild table if any accordion is currently open
+    const anyOpen = document.querySelector(".accordion-panel.open");
+    if(!anyOpen){
+        loadTotalCustomers();
+    }
+}, 5000);
 
 // ── Soft Delete → moves row to deleted_customers table in DB ─────────────────
 async function deleteCustomer(id, username, trElement){
