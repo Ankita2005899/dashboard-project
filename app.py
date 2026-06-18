@@ -2193,39 +2193,32 @@ def products_search():
 @app.route("/track-search")
 def track_search():
     query = request.args.get("q", "").strip()
-    user_id = session.get("user_id")
+    if not query:
+        return jsonify({"status": "empty"})
 
+    user_id = session.get("user_id")
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Exact name match only - count sirf ek baar badhega
-    cursor.execute("""
-        SELECT id, name, category FROM (
-            SELECT id, name, category FROM card WHERE name = %s
-            UNION ALL
-            SELECT id, name, category FROM study_material WHERE name = %s
-            UNION ALL
-            SELECT id, name, category FROM food_items WHERE name = %s
-        ) AS combined
-    """, (query, query, query))
-    results = cursor.fetchall()
-
-    processed = set()
-    for item in results:
-        key = (item["category"], item["id"])
-        if key in processed:
-            continue
-        processed.add(key)
-
+    # Exact match - sirf ek product ka count badhega
+    for table in ["card", "study_material", "food_items"]:
         cursor.execute(f"""
-            UPDATE {item['category']} SET searched_count = COALESCE(searched_count,0) + 1, last_searched_time = NOW()
-            WHERE id = %s
-        """, (item["id"],))
-
-        if user_id:
-            cursor.execute("""
-                INSERT INTO search_logs (user_id, product_id, category, search_time) VALUES (%s, %s, %s, NOW())
-            """, (user_id, item["id"], item["category"]))
+            UPDATE {table} 
+            SET searched_count = COALESCE(searched_count, 0) + 1, 
+                last_searched_time = NOW()
+            WHERE name = %s
+            LIMIT 1
+        """, (query,))
+        
+        if cursor.rowcount > 0:
+            cursor.execute(f"SELECT id FROM {table} WHERE name = %s LIMIT 1", (query,))
+            row = cursor.fetchone()
+            if row and user_id:
+                cursor.execute("""
+                    INSERT INTO search_logs (user_id, product_id, category, search_time) 
+                    VALUES (%s, %s, %s, NOW())
+                """, (user_id, row["id"], table))
+            break  # ek baar match milne ke baad stop
 
     conn.commit()
     cursor.close()
