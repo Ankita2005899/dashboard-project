@@ -924,8 +924,8 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
 
     <!-- ================= PRODUCT DETAIL MODAL ================= -->
     <div id="productModal" class="modal">
-       <div class="modal-content" style="padding-bottom:10px; overflow:hidden;">
-<button class="close-btn" onclick="closeModal()">×</button>
+<div class="modal-content" style="padding-bottom:10px; overflow:hidden; max-height:90vh; overflow-y:auto;">
+    <button class="close-btn" onclick="closeModal()">×</button>
 
       <div class="modal-body" style="display:flex; gap:20px; align-items:flex-start; flex-wrap:nowrap;">     
 
@@ -952,8 +952,7 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
     </div>
 </div>
 
-<div class="modal-right" style="flex:1; overflow-y:auto; max-height:600px; padding-right:8px;">    <h2 id="modalName" style="font-size:18px; margin-bottom:10px;"></h2>
-    <p><b>Available:</b> <span id="modalAvailability"></span></p>
+<div class="modal-right" style="flex:1; overflow-y:auto; max-height:80vh; padding-right:8px;">    <p><b>Available:</b> <span id="modalAvailability"></span></p>
         <p><b>Price:</b> ₹<span id="modalPrice"></span></p>
     <hr>
     <p>📅 <b>Uploaded:</b> <span id="modalDate"></span></p>
