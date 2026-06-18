@@ -3050,7 +3050,7 @@ def import_backup():
 #   • -5.0%   → signups dropped vs last month (investigate)
 #   • 0%      → flat month (stable but not growing)
 # ─────────────────────────────────────────────────────────────────────────────
-@owner_customers_bp.route("/api/owner/customers", methods=["GET"])
+@app.route("/api/owner/customers", methods=["GET"])
 def get_owner_customers():
     conn = None
     try:
