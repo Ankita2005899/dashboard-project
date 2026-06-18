@@ -3149,6 +3149,161 @@ def delete_customer(customer_id):
     finally:
         if conn and conn.is_connected():
             conn.close()
+            
+#----------------------------delete ML technique----------------------------------    
+
+# ── SOFT DELETE → moves to deleted_customers (ML scores computed here) ────────
+@app.route("/api/owner/customers/<int:customer_id>", methods=["DELETE"])
+def delete_customer(customer_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Fetch the row first
+        cursor.execute("SELECT * FROM user_activity WHERE id = %s", (customer_id,))
+        customer = cursor.fetchone()
+        if not customer:
+            return jsonify({"error": "Customer not found"}), 404
+
+        # ── ML: Similarity Score (Collaborative Filtering proxy) ─────────────
+        # Score based on signup mode + account age:
+        # google/github OAuth users = higher trust (70+)
+        # manual users with older accounts = medium (40-69)
+        # very new manual users = low (0-39)
+        # This mimics item-based collaborative filtering where
+        # "similar signup patterns to retained users = higher restore value"
+        from datetime import date as dt
+        mode  = (customer.get("mode") or "").lower()
+        adate = customer.get("action_date")
+        days_old = (dt.today() - adate).days if adate else 0
+
+        if mode in ("google", "github"):
+            base_score = 75
+        elif days_old > 30:
+            base_score = 55
+        else:
+            base_score = 30
+
+        ml_score = min(100, base_score + min(days_old // 10, 25))
+
+        if ml_score >= 70:
+            recommendation = "High similarity to retained users — recommended to restore"
+        elif ml_score >= 40:
+            recommendation = "Moderate activity pattern — consider restoring"
+        else:
+            recommendation = "Low activity pattern — safe to keep deleted"
+
+        # Serialize date/time
+        from datetime import timedelta
+        action_date = customer["action_date"].strftime("%Y-%m-%d") if customer.get("action_date") else None
+        at = customer.get("action_time")
+        if isinstance(at, timedelta):
+            total_seconds = int(at.total_seconds())
+            action_time = f"{total_seconds//3600:02}:{(total_seconds%3600)//60:02}:{total_seconds%60:02}"
+        else:
+            action_time = str(at) if at else None
+
+        # Move to deleted_customers
+        cursor.execute("""
+            INSERT INTO deleted_customers
+                (id, username, email, password, mode, action_date, action_time, action, ml_risk_score, ml_recommendation)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                deleted_at=CURRENT_TIMESTAMP,
+                ml_risk_score=VALUES(ml_risk_score),
+                ml_recommendation=VALUES(ml_recommendation)
+        """, (
+            customer["id"], customer["username"], customer["email"],
+            customer["password"], customer["mode"],
+            action_date, action_time, customer["action"],
+            ml_score, recommendation
+        ))
+
+        # Remove from user_activity
+        cursor.execute("DELETE FROM user_activity WHERE id = %s", (customer_id,))
+        conn.commit()
+        cursor.close()
+
+        return jsonify({"message": "Moved to recycle bin", "ml_score": ml_score}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+# ── RECYCLE BIN — fetch all deleted customers ─────────────────────────────────
+@app.route("/api/owner/recycle-bin", methods=["GET"])
+def get_recycle_bin():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM deleted_customers ORDER BY deleted_at DESC")
+        rows = cursor.fetchall()
+        for row in rows:
+            if row.get("action_date"):
+                row["action_date"] = row["action_date"].strftime("%Y-%m-%d")
+            if row.get("deleted_at"):
+                row["deleted_at"] = row["deleted_at"].strftime("%Y-%m-%d %H:%M:%S")
+        cursor.close()
+        return jsonify({"deleted_customers": rows})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+# ── RESTORE — move back to user_activity ─────────────────────────────────────
+@app.route("/api/owner/recycle-bin/<int:customer_id>/restore", methods=["POST"])
+def restore_customer(customer_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM deleted_customers WHERE id = %s", (customer_id,))
+        customer = cursor.fetchone()
+        if not customer:
+            return jsonify({"error": "Not found in recycle bin"}), 404
+
+        cursor.execute("""
+            INSERT INTO user_activity (id, username, email, password, mode, action_date, action_time, action)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            customer["id"], customer["username"], customer["email"],
+            customer["password"], customer["mode"],
+            customer["action_date"], customer["action_time"], customer["action"]
+        ))
+        cursor.execute("DELETE FROM deleted_customers WHERE id = %s", (customer_id,))
+        conn.commit()
+        cursor.close()
+        return jsonify({"message": "Customer restored successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+# ── PERMANENT DELETE — remove from recycle bin forever ───────────────────────
+@app.route("/api/owner/recycle-bin/<int:customer_id>", methods=["DELETE"])
+def permanent_delete_customer(customer_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM deleted_customers WHERE id = %s", (customer_id,))
+        conn.commit()
+        cursor.close()
+        return jsonify({"message": "Permanently deleted"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()        
 
 # ============================================================
 # STATIC FILE SERVING
