@@ -2201,16 +2201,24 @@ def track_search():
     cursor = conn.cursor(dictionary=True)
 
     for table in ["card", "study_material", "food_items"]:
-        # Exact name match OR keyword match
+        # Name exact match OR keyword match (comma separated)
         cursor.execute(f"""
             SELECT id, name FROM {table} 
-            WHERE name = %s OR FIND_IN_SET(%s, REPLACE(keywords, ' ', '')) > 0
+            WHERE name = %s 
             OR keywords LIKE %s
-            LIMIT 1
-        """, (query, query, f"%{query}%"))
+            OR keywords LIKE %s
+            OR keywords LIKE %s
+            OR keywords = %s
+        """, (
+            query,
+            f"{query},%",      # start mein
+            f"%, {query},%",   # beech mein
+            f"%, {query}",     # end mein
+            query              # exact single keyword
+        ))
         
-        row = cursor.fetchone()
-        if row:
+        rows = cursor.fetchall()
+        for row in rows:
             cursor.execute(f"""
                 UPDATE {table} 
                 SET searched_count = COALESCE(searched_count, 0) + 1, 
@@ -2223,12 +2231,12 @@ def track_search():
                     INSERT INTO search_logs (user_id, product_id, category, search_time) 
                     VALUES (%s, %s, %s, NOW())
                 """, (user_id, row["id"], table))
-            break
 
     conn.commit()
     cursor.close()
     conn.close()
     return jsonify({"status": "updated"})
+
 
 @app.route('/products/search-user')
 def search_user_products():
