@@ -1184,6 +1184,8 @@ function handleAddToCart(button, product, category) {
 
                 const card = document.createElement("div");
                 card.className = "card";
+                card.style.minWidth = "220px";
+                card.style.maxWidth = "280px";
 
                 card.innerHTML = `
             <img src="${p.image || ''}">
@@ -1324,6 +1326,8 @@ function loadProducts(query = "") {
             results.forEach(p => {
     const card = document.createElement("div");
     card.className = "card";
+    card.style.minWidth = "220px";
+    card.style.maxWidth = "280px";
     card.innerHTML = `
         <img src="${p.image || ''}" 
              onerror="this.style.display='none'" 
