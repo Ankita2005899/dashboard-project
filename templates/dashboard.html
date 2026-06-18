@@ -1427,7 +1427,15 @@ searchInput.addEventListener("input", function () {
     var theme = localStorage.getItem('shopsphere-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', theme);
   })();
-// Search icon click - track search count
+// Enter key press pe track search
+document.getElementById("searchInput").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        const query = this.value.trim();
+        if (query) trackSearch(query);
+    }
+});
+
+// Search icon click
 document.querySelector(".search-icon").addEventListener("click", function() {
     const query = document.getElementById("searchInput").value.trim();
     if (query) trackSearch(query);
