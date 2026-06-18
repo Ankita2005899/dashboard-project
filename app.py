@@ -2125,6 +2125,8 @@ def search_products():
     cursor.close()
     conn.close()
     return jsonify(results)
+
+
 @app.route("/products/search")
 def products_search():
     query = request.args.get("q", "").strip()
@@ -2156,33 +2158,38 @@ def products_search():
             SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, COALESCE(searched_count,0) AS searched_count
             FROM (
                 SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM card 
-                    WHERE name LIKE %s AND price = %s
+                    WHERE (name LIKE %s OR keywords LIKE %s) AND price = %s
                 UNION ALL
                 SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM study_material 
-                    WHERE name LIKE %s AND price = %s
+                    WHERE (name LIKE %s OR keywords LIKE %s) AND price = %s
                 UNION ALL
                 SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM food_items 
-                    WHERE name LIKE %s AND price = %s
+                    WHERE (name LIKE %s OR keywords LIKE %s) AND price = %s
             ) AS combined
             ORDER BY searched_count DESC
-        """, (name_pattern, price_filter, name_pattern, price_filter, name_pattern, price_filter))
+        """, (name_pattern, name_pattern, price_filter,
+              name_pattern, name_pattern, price_filter,
+              name_pattern, name_pattern, price_filter))
     else:
         cursor.execute("""
             SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, COALESCE(searched_count,0) AS searched_count
             FROM (
-                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM card WHERE name LIKE %s
+                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM card WHERE name LIKE %s OR keywords LIKE %s
                 UNION ALL
-                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM study_material WHERE name LIKE %s
+                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM study_material WHERE name LIKE %s OR keywords LIKE %s
                 UNION ALL
-                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM food_items WHERE name LIKE %s
+                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM food_items WHERE name LIKE %s OR keywords LIKE %s
             ) AS combined
             ORDER BY searched_count DESC
-        """, (like_pattern, like_pattern, like_pattern))
+        """, (like_pattern, like_pattern,
+              like_pattern, like_pattern,
+              like_pattern, like_pattern))
 
     results = cursor.fetchall()
     cursor.close()
     conn.close()
     return jsonify(results)
+
 
 @app.route("/track-search")
 def track_search():
@@ -2195,13 +2202,15 @@ def track_search():
 
     cursor.execute("""
         SELECT id, name, category FROM (
-            SELECT id, name, category FROM card WHERE name LIKE %s
+            SELECT id, name, category FROM card WHERE name LIKE %s OR keywords LIKE %s
             UNION ALL
-            SELECT id, name, category FROM study_material WHERE name LIKE %s
+            SELECT id, name, category FROM study_material WHERE name LIKE %s OR keywords LIKE %s
             UNION ALL
-            SELECT id, name, category FROM food_items WHERE name LIKE %s
+            SELECT id, name, category FROM food_items WHERE name LIKE %s OR keywords LIKE %s
         ) AS combined
-    """, (like_pattern, like_pattern, like_pattern))
+    """, (like_pattern, like_pattern,
+          like_pattern, like_pattern,
+          like_pattern, like_pattern))
     results = cursor.fetchall()
 
     processed = set()
