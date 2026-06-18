@@ -1287,6 +1287,7 @@ body{
                     <th>Joined Date</th>
                     <th>Time</th>
                     <th>Action</th>
+                    <th>Delete</th>
                 </tr>
             </thead>
             <tbody id="totalCustomersTableBody">
@@ -1883,13 +1884,15 @@ async function loadTotalCustomers(){
 
         const rows = data.customers ?? [];
         if(rows.length === 0){
-            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;">No customers yet</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:20px;">No customers yet</td></tr>`;
             return;
         }
 
         tbody.innerHTML = "";
         rows.forEach((row, i) => {
             const tr = document.createElement("tr");
+
+            // Data columns
             [
                 i + 1,
                 row.id,
@@ -1905,6 +1908,28 @@ async function loadTotalCustomers(){
                 td.textContent = (val === null || val === undefined || val === "") ? "-" : val;
                 tr.appendChild(td);
             });
+
+            // Delete button column
+            const deleteTd = document.createElement("td");
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "🗑 Delete";
+            deleteBtn.style.cssText = `
+                background:#ef4444;
+                color:white;
+                border:none;
+                padding:6px 14px;
+                border-radius:8px;
+                font-size:12px;
+                font-weight:600;
+                cursor:pointer;
+                transition:0.2s;
+            `;
+            deleteBtn.onmouseover = () => deleteBtn.style.background = "#b91c1c";
+            deleteBtn.onmouseout  = () => deleteBtn.style.background = "#ef4444";
+            deleteBtn.onclick = () => deleteCustomer(row.id, row.username, tr);
+            deleteTd.appendChild(deleteBtn);
+            tr.appendChild(deleteTd);
+
             tbody.appendChild(tr);
         });
 
@@ -1919,6 +1944,30 @@ async function loadTotalCustomers(){
 
 loadTotalCustomers();
 setInterval(loadTotalCustomers, 5000);
+
+// Delete a customer row from DB and instantly remove from table
+async function deleteCustomer(id, username, trElement){
+    if(!confirm(`Delete customer "${username}" (ID: ${id})?\n\nThis cannot be undone.`)) return;
+
+    try {
+        const res = await fetch(`/api/owner/customers/${id}`, { method: "DELETE" });
+        const data = await res.json();
+
+        if(res.ok){
+            // Remove row instantly — no need to wait for next poll
+            trElement.style.transition = "opacity 0.3s";
+            trElement.style.opacity = "0";
+            setTimeout(() => trElement.remove(), 300);
+
+            // Refresh card count
+            loadTotalCustomers();
+        } else {
+            alert("Delete failed: " + (data.error || "Unknown error"));
+        }
+    } catch(err){
+        alert("Delete failed: " + err.message);
+    }
+}
 
 function openRewardModal(){
     document.getElementById("rewardModal").style.display = "flex";
