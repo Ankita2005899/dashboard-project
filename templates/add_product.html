@@ -542,24 +542,30 @@ form {
 
                                 <div class="mb-3">
                                     <label class="form-label">Product Made Up Of</label>
-                                    <textarea name="made_of" class="form-control" rows="2" required 
+                                    <textarea name="made_of" class="form-control" rows="4" required
                                     oninput="countWords(this, 'madeOfCount')"></textarea>
-                                    <small id="madeOfCount" class="text-muted">0 / 250 words</small>
+                                    <small id="madeOfCount" style="color:red;">0 / 250 words</small>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Mostly Used For</label>
-                                    <textarea name="used_for" class="form-control" rows="2" required></textarea>
+                                    <textarea name="used_for" class="form-control" rows="4" required
+    oninput="countWords(this, 'usedForCount')"></textarea>
+<small id="usedForCount" style="color:red;">0 / 250 words</small>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Harmful Activities / Misuse</label>
-                                    <textarea name="harmful_activity" class="form-control" rows="2" required></textarea>
+                                    <textarea name="harmful_activity" class="form-control" rows="4" required
+    oninput="countWords(this, 'harmfulCount')"></textarea>
+<small id="harmfulCount" style="color:red;">0 / 250 words</small>
                                 </div>
 
                                 <div class="mb-4">
                                     <label class="form-label">Safety Precautions</label>
-                                    <textarea name="precautions" class="form-control" rows="2" required></textarea>
+                                    <textarea name="precautions" class="form-control" rows="4" required
+    oninput="countWords(this, 'precautionsCount')"></textarea>
+<small id="precautionsCount" style="color:red;">0 / 250 words</small>
                                 </div>
                             </div>
 
@@ -668,10 +674,12 @@ detailFields.forEach(f => {
             // ❌ STOP SUBMISSION
             if (!isValid) {
                 e.preventDefault();
-                formError.style.display = "block";
-                formError.innerText = "⚠ Please fill all required fields before adding the product.";
+                if (!formError.innerText) {
+                    formError.style.display = "block";
+                    formError.innerText = "⚠ Please fill all required fields before adding the product.";
+                }
             }
-        });
+});  // form submit listener end
 
 function countWords(textarea, counterId) {
     const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0).length;
@@ -680,6 +688,8 @@ function countWords(textarea, counterId) {
     el.style.color = words >= 250 ? "green" : "red";
 }
 
+
+  
 
     </script>
 <br>
