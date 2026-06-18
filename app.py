@@ -2125,7 +2125,6 @@ def search_products():
     cursor.close()
     conn.close()
     return jsonify(results)
-
 @app.route("/products/search")
 def products_search():
     query = request.args.get("q", "").strip()
@@ -2154,22 +2153,22 @@ def products_search():
 
     if price_filter is not None:
         cursor.execute("""
-            SELECT id, name, price, image, category, availability, detail, address, uploaded_at, COALESCE(searched_count,0) AS searched_count
+            SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, COALESCE(searched_count,0) AS searched_count
             FROM (
-                SELECT id, name, price, image, category, availability, detail, address, uploaded_at, searched_count FROM card 
+                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM card 
                     WHERE name LIKE %s AND price = %s
                 UNION ALL
-                SELECT id, name, price, image, category, availability, detail, address, uploaded_at, searched_count FROM study_material 
+                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM study_material 
                     WHERE name LIKE %s AND price = %s
                 UNION ALL
-                SELECT id, name, price, image, category, availability, detail, address, uploaded_at, searched_count FROM food_items 
+                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM food_items 
                     WHERE name LIKE %s AND price = %s
             ) AS combined
             ORDER BY searched_count DESC
         """, (name_pattern, price_filter, name_pattern, price_filter, name_pattern, price_filter))
     else:
         cursor.execute("""
-            SELECT id, name, price, image, category, availability, detail, address, uploaded_at, COALESCE(searched_count,0) AS searched_count
+            SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, COALESCE(searched_count,0) AS searched_count
             FROM (
                 SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM card WHERE name LIKE %s
                 UNION ALL
