@@ -929,24 +929,23 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
             <button class="close-btn" onclick="closeModal()">×</button>
 
 
-            <div class="modal-body">
+      <div class="modal-body" style="display:flex; gap:20px; align-items:flex-start; flex-wrap:nowrap;">     
 
-              <div class="modal-left">
+              <div class="modal-left" style="flex:0 0 280px; display:flex; flex-direction:column; gap:12px;">
     <img id="modalImage">
     <video id="modalVideo" controls style="display:none;">
         <source id="modalVideoSource" src="" type="video/mp4">
     </video>
 </div>
 
-<div class="modal-right">
+<div class="modal-right" style="flex:1; overflow-y:auto; max-height:500px; padding-right:8px;">
     <h2 id="modalName"></h2>
     <p><b>Available:</b> <span id="modalAvailability"></span></p>
     <p><b>Price:</b> ₹<span id="modalPrice"></span></p>
     <hr>
     <p>📅 <b>Uploaded:</b> <span id="modalDate"></span></p>
     <p>📍 <b>Address:</b> <span id="modalAddress"></span></p>
-    <p>🧱 <b>Product Details:</b></p>
-<pre id="modalMaterial" style="white-space:pre-wrap; font-size:14px; color:#555;"></pre>
+    <div id="modalMaterial" style="font-size:14px;"></div>
 </div>
 
             </div>
@@ -1031,7 +1030,21 @@ function removeFromCart(index) {
             document.getElementById("modalPrice").innerText = p.price;
             document.getElementById("modalDate").innerText = p.uploaded_at || "N/A";
             document.getElementById("modalAddress").innerText = p.address || "N/A";
-            document.getElementById("modalMaterial").innerText = p.detail || p.material || "N/A";
+            const detail = p.detail || p.material || "";
+const detailLines = detail.split("\n");
+const detailHTML = detailLines.map(line => {
+    const colonIndex = line.indexOf(":");
+    if (colonIndex !== -1) {
+        const title = line.substring(0, colonIndex);
+        const value = line.substring(colonIndex + 1).trim();
+        return `<div style="margin-bottom:12px;">
+            <span style="font-weight:700; color:#4f46e5; font-size:14px;">${title}:</span>
+            <p style="margin:4px 0 0 0; color:#374151; font-size:13px; line-height:1.6;">${value}</p>
+        </div>`;
+    }
+    return `<p style="color:#374151;">${line}</p>`;
+}).join("");
+document.getElementById("modalMaterial").innerHTML = detailHTML;
             const video = document.getElementById("modalVideo");
             const videoSource = document.getElementById("modalVideoSource");
 
