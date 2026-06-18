@@ -2200,32 +2200,35 @@ def track_search():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Exact match - sirf ek product ka count badhega
     for table in ["card", "study_material", "food_items"]:
+        # Exact name match OR keyword match
         cursor.execute(f"""
-            UPDATE {table} 
-            SET searched_count = COALESCE(searched_count, 0) + 1, 
-                last_searched_time = NOW()
-            WHERE name = %s
+            SELECT id, name FROM {table} 
+            WHERE name = %s OR FIND_IN_SET(%s, REPLACE(keywords, ' ', '')) > 0
+            OR keywords LIKE %s
             LIMIT 1
-        """, (query,))
+        """, (query, query, f"%{query}%"))
         
-        if cursor.rowcount > 0:
-            cursor.execute(f"SELECT id FROM {table} WHERE name = %s LIMIT 1", (query,))
-            row = cursor.fetchone()
-            if row and user_id:
+        row = cursor.fetchone()
+        if row:
+            cursor.execute(f"""
+                UPDATE {table} 
+                SET searched_count = COALESCE(searched_count, 0) + 1, 
+                    last_searched_time = NOW()
+                WHERE id = %s
+            """, (row["id"],))
+            
+            if user_id:
                 cursor.execute("""
                     INSERT INTO search_logs (user_id, product_id, category, search_time) 
                     VALUES (%s, %s, %s, NOW())
                 """, (user_id, row["id"], table))
-            break  # ek baar match milne ke baad stop
+            break
 
     conn.commit()
     cursor.close()
     conn.close()
     return jsonify({"status": "updated"})
-
-
 
 @app.route('/products/search-user')
 def search_user_products():
