@@ -2190,7 +2190,6 @@ def products_search():
     conn.close()
     return jsonify(results)
 
-
 @app.route("/track-search")
 def track_search():
     query = request.args.get("q", "").strip()
@@ -2198,19 +2197,17 @@ def track_search():
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    like_pattern = f"%{query}%"
 
+    # Exact name match only - count sirf ek baar badhega
     cursor.execute("""
         SELECT id, name, category FROM (
-            SELECT id, name, category FROM card WHERE name LIKE %s OR keywords LIKE %s
+            SELECT id, name, category FROM card WHERE name = %s
             UNION ALL
-            SELECT id, name, category FROM study_material WHERE name LIKE %s OR keywords LIKE %s
+            SELECT id, name, category FROM study_material WHERE name = %s
             UNION ALL
-            SELECT id, name, category FROM food_items WHERE name LIKE %s OR keywords LIKE %s
+            SELECT id, name, category FROM food_items WHERE name = %s
         ) AS combined
-    """, (like_pattern, like_pattern,
-          like_pattern, like_pattern,
-          like_pattern, like_pattern))
+    """, (query, query, query))
     results = cursor.fetchall()
 
     processed = set()

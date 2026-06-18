@@ -810,6 +810,65 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
 [data-theme="dark"] .close-btn { color: var(--th-text) !important; border-color: var(--th-border) !important; }
 [data-theme="dark"] .modal-right hr { border-top-color: rgba(255,255,255,0.08) !important; }
 [data-theme="dark"] .card-actions button:disabled { background: #1e1e2e !important; color: #6a6a7a !important; border-color: rgba(255,255,255,0.08) !important; }
+
+
+/* ================= HEADER ================= */
+.header {
+    position: fixed;
+    top: 0;
+    left: 260px;
+    right: 0;
+    height: 65px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.header-left h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.header-center {
+    flex: 1;
+    max-width: 500px;
+    margin: 0 20px;
+}
+
+.header-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.header-right button,
+.header-right a button {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    color: white;
+}
+
+.owner-btn {
+    background: #10b981 !important;
+}
+
+.header-right .sidebar-btn:last-child {
+    background: #f59e0b;
+}
+
+.main {
+    margin-top: 65px;
+}
+
 </style>
 
 </head>
@@ -827,11 +886,11 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
 
     <!-- CENTERED SEARCH BAR -->
     <div class="header-center">
-        <div class="search-wrapper">
+<div class="search-wrapper">
             <input type="text" id="searchInput" placeholder="Search products...">
             <span class="search-icon">🔍</span>
         </div>
-    </di
+    </div>
 
     <div class="header-right">
         <a href="/owner-section">
