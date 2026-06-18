@@ -1411,9 +1411,7 @@ searchInput.addEventListener("input", function () {
     return;
 }
 
-        trackSearch(query);   // ✅ ONLY COUNT
-        loadProducts(query);  // ✅ ONLY DISPLAY
-
+        loadProducts(query);  // display results
         localStorage.setItem("lastSearchQuery", query);
 
     }, 400);
@@ -1426,7 +1424,11 @@ searchInput.addEventListener("input", function () {
     var theme = localStorage.getItem('shopsphere-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', theme);
   })();
-
+// Search icon click - track search count
+document.querySelector(".search-icon").addEventListener("click", function() {
+    const query = document.getElementById("searchInput").value.trim();
+    if (query) trackSearch(query);
+});
 
   // Star Rating
 document.getElementById("starRating").addEventListener("click", function(e) {
