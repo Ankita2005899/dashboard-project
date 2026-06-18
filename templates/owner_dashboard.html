@@ -1264,7 +1264,10 @@ body{
                 <h3>Total Customers</h3>
                 <small>Showing all registered customers</small>
             </div>
-            <button onclick="closeTotalCustomersModal()" class="send-btn">Close</button>
+            <div style="display:flex;gap:10px;">
+                <button onclick="openRecycleBin()" style="background:#f59e0b;color:white;border:none;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;">🗑️ Recycle Bin</button>
+                <button onclick="closeTotalCustomersModal()" class="send-btn">Close</button>
+            </div>
         </div>
 
         <input 
@@ -1291,7 +1294,42 @@ body{
                 </tr>
             </thead>
             <tbody id="totalCustomersTableBody">
-                <tr><td colspan="9" style="text-align:center;padding:20px;">Loading...</td></tr>
+                <tr><td colspan="10" style="text-align:center;padding:20px;">Loading...</td></tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<!-- ♻️ RECYCLE BIN MODAL -->
+<div id="recycleBinModal" class="modal-overlay">
+    <div class="buyers-modal">
+
+        <div class="buyers-header">
+            <div>
+                <h3>♻️ Recycle Bin</h3>
+                <small>Deleted customers — restore or permanently delete</small>
+            </div>
+            <button onclick="closeRecycleBin()" class="send-btn">Close</button>
+        </div>
+
+        <table class="buyers-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Mode</th>
+                    <th>Deleted At</th>
+                    <th>🤖 ML Risk Score</th>
+                    <th>🤖 ML Recommendation</th>
+                    <th>Restore</th>
+                    <th>Delete Forever</th>
+                </tr>
+            </thead>
+            <tbody id="recycleBinTableBody">
+                <tr><td colspan="10" style="text-align:center;padding:20px;">Loading...</td></tr>
             </tbody>
         </table>
 
@@ -1892,20 +1930,43 @@ async function loadTotalCustomers(){
         rows.forEach((row, i) => {
             const tr = document.createElement("tr");
 
+            // Avatar color cycle — matches existing .pink .orange .green .blue classes
+            const avatarColors = ["pink","orange","green","blue"];
+            const colorClass   = avatarColors[i % avatarColors.length];
+
+            // Initials from username (e.g. "Ankita Bandal" → "AB", "sanket" → "SA")
+            const nameParts = (row.username || "?").trim().split(" ");
+            const initials  = nameParts.length >= 2
+                ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
+                : (row.username || "?").substring(0, 2).toUpperCase();
+
             // Data columns
-            [
+            const dataValues = [
                 i + 1,
                 row.id,
-                row.username,
+                null,           // placeholder — username gets special treatment below
                 row.email,
                 row.password,
                 row.mode,
                 row.action_date,
                 row.action_time,
                 row.action
-            ].forEach(val => {
+            ];
+
+            dataValues.forEach((val, colIndex) => {
                 const td = document.createElement("td");
-                td.textContent = (val === null || val === undefined || val === "") ? "-" : val;
+
+                if(colIndex === 2){
+                    // Username cell — avatar + name
+                    td.innerHTML = `
+                        <div class="customer-info">
+                            <div class="avatar ${colorClass}">${initials}</div>
+                            <span>${row.username || "-"}</span>
+                        </div>`;
+                } else {
+                    td.textContent = (val === null || val === undefined || val === "") ? "-" : val;
+                }
+
                 tr.appendChild(td);
             });
 
@@ -1945,27 +2006,142 @@ async function loadTotalCustomers(){
 loadTotalCustomers();
 setInterval(loadTotalCustomers, 5000);
 
-// Delete a customer row from DB and instantly remove from table
+// ── Soft Delete → moves row to deleted_customers table in DB ─────────────────
 async function deleteCustomer(id, username, trElement){
-    if(!confirm(`Delete customer "${username}" (ID: ${id})?\n\nThis cannot be undone.`)) return;
+    if(!confirm(`Move "${username}" to Recycle Bin?\n\nYou can restore them later.`)) return;
 
     try {
-        const res = await fetch(`/api/owner/customers/${id}`, { method: "DELETE" });
+        const res  = await fetch(`/api/owner/customers/${id}`, { method: "DELETE" });
         const data = await res.json();
 
         if(res.ok){
-            // Remove row instantly — no need to wait for next poll
             trElement.style.transition = "opacity 0.3s";
-            trElement.style.opacity = "0";
+            trElement.style.opacity    = "0";
             setTimeout(() => trElement.remove(), 300);
-
-            // Refresh card count
             loadTotalCustomers();
         } else {
             alert("Delete failed: " + (data.error || "Unknown error"));
         }
     } catch(err){
         alert("Delete failed: " + err.message);
+    }
+}
+
+// ── Recycle Bin ───────────────────────────────────────────────────────────────
+function openRecycleBin(){
+    document.getElementById("recycleBinModal").style.display = "flex";
+    loadRecycleBin();
+}
+
+function closeRecycleBin(){
+    document.getElementById("recycleBinModal").style.display = "none";
+}
+
+async function loadRecycleBin(){
+    const tbody = document.getElementById("recycleBinTableBody");
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:20px;">Loading...</td></tr>`;
+
+    try {
+        const res  = await fetch("/api/owner/recycle-bin");
+        if(!res.ok) throw new Error("status " + res.status);
+        const data = await res.json();
+        const rows = data.deleted_customers ?? [];
+
+        if(rows.length === 0){
+            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:20px;color:#10b981;">♻️ Recycle Bin is empty</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = "";
+        const avatarColors = ["pink","orange","green","blue"];
+
+        rows.forEach((row, i) => {
+            const colorClass = avatarColors[i % avatarColors.length];
+            const nameParts  = (row.username || "?").trim().split(" ");
+            const initials   = nameParts.length >= 2
+                ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
+                : (row.username || "?").substring(0, 2).toUpperCase();
+
+            // ML risk score color
+            const score = row.ml_risk_score ?? 0;
+            const scoreColor = score >= 70 ? "#10b981" : score >= 40 ? "#f59e0b" : "#ef4444";
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${i + 1}</td>
+                <td>${row.id}</td>
+                <td>
+                    <div class="customer-info">
+                        <div class="avatar ${colorClass}">${initials}</div>
+                        <span>${row.username || "-"}</span>
+                    </div>
+                </td>
+                <td>${row.email || "-"}</td>
+                <td>${row.mode || "-"}</td>
+                <td>${row.deleted_at || "-"}</td>
+                <td>
+                    <span style="font-weight:800;color:${scoreColor};font-size:15px;">${score}/100</span>
+                </td>
+                <td style="font-size:12px;color:#64748b;max-width:200px;">${row.ml_recommendation || "-"}</td>
+                <td>
+                    <button onclick="restoreCustomer(${row.id}, this.closest('tr'))"
+                        style="background:#10b981;color:white;border:none;padding:6px 14px;
+                               border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">
+                        ♻️ Restore
+                    </button>
+                </td>
+                <td>
+                    <button onclick="permanentDelete(${row.id}, '${row.username}', this.closest('tr'))"
+                        style="background:#ef4444;color:white;border:none;padding:6px 14px;
+                               border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">
+                        ❌ Delete Forever
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+    } catch(err){
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:red;">Failed to load recycle bin</td></tr>`;
+    }
+}
+
+// Restore a deleted customer back to user_activity
+async function restoreCustomer(id, trElement){
+    try {
+        const res  = await fetch(`/api/owner/recycle-bin/${id}/restore`, { method: "POST" });
+        const data = await res.json();
+
+        if(res.ok){
+            trElement.style.transition = "opacity 0.3s";
+            trElement.style.opacity    = "0";
+            setTimeout(() => { trElement.remove(); loadTotalCustomers(); }, 300);
+            alert("✅ Customer restored successfully!");
+        } else {
+            alert("Restore failed: " + (data.error || "Unknown error"));
+        }
+    } catch(err){
+        alert("Restore failed: " + err.message);
+    }
+}
+
+// Permanently delete from recycle bin (no recovery)
+async function permanentDelete(id, username, trElement){
+    if(!confirm(`Permanently delete "${username}"?\n\nThis CANNOT be undone.`)) return;
+
+    try {
+        const res  = await fetch(`/api/owner/recycle-bin/${id}`, { method: "DELETE" });
+        const data = await res.json();
+
+        if(res.ok){
+            trElement.style.transition = "opacity 0.3s";
+            trElement.style.opacity    = "0";
+            setTimeout(() => trElement.remove(), 300);
+        } else {
+            alert("Permanent delete failed: " + (data.error || "Unknown error"));
+        }
+    } catch(err){
+        alert("Permanent delete failed: " + err.message);
     }
 }
 
