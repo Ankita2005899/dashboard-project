@@ -2171,11 +2171,11 @@ def products_search():
         cursor.execute("""
             SELECT id, name, price, image, category, availability, detail, address, uploaded_at, COALESCE(searched_count,0) AS searched_count
             FROM (
-                SELECT id, name, price, image, category, availability, detail, address, uploaded_at, searched_count FROM card WHERE name LIKE %s
+                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM card WHERE name LIKE %s
                 UNION ALL
-                SELECT id, name, price, image, category, availability, detail, address, uploaded_at, searched_count FROM study_material WHERE name LIKE %s
+                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM study_material WHERE name LIKE %s
                 UNION ALL
-                SELECT id, name, price, image, category, availability, detail, address, uploaded_at, searched_count FROM food_items WHERE name LIKE %s
+                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM food_items WHERE name LIKE %s
             ) AS combined
             ORDER BY searched_count DESC
         """, (like_pattern, like_pattern, like_pattern))

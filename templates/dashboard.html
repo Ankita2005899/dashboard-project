@@ -1042,7 +1042,8 @@ function removeFromCart(index) {
             document.getElementById("modalName").innerText = p.name;
             document.getElementById("modalAvailability").innerText = p.availability;
             document.getElementById("modalPrice").innerText = p.price;
-            document.getElementById("modalDate").innerText = p.uploaded_at || "N/A";
+            const dateVal = p.uploaded_at ? new Date(p.uploaded_at).toISOString().split("T")[0] : "N/A";
+            document.getElementById("modalDate").innerText = dateVal;
             document.getElementById("modalAddress").innerText = p.address || "N/A";
             const detail = p.detail || p.material || "";
 const detailLines = detail.split("\n");
