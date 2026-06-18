@@ -489,22 +489,16 @@ body{
 
 /* ================= FOOTER ================= */
 .footer {
-    position: relative;
-    left: unset;
-    width: 100%;
-    margin-left: 0;
+    position: fixed;
     bottom: 0;
-                /* start after the sidebar */
-    
+    left: 260px;
+    width: calc(100% - 260px);
     height: 60px;
-
     background: linear-gradient(90deg,#111827,#1f2937,#0f766e);
     color: white;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     font-size: 14px;
     z-index: 1000;
 }
@@ -910,7 +904,7 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
 
 
         <!-- ================= MAIN ================= -->
-        <div class="main">
+        <div class="main" style="padding-bottom: 70px;">
         
             
 
@@ -961,12 +955,6 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
 
         </div>
     </div>
-
-<!-- ================= FOOTER ================= -->
-
-
-
-
 
     <script>
 
@@ -1310,7 +1298,6 @@ function handleAddToCart(button, product, category) {
             refreshProducts();
         });
 
-        /* ====================search option =============8/
 /* ================= SEARCH OPTION + HIGHLIGHT REAL CARD ================= */
 
 
