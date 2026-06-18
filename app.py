@@ -3060,8 +3060,9 @@ def get_owner_customers():
         # All customers — live, newest first
         cursor.execute("""
             SELECT id, username, email, password,
-                   mode, action_date, action_time, action
+                mode, action_date, action_time, action
             FROM user_activity
+            WHERE id NOT IN (SELECT id FROM deleted_customers)
             ORDER BY action_date DESC, action_time DESC
         """)
         customers = cursor.fetchall()
