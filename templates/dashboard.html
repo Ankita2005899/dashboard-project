@@ -1183,15 +1183,15 @@ function handleAddToCart(button, product, category) {
             p.category = category;
 
                 const card = document.createElement("div");
-                card.className = "card";
-                card.style.border = "2px solid #4f46e5";
-                card.style.boxShadow = "0 0 10px rgba(79,70,229,0.4)";
-                card.style.minWidth = "220px";
-                card.style.maxWidth = "280px";
+card.className = "card";
+card.style.minWidth = "220px";
+card.style.maxWidth = "280px";
 
-                card.innerHTML = `
-            <img src="${p.image ? (p.image.startsWith('http') ? p.image : '/static/uploads/' + p.image) : ''}"
-            <h3>${p.name}</h3>
+card.innerHTML = `
+    <img src="${p.image ? (p.image.startsWith('http') ? p.image : p.image.startsWith('/') ? p.image : '/static/uploads/' + p.image) : ''}" 
+         onerror="this.style.display='none'"
+         style="width:100%;height:160px;object-fit:cover;border-radius:8px;">
+    <h3>${p.name}</h3>
             <p>${p.availability > 0 ? `Available: ${p.availability}` : `<span style="color:red">Out of Stock</span>`}</p>
             <h4>₹${p.price}</h4>
             <div class="card-actions">
@@ -1326,17 +1326,16 @@ function loadProducts(query = "") {
             section.style.display = "block";  // show section
 
             results.forEach(p => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.style.border = "2px solid #4f46e5";
-    card.style.boxShadow = "0 0 10px rgba(79,70,229,0.4)";
-    card.style.minWidth = "220px";
-    card.style.maxWidth = "280px";
-    card.innerHTML = `
-        <img src="${p.image ? (p.image.startsWith('http') ? p.image : '/static/uploads/' + p.image) : ''}"
-             onerror="this.style.display='none'" 
-             style="width:100%;height:160px;object-fit:cover;border-radius:8px;">
-        <h3>${p.name}</h3>
+const card = document.createElement("div");
+card.className = "card";
+card.style.minWidth = "220px";
+card.style.maxWidth = "280px";
+
+card.innerHTML = `
+    <img src="${p.image ? (p.image.startsWith('http') ? p.image : p.image.startsWith('/') ? p.image : '/static/uploads/' + p.image) : ''}" 
+         onerror="this.style.display='none'"
+         style="width:100%;height:160px;object-fit:cover;border-radius:8px;">
+    <h3>${p.name}</h3>
         <p><b>Category:</b> ${p.category}</p>
         <p><b>Price:</b> ₹${p.price}</p>
         <p>🔍 Searched: ${p.searched_count || 0} times</p>
