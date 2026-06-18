@@ -2226,6 +2226,7 @@ def track_search():
     return jsonify({"status": "updated"})
 
 
+
 @app.route('/products/search-user')
 def search_user_products():
     user_id = session.get('user_id')
