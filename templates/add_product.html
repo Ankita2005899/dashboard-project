@@ -544,28 +544,28 @@ form {
                                     <label class="form-label">Product Made Up Of</label>
                                     <textarea name="made_of" class="form-control" rows="4" required
                                     oninput="countWords(this, 'madeOfCount')"></textarea>
-                                    <small id="madeOfCount" style="color:red;">0 / 250 words</small>
+                                    <small id="madeOfCount" style="color:red;">0 / 50 words</small>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Mostly Used For</label>
                                     <textarea name="used_for" class="form-control" rows="4" required
     oninput="countWords(this, 'usedForCount')"></textarea>
-<small id="usedForCount" style="color:red;">0 / 250 words</small>
+<small id="usedForCount" style="color:red;">0 / 50 words</small>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Harmful Activities / Misuse</label>
                                     <textarea name="harmful_activity" class="form-control" rows="4" required
     oninput="countWords(this, 'harmfulCount')"></textarea>
-<small id="harmfulCount" style="color:red;">0 / 250 words</small>
+<small id="harmfulCount" style="color:red;">0 / 50 words</small>
                                 </div>
 
                                 <div class="mb-4">
                                     <label class="form-label">Safety Precautions</label>
                                     <textarea name="precautions" class="form-control" rows="4" required
     oninput="countWords(this, 'precautionsCount')"></textarea>
-<small id="precautionsCount" style="color:red;">0 / 250 words</small>
+<small id="precautionsCount" style="color:red;">0 / 50 words</small>
                                 </div>
                             </div>
 
@@ -662,12 +662,11 @@ const detailFields = [
 detailFields.forEach(f => {
     const field = document.querySelector(`textarea[name="${f.name}"]`);
     const wordCount = field.value.trim().split(/\s+/).filter(w => w.length > 0).length;
-    if (wordCount < 250) {
+    if (wordCount < 50) {
         field.style.border = "1px solid red";
         isValid = false;
         formError.style.display = "block";
-        formError.innerText = `⚠ "${f.label}" must have at least 250 words. Currently: ${wordCount} words.`;
-    } else {
+        formError.innerText = `⚠ "${f.label}" must have at least 50 words. Currently: ${wordCount} words.`;
         field.style.border = "1px solid #ced4da";
     }
 });
@@ -685,8 +684,7 @@ function countWords(textarea, counterId) {
     const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0).length;
     const el = document.getElementById(counterId);
     el.innerText = `${words} / 250 words`;
-    el.style.color = words >= 250 ? "green" : "red";
-}
+    el.style.color = words >= 50 ? "green" : "red";
 
 
   
