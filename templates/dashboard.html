@@ -945,7 +945,8 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
     <hr>
     <p>📅 <b>Uploaded:</b> <span id="modalDate"></span></p>
     <p>📍 <b>Address:</b> <span id="modalAddress"></span></p>
-    <p>🧱 <b>Material:</b> <span id="modalMaterial"></span></p>
+    <p>🧱 <b>Product Details:</b></p>
+<pre id="modalMaterial" style="white-space:pre-wrap; font-size:14px; color:#555;"></pre>
 </div>
 
             </div>
@@ -1030,7 +1031,7 @@ function removeFromCart(index) {
             document.getElementById("modalPrice").innerText = p.price;
             document.getElementById("modalDate").innerText = p.uploaded_at || "N/A";
             document.getElementById("modalAddress").innerText = p.address || "N/A";
-            document.getElementById("modalMaterial").innerText = p.material || "N/A";
+            document.getElementById("modalMaterial").innerText = p.detail || p.material || "N/A";
             const video = document.getElementById("modalVideo");
             const videoSource = document.getElementById("modalVideoSource");
 
