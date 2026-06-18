@@ -489,10 +489,13 @@ body{
 
 /* ================= FOOTER ================= */
 .footer {
-    position: fixed;
+    position: relative;
+    left: unset;
+    width: 100%;
+    margin-left: 0;
     bottom: 0;
-    left: 260px;            /* start after the sidebar */
-    width: calc(100% - 260px);  /* full width minus sidebar */
+                /* start after the sidebar */
+    
     height: 60px;
 
     background: linear-gradient(90deg,#111827,#1f2937,#0f766e);
@@ -1335,18 +1338,31 @@ function loadProducts(query = "") {
             section.style.display = "block";  // show section
 
             results.forEach(p => {
-                const card = document.createElement("div");
-                card.className = "card";
-                card.innerHTML = `
-                    <h3>${p.name}</h3>
-                    <p><b>Category:</b> ${p.category}</p>
-                    <p><b>Price:</b> ₹${p.price}</p>
-                    <p>🔍 Searched: ${p.searched_count || 0} times</p>
-                `;
-                searchGrid.appendChild(card);
-            });
-        });
-}
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+        <img src="${p.image ? '/static/uploads/' + p.image : ''}" 
+             onerror="this.style.display='none'" 
+             style="width:100%;height:160px;object-fit:cover;border-radius:8px;">
+        <h3>${p.name}</h3>
+        <p><b>Category:</b> ${p.category}</p>
+        <p><b>Price:</b> ₹${p.price}</p>
+        <p>🔍 Searched: ${p.searched_count || 0} times</p>
+        <div class="card-actions">
+            <button class="add-btn">🛒 Add to Cart</button>
+            <button class="detail-btn">ℹ See Details</button>
+        </div>
+    `;
+    card.querySelector(".add-btn").addEventListener("click", e => {
+        e.stopPropagation();
+        handleAddToCart(e.target, p, p.category);
+    });
+    card.querySelector(".detail-btn").addEventListener("click", e => {
+        e.stopPropagation();
+        viewDetails(p);
+    });
+    searchGrid.appendChild(card);
+});
 
 /* ================= TRACK SEARCH (ONLY COUNT INCREASE) ================= */
 function trackSearch(query) {
