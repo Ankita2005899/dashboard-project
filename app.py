@@ -1302,7 +1302,8 @@ def get_food_items():
     cursor.execute("SELECT * FROM food_items")
     rows = cursor.fetchall()
 
-    products = []
+    products = []SELECT id, name, price, image, category, COALESCE(searched_count,0) AS searched_count
+
     for row in rows:
         products.append({
             "id": row["id"],
@@ -2154,28 +2155,28 @@ def products_search():
 
     if price_filter is not None:
         cursor.execute("""
-            SELECT id, name, price, image, category, COALESCE(searched_count,0) AS searched_count
+            SELECT id, name, price, image, category, availability, detail, address, uploaded_at, COALESCE(searched_count,0) AS searched_count
             FROM (
-                SELECT id, name, price, image, category, searched_count FROM card 
+                SELECT id, name, price, image, category, availability, detail, address, uploaded_at, searched_count FROM card 
                     WHERE name LIKE %s AND price = %s
                 UNION ALL
-                SELECT id, name, price, image, category, searched_count FROM study_material 
+                SELECT id, name, price, image, category, availability, detail, address, uploaded_at, searched_count FROM study_material 
                     WHERE name LIKE %s AND price = %s
                 UNION ALL
-                SELECT id, name, price, image, category, searched_count FROM food_items 
+                SELECT id, name, price, image, category, availability, detail, address, uploaded_at, searched_count FROM food_items 
                     WHERE name LIKE %s AND price = %s
             ) AS combined
             ORDER BY searched_count DESC
         """, (name_pattern, price_filter, name_pattern, price_filter, name_pattern, price_filter))
     else:
         cursor.execute("""
-            SELECT id, name, price, image, category, COALESCE(searched_count,0) AS searched_count
+            SELECT id, name, price, image, category, availability, detail, address, uploaded_at, COALESCE(searched_count,0) AS searched_count
             FROM (
-                SELECT id, name, price, image, category, searched_count FROM card WHERE name LIKE %s
+                SELECT id, name, price, image, category, availability, detail, address, uploaded_at, searched_count FROM card WHERE name LIKE %s
                 UNION ALL
-                SELECT id, name, price, image, category, searched_count FROM study_material WHERE name LIKE %s
+                SELECT id, name, price, image, category, availability, detail, address, uploaded_at, searched_count FROM study_material WHERE name LIKE %s
                 UNION ALL
-                SELECT id, name, price, image, category, searched_count FROM food_items WHERE name LIKE %s
+                SELECT id, name, price, image, category, availability, detail, address, uploaded_at, searched_count FROM food_items WHERE name LIKE %s
             ) AS combined
             ORDER BY searched_count DESC
         """, (like_pattern, like_pattern, like_pattern))
