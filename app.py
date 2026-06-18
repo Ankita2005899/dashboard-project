@@ -2121,7 +2121,6 @@ def search_products():
     conn.close()
     return jsonify(results)
 
-
 @app.route("/products/search")
 def products_search():
     query = request.args.get("q", "").strip()
@@ -2129,7 +2128,6 @@ def products_search():
     cursor = conn.cursor(dictionary=True)
     like_pattern = f"%{query}%"
 
-    # "steel pan of 500" → ["steel pan", "500"]
     price_filter = None
     name_query = query
     if " of " in query.lower():
@@ -2142,38 +2140,37 @@ def products_search():
 
     name_pattern = f"%{name_query}%"
 
-    # Price search bhi handle karo
     try:
         direct_price = float(query)
         price_filter = direct_price
-        name_pattern = "%%" 
+        name_pattern = "%%"
     except:
         pass
 
     if price_filter is not None:
         cursor.execute("""
-            SELECT id, name, price, category, COALESCE(searched_count,0) AS searched_count
+            SELECT id, name, price, image, category, COALESCE(searched_count,0) AS searched_count
             FROM (
-                SELECT id, name, price, category, searched_count FROM card 
+                SELECT id, name, price, image, category, searched_count FROM card 
                     WHERE name LIKE %s AND price = %s
                 UNION ALL
-                SELECT id, name, price, category, searched_count FROM study_material 
+                SELECT id, name, price, image, category, searched_count FROM study_material 
                     WHERE name LIKE %s AND price = %s
                 UNION ALL
-                SELECT id, name, price, category, searched_count FROM food_items 
+                SELECT id, name, price, image, category, searched_count FROM food_items 
                     WHERE name LIKE %s AND price = %s
             ) AS combined
             ORDER BY searched_count DESC
         """, (name_pattern, price_filter, name_pattern, price_filter, name_pattern, price_filter))
     else:
         cursor.execute("""
-            SELECT id, name, price, category, COALESCE(searched_count,0) AS searched_count
+            SELECT id, name, price, image, category, COALESCE(searched_count,0) AS searched_count
             FROM (
-                SELECT id, name, price, category, searched_count FROM card WHERE name LIKE %s
+                SELECT id, name, price, image, category, searched_count FROM card WHERE name LIKE %s
                 UNION ALL
-                SELECT id, name, price, category, searched_count FROM study_material WHERE name LIKE %s
+                SELECT id, name, price, image, category, searched_count FROM study_material WHERE name LIKE %s
                 UNION ALL
-                SELECT id, name, price, category, searched_count FROM food_items WHERE name LIKE %s
+                SELECT id, name, price, image, category, searched_count FROM food_items WHERE name LIKE %s
             ) AS combined
             ORDER BY searched_count DESC
         """, (like_pattern, like_pattern, like_pattern))
@@ -2182,7 +2179,6 @@ def products_search():
     cursor.close()
     conn.close()
     return jsonify(results)
-
 
 @app.route("/track-search")
 def track_search():
