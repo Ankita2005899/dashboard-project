@@ -1862,10 +1862,10 @@ function closeTotalCustomersModal(){
     document.getElementById("totalCustomersModal").style.display = "none";
 }
 function searchTotalCustomers(){
-    const raw   = document.getElementById("customerSearch").value.toLowerCase().trim();
+    const raw     = document.getElementById("customerSearch").value.toLowerCase().trim();
     const allRows = document.querySelectorAll("#totalCustomersTableBody tr");
 
-    // Split by comma → multiple search terms (e.g. "sanket, 2, manual")
+    // Split by comma → multiple search terms e.g. "3, sanket, gmail"
     const terms = raw.split(",").map(t => t.trim()).filter(t => t.length > 0);
 
     let i = 0;
@@ -1879,20 +1879,26 @@ function searchTotalCustomers(){
         }
 
         if(terms.length === 0){
-            // Empty search → show all
             dataRow.style.display = "";
             if(panelRow) panelRow.style.display = "";
         } else {
-            const cells = dataRow.querySelectorAll("td");
+            // Get each cell's text individually (exclude Delete button = last cell)
+            const cells = Array.from(dataRow.querySelectorAll("td"))
+                .slice(0, -1)
+                .map(td => td.innerText.toLowerCase().trim());
 
-            // Build searchable text from ALL columns including Sr.No and ID
-            const searchableText = Array.from(cells)
-                .slice(0, cells.length - 1)  // exclude Delete button
-                .map(td => td.innerText.toLowerCase().trim())
-                .join(" | ");
-
-            // Row matches if ANY comma-separated term matches
-            const match = terms.some(term => searchableText.includes(term));
+            const match = terms.some(term =>
+                cells.some(cellText => {
+                    if(term.length <= 2){
+                        // Short terms (IDs, Sr.No): exact match OR cell starts with term
+                        // Prevents "3" matching "as234sd@#$"
+                        return cellText === term || cellText.startsWith(term);
+                    } else {
+                        // Longer terms (names, emails, passwords, dates): substring match
+                        return cellText.includes(term);
+                    }
+                })
+            );
 
             dataRow.style.display = match ? "" : "none";
             if(panelRow) panelRow.style.display = "none";
