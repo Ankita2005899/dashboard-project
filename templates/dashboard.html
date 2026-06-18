@@ -1348,7 +1348,8 @@ function loadProducts(query = "") {
     });
     searchGrid.appendChild(card);
 });
-
+});
+}
 /* ================= TRACK SEARCH (ONLY COUNT INCREASE) ================= */
 function trackSearch(query) {
     fetch(`/track-search?q=${encodeURIComponent(query)}`);
