@@ -3209,6 +3209,8 @@ def delete_customer(customer_id):
 
 
 # ── RECYCLE BIN — fetch all deleted customers ─────────────────────────────────
+            
+            
 @app.route("/api/owner/recycle-bin", methods=["GET"])
 def get_recycle_bin():
     conn = None
@@ -3217,19 +3219,37 @@ def get_recycle_bin():
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM deleted_customers ORDER BY deleted_at DESC")
         rows = cursor.fetchall()
+
+        from datetime import timedelta, datetime, date as dt
         for row in rows:
-            if row.get("action_date"):
+            # action_date
+            if isinstance(row.get("action_date"), dt):
                 row["action_date"] = row["action_date"].strftime("%Y-%m-%d")
-            if row.get("deleted_at"):
+
+            # action_time — could be timedelta, string, or None
+            at = row.get("action_time")
+            if isinstance(at, timedelta):
+                total = int(at.total_seconds())
+                row["action_time"] = f"{total//3600:02}:{(total%3600)//60:02}:{total%60:02}"
+            elif at is not None:
+                row["action_time"] = str(at)
+
+            # deleted_at
+            if isinstance(row.get("deleted_at"), datetime):
                 row["deleted_at"] = row["deleted_at"].strftime("%Y-%m-%d %H:%M:%S")
+
+            # ml_risk_score — ensure it's a plain int/float for JSON
+            if row.get("ml_risk_score") is not None:
+                row["ml_risk_score"] = int(row["ml_risk_score"])
+
         cursor.close()
         return jsonify({"deleted_customers": rows})
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         if conn and conn.is_connected():
-            conn.close()
-
+            conn.close()            
 
 # ── RESTORE — move back to user_activity ─────────────────────────────────────
 @app.route("/api/owner/recycle-bin/<int:customer_id>/restore", methods=["POST"])
