@@ -683,12 +683,9 @@ detailFields.forEach(f => {
 function countWords(textarea, counterId) {
     const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0).length;
     const el = document.getElementById(counterId);
-    el.innerText = `${words} / 250 words`;
+    el.innerText = `${words} / 50 words`;
     el.style.color = words >= 50 ? "green" : "red";
-
-
-  
-
+}
     </script>
 <br>
 <br>
