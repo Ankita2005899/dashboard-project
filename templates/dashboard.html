@@ -841,14 +841,7 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
     </div>
 </header>
 
-<!-- Search Results Section -->
-<div id="searchResultsSection" style="display:none; padding:10px; margin-left:260px; margin-top:0px; background:#d4f4f8;">    <div id="searchGrid" style="
-        display:grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
-        gap:15px;
-        padding:20px;
-    "></div>
-</div>
+
 
 <div id="successPopup" class="popup">
     {{ message }}
@@ -903,6 +896,12 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
 
         <!-- ================= MAIN ================= -->
         <div class="main" style="padding-bottom: 70px;">
+
+    <!-- Search Results Section -->
+    <div id="searchResultsSection" style="display:none;">
+        <h2 class="section-title">🔍 Search Results</h2>
+        <div id="searchGrid" class="grid"></div>
+    </div>
         
             
 
@@ -1315,7 +1314,7 @@ function loadProducts(query = "") {
             if (!results || results.length === 0) {
                 searchGrid.innerHTML = "<p>No products found</p>";
                 section.style.display = "block";
-                document.querySelector(".main").style.display = "none"; // main hide karo
+                
 
                 return;
             }
@@ -1367,7 +1366,6 @@ searchInput.addEventListener("input", function () {
         if (query === "") {
     searchGrid.innerHTML = "";
     document.getElementById("searchResultsSection").style.display = "none";
-    document.querySelector(".main").style.display = "block"; // main wapas
     return;
 }
 
