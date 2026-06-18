@@ -3195,7 +3195,6 @@ def delete_customer(customer_id):
         ))
 
         # Remove from user_activity
-        cursor.execute("DELETE FROM user_activity WHERE id = %s", (customer_id,))
         conn.commit()
         cursor.close()
 
@@ -3289,16 +3288,20 @@ def permanent_delete_customer(customer_id):
     try:
         conn   = get_db_connection()
         cursor = conn.cursor()
+
+        # Permanently delete from BOTH tables
+        cursor.execute("DELETE FROM user_activity WHERE id = %s", (customer_id,))
         cursor.execute("DELETE FROM deleted_customers WHERE id = %s", (customer_id,))
+
         conn.commit()
         cursor.close()
         return jsonify({"message": "Permanently deleted"}), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         if conn and conn.is_connected():
-            conn.close()        
-
+            conn.close()
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
