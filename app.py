@@ -3018,6 +3018,133 @@ def import_backup():
     
     except Exception as e:
         return f"❌ Error: {str(e)}"
+    
+    
+#=========================owner dashboard =========================
+#=====================user table attachment ---------------------
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GET /api/owner/customers
+#
+# Returns:
+#   {
+#     "total_customers"  : int,       — live COUNT(*) from user_activity
+#     "percent_change"   : float,     — month-over-month growth %  (ML: see below)
+#     "customers"        : [ ... ]    — every row, newest first
+#   }
+#
+# ML USED HERE — Month-over-Month % Change (Baseline Anomaly Detection):
+# -----------------------------------------------------------------------
+# percent_change is computed as:
+#       (this_month_signups - last_month_signups) / last_month_signups × 100
+#
+# This is the foundation of trend-deviation detection — the same
+# arithmetic used in EWMA (Exponentially Weighted Moving Average) and
+# Holt-Winters forecasting to establish a "baseline" so you can later
+# flag when the current value is an anomaly vs the expected trend.
+#
+# In plain terms for the owner dashboard:
+#   • +12.4%  → signups are growing faster than last month (healthy)
+#   • -5.0%   → signups dropped vs last month (investigate)
+#   • 0%      → flat month (stable but not growing)
+# ─────────────────────────────────────────────────────────────────────────────
+@owner_customers_bp.route("/api/owner/customers", methods=["GET"])
+def get_owner_customers():
+    conn = None
+    try:
+        conn   = get_db()
+        cursor = conn.cursor(dictionary=True)
+ 
+        # ── 1. All customers — live, newest first ────────────────────────────
+        cursor.execute("""
+            SELECT
+                id,
+                username,
+                email,
+                password,
+                mode,
+                action_date,
+                action_time,
+                action
+            FROM user_activity
+            ORDER BY action_date DESC, action_time DESC
+        """)
+        customers = cursor.fetchall()
+ 
+        # Serialize dates / times so JSON doesn't choke on Python objects
+        for row in customers:
+            if isinstance(row.get("action_date"), date):
+                row["action_date"] = row["action_date"].strftime("%Y-%m-%d")
+            if isinstance(row.get("action_time"), datetime):
+                row["action_time"] = row["action_time"].strftime("%H:%M:%S")
+ 
+        total = len(customers)
+ 
+        # ── 2. Month-over-month change (ML: baseline trend detection) ────────
+        today      = date.today()
+        this_month = today.month
+        this_year  = today.year
+ 
+        # Last month with year rollover (e.g. Jan → Dec of previous year)
+        if this_month == 1:
+            last_month      = 12
+            last_month_year = this_year - 1
+        else:
+            last_month      = this_month - 1
+            last_month_year = this_year
+ 
+        cursor.execute("""
+            SELECT COUNT(*) AS cnt
+            FROM user_activity
+            WHERE MONTH(action_date) = %s
+              AND YEAR(action_date)  = %s
+        """, (this_month, this_year))
+        this_count = cursor.fetchone()["cnt"]
+ 
+        cursor.execute("""
+            SELECT COUNT(*) AS cnt
+            FROM user_activity
+            WHERE MONTH(action_date) = %s
+              AND YEAR(action_date)  = %s
+        """, (last_month, last_month_year))
+        last_count = cursor.fetchone()["cnt"]
+ 
+        if last_count == 0:
+            # No prior-month baseline → can't compute a meaningful % yet
+            percent_change = 0.0
+        else:
+            percent_change = round(
+                ((this_count - last_count) / last_count) * 100, 1
+            )
+ 
+        cursor.close()
+ 
+        return jsonify({
+            "total_customers": total,
+            "percent_change":  percent_change,
+            "customers":       customers
+        })
+ 
+    except Exception as e:
+        return jsonify({
+            "error":    str(e),
+            "customers": [],
+            "total_customers": 0,
+            "percent_change":  0.0
+        }), 500
+ 
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+ 
+
+
+
+
+
+
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================

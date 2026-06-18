@@ -1087,8 +1087,8 @@ body{
 
 <div class="card dashboard-card" onclick="openTotalCustomersModal()" style="cursor:pointer;">
     <h3>Total customers</h3>
-    <h2>48,291</h2>
-    <p class="up">↑ 12.4% vs last month</p>
+    <h2 id="totalCustomersCount">—</h2>
+    <p id="totalCustomersChange" class="up">Loading...</p>
 </div>
 
     <div class="card dashboard-card" onclick="openActiveBuyersModal()" style="cursor:pointer;">
@@ -1278,42 +1278,19 @@ body{
         <table class="buyers-table">
             <thead>
                 <tr>
-                    <th>User ID</th>
-                    <th>Customer</th>
-                    <th>Status</th>
+                    <th>#</th>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Password</th>
+                    <th>Mode</th>
                     <th>Joined Date</th>
-                    <th>Total Orders</th>
+                    <th>Time</th>
                     <th>Action</th>
                 </tr>
             </thead>
-
             <tbody id="totalCustomersTableBody">
-                <tr>
-                    <td>#U1001</td>
-                    <td>Omar Abdulhadi</td>
-                    <td>Active</td>
-                    <td>Jan 2026</td>
-                    <td>18</td>
-                    <td><button class="send-btn">View</button></td>
-                </tr>
-
-                <tr>
-                    <td>#U1002</td>
-                    <td>Isabella Ricci</td>
-                    <td>Active</td>
-                    <td>Feb 2026</td>
-                    <td>9</td>
-                    <td><button class="send-btn">View</button></td>
-                </tr>
-
-                <tr>
-                    <td>#U1003</td>
-                    <td>Tomas Novak</td>
-                    <td>Inactive</td>
-                    <td>Mar 2026</td>
-                    <td>27</td>
-                    <td><button class="send-btn">View</button></td>
-                </tr>
+                <tr><td colspan="9" style="text-align:center;padding:20px;">Loading...</td></tr>
             </tbody>
         </table>
 
@@ -1868,6 +1845,80 @@ window.onclick = function(e){
         }
     });
 }
+
+// ── Live Total Customers (polls /api/owner/customers every 5s) ───────────────
+// ML USED: Month-over-Month % Change (Baseline Trend Detection)
+// Computes (this_month_signups − last_month_signups) / last_month_signups × 100
+// to tell the owner whether growth is accelerating, decelerating, or flat —
+// the same arithmetic baseline used in EWMA anomaly detection.
+async function loadTotalCustomers(){
+    try {
+        const res = await fetch("/api/owner/customers");
+        if(!res.ok) throw new Error("status " + res.status);
+        const data = await res.json();
+
+        // ── Stat card ────────────────────────────────────────────────────────
+        const countEl  = document.getElementById("totalCustomersCount");
+        const changeEl = document.getElementById("totalCustomersChange");
+
+        if(countEl)  countEl.textContent = (data.total_customers ?? 0).toLocaleString("en-IN");
+
+        if(changeEl){
+            const pct = data.percent_change ?? 0;
+            if(pct > 0){
+                changeEl.textContent  = "↑ " + pct + "% vs last month";
+                changeEl.className    = "up";
+            } else if(pct < 0){
+                changeEl.textContent  = "↓ " + Math.abs(pct) + "% vs last month";
+                changeEl.className    = "down";
+            } else {
+                changeEl.textContent  = "No change vs last month";
+                changeEl.className    = "";
+            }
+        }
+
+        // ── Modal table ──────────────────────────────────────────────────────
+        const tbody = document.getElementById("totalCustomersTableBody");
+        if(!tbody) return;
+
+        const rows = data.customers ?? [];
+        if(rows.length === 0){
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;">No customers yet</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = "";
+        rows.forEach((row, i) => {
+            const tr = document.createElement("tr");
+            [
+                i + 1,
+                row.id,
+                row.username,
+                row.email,
+                row.password,
+                row.mode,
+                row.action_date,
+                row.action_time,
+                row.action
+            ].forEach(val => {
+                const td = document.createElement("td");
+                td.textContent = (val === null || val === undefined || val === "") ? "-" : val;
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+
+    } catch(err){
+        console.error("Total customers fetch failed:", err);
+        const countEl  = document.getElementById("totalCustomersCount");
+        const changeEl = document.getElementById("totalCustomersChange");
+        if(countEl)  countEl.textContent = "—";
+        if(changeEl){ changeEl.textContent = "Failed to load"; changeEl.className = "down"; }
+    }
+}
+
+loadTotalCustomers();
+setInterval(loadTotalCustomers, 5000);
 
 function openRewardModal(){
     document.getElementById("rewardModal").style.display = "flex";
