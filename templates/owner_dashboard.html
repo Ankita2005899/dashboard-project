@@ -1863,14 +1863,45 @@ function closeTotalCustomersModal(){
 }
 
 function searchTotalCustomers(){
-    let input = document.getElementById("customerSearch").value.toLowerCase();
-    let rows = document.querySelectorAll("#totalCustomersTableBody tr");
+    const input = document.getElementById("customerSearch").value.toLowerCase().trim();
+    const allRows = document.querySelectorAll("#totalCustomersTableBody tr");
 
-    rows.forEach(row => {
-        let text = row.innerText.toLowerCase();
-        row.style.display = text.includes(input) ? "" : "none";
-    });
+    // Group rows: every data row is followed by its accordion panel row
+    let i = 0;
+    while(i < allRows.length){
+        const dataRow    = allRows[i];
+        const panelRow   = allRows[i + 1]; // accordion panel immediately after
+
+        // Skip accordion panel rows — they have no searchable text
+        if(dataRow.classList.contains("accordion-panel")){
+            i++;
+            continue;
+        }
+
+        if(input === ""){
+            // Empty search → show everything
+            dataRow.style.display  = "";
+            if(panelRow) panelRow.style.display = "";
+        } else {
+            const cells = dataRow.querySelectorAll("td");
+            // Search only visible data columns (skip Delete button column)
+            const searchableText = Array.from(cells)
+                .slice(0, cells.length - 1) // exclude last Delete column
+                .map(td => td.innerText.toLowerCase())
+                .join(" ");
+
+            const match = searchableText.includes(input);
+            dataRow.style.display = match ? "" : "none";
+
+            // Always hide accordion panel when searching
+            if(panelRow) panelRow.style.display = "none";
+        }
+
+        i += 2; // jump over data row + its panel row
+    }
 }
+
+
 function openTotalCustomersModal() {
     const modal = document.getElementById("totalCustomersModal");
     modal.style.display = "flex";
