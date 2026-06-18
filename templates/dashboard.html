@@ -1347,9 +1347,6 @@ let searchTimer = null;
 
 /* ================= LOAD PRODUCTS ================= */
 function loadProducts(query = "") {
-    // Count update karo
-    fetch(`/track-search?q=${encodeURIComponent(query)}`);
-    
     fetch(`/products/search?q=${encodeURIComponent(query)}`)
         .then(res => res.json())
         .then(results => {
