@@ -835,20 +835,7 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
             <span class="search-icon">🔍</span>
         </div>
     </div>
-<div class="main">
 
-    <!-- Search Results - SABSE UPAR -->
-    <div id="searchResultsSection" style="display:none; padding:10px;">
-        <h2 class="section-title">🔍 Search Results</h2>
-        <div id="searchGrid" style="
-            display:grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
-            gap:15px;
-            padding:20px;
-        "></div>
-    </div>
-
-    <!-- baaki content neeche -->
     <div class="header-right">
         <a href="/owner-section">
             <button class="owner-btn sidebar-btn">👑 Owner Section</button>
@@ -857,9 +844,21 @@ body { background: var(--th-body-bg) !important; color: var(--th-text) !importan
     </div>
 </header>
 
-    <div id="successPopup" class="popup">
-        {{ message }}
-    </div>
+<!-- Search Results Section -->
+<div id="searchResultsSection" style="display:none; padding:10px; margin-left:260px; margin-top:70px; background:#d4f4f8;">
+    <h2 class="section-title">🔍 Search Results</h2>
+    <div id="searchGrid" style="
+        display:grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+        gap:15px;
+        padding:20px;
+    "></div>
+</div>
+
+<div id="successPopup" class="popup">
+    {{ message }}
+</div>
+
 
 
     <div class="container">
