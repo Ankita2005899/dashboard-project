@@ -1410,8 +1410,8 @@ def add_product():
     db.commit()
     cursor.close()
     db.close()
-
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("home"))
+    
 
 
 # ============================================================
