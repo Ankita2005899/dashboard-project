@@ -2678,8 +2678,8 @@ labelEl.style.cssText = `
     outline:none;
 `;
         document.getElementById("currentLoginBtn").textContent  = `📅 ${month} Current Login`;
-        document.getElementById("currentLoginBtn").style.display = "inline-block"; // ← show button again
-
+        document.getElementById("currentLoginBtn").style.display = "inline-block";
+        document.getElementById("undoLoginBtn").style.display    = "none";
         const tbody = document.getElementById("newCustomersTableBody");
         const rows  = data.new_customers ?? [];
 
@@ -2745,7 +2745,7 @@ labelEl.style.cssText = `
     outline:none;
 `;
         document.getElementById("currentLoginBtn").style.display  = "none";
-document.getElementById("undoLoginBtn").style.display     = "inline-block";
+        document.getElementById("undoLoginBtn").style.display     = "inline-block";
 
         const tbody = document.getElementById("newCustomersTableBody");
         const rows  = data.logins ?? [];
