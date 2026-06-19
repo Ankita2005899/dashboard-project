@@ -2202,7 +2202,6 @@ def track_search():
     cursor = conn.cursor()
     like_pattern = f"%{query}%"
 
-    # Sirf product tables — card, food_items, study_material
     product_tables = ["card", "food_items", "study_material"]
 
     for table in product_tables:
@@ -2217,6 +2216,7 @@ def track_search():
     cursor.close()
     conn.close()
     return jsonify({"status": "updated"})
+
 
 @app.route('/products/search-user')
 def search_user_products():

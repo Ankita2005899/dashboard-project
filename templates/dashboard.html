@@ -1396,6 +1396,10 @@ card.innerHTML = `
 }
 /* ================= TRACK SEARCH (ONLY COUNT INCREASE) ================= */
 function trackSearch(query) {
+    if (!query) return;
+    fetch(`/track-search?q=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => console.log("Search tracked:", data));
 }
 
 /* ================= INPUT SEARCH ================= */
