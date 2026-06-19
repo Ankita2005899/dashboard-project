@@ -2644,7 +2644,9 @@ async function loadNewCustomers(){
 
         const month = data.month || "Current";
         document.getElementById("newCustomersTitle").textContent  = `${month} — New Accounts`;
-        document.getElementById("newCustomersLabel").textContent  = `Showing newly registered customers in ${month}`;
+        const labelEl = document.getElementById("newCustomersLabel");
+        labelEl.textContent = `Showing newly registered customers in ${month}`;
+        labelEl.style.cssText = ""; // reset to default
         document.getElementById("currentLoginBtn").textContent  = `📅 ${month} Current Login`;
         document.getElementById("currentLoginBtn").style.display = "inline-block"; // ← show button again
 
@@ -2691,7 +2693,17 @@ async function loadCurrentMonthLogins(){
 
         const month = data.month || "Current";
         document.getElementById("newCustomersTitle").textContent  = `${month} Current Login`;
-        document.getElementById("newCustomersLabel").textContent  = `${month} Current Login Detail`;
+        const labelEl = document.getElementById("newCustomersLabel");
+labelEl.textContent  = `${month} Current Login Detail`;
+labelEl.style.cssText = `
+    display:block;
+    text-align:center;
+    font-size:18px;
+    font-weight:700;
+    color:#6366f1;
+    margin:8px 0;
+    width:100%;
+`;
         document.getElementById("currentLoginBtn").style.display  = "none"; // ← hide button
 
         const tbody = document.getElementById("newCustomersTableBody");
