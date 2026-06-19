@@ -2199,45 +2199,22 @@ def track_search():
         return jsonify({"status": "empty"})
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    # Saari tables dynamically fetch karo
-    cursor.execute("SHOW TABLES")
-    all_tables = [list(row.values())[0] for row in cursor.fetchall()]
-
-    # Sirf product tables — jinmein searched_count column hai
-    product_tables = []
-    for table in all_tables:
-        cursor.execute(f"SHOW COLUMNS FROM `{table}` LIKE 'searched_count'")
-        if cursor.fetchone():
-            product_tables.append(table)
-
+    cursor = conn.cursor()
     like_pattern = f"%{query}%"
-    cursor2 = conn.cursor()
+
+    # Sirf product tables — card, food_items, study_material
+    product_tables = ["card", "food_items", "study_material"]
 
     for table in product_tables:
-        # Check karo keywords column hai kya
-        cursor.execute(f"SHOW COLUMNS FROM `{table}` LIKE 'keywords'")
-        has_keywords = cursor.fetchone() is not None
-
-        if has_keywords:
-            cursor2.execute(f"""
-                UPDATE `{table}` 
-                SET searched_count = searched_count + 1,
-                    last_searched_time = NOW()
-                WHERE name = %s OR keywords LIKE %s
-            """, (query, like_pattern))
-        else:
-            cursor2.execute(f"""
-                UPDATE `{table}` 
-                SET searched_count = searched_count + 1,
-                    last_searched_time = NOW()
-                WHERE name = %s
-            """, (query,))
+        cursor.execute(f"""
+            UPDATE `{table}` 
+            SET searched_count = searched_count + 1,
+                last_searched_time = NOW()
+            WHERE name = %s OR keywords LIKE %s
+        """, (query, like_pattern))
 
     conn.commit()
     cursor.close()
-    cursor2.close()
     conn.close()
     return jsonify({"status": "updated"})
 
