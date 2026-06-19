@@ -1832,8 +1832,9 @@ function openNewCustomersModal() {
     loadNewCustomers(); // ← add this line
 }
 
-function closeNewCustomersModal(){
+function closeNewCustomersModal() {
     document.getElementById("newCustomersModal").style.display = "none";
+    document.getElementById("currentLoginBtn").style.display = "inline-block"; // reset
 }
 
 function searchNewCustomers(){
@@ -2644,7 +2645,8 @@ async function loadNewCustomers(){
         const month = data.month || "Current";
         document.getElementById("newCustomersTitle").textContent  = `${month} — New Accounts`;
         document.getElementById("newCustomersLabel").textContent  = `Showing newly registered customers in ${month}`;
-        document.getElementById("currentLoginBtn").textContent    = `📅 ${month} Current Login`;
+        document.getElementById("currentLoginBtn").textContent  = `📅 ${month} Current Login`;
+        document.getElementById("currentLoginBtn").style.display = "inline-block"; // ← show button again
 
         const tbody = document.getElementById("newCustomersTableBody");
         const rows  = data.new_customers ?? [];
@@ -2688,8 +2690,9 @@ async function loadCurrentMonthLogins(){
         const data = await res.json();
 
         const month = data.month || "Current";
-        document.getElementById("newCustomersTitle").textContent = `${month} Current Login`;
-        document.getElementById("newCustomersLabel").textContent = `Users active in ${month}`;
+        document.getElementById("newCustomersTitle").textContent  = `${month} Current Login`;
+        document.getElementById("newCustomersLabel").textContent  = `${month} Current Login Detail`;
+        document.getElementById("currentLoginBtn").style.display  = "none"; // ← hide button
 
         const tbody = document.getElementById("newCustomersTableBody");
         const rows  = data.logins ?? [];
@@ -2724,7 +2727,6 @@ async function loadCurrentMonthLogins(){
         console.error("Current logins fetch failed:", err);
     }
 }
-
 </script>
 
 
