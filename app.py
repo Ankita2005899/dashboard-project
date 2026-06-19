@@ -2198,26 +2198,48 @@ def track_search():
     if not query:
         return jsonify({"status": "empty"})
 
-    user_id = session.get("user_id")
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
+
+    # Saari tables dynamically fetch karo
+    cursor.execute("SHOW TABLES")
+    all_tables = [list(row.values())[0] for row in cursor.fetchall()]
+
+    # Sirf product tables — jinmein searched_count column hai
+    product_tables = []
+    for table in all_tables:
+        cursor.execute(f"SHOW COLUMNS FROM `{table}` LIKE 'searched_count'")
+        if cursor.fetchone():
+            product_tables.append(table)
 
     like_pattern = f"%{query}%"
+    cursor2 = conn.cursor()
 
-    for table in ["card", "study_material", "food_items"]:
-        cursor.execute(f"""
-            UPDATE {table} 
-            SET searched_count = searched_count + 1,
-                last_searched_time = NOW()
-            WHERE name = %s OR keywords LIKE %s
-        """, (query, like_pattern))
+    for table in product_tables:
+        # Check karo keywords column hai kya
+        cursor.execute(f"SHOW COLUMNS FROM `{table}` LIKE 'keywords'")
+        has_keywords = cursor.fetchone() is not None
+
+        if has_keywords:
+            cursor2.execute(f"""
+                UPDATE `{table}` 
+                SET searched_count = searched_count + 1,
+                    last_searched_time = NOW()
+                WHERE name = %s OR keywords LIKE %s
+            """, (query, like_pattern))
+        else:
+            cursor2.execute(f"""
+                UPDATE `{table}` 
+                SET searched_count = searched_count + 1,
+                    last_searched_time = NOW()
+                WHERE name = %s
+            """, (query,))
 
     conn.commit()
     cursor.close()
+    cursor2.close()
     conn.close()
     return jsonify({"status": "updated"})
-
-
 
 @app.route('/products/search-user')
 def search_user_products():
