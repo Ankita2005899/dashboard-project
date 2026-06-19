@@ -1865,7 +1865,6 @@ function searchTotalCustomers(){
     const raw     = document.getElementById("customerSearch").value.toLowerCase().trim();
     const allRows = document.querySelectorAll("#totalCustomersTableBody tr");
 
-    // Split by comma → multiple search terms e.g. "3, sanket, gmail"
     const terms = raw.split(",").map(t => t.trim()).filter(t => t.length > 0);
 
     let i = 0;
@@ -1882,29 +1881,32 @@ function searchTotalCustomers(){
             dataRow.style.display = "";
             if(panelRow) panelRow.style.display = "";
         } else {
-            // Get each cell's text individually (exclude Delete button = last cell)
             const cells = Array.from(dataRow.querySelectorAll("td"))
                 .slice(0, -1)
                 .map(td => td.innerText.toLowerCase().trim());
 
             const match = terms.some(term => {
-                    if(term.length <= 2){
-                        // Short terms → ONLY match Sr.No (index 0) or ID (index 1) exactly
-                        return cells[0] === term || cells[1] === term;
-                    } else {
-                        // Longer terms → substring match across all cells
-                        return cells.some(cellText => cellText.includes(term));
-                    }
-                });
+                if(term.length <= 2){
+                    return cells[0] === term || cells[1] === term;
+                } else {
+                    return cells.some(cellText => cellText.includes(term));
+                }
+            });
 
             dataRow.style.display = match ? "" : "none";
-            if(panelRow && !panelRow.classList.contains("open")) panelRow.style.display = "none";
-        }
+
+            if(panelRow){
+                if(panelRow.classList.contains("open")){
+                    panelRow.style.display = "table-row";
+                } else {
+                    panelRow.style.display = "none";
+                }
+            }
+        }         // ← closes else
 
         i += 2;
-    }
-}
-
+    }             // ← closes while
+}                 // ← closes function
 
 function openTotalCustomersModal() {
     const modal = document.getElementById("totalCustomersModal");
@@ -2380,10 +2382,14 @@ function toggleAccordion(id){
     const isOpen = panel.classList.contains("open");
 
     // Close all open panels first
-    document.querySelectorAll(".accordion-panel.open").forEach(p => p.classList.remove("open"));
+    document.querySelectorAll(".accordion-panel.open").forEach(p => {
+        p.classList.remove("open");
+        p.style.display = "none";
+    });
 
     if(!isOpen){
         panel.classList.add("open");
+        panel.style.display = "table-row"; // ← force show even if search hid it
         renderAccCharts(id);
     }
 }
