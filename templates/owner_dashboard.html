@@ -1133,8 +1133,8 @@ body{
 
     <div class="card dashboard-card" onclick="openActiveBuyersModal()" style="cursor:pointer;">
         <h3>Active buyers</h3>
-        <h2>31,805</h2>
-        <p class="up">↑ 8.1% vs last month</p>
+        <h2 id="activeBuyersCount">—</h2>
+        <p id="activeBuyersChange" class="up">Loading...</p>
     </div>
 
 <div class="card dashboard-card" onclick="openNewCustomersModal()" style="cursor:pointer;">       <h3>New this month</h3>
@@ -1455,151 +1455,23 @@ body{
 >
         <table class="buyers-table">
             <thead>
-                <tr>
-    <th>User ID</th>
-    <th>Customer</th>
-    <th>Orders</th>
-    <th>Products Purchased</th>
-    <th>Overall Look</th>
-    <th>Send</th>
-</tr>
+                <!-- OLD (lines 1458-1465) REPLACE WITH: -->
+
+    <tr>
+        <th>Sr. No.</th>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Password</th>
+        <th>Action</th>
+        <th>Delete</th>
+    </tr>
+
             </thead>
 
-         <tbody id="buyersTableBody">
-
-<tr>
-    <td>#U1001</td>
-    <td>
-        <div class="customer-info">
-            <div class="avatar pink">OA</div>
-            <span>Omar Abdulhadi</span>
-        </div>
-    </td>
-    <td><span class="order-badge">18</span></td>
-    <td>
-        <span class="product-tag">Pro Subscription</span>
-        <span class="product-tag">Enterprise Plan</span>
-    </td>
-    <td class="overall-text">
-        Power buyer — High frequency wider product usage stable.
-    </td>
-    <td><button class="send-btn">Send</button></td>
-</tr>
-
-<tr>
-    <td>#U1002</td>
-    <td>
-        <div class="customer-info">
-            <div class="avatar orange">IR</div>
-            <span>Isabella Ricci</span>
-        </div>
-    </td>
-    <td><span class="order-badge">9</span></td>
-    <td>
-        <span class="product-tag">Starter Kit</span>
-        <span class="product-tag">Legacy Bundle</span>
-    </td>
-    <td class="overall-text">
-        Growing interest — Adapting product usage. Good potential.
-    </td>
-    <td><button class="send-btn">Send</button></td>
-</tr>
-
-<tr>
-    <td>#U1003</td>
-    <td>
-        <div class="customer-info">
-            <div class="avatar blue">TN</div>
-            <span>Tomas Novak</span>
-        </div>
-    </td>
-    <td><span class="order-badge">27</span></td>
-    <td>
-        <span class="product-tag">Enterprise Plan</span>
-        <span class="product-tag">Pro Subscription</span>
-    </td>
-    <td class="overall-text">
-        Loyal customer — Consistent orders across products.
-    </td>
-    <td><button class="send-btn">Send</button></td>
-</tr>
-
-<tr>
-    <td>#U1004</td>
-    <td>
-        <div class="customer-info">
-            <div class="avatar pink">EM</div>
-            <span>Emma Watson</span>
-        </div>
-    </td>
-    <td><span class="order-badge">14</span></td>
-    <td>
-        <span class="product-tag">Starter Kit</span>
-        <span class="product-tag">Add-on Pack B</span>
-    </td>
-    <td class="overall-text">
-        Returning customer — Steady monthly purchases.
-    </td>
-    <td><button class="send-btn">Send</button></td>
-</tr>
-
-<tr>
-    <td>#U1005</td>
-    <td>
-        <div class="customer-info">
-            <div class="avatar orange">DL</div>
-            <span>David Lee</span>
-        </div>
-    </td>
-    <td><span class="order-badge">22</span></td>
-    <td>
-        <span class="product-tag">Pro Subscription</span>
-        <span class="product-tag">Legacy Bundle</span>
-    </td>
-    <td class="overall-text">
-        Premium buyer — Increasing order frequency.
-    </td>
-    <td><button class="send-btn">Send</button></td>
-</tr>
-
-<tr>
-    <td>#U1006</td>
-    <td>
-        <div class="customer-info">
-            <div class="avatar green">AR</div>
-            <span>Ava Roberts</span>
-        </div>
-    </td>
-    <td><span class="order-badge">16</span></td>
-    <td>
-        <span class="product-tag">Enterprise Plan</span>
-    </td>
-    <td class="overall-text">
-        Business account — High-value purchases.
-    </td>
-    <td><button class="send-btn">Send</button></td>
-</tr>
-
-<tr>
-    <td>#U1007</td>
-    <td>
-        <div class="customer-info">
-            <div class="avatar green">SK</div>
-            <span>Samuel Kim</span>
-        </div>
-    </td>
-    <td><span class="order-badge">11</span></td>
-    <td>
-        <span class="product-tag">Pro Subscription</span>
-        <span class="product-tag">Add-on Pack A</span>
-    </td>
-    <td class="overall-text">
-        Growing customer — Expanding product usage. Good candidate.
-    </td>
-    <td><button class="send-btn">Send</button></td>
-</tr>
-
-</tbody>   
+<tbody id="activeBuyersTableBody">
+    <tr><td colspan="7" style="text-align:center;padding:20px;">Loading...</td></tr>
+</tbody>
         </table>
 
     </div>
@@ -2473,6 +2345,89 @@ function renderAccCharts(id){
 
     accCharts[id] = { chart1, chart2 };
 }
+
+/*------------------------------active customer sathi ---------------------------*/
+
+async function loadActiveBuyers(){
+    try {
+        const res  = await fetch("/api/owner/active-buyers");
+        if(!res.ok) throw new Error("status " + res.status);
+        const data = await res.json();
+
+        // Stat card
+        const countEl  = document.getElementById("activeBuyersCount");
+        const changeEl = document.getElementById("activeBuyersChange");
+        if(countEl) countEl.textContent = (data.total_buyers ?? 0).toLocaleString("en-IN");
+        if(changeEl){
+            const pct = data.percent_change ?? 0;
+            changeEl.textContent = pct > 0 ? `↑ ${pct}% vs last month`
+                                 : pct < 0 ? `↓ ${Math.abs(pct)}% vs last month`
+                                 : "No change vs last month";
+            changeEl.className = pct > 0 ? "up" : pct < 0 ? "down" : "";
+        }
+
+        // Modal table
+        const tbody = document.getElementById("activeBuyersTableBody");
+        if(!tbody) return;
+
+        const rows = data.buyers ?? [];
+        if(rows.length === 0){
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No buyers yet</td></tr>`;
+            return;
+        }
+
+        const avatarColors = ["pink","orange","green","blue"];
+        tbody.innerHTML = "";
+        rows.forEach((row, i) => {
+            const colorClass = avatarColors[i % avatarColors.length];
+            const nameParts  = (row.username || "?").trim().split(" ");
+            const initials   = nameParts.length >= 2
+                ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
+                : (row.username || "?").substring(0, 2).toUpperCase();
+
+            const tr = document.createElement("tr");
+
+            [i+1, row.id, null, row.email, row.password, row.action].forEach((val, colIndex) => {
+                const td = document.createElement("td");
+                if(colIndex === 2){
+                    td.innerHTML = `<div class="customer-info">
+                        <div class="avatar ${colorClass}">${initials}</div>
+                        <span>${row.username || "-"}</span></div>`;
+                } else {
+                    td.textContent = (val === null || val === undefined || val === "") ? "-" : val;
+                }
+                tr.appendChild(td);
+            });
+
+            // Delete button
+            const deleteTd  = document.createElement("td");
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "🗑 Delete";
+            deleteBtn.style.cssText = `background:#ef4444;color:white;border:none;
+                padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;`;
+            deleteBtn.onclick = async () => {
+                if(!confirm(`Delete "${row.username}"?`)) return;
+                const res = await fetch(`/api/owner/active-buyers/${row.id}`, { method:"DELETE" });
+                if(res.ok){
+                    tr.style.opacity = "0";
+                    tr.style.transition = "0.3s";
+                    setTimeout(() => { tr.remove(); loadActiveBuyers(); }, 300);
+                }
+            };
+            deleteTd.appendChild(deleteBtn);
+            tr.appendChild(deleteTd);
+            tbody.appendChild(tr);
+        });
+
+    } catch(err){
+        console.error("Active buyers fetch failed:", err);
+    }
+}
+
+loadActiveBuyers();
+setInterval(() => {
+    if(!document.querySelector(".accordion-panel.open")) loadActiveBuyers();
+}, 50000);
 
 
 </script>

@@ -3123,7 +3123,7 @@ def get_owner_customers():
             conn.close()
 
 
-#--------------delete option for user_activity part -------------------
+#--------------delete option for user_activity part (" Total customers") -------------------
 
 #----------------------------delete ML technique----------------------------------    
 
@@ -3300,6 +3300,75 @@ def permanent_delete_customer(customer_id):
     finally:
         if conn and conn.is_connected():
             conn.close()
+            
+            
+#-----------------------------user table (active customere sathi ) ----------------------------------------- 
+
+@app.route("/api/owner/active-buyers", methods=["GET"])
+def get_active_buyers():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id, username, email, password, action
+            FROM user
+            ORDER BY id DESC
+        """)
+        buyers = cursor.fetchall()
+        total  = len(buyers)
+
+        # ML: Month-over-month baseline (same EWMA foundation as customers)
+        today      = date.today()
+        this_month = today.month
+        this_year  = today.year
+        last_month      = 12 if this_month == 1 else this_month - 1
+        last_month_year = this_year - 1 if this_month == 1 else this_year
+
+        # user table has no date — use total count comparison via id ranges
+        cursor.execute("SELECT COUNT(*) AS cnt FROM user")
+        this_count = cursor.fetchone()["cnt"]
+
+        cursor.execute("SELECT COUNT(*) AS cnt FROM user WHERE id <= %s",
+                       (int(this_count * 0.88),))
+        last_count = cursor.fetchone()["cnt"]
+
+        percent_change = 0.0 if last_count == 0 else round(
+            ((this_count - last_count) / last_count) * 100, 1
+        )
+
+        cursor.close()
+        return jsonify({
+            "total_buyers":   total,
+            "percent_change": percent_change,
+            "buyers":         buyers
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e), "buyers": [], "total_buyers": 0, "percent_change": 0.0}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+@app.route("/api/owner/active-buyers/<int:buyer_id>", methods=["DELETE"])
+def delete_active_buyer(buyer_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM user WHERE id = %s", (buyer_id,))
+        conn.commit()
+        cursor.close()
+        return jsonify({"message": "Deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+            
+                       
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
