@@ -1158,15 +1158,17 @@ body{
                 <small id="newCustomersLabel">Showing newly registered customers</small>
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
-    <div style="display:flex;gap:8px;">
-        <button id="undoLoginBtn" onclick="loadNewCustomers()"
-            style="display:none;background:#e0e7ff;color:#6366f1;border:none;
-            padding:8px 14px;border-radius:8px;font-weight:700;
-            cursor:pointer;font-size:18px;" title="Back to New Accounts">
-            ↩
-        </button>
+<div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+    <button id="undoLoginBtn" onclick="loadNewCustomers()"
+        style="display:none;background:#e0e7ff;color:#6366f1;border:none;
+        padding:8px 14px;border-radius:8px;font-weight:700;
+        cursor:pointer;font-size:18px;" title="Back to New Accounts">
+        ↩
+    </button>
+    <div style="margin-left:auto;">
         <button onclick="closeNewCustomersModal()" class="send-btn">Close</button>
     </div>
+</div>
     <button id="currentLoginBtn" onclick="loadCurrentMonthLogins()"
                     style="background:#6366f1;color:white;border:none;padding:8px 16px;
                     border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;">
