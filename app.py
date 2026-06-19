@@ -3529,13 +3529,9 @@ def get_new_this_month():
             SELECT COUNT(*) AS cnt FROM user_activity
             WHERE MONTH(action_date)=%s AND YEAR(action_date)=%s
         """, (today.month, today.year))
-        activity_count = cursor.fetchone()["cnt"]
-
-# All users from user table (no date — show total as current active)
-        cursor.execute("SELECT COUNT(*) AS cnt FROM user")
-        user_count = cursor.fetchone()["cnt"]
-
-        this_count = activity_count + user_count
+        
+        this_count = cursor.fetchone()["cnt"]  # only user_activity current month signups
+        
 
         # Last month signups
         last_month      = 12 if today.month == 1 else today.month - 1
