@@ -2473,7 +2473,33 @@ async function loadActiveBuyers(){
             };
             deleteTd.appendChild(deleteBtn);
             tr.appendChild(deleteTd);
+
+            // Row click → open accordion
+            tr.classList.add("accordion-row");
+            tr.style.cursor = "pointer";
+            tr.onclick = (e) => {
+                if(e.target.tagName === "BUTTON") return;
+                toggleBuyerAccordion(row.id);
+            };
             tbody.appendChild(tr);
+
+            // Accordion panel — Active Website Duration chart
+            const bPanelTr = document.createElement("tr");
+            bPanelTr.id    = `buyer-acc-${row.id}`;
+            bPanelTr.classList.add("buyer-accordion-panel");
+            bPanelTr.style.display = "none";
+            const bPanelTd = document.createElement("td");
+            bPanelTd.colSpan = 7;
+            bPanelTd.innerHTML = `
+                <div style="padding:16px;">
+                    <strong style="color:#6366f1;">📊 Active User Website Duration</strong>
+                    <div style="height:200px;margin-top:12px;">
+                        <canvas id="buyer-canvas-${row.id}"></canvas>
+                    </div>
+                </div>`;
+            bPanelTr.appendChild(bPanelTd);
+            tbody.appendChild(bPanelTr);
+       
         });
 
     } catch(err){
