@@ -2189,51 +2189,34 @@ def products_search():
     cursor.close()
     conn.close()
     return jsonify(results)
+
+
+
 @app.route("/track-search")
 def track_search():
-    query = request.args.get("q", "").strip().lower()
+    query = request.args.get("q", "").strip()
     if not query:
         return jsonify({"status": "empty"})
 
     user_id = session.get("user_id")
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor2 = conn.cursor()
+    cursor = conn.cursor()
+
+    like_pattern = f"%{query}%"
 
     for table in ["card", "study_material", "food_items"]:
-        cursor.execute(f"SELECT id, name, keywords FROM {table}")
-        rows = cursor.fetchall()
-
-        for row in rows:
-            matched = False
-
-            if row["name"] and row["name"].strip().lower() == query:
-                matched = True
-
-            if not matched and row["keywords"]:
-                keywords_list = [k.strip().lower() for k in row["keywords"].split(",")]
-                if query in keywords_list:
-                    matched = True
-
-            if matched:
-                cursor2.execute(f"""
-                    UPDATE {table} 
-                    SET searched_count = COALESCE(searched_count, 0) + 1, 
-                        last_searched_time = NOW()
-                    WHERE id = %s
-                """, (row["id"],))
-
-                if user_id:
-                    cursor2.execute("""
-                        INSERT INTO search_logs (user_id, product_id, category, search_time) 
-                        VALUES (%s, %s, %s, NOW())
-                    """, (user_id, row["id"], table))
+        cursor.execute(f"""
+            UPDATE {table} 
+            SET searched_count = searched_count + 1,
+                last_searched_time = NOW()
+            WHERE name = %s OR keywords LIKE %s
+        """, (query, like_pattern))
 
     conn.commit()
     cursor.close()
-    cursor2.close()
     conn.close()
     return jsonify({"status": "updated"})
+
 
 
 @app.route('/products/search-user')
