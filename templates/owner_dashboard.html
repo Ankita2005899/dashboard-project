@@ -1898,7 +1898,7 @@ function searchTotalCustomers(){
                 });
 
             dataRow.style.display = match ? "" : "none";
-            if(panelRow) panelRow.style.display = "none";
+            if(panelRow && !panelRow.classList.contains("open")) panelRow.style.display = "none";
         }
 
         i += 2;
