@@ -1286,7 +1286,8 @@ def get_study_materials():
             "price": row["price"],
             "uploaded_at": row["uploaded_at"].strftime("%Y-%m-%d") if row["uploaded_at"] else None,
             "address": row["address"],
-            "material": row["material"]
+            "material": row["material"],
+            "detail": row["detail"]   # ← yeh add karo
         })
 
     cursor.close()
@@ -1313,7 +1314,8 @@ def get_food_items():
             "price": row["price"],
             "uploaded_at": row["uploaded_at"].strftime("%Y-%m-%d") if row["uploaded_at"] else None,
             "address": row["address"],
-            "material": row["material"]
+            "material": row["material"],
+            "detail": row["detail"]   # ← yeh add karo
         })
 
     cursor.close()
