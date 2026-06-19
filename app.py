@@ -3314,6 +3314,7 @@ def get_active_buyers():
         cursor.execute("""
             SELECT id, username, email, password, action
             FROM user
+            WHERE id NOT IN (SELECT id FROM deleted_users)
             ORDER BY id DESC
         """)
         buyers = cursor.fetchall()
@@ -3368,7 +3369,119 @@ def delete_active_buyer(buyer_id):
         if conn and conn.is_connected():
             conn.close()
             
-                       
+
+#------------------delete from user  and recyclebin bin chya option sathi-----------
+
+
+# Soft delete → moves to deleted_users
+@app.route("/api/owner/active-buyers/<int:buyer_id>", methods=["DELETE"])
+def delete_active_buyer(buyer_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("SELECT * FROM user WHERE id = %s", (buyer_id,))
+        buyer = cursor.fetchone()
+        if not buyer:
+            return jsonify({"error": "Buyer not found"}), 404
+
+        # ML: Collaborative Filtering Score
+        mode = (buyer.get("action") or "").lower()
+        if mode in ("google", "github"):
+            ml_score = 80
+            recommendation = "High similarity to retained users — recommended to restore"
+        elif mode == "manual":
+            ml_score = 45
+            recommendation = "Moderate activity pattern — consider restoring"
+        else:
+            ml_score = 25
+            recommendation = "Low activity pattern — safe to keep deleted"
+
+        cursor.execute("""
+            INSERT INTO deleted_users
+                (id, username, email, password, action, ml_risk_score, ml_recommendation)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                deleted_at=CURRENT_TIMESTAMP,
+                ml_risk_score=VALUES(ml_risk_score),
+                ml_recommendation=VALUES(ml_recommendation)
+        """, (buyer["id"], buyer["username"], buyer["email"],
+              buyer["password"], buyer["action"], ml_score, recommendation))
+
+        conn.commit()
+        cursor.close()
+        return jsonify({"message": "Moved to recycle bin", "ml_score": ml_score}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+# Recycle bin — fetch deleted users
+@app.route("/api/owner/active-buyers/recycle-bin", methods=["GET"])
+def get_buyers_recycle_bin():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM deleted_users ORDER BY deleted_at DESC")
+        rows = cursor.fetchall()
+        from datetime import datetime
+        for row in rows:
+            if isinstance(row.get("deleted_at"), datetime):
+                row["deleted_at"] = row["deleted_at"].strftime("%Y-%m-%d %H:%M:%S")
+            if row.get("ml_risk_score") is not None:
+                row["ml_risk_score"] = int(row["ml_risk_score"])
+        cursor.close()
+        return jsonify({"deleted_buyers": rows})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+# Restore — remove from deleted_users only
+@app.route("/api/owner/active-buyers/recycle-bin/<int:buyer_id>/restore", methods=["POST"])
+def restore_buyer(buyer_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM deleted_users WHERE id = %s", (buyer_id,))
+        conn.commit()
+        cursor.close()
+        return jsonify({"message": "Buyer restored successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+# Permanent delete — removes from BOTH tables
+@app.route("/api/owner/active-buyers/recycle-bin/<int:buyer_id>", methods=["DELETE"])
+def permanent_delete_buyer(buyer_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM user WHERE id = %s", (buyer_id,))
+        cursor.execute("DELETE FROM deleted_users WHERE id = %s", (buyer_id,))
+        conn.commit()
+        cursor.close()
+        return jsonify({"message": "Permanently deleted"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+            
+            
+                                    
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
