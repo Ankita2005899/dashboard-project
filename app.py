@@ -2282,7 +2282,7 @@ def track_add_to_cart():
 
     conn.commit()
     cursor.close()
-    conn.close()Product 
+    conn.close()
     return jsonify({"message": "cart activity recorded", "time": str(ist_time)})
 
 
