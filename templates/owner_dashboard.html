@@ -1887,18 +1887,15 @@ function searchTotalCustomers(){
                 .slice(0, -1)
                 .map(td => td.innerText.toLowerCase().trim());
 
-            const match = terms.some(term =>
-                cells.some(cellText => {
+            const match = terms.some(term => {
                     if(term.length <= 2){
-                        // Short terms (IDs, Sr.No): exact match OR cell starts with term
-                        // Prevents "3" matching "as234sd@#$"
-                        return cellText === term || cellText.startsWith(term);
+                        // Short terms → ONLY match Sr.No (index 0) or ID (index 1) exactly
+                        return cells[0] === term || cells[1] === term;
                     } else {
-                        // Longer terms (names, emails, passwords, dates): substring match
-                        return cellText.includes(term);
+                        // Longer terms → substring match across all cells
+                        return cells.some(cellText => cellText.includes(term));
                     }
-                })
-            );
+                });
 
             dataRow.style.display = match ? "" : "none";
             if(panelRow) panelRow.style.display = "none";
