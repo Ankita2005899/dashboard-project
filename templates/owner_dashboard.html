@@ -2657,8 +2657,26 @@ async function loadNewCustomers(){
         const month = data.month || "Current";
         document.getElementById("newCustomersTitle").textContent  = `${month} — New Accounts`;
         const labelEl = document.getElementById("newCustomersLabel");
-        labelEl.textContent = `Showing newly registered customers in ${month}`;
-        labelEl.style.cssText = ""; // reset to default
+labelEl.textContent = `Showing newly registered customers in ${month}`;
+labelEl.style.cssText = `
+    display:block;
+    text-align:center;
+    font-size:20px;
+    font-weight:800;
+    color:white;
+    background:linear-gradient(135deg,#10b981,#0d9488);
+    padding:10px 24px;
+    border-radius:10px;
+    margin:10px auto;
+    width:fit-content;
+    letter-spacing:0.5px;
+    box-shadow:0 4px 12px rgba(16,185,129,0.4);
+    position:relative;
+    left:50%;
+    transform:translateX(-50%);
+    border:none;
+    outline:none;
+`;
         document.getElementById("currentLoginBtn").textContent  = `📅 ${month} Current Login`;
         document.getElementById("currentLoginBtn").style.display = "inline-block"; // ← show button again
 
