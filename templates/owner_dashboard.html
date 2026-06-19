@@ -1137,10 +1137,20 @@ body{
         <p id="activeBuyersChange" class="up">Loading...</p>
     </div>
 
-<div class="card dashboard-card" onclick="openNewCustomersModal()" style="cursor:pointer;">       <h3>New this month</h3>
-        <h2 id="newThisMonthCount">—</h2>
-        <p id="newThisMonthChange" class="up">Loading...</p>
+<div class="card dashboard-card" onclick="openNewCustomersModal()" style="cursor:pointer;">
+    <h3>New this month</h3>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+        <div>
+            <h2 id="newThisMonthCount">—</h2>
+            <p id="newThisMonthChange" class="up">Loading...</p>
+        </div>
+        <div style="text-align:right;">
+            <span id="newThisMonthLabel" style="font-size:12px;color:#64748b;font-weight:600;"></span>
+            <h3 id="newThisMonthMonthCount" style="font-size:28px;font-weight:800;color:#10b981;margin:0;">—</h3>
+            <span style="font-size:11px;color:#94a3b8;">accounts created</span>
+        </div>
     </div>
+</div>
 
 <div class="card dashboard-card" onclick="openAvgOrdersModal()" style="cursor:pointer;">
          <h3>Avg. orders/customer</h3>
@@ -2795,6 +2805,13 @@ async function loadNewThisMonth(){
 
         if(countEl) countEl.textContent = (data.count ?? 0).toLocaleString("en-IN");
 
+        // Right side — current month account count
+        const monthLabel = document.getElementById("newThisMonthLabel");
+        const monthCount = document.getElementById("newThisMonthMonthCount");
+        const now        = new Date();
+        const monthName  = now.toLocaleString("en-IN", { month: "long" });
+        if(monthLabel) monthLabel.textContent = `${monthName} ${now.getFullYear()}`;
+        if(monthCount) monthCount.textContent = (data.count ?? 0).toLocaleString("en-IN");
         if(changeEl){
             const pct = data.percent_change ?? 0;
             if(pct > 0){
