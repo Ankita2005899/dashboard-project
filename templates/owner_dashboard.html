@@ -1695,25 +1695,49 @@ function closeActiveBuyersModal(){
 }
 
 function searchBuyers() {
-    let input = document.getElementById("buyerSearch").value.toLowerCase();
-    let rows = document.querySelectorAll("#buyersTableBody tr");
+    const raw   = document.getElementById("buyerSearch").value.toLowerCase().trim();
+    const terms = raw.split(",").map(t => t.trim()).filter(t => t.length > 0);
+    const allRows = document.querySelectorAll("#activeBuyersTableBody tr");
 
-    rows.forEach(row => {
-        let userId = row.cells[0].innerText.toLowerCase();
-        let customerName = row.cells[1].innerText.toLowerCase();
-        let products = row.cells[3].innerText.toLowerCase();
+    let i = 0;
+    while(i < allRows.length){
+        const dataRow  = allRows[i];
+        const panelRow = allRows[i + 1];
 
-        if (
-            userId.includes(input) ||
-            customerName.includes(input) ||
-            products.includes(input)
-        ) {
-            row.style.display = "";
-        } else {
-            row.style.display = "none";
+        if(dataRow.classList.contains("buyer-accordion-panel")){
+            i++;
+            continue;
         }
-    });
+
+        if(terms.length === 0){
+            dataRow.style.display = "";
+            if(panelRow) panelRow.style.display = "";
+        } else {
+            const cells = Array.from(dataRow.querySelectorAll("td"))
+                .slice(0, -1)
+                .map(td => td.innerText.toLowerCase().trim());
+
+            const match = terms.some(term => {
+                if(term.length <= 2){
+                    return cells[0] === term || cells[1] === term;
+                } else {
+                    return cells.some(cellText => cellText.includes(term));
+                }
+            });
+
+            dataRow.style.display = match ? "" : "none";
+            if(panelRow){
+                if(panelRow.classList.contains("open")){
+                    panelRow.style.display = "table-row";
+                } else {
+                    panelRow.style.display = "none";
+                }
+            }
+        }
+        i += 2;
+    }
 }
+
 
 function openChurnModal(){
     document.getElementById("churnModal").style.display = "flex";
