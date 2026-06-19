@@ -2189,7 +2189,6 @@ def products_search():
     cursor.close()
     conn.close()
     return jsonify(results)
-
 @app.route("/track-search")
 def track_search():
     query = request.args.get("q", "").strip().lower()
@@ -2199,6 +2198,7 @@ def track_search():
     user_id = session.get("user_id")
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
+    cursor2 = conn.cursor()
 
     for table in ["card", "study_material", "food_items"]:
         cursor.execute(f"SELECT id, name, keywords FROM {table}")
@@ -2207,18 +2207,16 @@ def track_search():
         for row in rows:
             matched = False
 
-            # Name exact match
             if row["name"] and row["name"].strip().lower() == query:
                 matched = True
 
-            # Keyword match - comma split karke check karo
             if not matched and row["keywords"]:
                 keywords_list = [k.strip().lower() for k in row["keywords"].split(",")]
                 if query in keywords_list:
                     matched = True
 
             if matched:
-                cursor.execute(f"""
+                cursor2.execute(f"""
                     UPDATE {table} 
                     SET searched_count = COALESCE(searched_count, 0) + 1, 
                         last_searched_time = NOW()
@@ -2226,13 +2224,14 @@ def track_search():
                 """, (row["id"],))
 
                 if user_id:
-                    cursor.execute("""
+                    cursor2.execute("""
                         INSERT INTO search_logs (user_id, product_id, category, search_time) 
                         VALUES (%s, %s, %s, NOW())
                     """, (user_id, row["id"], table))
 
     conn.commit()
     cursor.close()
+    cursor2.close()
     conn.close()
     return jsonify({"status": "updated"})
 
