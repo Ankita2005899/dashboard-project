@@ -1994,30 +1994,40 @@ async function loadTotalCustomers(){
             deleteBtn.onclick = () => deleteCustomer(row.id, row.username, tr);
             deleteTd.appendChild(deleteBtn);
             tr.appendChild(deleteTd);
-tr.classList.add("accordion-row");
-tr.style.cursor = "pointer";
-tr.onclick = (e) => {
-    if(e.target.tagName === "BUTTON") return;
-    toggleBuyerAccordion(row.id);
-};
-tbody.appendChild(tr);
+// Make row clickable — 2 tab accordion for Total Customers
+            tr.classList.add("accordion-row");
+            tr.style.cursor = "pointer";
+            tr.onclick = (e) => {
+                if(e.target.tagName === "BUTTON") return;
+                toggleAccordion(row.id);
+            };
+            tbody.appendChild(tr);
 
-// Accordion panel
-const panelTr  = document.createElement("tr");
-panelTr.id     = `buyer-acc-${row.id}`;
-panelTr.classList.add("buyer-accordion-panel");
-panelTr.style.display = "none";
-const panelTd  = document.createElement("td");
-panelTd.colSpan = 7;
-panelTd.innerHTML = `
-    <div style="padding:16px;">
-        <strong style="color:#6366f1;">📊 Active User Website Duration</strong>
-        <div style="height:200px;margin-top:12px;">
-            <canvas id="buyer-canvas-${row.id}"></canvas>
-        </div>
-    </div>`;
-panelTr.appendChild(panelTd);
-tbody.appendChild(panelTr);
+            // Accordion panel — 2 tabs: Complete Progress + Total Website Duration
+            const panelTr = document.createElement("tr");
+            panelTr.id = `acc-${row.id}`;
+            panelTr.classList.add("accordion-panel");
+
+            const panelTd = document.createElement("td");
+            panelTd.colSpan = 11;
+            panelTd.innerHTML = `
+                <div class="accordion-tabs">
+                    <button class="acc-tab active" onclick="switchAccTab(${row.id}, 1, this)">
+                        1. Complete Progress
+                    </button>
+                    <button class="acc-tab" onclick="switchAccTab(${row.id}, 2, this)">
+                        2. Total Used Website Duration
+                    </button>
+                </div>
+                <div class="acc-chart-wrap active" id="acc-chart1-${row.id}">
+                    <canvas id="acc-canvas1-${row.id}"></canvas>
+                </div>
+                <div class="acc-chart-wrap" id="acc-chart2-${row.id}">
+                    <canvas id="acc-canvas2-${row.id}"></canvas>
+                </div>
+            `;
+            panelTr.appendChild(panelTd);
+            tbody.appendChild(panelTr);
 
         });
     } catch(err){
