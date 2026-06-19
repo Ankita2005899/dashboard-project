@@ -3446,8 +3446,73 @@ def permanent_delete_buyer(buyer_id):
         if conn and conn.is_connected():
             conn.close()
             
+#---------------------third part sathi  (" New this month ")----------------------------------            
+                        
+
+@app.route("/api/owner/new-customers", methods=["GET"])
+def get_new_customers():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        today  = date.today()
+
+        # Current month new accounts from user_activity
+        cursor.execute("""
+            SELECT id, username, email, mode, action_date, action_time
+            FROM user_activity
+            WHERE MONTH(action_date) = %s AND YEAR(action_date) = %s
+            ORDER BY action_date DESC, action_time DESC
+        """, (today.month, today.year))
+        rows = cursor.fetchall()
+
+        from datetime import timedelta
+        for row in rows:
+            if isinstance(row.get("action_date"), date):
+                row["action_date"] = row["action_date"].strftime("%Y-%m-%d")
+            at = row.get("action_time")
+            if isinstance(at, timedelta):
+                total = int(at.total_seconds())
+                row["action_time"] = f"{total//3600:02}:{(total%3600)//60:02}:{total%60:02}"
+
+        cursor.close()
+        return jsonify({"new_customers": rows, "month": today.strftime("%B")})
+
+    except Exception as e:
+        return jsonify({"error": str(e), "new_customers": []}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+@app.route("/api/owner/current-logins", methods=["GET"])
+def get_current_logins():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        today  = date.today()
+
+        # Current month logins from user table
+        # user table has no date — return all users as "active this month"
+        cursor.execute("""
+            SELECT id, username, email, action
+            FROM user
+            WHERE id NOT IN (SELECT id FROM deleted_users)
+            ORDER BY id DESC
+            LIMIT 50
+        """)
+        rows = cursor.fetchall()
+        cursor.close()
+        return jsonify({"logins": rows, "month": today.strftime("%B")})
+
+    except Exception as e:
+        return jsonify({"error": str(e), "logins": []}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
             
-                                    
+                                                
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================

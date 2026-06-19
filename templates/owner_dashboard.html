@@ -1154,16 +1154,23 @@ body{
 
         <div class="buyers-header">
             <div>
-                <h3>New Customers This Month</h3>
-                <small>Showing newly registered customers</small>
+                <h3 id="newCustomersTitle">New Customers This Month</h3>
+                <small id="newCustomersLabel">Showing newly registered customers</small>
             </div>
-            <button onclick="closeNewCustomersModal()" class="send-btn">Close</button>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+                <button onclick="closeNewCustomersModal()" class="send-btn">Close</button>
+                <button id="currentLoginBtn" onclick="loadCurrentMonthLogins()"
+                    style="background:#6366f1;color:white;border:none;padding:8px 16px;
+                    border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;">
+                    📅 June Current Login
+                </button>
+            </div>
         </div>
 
-        <input 
+        <input
             type="text"
             id="newCustomerSearch"
-            placeholder="Search by User ID, Name..."
+            placeholder="Search by ID, Name..."
             class="search-box"
             onkeyup="searchNewCustomers()"
         >
@@ -1171,42 +1178,17 @@ body{
         <table class="buyers-table">
             <thead>
                 <tr>
-                    <th>User ID</th>
-                    <th>Customer</th>
-                    <th>Signup Date</th>
-                    <th>Source</th>
-                    <th>First Purchase</th>
-                    <th>Action</th>
+                    <th>Sr. No.</th>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Mode</th>
+                    <th>Joined Date</th>
+                    <th>Time</th>
                 </tr>
             </thead>
-
             <tbody id="newCustomersTableBody">
-                <tr>
-                    <td>#N2001</td>
-                    <td>James Carter</td>
-                    <td>May 02, 2026</td>
-                    <td>Website</td>
-                    <td>Starter Kit</td>
-                    <td><button class="send-btn">View</button></td>
-                </tr>
-
-                <tr>
-                    <td>#N2002</td>
-                    <td>Sophia Miller</td>
-                    <td>May 04, 2026</td>
-                    <td>Referral</td>
-                    <td>Pro Subscription</td>
-                    <td><button class="send-btn">View</button></td>
-                </tr>
-
-                <tr>
-                    <td>#N2003</td>
-                    <td>Daniel Scott</td>
-                    <td>May 05, 2026</td>
-                    <td>Ad Campaign</td>
-                    <td>Enterprise Plan</td>
-                    <td><button class="send-btn">View</button></td>
-                </tr>
+                <tr><td colspan="7" style="text-align:center;padding:20px;">Loading...</td></tr>
             </tbody>
         </table>
 
@@ -1845,8 +1827,9 @@ function closeTotalCustomersModal() {
     modal.style.display = "none";
 }
 
-function openNewCustomersModal(){
+function openNewCustomersModal() {
     document.getElementById("newCustomersModal").style.display = "flex";
+    loadNewCustomers(); // ← add this line
 }
 
 function closeNewCustomersModal(){
@@ -2649,6 +2632,98 @@ function renderBuyerChart(id){
     });
 }
 
+/*#---------------------third part sathi  (" New this month ")----------------------------------*/
+
+// ── New Customers This Month ──────────────────────────────────────────────────
+async function loadNewCustomers(){
+    try {
+        const res  = await fetch("/api/owner/new-customers");
+        if(!res.ok) throw new Error("status " + res.status);
+        const data = await res.json();
+
+        const month = data.month || "Current";
+        document.getElementById("newCustomersTitle").textContent  = `${month} — New Accounts`;
+        document.getElementById("newCustomersLabel").textContent  = `Showing newly registered customers in ${month}`;
+        document.getElementById("currentLoginBtn").textContent    = `📅 ${month} Current Login`;
+
+        const tbody = document.getElementById("newCustomersTableBody");
+        const rows  = data.new_customers ?? [];
+
+        if(rows.length === 0){
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#10b981;">No new accounts in ${month}</td></tr>`;
+            return;
+        }
+
+        const avatarColors = ["pink","orange","green","blue"];
+        tbody.innerHTML = "";
+        rows.forEach((row, i) => {
+            const colorClass = avatarColors[i % avatarColors.length];
+            const initials   = (row.username || "?").substring(0, 2).toUpperCase();
+            const tr         = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${i + 1}</td>
+                <td>${row.id}</td>
+                <td><div class="customer-info">
+                    <div class="avatar ${colorClass}">${initials}</div>
+                    <span>${row.username || "-"}</span>
+                </div></td>
+                <td>${row.email || "-"}</td>
+                <td>${row.mode || "-"}</td>
+                <td>${row.action_date || "-"}</td>
+                <td>${row.action_time || "-"}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+    } catch(err){
+        console.error("New customers fetch failed:", err);
+    }
+}
+
+// ── Current Month Logins ──────────────────────────────────────────────────────
+async function loadCurrentMonthLogins(){
+    try {
+        const res  = await fetch("/api/owner/current-logins");
+        if(!res.ok) throw new Error("status " + res.status);
+        const data = await res.json();
+
+        const month = data.month || "Current";
+        document.getElementById("newCustomersTitle").textContent = `${month} Current Login`;
+        document.getElementById("newCustomersLabel").textContent = `Users active in ${month}`;
+
+        const tbody = document.getElementById("newCustomersTableBody");
+        const rows  = data.logins ?? [];
+
+        if(rows.length === 0){
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;">No logins found</td></tr>`;
+            return;
+        }
+
+        const avatarColors = ["pink","orange","green","blue"];
+        tbody.innerHTML = "";
+        rows.forEach((row, i) => {
+            const colorClass = avatarColors[i % avatarColors.length];
+            const initials   = (row.username || "?").substring(0, 2).toUpperCase();
+            const tr         = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${i + 1}</td>
+                <td>${row.id}</td>
+                <td><div class="customer-info">
+                    <div class="avatar ${colorClass}">${initials}</div>
+                    <span>${row.username || "-"}</span>
+                </div></td>
+                <td>${row.email || "-"}</td>
+                <td>${row.action || "-"}</td>
+                <td>-</td>
+                <td>-</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+    } catch(err){
+        console.error("Current logins fetch failed:", err);
+    }
+}
 
 </script>
 
