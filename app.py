@@ -3512,7 +3512,50 @@ def get_current_logins():
         if conn and conn.is_connected():
             conn.close()
             
-                                                
+#-----------------------third part madhe square var complete current month login and signup show karila --------------------------      
+
+
+@app.route("/api/owner/new-this-month", methods=["GET"])
+def get_new_this_month():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        today  = date.today()
+
+        # Current month signups from user_activity
+        cursor.execute("""
+            SELECT COUNT(*) AS cnt FROM user_activity
+            WHERE MONTH(action_date)=%s AND YEAR(action_date)=%s
+        """, (today.month, today.year))
+        this_count = cursor.fetchone()["cnt"]
+
+        # Last month signups
+        last_month      = 12 if today.month == 1 else today.month - 1
+        last_month_year = today.year - 1 if today.month == 1 else today.year
+        cursor.execute("""
+            SELECT COUNT(*) AS cnt FROM user_activity
+            WHERE MONTH(action_date)=%s AND YEAR(action_date)=%s
+        """, (last_month, last_month_year))
+        last_count = cursor.fetchone()["cnt"]
+
+        percent_change = 0.0 if last_count == 0 else round(
+            ((this_count - last_count) / last_count) * 100, 1
+        )
+
+        cursor.close()
+        return jsonify({
+            "count":          this_count,
+            "percent_change": percent_change
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e), "count": 0, "percent_change": 0.0}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+            
+            
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================

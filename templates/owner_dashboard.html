@@ -1138,8 +1138,8 @@ body{
     </div>
 
 <div class="card dashboard-card" onclick="openNewCustomersModal()" style="cursor:pointer;">       <h3>New this month</h3>
-        <h2>5,412</h2>
-        <p class="up">↑ 21.3% vs last month</p>
+        <h2 id="newThisMonthCount">—</h2>
+        <p id="newThisMonthChange" class="up">Loading...</p>
     </div>
 
 <div class="card dashboard-card" onclick="openAvgOrdersModal()" style="cursor:pointer;">
@@ -2780,6 +2780,43 @@ labelEl.style.cssText = `
         console.error("Current logins fetch failed:", err);
     }
 }
+
+/*#-----------------------third part madhe square var complete current month login and signup show karila --------------------------*/
+
+
+async function loadNewThisMonth(){
+    try {
+        const res  = await fetch("/api/owner/new-this-month");
+        if(!res.ok) throw new Error("status " + res.status);
+        const data = await res.json();
+
+        const countEl  = document.getElementById("newThisMonthCount");
+        const changeEl = document.getElementById("newThisMonthChange");
+
+        if(countEl) countEl.textContent = (data.count ?? 0).toLocaleString("en-IN");
+
+        if(changeEl){
+            const pct = data.percent_change ?? 0;
+            if(pct > 0){
+                changeEl.textContent = `↑ ${pct}% vs last month`;
+                changeEl.className   = "up";
+            } else if(pct < 0){
+                changeEl.textContent = `↓ ${Math.abs(pct)}% vs last month`;
+                changeEl.className   = "down";
+            } else {
+                changeEl.textContent = "No change vs last month";
+                changeEl.className   = "";
+            }
+        }
+    } catch(err){
+        console.error("New this month fetch failed:", err);
+    }
+}
+
+loadNewThisMonth();
+setInterval(loadNewThisMonth, 30000);
+
+
 </script>
 
 
