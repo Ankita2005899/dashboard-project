@@ -1280,8 +1280,8 @@ def get_study_materials():
         products.append({
             "id": row["id"],
             "name": row["name"],
-            "image": f"/static/products/{row['image']}" if row["image"] else None,
-            "video": f"/static/products/{row['video']}" if row["video"] else None,
+            "image": row["image"] if row["image"] else None,
+            "video": row["video"] if row["video"] else None,
             "availability": row["availability"],
             "price": row["price"],
             "uploaded_at": row["uploaded_at"].strftime("%Y-%m-%d") if row["uploaded_at"] else None,
@@ -1307,8 +1307,8 @@ def get_food_items():
         products.append({
             "id": row["id"],
             "name": row["name"],
-            "image": f"/static/products/{row['image']}" if row["image"] else None,
-            "video": f"/static/products/{row['video']}" if row["video"] else None,
+            "image": row["image"] if row["image"] else None,
+            "video": row["video"] if row["video"] else None,
             "availability": row["availability"],
             "price": row["price"],
             "uploaded_at": row["uploaded_at"].strftime("%Y-%m-%d") if row["uploaded_at"] else None,
@@ -2282,8 +2282,8 @@ def track_add_to_cart():
 
     conn.commit()
     cursor.close()
-    conn.close()
-    return jsonify({"message": "Product cart activity recorded", "time": str(ist_time)})
+    conn.close()Product 
+    return jsonify({"message": "cart activity recorded", "time": str(ist_time)})
 
 
 @app.route("/owner-addtocart-data")
