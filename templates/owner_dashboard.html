@@ -1994,35 +1994,32 @@ async function loadTotalCustomers(){
             deleteBtn.onclick = () => deleteCustomer(row.id, row.username, tr);
             deleteTd.appendChild(deleteBtn);
             tr.appendChild(deleteTd);
-
 tr.classList.add("accordion-row");
-            tr.style.cursor = "pointer";
-            tr.onclick = (e) => {
-                if(e.target.tagName === "BUTTON") return;
-                toggleBuyerAccordion(row.id);
-            };
-            tbody.appendChild(tr);
+tr.style.cursor = "pointer";
+tr.onclick = (e) => {
+    if(e.target.tagName === "BUTTON") return;
+    toggleBuyerAccordion(row.id);
+};
+tbody.appendChild(tr);
 
-            // Accordion panel — active website duration chart
-            const panelTr  = document.createElement("tr");
-            panelTr.id     = `buyer-acc-${row.id}`;
-            panelTr.classList.add("buyer-accordion-panel");
-            panelTr.style.display = "none";
-            const panelTd  = document.createElement("td");
-            panelTd.colSpan = 7;
-            panelTd.innerHTML = `
-                <div style="padding:16px;">
-                    <strong style="color:#6366f1;">📊 Active User Website Duration</strong>
-                    <div style="height:200px;margin-top:12px;">
-                        <canvas id="buyer-canvas-${row.id}"></canvas>
-                    </div>
-                </div>`;
-            panelTr.appendChild(panelTd);
-            tbody.appendChild(panelTr);
+// Accordion panel
+const panelTr  = document.createElement("tr");
+panelTr.id     = `buyer-acc-${row.id}`;
+panelTr.classList.add("buyer-accordion-panel");
+panelTr.style.display = "none";
+const panelTd  = document.createElement("td");
+panelTd.colSpan = 7;
+panelTd.innerHTML = `
+    <div style="padding:16px;">
+        <strong style="color:#6366f1;">📊 Active User Website Duration</strong>
+        <div style="height:200px;margin-top:12px;">
+            <canvas id="buyer-canvas-${row.id}"></canvas>
+        </div>
+    </div>`;
+panelTr.appendChild(panelTd);
+tbody.appendChild(panelTr);
 
         });
-
-        
     } catch(err){
         console.error("Total customers fetch failed:", err);
         const countEl  = document.getElementById("totalCustomersCount");
