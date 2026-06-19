@@ -1288,6 +1288,8 @@ def get_study_materials():
             "address": row["address"],
             "material": row["material"],
             "detail": row["detail"]   # ← yeh add karo
+            "keywords": row.get("keywords", "")
+
         })
 
     cursor.close()
@@ -1316,6 +1318,8 @@ def get_food_items():
             "address": row["address"],
             "material": row["material"],
             "detail": row["detail"]   # ← yeh add karo
+            "keywords": row.get("keywords", "")
+
         })
 
     cursor.close()
