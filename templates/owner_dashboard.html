@@ -999,6 +999,11 @@ body{
     <button class="header-btn reward-btn" onclick="openRewardDistributionModal()">
         🎁 Reward Distribution
     </button>
+
+    <button class="header-btn" onclick="openStrongPasswordModal()"
+        style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;">
+        🔐 Strong Passwords
+    </button>
 </div>
 
     </div>
@@ -1068,6 +1073,61 @@ body{
             </div>
 
         </div>
+
+    </div>
+</div>
+
+
+<!-- 🔐 Strong Password Modal -->
+<div id="strongPasswordModal" class="modal-overlay">
+    <div class="buyers-modal" style="max-width:700px;">
+
+        <div class="buyers-header">
+            <div>
+                <h3 style="color:#6366f1;">🔐 Strong Password Manager</h3>
+                <small>Store and view strong passwords securely</small>
+            </div>
+            <button onclick="closeStrongPasswordModal()" class="send-btn">Close</button>
+        </div>
+
+        <!-- Add Password Form -->
+        <div style="background:linear-gradient(135deg,#f0f0ff,#faf5ff);
+                    border:2px solid #c4b5fd;border-radius:12px;
+                    padding:20px;margin-bottom:24px;">
+            <h4 style="color:#6366f1;margin:0 0 14px;">➕ Add New Password</h4>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <input type="text" id="newPasswordInput"
+                    placeholder="Enter strong password..."
+                    style="flex:1;padding:10px 16px;border:2px solid #c4b5fd;
+                    border-radius:8px;font-size:14px;outline:none;min-width:200px;">
+                <label style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:#6366f1;">
+                    <input type="checkbox" id="isUsedCheck" style="width:16px;height:16px;">
+                    Mark as Used
+                </label>
+                <button onclick="addStrongPassword()"
+                    style="background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                    color:white;border:none;padding:10px 20px;border-radius:8px;
+                    font-weight:700;cursor:pointer;font-size:14px;">
+                    💾 Save
+                </button>
+            </div>
+            <div id="passwordSaveMsg" style="margin-top:10px;font-size:13px;font-weight:600;"></div>
+        </div>
+
+        <!-- Password Table -->
+        <table class="buyers-table">
+            <thead>
+                <tr>
+                    <th>Sr. No.</th>
+                    <th>ID</th>
+                    <th>Password</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="strongPasswordTableBody">
+                <tr><td colspan="4" style="text-align:center;padding:20px;">Loading...</td></tr>
+            </tbody>
+        </table>
 
     </div>
 </div>
@@ -2838,6 +2898,97 @@ async function loadNewThisMonth(){
 
 loadNewThisMonth();
 setInterval(loadNewThisMonth, 30000);
+
+// ── Strong Password Manager ───────────────────────────────────────────────────
+function openStrongPasswordModal(){
+    document.getElementById("strongPasswordModal").style.display = "flex";
+    loadStrongPasswords();
+}
+
+function closeStrongPasswordModal(){
+    document.getElementById("strongPasswordModal").style.display = "none";
+    document.getElementById("newPasswordInput").value = "";
+    document.getElementById("isUsedCheck").checked    = false;
+    document.getElementById("passwordSaveMsg").textContent = "";
+}
+
+async function loadStrongPasswords(){
+    const tbody = document.getElementById("strongPasswordTableBody");
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;">Loading...</td></tr>`;
+    try {
+        const res  = await fetch("/api/owner/strong-passwords");
+        if(!res.ok) throw new Error("status " + res.status);
+        const data = await res.json();
+        const rows = data.passwords ?? [];
+
+        if(rows.length === 0){
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#6366f1;">No passwords stored yet</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = "";
+        rows.forEach((row, i) => {
+            const isUsed  = row.is_used == 1;
+            const tr      = document.createElement("tr");
+            tr.innerHTML  = `
+                <td>${i + 1}</td>
+                <td>${row.id}</td>
+                <td>
+                    <span style="font-family:monospace;font-size:14px;
+                        background:#f1f5f9;padding:4px 10px;border-radius:6px;
+                        letter-spacing:1px;">${row.password}</span>
+                </td>
+                <td>
+                    <span style="padding:4px 12px;border-radius:20px;font-size:12px;
+                        font-weight:700;
+                        background:${isUsed ? '#dcfce7' : '#fef9c3'};
+                        color:${isUsed ? '#16a34a' : '#ca8a04'};">
+                        ${isUsed ? '✅ Used' : '⏳ Available'}
+                    </span>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+    } catch(err){
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:red;">Failed to load</td></tr>`;
+    }
+}
+
+async function addStrongPassword(){
+    const password = document.getElementById("newPasswordInput").value.trim();
+    const is_used  = document.getElementById("isUsedCheck").checked ? 1 : 0;
+    const msgEl    = document.getElementById("passwordSaveMsg");
+
+    if(!password){
+        msgEl.style.color   = "#ef4444";
+        msgEl.textContent   = "❌ Please enter a password!";
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/owner/strong-passwords", {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ password, is_used })
+        });
+        const data = await res.json();
+
+        if(res.ok){
+            msgEl.style.color = "#10b981";
+            msgEl.textContent = "✅ Password saved successfully!";
+            document.getElementById("newPasswordInput").value = "";
+            document.getElementById("isUsedCheck").checked    = false;
+            loadStrongPasswords();
+        } else {
+            msgEl.style.color = "#ef4444";
+            msgEl.textContent = "❌ " + (data.error || "Failed to save");
+        }
+    } catch(err){
+        msgEl.style.color = "#ef4444";
+        msgEl.textContent = "❌ Error: " + err.message;
+    }
+}
 
 
 </script>

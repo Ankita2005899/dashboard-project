@@ -3560,6 +3560,50 @@ def get_new_this_month():
             conn.close()
             
             
+
+# ── Strong Password Manager ───────────────────────────────────────────────────
+@app.route("/api/owner/strong-passwords", methods=["GET"])
+def get_strong_passwords():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM strong_password ORDER BY id DESC")
+        rows = cursor.fetchall()
+        cursor.close()
+        return jsonify({"passwords": rows})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+@app.route("/api/owner/strong-passwords", methods=["POST"])
+def add_strong_password():
+    conn = None
+    try:
+        data     = request.get_json()
+        password = data.get("password", "").strip()
+        is_used  = int(data.get("is_used", 0))
+
+        if not password:
+            return jsonify({"error": "Password cannot be empty"}), 400
+
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO strong_password (password, is_used) VALUES (%s, %s)",
+            (password, is_used)
+        )
+        conn.commit()
+        cursor.close()
+        return jsonify({"message": "Password saved successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+            
             
 # ============================================================
 # STATIC FILE SERVING
