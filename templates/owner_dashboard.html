@@ -1142,12 +1142,13 @@ body{
     <div style="display:flex;justify-content:space-between;align-items:flex-end;">
         <div>
             <h2 id="newThisMonthCount">—</h2>
-                <span style="font-size:12px;color:#64748b;font-weight:500;">new logins</span>
-                <p id="newThisMonthChange" class="up">Loading...</p>
+            <span style="font-size:12px;color:#64748b;font-weight:500;">new logins</span>
+            <p id="newThisMonthChange" class="up">Loading...</p>
         </div>
         <div style="text-align:right;">
             <span id="newThisMonthLabel" style="font-size:12px;color:#64748b;font-weight:600;"></span><br>
-            <span style="font-size:11px;color:#94a3b8;">new Account</span>
+            <span id="newThisMonthAccCount" style="font-size:26px;font-weight:800;color:#10b981;">—</span><br>
+            <span style="font-size:11px;color:#94a3b8;">new Accounts</span>
         </div>
     </div>
 </div>
@@ -2800,17 +2801,22 @@ async function loadNewThisMonth(){
         if(!res.ok) throw new Error("status " + res.status);
         const data = await res.json();
 
-        const countEl  = document.getElementById("newThisMonthCount");
+        // Left — login count
+        const countEl = document.getElementById("newThisMonthCount");
+        if(countEl) countEl.textContent = (data.login_count ?? 0).toLocaleString("en-IN");
+
+        // Right — new accounts count
+        const accEl = document.getElementById("newThisMonthAccCount");
+        if(accEl) accEl.textContent = (data.new_accounts ?? 0).toLocaleString("en-IN");
+
+        // Month label
+        const now       = new Date();
+        const monthName = now.toLocaleString("en-IN", { month: "long" });
+        const labelEl   = document.getElementById("newThisMonthLabel");
+        if(labelEl) labelEl.textContent = `${monthName} ${now.getFullYear()}`;
+
+        // % change
         const changeEl = document.getElementById("newThisMonthChange");
-
-        if(countEl) countEl.textContent = (data.count ?? 0).toLocaleString("en-IN");
-
-        // Right side — current month account count
-        const monthLabel = document.getElementById("newThisMonthLabel");
-        const monthCount = document.getElementById("newThisMonthMonthCount");
-        const now        = new Date();
-        const monthName  = now.toLocaleString("en-IN", { month: "long" });
-        if(monthLabel) monthLabel.textContent = `${monthName} ${now.getFullYear()}`;
         if(changeEl){
             const pct = data.percent_change ?? 0;
             if(pct > 0){
@@ -2828,6 +2834,7 @@ async function loadNewThisMonth(){
         console.error("New this month fetch failed:", err);
     }
 }
+
 
 loadNewThisMonth();
 setInterval(loadNewThisMonth, 30000);
