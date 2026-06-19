@@ -1158,8 +1158,16 @@ body{
                 <small id="newCustomersLabel">Showing newly registered customers</small>
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
-                <button onclick="closeNewCustomersModal()" class="send-btn">Close</button>
-                <button id="currentLoginBtn" onclick="loadCurrentMonthLogins()"
+    <div style="display:flex;gap:8px;">
+        <button id="undoLoginBtn" onclick="loadNewCustomers()"
+            style="display:none;background:#e0e7ff;color:#6366f1;border:none;
+            padding:8px 14px;border-radius:8px;font-weight:700;
+            cursor:pointer;font-size:18px;" title="Back to New Accounts">
+            ↩
+        </button>
+        <button onclick="closeNewCustomersModal()" class="send-btn">Close</button>
+    </div>
+    <button id="currentLoginBtn" onclick="loadCurrentMonthLogins()"
                     style="background:#6366f1;color:white;border:none;padding:8px 16px;
                     border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;">
                     📅 June Current Login
@@ -1833,9 +1841,11 @@ function openNewCustomersModal() {
 }
 
 function closeNewCustomersModal() {
-    document.getElementById("newCustomersModal").style.display = "none";
-    document.getElementById("currentLoginBtn").style.display = "inline-block"; // reset
+    document.getElementById("newCustomersModal").style.display  = "none";
+    document.getElementById("currentLoginBtn").style.display    = "inline-block";
+    document.getElementById("undoLoginBtn").style.display       = "none";
 }
+
 
 function searchNewCustomers(){
     let input = document.getElementById("newCustomerSearch").value.toLowerCase();
@@ -2709,7 +2719,8 @@ labelEl.style.cssText = `
     letter-spacing:0.5px;
     box-shadow:0 4px 12px rgba(99,102,241,0.4);
 `;
-        document.getElementById("currentLoginBtn").style.display  = "none"; // ← hide button
+        document.getElementById("currentLoginBtn").style.display  = "none";
+document.getElementById("undoLoginBtn").style.display     = "inline-block";
 
         const tbody = document.getElementById("newCustomersTableBody");
         const rows  = data.logins ?? [];
