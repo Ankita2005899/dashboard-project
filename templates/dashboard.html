@@ -1420,13 +1420,15 @@ searchInput.addEventListener("input", function () {
     }, 400);
 });
 
-    </script>
+</script>
 <script>
   // Apply saved theme immediately (before page renders)
   (function(){
     var theme = localStorage.getItem('shopsphere-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', theme);
   })();
+</script>
+<script>
 // Enter key press pe track search
 document.getElementById("searchInput").addEventListener("keydown", function(e) {
     if (e.key === "Enter") {
