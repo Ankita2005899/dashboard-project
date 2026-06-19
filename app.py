@@ -3353,22 +3353,7 @@ def get_active_buyers():
             conn.close()
 
 
-@app.route("/api/owner/active-buyers/<int:buyer_id>", methods=["DELETE"])
-def delete_active_buyer(buyer_id):
-    conn = None
-    try:
-        conn   = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM user WHERE id = %s", (buyer_id,))
-        conn.commit()
-        cursor.close()
-        return jsonify({"message": "Deleted successfully"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    finally:
-        if conn and conn.is_connected():
-            conn.close()
-            
+
 
 #------------------delete from user  and recyclebin bin chya option sathi-----------
 
