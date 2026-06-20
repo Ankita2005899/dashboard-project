@@ -2653,7 +2653,7 @@ def verify_payment():
     razorpay_order_id   = data["razorpay_order_id"]
     razorpay_payment_id = data["razorpay_payment_id"]
     razorpay_signature  = data["razorpay_signature"]
-    product_id          = data.get("product_id")
+    cart_id             = data.get("cart_id")  # cart_id use karo
 
     body = razorpay_order_id + "|" + razorpay_payment_id
 
@@ -2665,41 +2665,41 @@ def verify_payment():
 
     username = session.get("username")
     user_id  = session.get("user_id")
-    table_name = f"{username}_{user_id}"
+    table_name = f"{username}_{user_id}"  # e.g. sanket_3
 
     db = get_db_connection()
     cursor = db.cursor()
 
     if expected_signature == razorpay_signature:
-        # ✅ Payment successful
         cursor.execute(f"""
             UPDATE `{table_name}` 
             SET mode = 'successful'
-            WHERE product_id = %s
-        """, (product_id,))
+            WHERE id = %s
+        """, (cart_id,))  # id use karo, product_id nahi
 
-        cursor.execute("""
-            INSERT INTO orders (user_email, razorpay_payment_id, razorpay_order_id, status)
-            VALUES (%s, %s, %s, 'PAID')
-        """, (session.get("user_email"), razorpay_payment_id, razorpay_order_id))
+        try:
+            cursor.execute("""
+                INSERT INTO orders (user_email, razorpay_payment_id, razorpay_order_id, status)
+                VALUES (%s, %s, %s, 'PAID')
+            """, (session.get("user_email"), razorpay_payment_id, razorpay_order_id))
+        except:
+            pass  # orders table nahi hai toh skip karo
 
         db.commit()
         cursor.close()
         db.close()
-        return jsonify({"status": "success", "message": "Payment Successful"})
+        return jsonify({"status": "success"})
     else:
-        # ❌ Payment failed
         cursor.execute(f"""
             UPDATE `{table_name}` 
             SET mode = 'failed'
-            WHERE product_id = %s
-        """, (product_id,))
+            WHERE id = %s
+        """, (cart_id,))
 
         db.commit()
         cursor.close()
         db.close()
-        return jsonify({"status": "failed", "message": "Payment Failed"})
-    
+        return jsonify({"status": "failed"})
     
 
 @app.route("/get-buynow-item/<int:id>")
