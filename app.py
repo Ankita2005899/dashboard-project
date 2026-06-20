@@ -3618,6 +3618,7 @@ def bulk_delete_strong_passwords():
             conn.close()
             
             
+#________________________3 button part in password section (" make as used and make as unused ") ___---------------            
             
             
 @app.route("/api/owner/strong-passwords/bulk-update-status", methods=["POST"])
@@ -3649,7 +3650,30 @@ def bulk_update_password_status():
         if conn and conn.is_connected():
             conn.close()
             
-            
+#-----------------------------category request ko table mi store karne ke leya  ---------------
+
+@app.route("/request-category", methods=["POST"])
+def request_category():
+    data = request.get_json()
+    user_name = data.get("user_name", "").strip()
+    category_name = data.get("category_name", "").strip()
+    reason = data.get("reason", "").strip()
+
+    if not user_name or not category_name or not reason:
+        return jsonify({"status": "error", "message": "All fields required"})
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO category_requests (user_name, category_name, reason)
+        VALUES (%s, %s, %s)
+    """, (user_name, category_name, reason))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({"status": "success"})
+
+    
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================

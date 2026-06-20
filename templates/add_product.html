@@ -9,24 +9,26 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-       /* ================= BODY ================= */
-body {
-    margin: 0;
-    font-family: "Segoe UI", sans-serif;
+        /* ================= BODY ================= */
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
 
-    /* Soft dashboard gradient background */
-   background:#d4f4f8; 
-    min-height: 100vh;
+            /* Soft dashboard gradient background */
+            background: #d4f4f8;
+            min-height: 100vh;
 
-    /* Make sure content uses full width and height */
-    width: 100%;
-    color: #111827; /* default text color for contrast */
-}
+            /* Make sure content uses full width and height */
+            width: 100%;
+            color: #111827;
+            /* default text color for contrast */
+        }
 
-/* Optional: ensure main area also inherits background */
-.main {
-    background: transparent; /* so the body gradient shows through */
-}
+        /* Optional: ensure main area also inherits background */
+        .main {
+            background: transparent;
+            /* so the body gradient shows through */
+        }
 
         .card {
             border-radius: 12px;
@@ -74,337 +76,382 @@ body {
             padding: 10px;
             border-radius: 5px;
         }
-/* ================= FORM CARD BORDER ================= */
-form {
-    border: 2px solid #cbd5e1; /* same as card/sidebar */
-    border-radius: 12px;        /* match card */
-    padding: 20px;              /* add spacing inside */
-    background: #fff;           /* white background */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06); /* subtle shadow */
-}
 
-/* ================= SUBMIT BUTTON ================= */
-form button[type="submit"] {
-    border: 2px solid #cbd5e1;                /* same border as dashboard buttons */
-    border-radius: 10px;                       /* rounded corners */
-    background: linear-gradient(135deg,#4f46e5,#6366f1); /* gradient like add button */
-    color: white;
-    font-weight: 600;
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: all 0.25s ease;
-}
+        /* ================= FORM CARD BORDER ================= */
+        form {
+            border: 2px solid #cbd5e1;
+            /* same as card/sidebar */
+            border-radius: 12px;
+            /* match card */
+            padding: 20px;
+            /* add spacing inside */
+            background: #fff;
+            /* white background */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            /* subtle shadow */
+        }
 
-form button[type="submit"]:hover {
-    background: #f97316; /* hover effect like dashboard */
-    border-color: #f97316;
-    color: white;
-    transform: translateY(-2px);
-}
+        /* ================= SUBMIT BUTTON ================= */
+        form button[type="submit"] {
+            border: 2px solid #cbd5e1;
+            /* same border as dashboard buttons */
+            border-radius: 10px;
+            /* rounded corners */
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            /* gradient like add button */
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
 
-.upload-box {
-    border: 2px solid #cbd5e1;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
+        form button[type="submit"]:hover {
+            background: #f97316;
+            /* hover effect like dashboard */
+            border-color: #f97316;
+            color: white;
+            transform: translateY(-2px);
+        }
 
-/* ================= FORM TITLE ================= */
-.form-title {
-    font-weight: 700;                        /* bolder */
-    font-size: 24px;                         /* bigger */
-    letter-spacing: 1px;                     /* spacing between letters */
-    color: #4f46e5;                          /* gradient-like purple */
-    text-align: center;                      /* center */
-    padding: 12px 0;                         /* some vertical padding */
-    border-bottom: 3px solid #cbd5e1;       /* subtle border under title */
-    margin-bottom: 25px;                     /* spacing from form */
-    border-radius: 8px 8px 0 0;             /* rounded top corners */
-    background: linear-gradient(135deg,#e0e7ff,#f3f4f6); /* soft gradient background */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06); /* subtle shadow */
-}
+        .upload-box {
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
 
-.form-title::after {
-    content: "";
-    display: block;
-    width: 60px;
-    height: 4px;
-    margin: 8px auto 0 auto;
-    background: #10b981; /* green accent */
-    border-radius: 2px;
-}
+        /* ================= FORM TITLE ================= */
+        .form-title {
+            font-weight: 700;
+            /* bolder */
+            font-size: 24px;
+            /* bigger */
+            letter-spacing: 1px;
+            /* spacing between letters */
+            color: #4f46e5;
+            /* gradient-like purple */
+            text-align: center;
+            /* center */
+            padding: 12px 0;
+            /* some vertical padding */
+            border-bottom: 3px solid #cbd5e1;
+            /* subtle border under title */
+            margin-bottom: 25px;
+            /* spacing from form */
+            border-radius: 8px 8px 0 0;
+            /* rounded top corners */
+            background: linear-gradient(135deg, #e0e7ff, #f3f4f6);
+            /* soft gradient background */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            /* subtle shadow */
+        }
+
+        .form-title::after {
+            content: "";
+            display: block;
+            width: 60px;
+            height: 4px;
+            margin: 8px auto 0 auto;
+            background: #10b981;
+            /* green accent */
+            border-radius: 2px;
+        }
+
         /* ================= FIXED FOOTER ================= */
-/* ================= FOOTER ================= */
-/* ================= FOOTER ================= */
-.footer{
-    position:fixed;
+        /* ================= FOOTER ================= */
+        /* ================= FOOTER ================= */
+        .footer {
+            position: fixed;
 
-    bottom:0;
-    left:0;
+            bottom: 0;
+            left: 0;
 
-    width:100%;
-    height:60px;
+            width: 100%;
+            height: 60px;
 
-    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+            background: linear-gradient(90deg, #111827, #1f2937, #0f766e);
 
-    color:white;
+            color: white;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-    font-size:14px;
+            font-size: 14px;
 
-    z-index:1000;
-}
+            z-index: 1000;
+        }
 
-/* prevent content hiding behind footer */
-.main {
-    padding-bottom: 80px;
-}
+        /* prevent content hiding behind footer */
+        .main {
+            padding-bottom: 80px;
+        }
 
-/* ================= PROFESSIONAL HEADER ================= */
+        /* ================= PROFESSIONAL HEADER ================= */
 
-.header{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:70px;
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
 
-    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+            background: linear-gradient(135deg, #e0f2fe, #f0fdfa);
 
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
 
-    padding:0 30px;
+            padding: 0 30px;
 
-    border-bottom:3px solid #1e293b;
+            border-bottom: 3px solid #1e293b;
 
-    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 
-    z-index:3000;
-}
+            z-index: 3000;
+        }
 
-.header-left h2{
-    font-weight:700;
-    color:#1e293b;
-}
+        .header-left h2 {
+            font-weight: 700;
+            color: #1e293b;
+        }
 
-.header-right{
-    display:flex;
-    gap:10px;
-}
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
 
-.header-btn{
-    padding:8px 16px;
+        .header-btn {
+            padding: 8px 16px;
 
-    border-radius:8px;
-    border:2px solid #cbd5e1;
+            border-radius: 8px;
+            border: 2px solid #cbd5e1;
 
-    background:white;
-    color:#1e293b;
+            background: white;
+            color: #1e293b;
 
-    text-decoration:none;
-    font-weight:600;
+            text-decoration: none;
+            font-weight: 600;
 
-    transition:all 0.25s ease;
-}
+            transition: all 0.25s ease;
+        }
 
-.header-btn:hover{
-    background:linear-gradient(135deg,#f97316,#f59e0b);
-    color:white;
-    border-color:#f97316;
-}
+        .header-btn:hover {
+            background: linear-gradient(135deg, #f97316, #f59e0b);
+            color: white;
+            border-color: #f97316;
+        }
 
-.container{
-    margin-top:100px;
-}
+        .container {
+            margin-top: 100px;
+        }
 
-.card{
-    border-radius:14px;
-    border:2px solid #cbd5e1;
+        .card {
+            border-radius: 14px;
+            border: 2px solid #cbd5e1;
 
-    box-shadow:0 6px 16px rgba(0,0,0,0.08);
-}.form-title{
-    font-weight:700;
-    font-size:24px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
 
-    text-align:center;
+        .form-title {
+            font-weight: 700;
+            font-size: 24px;
 
-    padding:14px;
+            text-align: center;
 
-    background:linear-gradient(135deg,#e0e7ff,#f3f4f6);
+            padding: 14px;
 
-    border-radius:10px;
-    border:2px solid #cbd5e1;
+            background: linear-gradient(135deg, #e0e7ff, #f3f4f6);
 
-    color:#1e293b;
+            border-radius: 10px;
+            border: 2px solid #cbd5e1;
 
-    margin-bottom:30px;
-}
+            color: #1e293b;
 
-.upload-box{
-    border:2px dashed #cbd5e1;
+            margin-bottom: 30px;
+        }
 
-    padding:25px;
+        .upload-box {
+            border: 2px dashed #cbd5e1;
 
-    border-radius:12px;
+            padding: 25px;
 
-    background:#ffffff;
+            border-radius: 12px;
 
-    text-align:center;
+            background: #ffffff;
 
-    transition:all 0.25s ease;
-}
+            text-align: center;
 
-.upload-box:hover{
-    border-color:#4f46e5;
-}
+            transition: all 0.25s ease;
+        }
 
-/* ================= THEME SYNC (matches index.html toggle) ================= */
-/* Light mode = default (no attribute needed) */
-:root {
-    --th-body-bg:    #d4f4f8;
-    --th-header-bg:  linear-gradient(135deg,#e0f2fe,#f0fdfa);
-    --th-card-bg:    #ffffff;
-    --th-form-bg:    #ffffff;
-    --th-input-bg:   #ffffff;
-    --th-input-color:#111827;
-    --th-border:     #cbd5e1;
-    --th-text:       #1e293b;
-    --th-label:      #374151;
-    --th-title-bg:   linear-gradient(135deg,#e0e7ff,#f3f4f6);
-    --th-title-color:#4f46e5;
-    --th-upload-bg:  #ffffff;
-    --th-grid-lines: rgba(0,0,0,0.06);
-}
+        .upload-box:hover {
+            border-color: #4f46e5;
+        }
 
-/* Dark mode — activated when index.html toggle sets data-theme="dark" */
-[data-theme="dark"] {
-    --th-body-bg:    #0a0a0f;
-    --th-header-bg:  linear-gradient(135deg,#12121a,#1a1a26);
-    --th-card-bg:    #12121a;
-    --th-form-bg:    #12121a;
-    --th-input-bg:   #1e1e2e;
-    --th-input-color:#f0eee8;
-    --th-border:     rgba(255,255,255,0.12);
-    --th-text:       #f0eee8;
-    --th-label:      #a0a0b0;
-    --th-title-bg:   linear-gradient(135deg,#1a1a2e,#12121a);
-    --th-title-color:#FF6B2B;
-    --th-upload-bg:  #1e1e2e;
-    --th-grid-lines: rgba(255,255,255,0.04);
-}
+        /* ================= THEME SYNC (matches index.html toggle) ================= */
+        /* Light mode = default (no attribute needed) */
+        :root {
+            --th-body-bg: #d4f4f8;
+            --th-header-bg: linear-gradient(135deg, #e0f2fe, #f0fdfa);
+            --th-card-bg: #ffffff;
+            --th-form-bg: #ffffff;
+            --th-input-bg: #ffffff;
+            --th-input-color: #111827;
+            --th-border: #cbd5e1;
+            --th-text: #1e293b;
+            --th-label: #374151;
+            --th-title-bg: linear-gradient(135deg, #e0e7ff, #f3f4f6);
+            --th-title-color: #4f46e5;
+            --th-upload-bg: #ffffff;
+            --th-grid-lines: rgba(0, 0, 0, 0.06);
+        }
 
-/* Apply variables to elements */
-body {
-    background-color: var(--th-body-bg) !important;
-    background-image:
-        linear-gradient(var(--th-grid-lines) 1px, transparent 1px),
-        linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important;
-    background-size: 60px 60px !important;
-    color: var(--th-text) !important;
-    transition: background 0.3s, color 0.3s;
-}
-.header {
-    background: var(--th-header-bg) !important;
-    border-bottom-color: var(--th-border) !important;
-    transition: background 0.3s;
-}
-.header-left h2 { color: var(--th-text) !important; }
-.header-btn {
-    background: var(--th-card-bg) !important;
-    color: var(--th-text) !important;
-    border-color: var(--th-border) !important;
-    transition: background 0.3s, color 0.3s;
-}
-.card {
-    background: var(--th-card-bg) !important;
-    border-color: var(--th-border) !important;
-    transition: background 0.3s;
-}
-form {
-    background: var(--th-form-bg) !important;
-    border-color: var(--th-border) !important;
-    transition: background 0.3s;
-}
-.form-title {
-    background: var(--th-title-bg) !important;
-    color: var(--th-title-color) !important;
-    border-bottom-color: var(--th-border) !important;
-    transition: background 0.3s, color 0.3s;
-}
-.upload-box {
-    background: var(--th-upload-bg) !important;
-    border-color: var(--th-border) !important;
-    transition: background 0.3s;
-}
-.form-control, .form-check-input {
-    background-color: var(--th-input-bg) !important;
-    color: var(--th-input-color) !important;
-    border-color: var(--th-border) !important;
-    transition: background 0.3s, color 0.3s;
-}
-.form-label, .form-check-label, label {
-    color: var(--th-label) !important;
-}
-[data-theme="dark"] .form-control::placeholder { color: #4a4a6a; }
-[data-theme="dark"] .sub-title { color: #FF6B2B !important; }
+        /* Dark mode — activated when index.html toggle sets data-theme="dark" */
+        [data-theme="dark"] {
+            --th-body-bg: #0a0a0f;
+            --th-header-bg: linear-gradient(135deg, #12121a, #1a1a26);
+            --th-card-bg: #12121a;
+            --th-form-bg: #12121a;
+            --th-input-bg: #1e1e2e;
+            --th-input-color: #f0eee8;
+            --th-border: rgba(255, 255, 255, 0.12);
+            --th-text: #f0eee8;
+            --th-label: #a0a0b0;
+            --th-title-bg: linear-gradient(135deg, #1a1a2e, #12121a);
+            --th-title-color: #FF6B2B;
+            --th-upload-bg: #1e1e2e;
+            --th-grid-lines: rgba(255, 255, 255, 0.04);
+        }
+
+        /* Apply variables to elements */
+        body {
+            background-color: var(--th-body-bg) !important;
+            background-image:
+                linear-gradient(var(--th-grid-lines) 1px, transparent 1px),
+                linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important;
+            background-size: 60px 60px !important;
+            color: var(--th-text) !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .header {
+            background: var(--th-header-bg) !important;
+            border-bottom-color: var(--th-border) !important;
+            transition: background 0.3s;
+        }
+
+        .header-left h2 {
+            color: var(--th-text) !important;
+        }
+
+        .header-btn {
+            background: var(--th-card-bg) !important;
+            color: var(--th-text) !important;
+            border-color: var(--th-border) !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .card {
+            background: var(--th-card-bg) !important;
+            border-color: var(--th-border) !important;
+            transition: background 0.3s;
+        }
+
+        form {
+            background: var(--th-form-bg) !important;
+            border-color: var(--th-border) !important;
+            transition: background 0.3s;
+        }
+
+        .form-title {
+            background: var(--th-title-bg) !important;
+            color: var(--th-title-color) !important;
+            border-bottom-color: var(--th-border) !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .upload-box {
+            background: var(--th-upload-bg) !important;
+            border-color: var(--th-border) !important;
+            transition: background 0.3s;
+        }
+
+        .form-control,
+        .form-check-input {
+            background-color: var(--th-input-bg) !important;
+            color: var(--th-input-color) !important;
+            border-color: var(--th-border) !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .form-label,
+        .form-check-label,
+        label {
+            color: var(--th-label) !important;
+        }
+
+        [data-theme="dark"] .form-control::placeholder {
+            color: #4a4a6a;
+        }
+
+        [data-theme="dark"] .sub-title {
+            color: #FF6B2B !important;
+        }
 
 
-.form-check {
-    position: relative;
-    z-index: 10;
-    pointer-events: auto;
-}
+        .form-check {
+            position: relative;
+            z-index: 10;
+            pointer-events: auto;
+        }
 
-.form-check-input {
-    position: relative;
-    z-index: 10;
-    pointer-events: auto;
-    cursor: pointer;
-}
+        .form-check-input {
+            position: relative;
+            z-index: 10;
+            pointer-events: auto;
+            cursor: pointer;
+        }
 
-.form-check-label {
-    cursor: pointer;
-    pointer-events: auto;
-}
+        .form-check-label {
+            cursor: pointer;
+            pointer-events: auto;
+        }
 
-.form-check-input[type="checkbox"] {
-    appearance: auto !important;
-    -webkit-appearance: checkbox !important;
-    width: 16px !important;
-    height: 16px !important;
-    cursor: pointer !important;
-    pointer-events: auto !important;
-    position: relative !important;
-    z-index: 999 !important;
-}
+        .form-check-input[type="checkbox"] {
+            appearance: auto !important;
+            -webkit-appearance: checkbox !important;
+            width: 16px !important;
+            height: 16px !important;
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            position: relative !important;
+            z-index: 999 !important;
+        }
     </style>
 </head>
 
 <body>
-<!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
-<script>
-  (function(){
-    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-  })();
-</script>
-<!-- ================= HEADER ================= -->
-<header class="header">
+    <!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
+    <script>
+        (function () {
+            var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <!-- ================= HEADER ================= -->
+    <header class="header">
 
-    <div class="header-left">
-        <h2>📦 Add Product</h2>
-    </div>
+        <div class="header-left">
+            <h2>📦 Add Product</h2>
+        </div>
 
-    <div class="header-right">
-        <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
-    </div>
+        <div class="header-right">
+            <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+        </div>
 
-</header>
-<BR>
+    </header>
+    <BR>
     <br>
 
     <div class="container mt-5 mb-5">
@@ -527,12 +574,13 @@ form {
                                     <label class="form-label">Address (Product From)</label>
                                     <input type="text" name="address" class="form-control" required>
                                 </div>
-                            <div class="col-md-12 mb-3">
-    <label class="form-label">Keywords (for ML search)</label>
-    <input type="text" name="keywords" class="form-control" 
-           placeholder="e.g. kitchen, steel, cooking, utensil">
-    <small class="text-muted">Comma separated keywords for better search & recommendations</small>
-</div> 
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Keywords (for ML search)</label>
+                                    <input type="text" name="keywords" class="form-control"
+                                        placeholder="e.g. kitchen, steel, cooking, utensil">
+                                    <small class="text-muted">Comma separated keywords for better search &
+                                        recommendations</small>
+                                </div>
 
                             </div>
 
@@ -543,29 +591,29 @@ form {
                                 <div class="mb-3">
                                     <label class="form-label">Product Made Up Of</label>
                                     <textarea name="made_of" class="form-control" rows="4" required
-                                    oninput="countWords(this, 'madeOfCount')"></textarea>
+                                        oninput="countWords(this, 'madeOfCount')"></textarea>
                                     <small id="madeOfCount" style="color:red;">0 / 50 words</small>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Mostly Used For</label>
                                     <textarea name="used_for" class="form-control" rows="4" required
-    oninput="countWords(this, 'usedForCount')"></textarea>
-<small id="usedForCount" style="color:red;">0 / 50 words</small>
+                                        oninput="countWords(this, 'usedForCount')"></textarea>
+                                    <small id="usedForCount" style="color:red;">0 / 50 words</small>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Harmful Activities / Misuse</label>
                                     <textarea name="harmful_activity" class="form-control" rows="4" required
-    oninput="countWords(this, 'harmfulCount')"></textarea>
-<small id="harmfulCount" style="color:red;">0 / 50 words</small>
+                                        oninput="countWords(this, 'harmfulCount')"></textarea>
+                                    <small id="harmfulCount" style="color:red;">0 / 50 words</small>
                                 </div>
 
                                 <div class="mb-4">
                                     <label class="form-label">Safety Precautions</label>
                                     <textarea name="precautions" class="form-control" rows="4" required
-    oninput="countWords(this, 'precautionsCount')"></textarea>
-<small id="precautionsCount" style="color:red;">0 / 50 words</small>
+                                        oninput="countWords(this, 'precautionsCount')"></textarea>
+                                    <small id="precautionsCount" style="color:red;">0 / 50 words</small>
                                 </div>
                             </div>
 
@@ -588,97 +636,116 @@ form {
         </div>
     </div>
 
-<!-- ===== REQUEST NEW CATEGORY SECTION ===== -->
-<div class="container my-4" id="categoryRequestSection">
-    <div class="card shadow-sm p-4" style="border-radius:12px;background:white;border:2px dashed #a8bcee;">
-        
-        <h5 style="font-weight:700;color:#1e293b;margin-bottom:4px;">
-            📩 Request a New Category
-        </h5>
-        <p style="font-size:13px;color:#64748b;margin-bottom:20px;">
-            Can't find your product category? Request the owner to add a new one!
-        </p>
+    <!-- ===== REQUEST NEW CATEGORY SECTION ===== -->
+    <div class="container my-4" id="categoryRequestSection">
+        <div class="card shadow-sm p-4" style="border-radius:12px;background:white;border:2px dashed #a8bcee;">
 
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label style="font-size:13px;font-weight:600;color:#374151;">Category Name</label>
-                <input type="text" id="reqCategoryName" placeholder="e.g. Electronics, Books, Toys..."
-                    class="form-control mt-1" style="border-radius:8px;border:1px solid #cbd5e1;">
+            <h5 style="font-weight:700;color:#1e293b;margin-bottom:4px;">
+                📩 Request a New Category
+            </h5>
+            <p style="font-size:13px;color:#64748b;margin-bottom:20px;">
+                Can't find your product category? Request the owner to add a new one!
+            </p>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label style="font-size:13px;font-weight:600;color:#374151;">Category Name</label>
+                    <input type="text" id="reqCategoryName" placeholder="e.g. Electronics, Books, Toys..."
+                        class="form-control mt-1" style="border-radius:8px;border:1px solid #cbd5e1;">
+                </div>
+                <div class="col-md-6">
+                    <label style="font-size:13px;font-weight:600;color:#374151;">Your Name</label>
+                    <input type="text" id="reqUserName" placeholder="Your name" class="form-control mt-1"
+                        style="border-radius:8px;border:1px solid #cbd5e1;">
+                </div>
+                <div class="col-12">
+                    <label style="font-size:13px;font-weight:600;color:#374151;">Why this category is needed?</label>
+                    <textarea id="reqReason" rows="3" placeholder="Explain why this category should be added..."
+                        class="form-control mt-1"
+                        style="border-radius:8px;border:1px solid #cbd5e1;resize:none;"></textarea>
+                </div>
+                <div class="col-12">
+                    <button onclick="submitCategoryRequest()"
+                        style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;border:none;padding:10px 28px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;">
+                        📨 Send Request to Owner
+                    </button>
+                    <span id="reqMsg" style="margin-left:14px;font-size:13px;display:none;"></span>
+                </div>
             </div>
-            <div class="col-md-6">
-                <label style="font-size:13px;font-weight:600;color:#374151;">Your Name</label>
-                <input type="text" id="reqUserName" placeholder="Your name"
-                    class="form-control mt-1" style="border-radius:8px;border:1px solid #cbd5e1;">
-            </div>
-            <div class="col-12">
-                <label style="font-size:13px;font-weight:600;color:#374151;">Why this category is needed?</label>
-                <textarea id="reqReason" rows="3" placeholder="Explain why this category should be added..."
-                    class="form-control mt-1" style="border-radius:8px;border:1px solid #cbd5e1;resize:none;"></textarea>
-            </div>
-            <div class="col-12">
-                <button onclick="submitCategoryRequest()" 
-                    style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;border:none;padding:10px 28px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;">
-                    📨 Send Request to Owner
-                </button>
-                <span id="reqMsg" style="margin-left:14px;font-size:13px;display:none;"></span>
-            </div>
+
         </div>
+    </div>
+    <!-- ===== FLOATING SCROLL BUTTONS (RIGHT SIDE) ===== -->
+    <!-- ===== FLOATING SCROLL LINKS (TOP RIGHT) ===== -->
+    <div style="position:fixed;right:20px;top:80px;display:flex;flex-direction:column;gap:8px;z-index:9999;">
+
+        <span onclick="scrollToForm()"
+            style="background:rgba(255,255,255,0.9);color:#1e293b;border:2px solid #cbd5e1;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.25s;text-align:left;">
+            📋 Add Form
+        </span>
+
+        <span onclick="scrollToRequest()"
+            style="background:rgba(255,255,255,0.9);color:#1e293b;border:2px solid #cbd5e1;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.25s;text-align:left;">
+            📩 Request Category
+        </span>
 
     </div>
-</div>
-<!-- ===== FLOATING SCROLL BUTTONS (RIGHT SIDE) ===== -->
-<!-- ===== FLOATING SCROLL LINKS (TOP RIGHT) ===== -->
-<div style="position:fixed;right:20px;top:80px;display:flex;flex-direction:column;gap:8px;z-index:9999;">
-    
-    <span onclick="scrollToForm()"
-        style="background:rgba(255,255,255,0.9);color:#1e293b;border:2px solid #cbd5e1;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.25s;text-align:left;">
-        📋 Add Form
-    </span>
 
-    <span onclick="scrollToRequest()"
-        style="background:rgba(255,255,255,0.9);color:#1e293b;border:2px solid #cbd5e1;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.25s;text-align:left;">
-        📩 Request Category
-    </span>
-
-</div>
-
-<script>
-function scrollToForm() {
-    document.getElementById("productForm").scrollIntoView({ behavior: "smooth", block: "start" });
-}
-function scrollToRequest() {
-    document.getElementById("categoryRequestSection").scrollIntoView({ behavior: "smooth", block: "start" });
-}
-</script>
+    <script>
+        function scrollToForm() {
+            document.getElementById("productForm").scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        function scrollToRequest() {
+            document.getElementById("categoryRequestSection").scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    </script>
 
 
-<script>
-function submitCategoryRequest() {
-    const category = document.getElementById("reqCategoryName").value.trim();
-    const name = document.getElementById("reqUserName").value.trim();
-    const reason = document.getElementById("reqReason").value.trim();
-    const msg = document.getElementById("reqMsg");
+    <script>
+        function submitCategoryRequest() {
+            const category = document.getElementById("reqCategoryName").value.trim();
+            const name = document.getElementById("reqUserName").value.trim();
+            const reason = document.getElementById("reqReason").value.trim();
+            const msg = document.getElementById("reqMsg");
 
-    if (!category || !name || !reason) {
-        msg.style.display = "inline";
-        msg.style.color = "red";
-        msg.innerText = "⚠ Please fill all fields!";
-        return;
-    }
+            if (!category || !name || !reason) {
+                msg.style.display = "inline";
+                msg.style.color = "red";
+                msg.innerText = "⚠ Please fill all fields!";
+                return;
+            }
 
-    // Backend ready hone pe yahan fetch("/request-category") lagega
-    msg.style.display = "inline";
-    msg.style.color = "green";
-    msg.innerText = "✅ Request sent to owner successfully!";
+            // Backend ready hone pe yahan fetch("/request-category") lagega
+            fetch("/request-category", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_name: name, category_name: category, reason: reason })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        msg.style.display = "inline";
+                        msg.style.color = "green";
+                        msg.innerText = "✅ Request sent to owner successfully!";
+                        document.getElementById("reqCategoryName").value = "";
+                        document.getElementById("reqUserName").value = "";
+                        document.getElementById("reqReason").value = "";
+                        setTimeout(() => { msg.style.display = "none"; }, 3000);
+                    } else {
+                        msg.style.display = "inline";
+                        msg.style.color = "red";
+                        msg.innerText = "❌ Error: " + data.message;
+                    }
+                });
 
-    document.getElementById("reqCategoryName").value = "";
-    document.getElementById("reqUserName").value = "";
-    document.getElementById("reqReason").value = "";
+            document.getElementById("reqCategoryName").value = "";
+            document.getElementById("reqUserName").value = "";
+            document.getElementById("reqReason").value = "";
 
-    setTimeout(() => { msg.style.display = "none"; }, 3000);
-}
-</script>    
-    
+            setTimeout(() => { msg.style.display = "none"; }, 3000);
+        }
+    </script>
+
     <!-- JS -->
     <script>
         function previewImage(event) {
@@ -740,25 +807,25 @@ function submitCategoryRequest() {
                     field.style.border = "1px solid #ced4da";
                 }
             });
-// 🔴 250 WORDS VALIDATION for detail fields
-const detailFields = [
-    { name: "made_of", label: "Product Made Up Of" },
-    { name: "used_for", label: "Mostly Used For" },
-    { name: "harmful_activity", label: "Harmful Activities / Misuse" },
-    { name: "precautions", label: "Safety Precautions" }
-];
+            // 🔴 250 WORDS VALIDATION for detail fields
+            const detailFields = [
+                { name: "made_of", label: "Product Made Up Of" },
+                { name: "used_for", label: "Mostly Used For" },
+                { name: "harmful_activity", label: "Harmful Activities / Misuse" },
+                { name: "precautions", label: "Safety Precautions" }
+            ];
 
-detailFields.forEach(f => {
-    const field = document.querySelector(`textarea[name="${f.name}"]`);
-    const wordCount = field.value.trim().split(/\s+/).filter(w => w.length > 0).length;
-    if (wordCount < 50) {
-        field.style.border = "1px solid red";
-        isValid = false;
-        formError.style.display = "block";
-        formError.innerText = `⚠ "${f.label}" must have at least 50 words. Currently: ${wordCount} words.`;
-        field.style.border = "1px solid #ced4da";
-    }
-});
+            detailFields.forEach(f => {
+                const field = document.querySelector(`textarea[name="${f.name}"]`);
+                const wordCount = field.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+                if (wordCount < 50) {
+                    field.style.border = "1px solid red";
+                    isValid = false;
+                    formError.style.display = "block";
+                    formError.innerText = `⚠ "${f.label}" must have at least 50 words. Currently: ${wordCount} words.`;
+                    field.style.border = "1px solid #ced4da";
+                }
+            });
             // ❌ STOP SUBMISSION
             if (!isValid) {
                 e.preventDefault();
@@ -767,21 +834,21 @@ detailFields.forEach(f => {
                     formError.innerText = "⚠ Please fill all required fields before adding the product.";
                 }
             }
-});  // form submit listener end
+        });  // form submit listener end
 
-function countWords(textarea, counterId) {
-    const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0).length;
-    const el = document.getElementById(counterId);
-    el.innerText = `${words} / 50 words`;
-    el.style.color = words >= 50 ? "green" : "red";
-}
+        function countWords(textarea, counterId) {
+            const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+            const el = document.getElementById(counterId);
+            el.innerText = `${words} / 50 words`;
+            el.style.color = words >= 50 ? "green" : "red";
+        }
     </script>
-<br>
-<br>
+    <br>
+    <br>
 
-<footer class="footer">
-    © 2026 Product Dashboard | All Rights Reserved
-</footer>
+    <footer class="footer">
+        © 2026 Product Dashboard | All Rights Reserved
+    </footer>
 </body>
 
 </html>
