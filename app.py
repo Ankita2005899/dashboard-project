@@ -2658,9 +2658,9 @@ def verify_payment():
     body = razorpay_order_id + "|" + razorpay_payment_id
 
     expected_signature = hmac.new(
-        bytes(KEY_SECRET, "utf-8"),
-        bytes(body, "utf-8"),
-        hashlib.sha256
+        key=bytes(KEY_SECRET, "utf-8"),
+        msg=bytes(body, "utf-8"),
+        digestmod=hashlib.sha256
     ).hexdigest()
 
     if expected_signature == razorpay_signature:
