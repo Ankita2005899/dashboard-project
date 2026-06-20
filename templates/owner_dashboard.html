@@ -1180,7 +1180,7 @@
 
     <!-- ADD HERE ↓ -->
     <div id="categoryRequestsModal" class="modal-overlay">
-        <div class="buyers-modal" style="max-width:900px;">
+        <div class="buyers-modal" style="max-width:1100px;width:95%;">
             <div class="buyers-header">
                 <div>
                     <h3 style="color:#8b5cf6;">📂 Category Requests</h3>
@@ -2400,11 +2400,12 @@
                         ${row.category_name || "Untitled Request"}
                     </div>
                     <div id="req-card-${row.id}" style="display:none;margin-top:10px;
-                        background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;
-                        padding:14px;font-size:13px;line-height:1.7;">
-                        <div><strong style="color:#6366f1;">User:</strong> ${row.user_name || "-"}</div>
-                        <div><strong style="color:#6366f1;">Category:</strong> ${row.category_name || "-"}</div>
-                        <div><strong style="color:#6366f1;">Reason:</strong> ${row.reason || "-"}</div>
+                        background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;
+                        padding:16px;font-size:13px;line-height:1.8;
+                        width:280px;max-width:100%;box-shadow:0 2px 8px rgba(139,92,246,0.1);">
+                        <div style="margin-bottom:8px;"><strong style="color:#6366f1;">User:</strong><br>${row.user_name || "-"}</div>
+                        <div style="margin-bottom:8px;"><strong style="color:#6366f1;">Category:</strong><br>${row.category_name || "-"}</div>
+                        <div><strong style="color:#6366f1;">Reason:</strong><br>${row.reason || "-"}</div>
                     </div>
                 </td>
                 <td>${row.status || "-"}</td>
