@@ -1544,26 +1544,21 @@
             }
 
             /* ================= INPUT SEARCH ================= */
-            searchInput.addEventListener("input", function () {
+            searchInput.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
 
-                const query = this.value.trim();
+    const query = this.value.trim();
 
-                clearTimeout(searchTimer);
+    if (query === "") {
+        searchGrid.innerHTML = "";
+        document.getElementById("searchResultsSection").style.display = "none";
+        return;
+    }
 
-                searchTimer = setTimeout(() => {
-
-                    if (query === "") {
-                        searchGrid.innerHTML = "";
-                        document.getElementById("searchResultsSection").style.display = "none";
-                        return;
-                    }
-
-                    loadProducts(query);  // ✅ DISPLAY
-                    trackSearch(query);   // ✅ COUNT - sirf ek baar debounce ke baad
-                    localStorage.setItem("lastSearchQuery", query);
-
-                }, 400);
-            });
+    loadProducts(query);
+    trackSearch(query);
+    localStorage.setItem("lastSearchQuery", query);
+});
 
         </script>
         <script>
