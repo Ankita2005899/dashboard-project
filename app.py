@@ -3760,11 +3760,6 @@ def request_category():
     return jsonify({"status": "success"})
    
 #--------------------owner dashooard madhe category request sathi ------------------------------   
-
-
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-
 @app.route("/api/owner/category-requests", methods=["GET"])
 def get_category_requests():
     conn = None
@@ -3780,18 +3775,26 @@ def get_category_requests():
             if isinstance(row.get("requested_at"), datetime):
                 row["requested_at"] = row["requested_at"].strftime("%Y-%m-%d %H:%M:%S")
 
-        # ── ML: TF-IDF + Cosine Similarity for Duplicate Detection ───────────
-        # Compares every request's "reason" text against all others.
-        # If similarity > 70%, it's flagged as a likely duplicate so the
-        # owner doesn't send the same request to the developer twice.
+        # ── ML: TF-IDF + Cosine Similarity (safe version) ─────────────────────
+        for row in rows:
+            row["similarity_score"] = 0.0
+            row["is_duplicate"]     = False
+            row["duplicate_of"]     = None
+
         if len(rows) > 1:
-            reasons = [r.get("reason") or "" for r in rows]
             try:
-                # Filter out empty/too-short reasons before vectorizing
-                valid_reasons = [r if r and len(r.strip()) >= 3 else "no_reason_provided" for r in reasons]
-                vectorizer = TfidfVectorizer(stop_words="english", min_df=1, token_pattern=r"(?u)\b\w+\b")
-                tfidf_matrix = vectorizer.fit_transform(valid_reasons)
-                sim_matrix = cosine_similarity(tfidf_matrix)
+                from sklearn.feature_extraction.text import TfidfVectorizer
+                from sklearn.metrics.pairwise import cosine_similarity
+
+                # Replace empty/very short reasons with a placeholder so vectorizer never crashes
+                reasons = []
+                for r in rows:
+                    text = (r.get("reason") or "").strip()
+                    reasons.append(text if len(text) >= 3 else "no_reason_text_placeholder")
+
+                vectorizer   = TfidfVectorizer(token_pattern=r"(?u)\b\w+\b")
+                tfidf_matrix = vectorizer.fit_transform(reasons)
+                sim_matrix   = cosine_similarity(tfidf_matrix)
 
                 for i, row in enumerate(rows):
                     max_sim = 0.0
@@ -3800,28 +3803,22 @@ def get_category_requests():
                         if i != j and sim_matrix[i][j] > max_sim:
                             max_sim = sim_matrix[i][j]
                             dup_of  = rows[j]["id"]
-                    row["similarity_score"] = round(max_sim * 100, 1)
-                    row["is_duplicate"]     = max_sim >= 0.70
+                    row["similarity_score"] = round(float(max_sim) * 100, 1)
+                    row["is_duplicate"]     = bool(max_sim >= 0.70)
                     row["duplicate_of"]     = dup_of if max_sim >= 0.70 else None
-            except Exception:
-                for row in rows:
-                    row["similarity_score"] = 0.0
-                    row["is_duplicate"]     = False
-                    row["duplicate_of"]     = None
-        else:
-            for row in rows:
-                row["similarity_score"] = 0.0
-                row["is_duplicate"]     = False
-                row["duplicate_of"]     = None
+
+            except Exception as ml_err:
+                # If ML fails for any reason, just skip it — don't break the whole route
+                print("ML similarity check failed:", ml_err)
 
         return jsonify({"requests": rows})
 
     except Exception as e:
+        print("get_category_requests crashed:", e)
         return jsonify({"error": str(e), "requests": []}), 500
     finally:
         if conn and conn.is_connected():
             conn.close()
-
 
 @app.route("/api/owner/category-requests/<int:request_id>/send", methods=["POST"])
 def send_category_request(request_id):
