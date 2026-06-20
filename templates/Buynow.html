@@ -766,7 +766,9 @@
                 alert('Proceed with ' + selected);
             }
         });
-
+        // URL se cart_id lo
+        const urlParams = new URLSearchParams(window.location.search);
+        const cartId = urlParams.get("cart_id");
         document.getElementById('payNowBtn').addEventListener('click', async function () {
 
             let res = await fetch("/create-order", {
@@ -793,7 +795,7 @@
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
-                            product_id: productId   // ← yeh add karo
+                            cart_id: cartId
                         })
                     });
 
