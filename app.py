@@ -44,6 +44,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from flask_mail import Mail, Message
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+from flask_mail import Mail as FlaskMail, Message
+
 
 load_dotenv("databasehandler.env")
 
@@ -3768,7 +3770,7 @@ app.config['MAIL_USE_TLS']  = True
 app.config['MAIL_USERNAME'] = os.environ.get('SENDER_EMAIL')
 app.config['MAIL_PASSWORD'] = os.environ.get('owner_section_category_request_message')
 
-mail = Mail(app)
+mail = FlaskMail(app)
 
 @app.route("/api/owner/category-requests", methods=["GET"])
 def get_category_requests():
