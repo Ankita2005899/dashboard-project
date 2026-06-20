@@ -1706,17 +1706,20 @@
             })();
         </script>
 <script>
-            // Star Rating
-            document.getElementById("starRating").addEventListener("click", function (e) {
-                if (e.target.classList.contains("star")) {
-                    const val = parseInt(e.target.dataset.value);
-                    document.querySelectorAll(".star").forEach((s, i) => {
-                        s.textContent = i < val ? "⭐" : "☆";
-                    });
-                    const msgs = ["😞 Poor", "😐 Fair", "🙂 Good", "😊 Very Good", "🤩 Excellent!"];
-                    document.getElementById("ratingMsg").innerText = msgs[val - 1];
-                }
-            });
+document.addEventListener("DOMContentLoaded", function() {
+    const starEl = document.getElementById("starRating");
+    if (starEl) {
+        starEl.addEventListener("click", function (e) {
+            if (e.target.classList.contains("star")) {
+                const val = parseInt(e.target.dataset.value);
+                document.querySelectorAll(".star").forEach((s, i) => {
+                    s.textContent = i < val ? "⭐" : "☆";
+                });
+                const msgs = ["😞 Poor", "😐 Fair", "🙂 Good", "😊 Very Good", "🤩 Excellent!"];
+                document.getElementById("ratingMsg").innerText = msgs[val - 1];
+            }
+        });
+    }
 
 // ===== NOTIFICATION PANEL JS =====
 function openNotifications() {
@@ -1754,8 +1757,8 @@ function updateBadge() {
     else { badge.style.display = "inline"; badge.textContent = count; }
 }
 
-        </script>
-
+}); // DOMContentLoaded end
+</script>
         <!-- SUCCESS POPUP -->
 
 
