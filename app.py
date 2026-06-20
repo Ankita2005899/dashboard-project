@@ -14,7 +14,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import razorpay
 import mysql.connector
-from better_profanity import profanity
 
 #----------------login github entry-------------------------
 from sendgrid import SendGridAPIClient
