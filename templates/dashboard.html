@@ -1568,21 +1568,7 @@
                 document.documentElement.setAttribute('data-theme', theme);
             })();
         </script>
-        <script>
-            // Enter key press pe track search
-            document.getElementById("searchInput").addEventListener("keydown", function (e) {
-                if (e.key === "Enter") {
-                    const query = this.value.trim();
-                    if (query) trackSearch(query);
-                }
-            });
-
-            // Search icon click
-            document.querySelector(".search-icon").addEventListener("click", function () {
-                const query = document.getElementById("searchInput").value.trim();
-                if (query) trackSearch(query);
-            });
-
+<script>
             // Star Rating
             document.getElementById("starRating").addEventListener("click", function (e) {
                 if (e.target.classList.contains("star")) {
