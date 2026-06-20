@@ -724,9 +724,7 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === "success") {
-                        msg.style.display = "inline";
-                        msg.style.color = "green";
-                        msg.innerText = "✅ Request sent to owner successfully!";
+                        document.getElementById("categorySuccessPopup").style.display = "flex";
                         document.getElementById("reqCategoryName").value = "";
                         document.getElementById("reqUserName").value = "";
                         document.getElementById("reqReason").value = "";
@@ -745,7 +743,30 @@
             setTimeout(() => { msg.style.display = "none"; }, 3000);
         }
     </script>
+<!-- SUCCESS POPUP -->
+<div id="categorySuccessPopup" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:99999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;padding:40px;text-align:center;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:popupIn 0.3s ease;">
+        <div style="font-size:60px;margin-bottom:16px;">✅</div>
+        <h3 style="color:#1e293b;font-weight:700;margin-bottom:8px;">Request Sent!</h3>
+        <p style="color:#64748b;font-size:14px;margin-bottom:24px;">Your category request has been successfully sent to the owner. We'll review it soon!</p>
+        <button onclick="closeCategoryPopup()" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;border:none;padding:12px 32px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">
+            OK, Got it! 👍
+        </button>
+    </div>
+</div>
 
+<style>
+@keyframes popupIn {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+</style>
+
+<script>
+function closeCategoryPopup() {
+    document.getElementById("categorySuccessPopup").style.display = "none";
+}
+</script>
     <!-- JS -->
     <script>
         function previewImage(event) {
