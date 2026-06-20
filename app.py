@@ -41,7 +41,9 @@ import cloudinary
 import cloudinary.uploader
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
+from flask_mail import Mail, Message
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 load_dotenv("databasehandler.env")
 
@@ -3760,6 +3762,14 @@ def request_category():
     return jsonify({"status": "success"})
    
 #--------------------owner dashooard madhe category request sathi ------------------------------   
+app.config['MAIL_SERVER']   = 'smtp.gmail.com'
+app.config['MAIL_PORT']     = 587
+app.config['MAIL_USE_TLS']  = True
+app.config['MAIL_USERNAME'] = os.environ.get('SENDER_EMAIL')
+app.config['MAIL_PASSWORD'] = os.environ.get('owner_section_category_request_message')
+
+mail = Mail(app)
+
 @app.route("/api/owner/category-requests", methods=["GET"])
 def get_category_requests():
     conn = None
@@ -3951,8 +3961,6 @@ def send_category_request(request_id):
         if isinstance(req.get("requested_at"), datetime):
             req["requested_at"] = req["requested_at"].strftime("%Y-%m-%d %H:%M:%S")
 
-        from sendgrid import SendGridAPIClient
-        from sendgrid.helpers.mail import Mail
 
         note_block = f"""
             <div style="margin-top:14px;padding:12px;background:#f0f9ff;
@@ -3961,11 +3969,11 @@ def send_category_request(request_id):
             </div>
         """ if owner_note else ""
 
-        message = Mail(
-            from_email=os.environ.get("SENDER_EMAIL"),
-            to_emails="ankitabandal45@gmail.com",
+        msg = Message(
             subject=f"New Category Request: {req['category_name']}",
-            html_content=f"""
+            sender=os.environ.get('SENDER_EMAIL'),
+            recipients=["ankitabandal45@gmail.com"],
+            html=f"""
                 <h3>New Category Request</h3>
                 <p><strong>Requested by:</strong> {req['user_name']}</p>
                 <p><strong>Category:</strong> {req['category_name']}</p>
@@ -3974,11 +3982,7 @@ def send_category_request(request_id):
                 {note_block}
             """
         )
-        sg_key = os.environ.get("SENDGRID_API_KEY")
-        print(f"DEBUG KEY -> len={len(sg_key) if sg_key else 0}, "
-              f"start={sg_key[:8] if sg_key else None}, end={sg_key[-4:] if sg_key else None}")
-        sg = SendGridAPIClient(sg_key)
-        sg.send(message)
+        mail.send(msg)
 
         cursor.execute(
             "UPDATE category_requests SET status = %s WHERE id = %s",
