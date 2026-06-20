@@ -1564,6 +1564,9 @@
                             <button onclick="openRecycleBin()"
                                 style="background:#f59e0b;color:white;border:none;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;">🗑️
                                 Recycle Bin</button>
+                            <button onclick="openCategoryRequestsModal()"
+                                style="background:#8b5cf6;color:white;border:none;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;">📂
+                                Category Requests</button>
                             <button onclick="closeTotalCustomersModal()" class="send-btn">Close</button>
                         </div>
                     </div>
@@ -1629,6 +1632,50 @@
                             </tr>
                         </tbody>
                     </table>
+                    <div id="recycleBinModal" class="modal-overlay">
+                        ... (existing content) ...
+                    </div>
+                </div>
+
+                <!-- ADD HERE ↓ -->
+                <div id="categoryRequestsModal" class="modal-overlay">
+                    <div class="buyers-modal" style="max-width:900px;">
+                        <div class="buyers-header">
+                            <div>
+                                <h3 style="color:#8b5cf6;">📂 Category Requests</h3>
+                                <small>Requests submitted by customers — review and send to developer</small>
+                            </div>
+                            <button onclick="closeCategoryRequestsModal()" class="send-btn">Close</button>
+                        </div>
+
+                        <table class="buyers-table">
+                            <thead>
+                                <tr>
+                                    <th>Sr. No.</th>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Category</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Requested At</th>
+                                    <th>🤖 Duplicate Check</th>
+                                    <th>Send</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoryRequestsTableBody">
+                                <tr>
+                                    <td colspan="9" style="text-align:center;padding:20px;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- ADD ABOVE ↑ -->
+
+                <div class="buyers-section">
+                    <h3>Top products by unique buyers</h3>
+                    ... (rest of file continues) ...
+
 
                 </div>
             </div>
@@ -2312,7 +2359,84 @@
                         if (changeEl) { changeEl.textContent = "Failed to load"; changeEl.className = "down"; }
                     }
                 }
+                function openCategoryRequestsModal() {
+                    document.getElementById("categoryRequestsModal").style.display = "flex";
+                    loadCategoryRequests();
+                }
+                function closeCategoryRequestsModal() {
+                    document.getElementById("categoryRequestsModal").style.display = "none";
+                }
 
+                async function loadCategoryRequests() {
+                    const tbody = document.getElementById("categoryRequestsTableBody");
+                    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;">Loading...</td></tr>`;
+                    try {
+                        const res = await fetch("/api/owner/category-requests");
+                        if (!res.ok) throw new Error("status " + res.status);
+                        const data = await res.json();
+                        const rows = data.requests ?? [];
+
+                        if (rows.length === 0) {
+                            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:#8b5cf6;">No category requests yet</td></tr>`;
+                            return;
+                        }
+
+                        tbody.innerHTML = "";
+                        rows.forEach((row, i) => {
+                            const isSent = row.status === "sent_to_developer";
+                            const dupTag = row.is_duplicate
+                                ? `<span style="background:#fee2e2;color:#dc2626;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">⚠️ ${row.similarity_score}% match w/ #${row.duplicate_of}</span>`
+                                : `<span style="background:#dcfce7;color:#16a34a;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">✅ Unique</span>`;
+
+                            const tr = document.createElement("tr");
+                            tr.innerHTML = `
+                <td>${i + 1}</td>
+                <td>${row.id}</td>
+                <td>${row.user_name || "-"}</td>
+                <td>${row.category_name || "-"}</td>
+                <td style="max-width:220px;font-size:13px;">${row.reason || "-"}</td>
+                <td>${row.status || "-"}</td>
+                <td>${row.requested_at || "-"}</td>
+                <td>${dupTag}</td>
+                <td>
+                    <button ${isSent ? "disabled" : ""} onclick="sendCategoryRequest(${row.id}, this)"
+                        style="background:${isSent ? '#94a3b8' : '#8b5cf6'};color:white;border:none;
+                        padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;
+                        cursor:${isSent ? 'not-allowed' : 'pointer'};">
+                        ${isSent ? '✅ Sent' : '📧 Send'}
+                    </button>
+                </td>
+            `;
+                            tbody.appendChild(tr);
+                        });
+
+                    } catch (err) {
+                        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:red;">Failed to load</td></tr>`;
+                    }
+                }
+
+                async function sendCategoryRequest(id, btnEl) {
+                    if (!confirm("Send this category request to the developer?")) return;
+                    btnEl.disabled = true;
+                    btnEl.textContent = "Sending...";
+
+                    try {
+                        const res = await fetch(`/api/owner/category-requests/${id}/send`, { method: "POST" });
+                        const data = await res.json();
+                        if (res.ok) {
+                            btnEl.textContent = "✅ Sent";
+                            btnEl.style.background = "#94a3b8";
+                        } else {
+                            alert("Failed: " + (data.error || "Unknown error"));
+                            btnEl.disabled = false;
+                            btnEl.textContent = "📧 Send";
+                        }
+                    } catch (err) {
+                        alert("Failed: " + err.message);
+                        btnEl.disabled = false;
+                        btnEl.textContent = "📧 Send";
+                    }
+                }
                 loadTotalCustomers();
                 setInterval(() => {
                     // Don't rebuild table if any accordion is currently open
@@ -3203,89 +3327,89 @@
                 }
 
                 // ── 3-Dot Menu ──────────────────────────────────────────────────────────────
-function togglePasswordMenu(e){
-    e.stopPropagation();
-    const menu = document.getElementById("passwordMenuDropdown");
-    menu.style.display = menu.style.display === "none" ? "block" : "none";
-}
+                function togglePasswordMenu(e) {
+                    e.stopPropagation();
+                    const menu = document.getElementById("passwordMenuDropdown");
+                    menu.style.display = menu.style.display === "none" ? "block" : "none";
+                }
 
-document.addEventListener("click", () => {
-    const menu = document.getElementById("passwordMenuDropdown");
-    if(menu) menu.style.display = "none";
-});
+                document.addEventListener("click", () => {
+                    const menu = document.getElementById("passwordMenuDropdown");
+                    if (menu) menu.style.display = "none";
+                });
 
-// ── Select Mode (shared for delete / mark used / mark unused) ────────────────
-let currentBulkMode = null; // 'delete' | 'used' | 'unused'
+                // ── Select Mode (shared for delete / mark used / mark unused) ────────────────
+                let currentBulkMode = null; // 'delete' | 'used' | 'unused'
 
-function enableSelectMode(mode){
-    currentBulkMode = mode;
-    document.getElementById("passwordMenuDropdown").style.display = "none";
-    document.getElementById("checkboxHeaderTh").style.display     = "";
-    document.querySelectorAll(".row-checkbox-td").forEach(td => td.style.display = "");
-    document.getElementById("deleteSelectedBar").style.display    = "block";
+                function enableSelectMode(mode) {
+                    currentBulkMode = mode;
+                    document.getElementById("passwordMenuDropdown").style.display = "none";
+                    document.getElementById("checkboxHeaderTh").style.display = "";
+                    document.querySelectorAll(".row-checkbox-td").forEach(td => td.style.display = "");
+                    document.getElementById("deleteSelectedBar").style.display = "block";
 
-    const btn = document.getElementById("bulkActionBtn");
-    if(mode === "delete"){
-        btn.textContent  = "🗑 Delete Selected";
-        btn.style.background = "#ef4444";
-    } else if(mode === "unused"){
-        btn.textContent  = "⏳ Mark as Unused";
-        btn.style.background = "#f59e0b";
-    } else if(mode === "used"){
-        btn.textContent  = "✅ Mark as Used";
-        btn.style.background = "#10b981";
-    }
-}
+                    const btn = document.getElementById("bulkActionBtn");
+                    if (mode === "delete") {
+                        btn.textContent = "🗑 Delete Selected";
+                        btn.style.background = "#ef4444";
+                    } else if (mode === "unused") {
+                        btn.textContent = "⏳ Mark as Unused";
+                        btn.style.background = "#f59e0b";
+                    } else if (mode === "used") {
+                        btn.textContent = "✅ Mark as Used";
+                        btn.style.background = "#10b981";
+                    }
+                }
 
-function cancelSelectMode(){
-    currentBulkMode = null;
-    document.getElementById("checkboxHeaderTh").style.display  = "none";
-    document.querySelectorAll(".row-checkbox-td").forEach(td => td.style.display = "none");
-    document.getElementById("deleteSelectedBar").style.display = "none";
-    document.querySelectorAll(".password-checkbox").forEach(cb => cb.checked = false);
-}
+                function cancelSelectMode() {
+                    currentBulkMode = null;
+                    document.getElementById("checkboxHeaderTh").style.display = "none";
+                    document.querySelectorAll(".row-checkbox-td").forEach(td => td.style.display = "none");
+                    document.getElementById("deleteSelectedBar").style.display = "none";
+                    document.querySelectorAll(".password-checkbox").forEach(cb => cb.checked = false);
+                }
 
-function toggleSelectAll(masterCb){
-    document.querySelectorAll(".password-checkbox").forEach(cb => cb.checked = masterCb.checked);
-}
+                function toggleSelectAll(masterCb) {
+                    document.querySelectorAll(".password-checkbox").forEach(cb => cb.checked = masterCb.checked);
+                }
 
-// ── Runs the correct action based on which menu option was selected ──────────
-async function runBulkAction(){
-    const checked = document.querySelectorAll(".password-checkbox:checked");
-    if(checked.length === 0){
-        alert("Please select at least one password!");
-        return;
-    }
+                // ── Runs the correct action based on which menu option was selected ──────────
+                async function runBulkAction() {
+                    const checked = document.querySelectorAll(".password-checkbox:checked");
+                    if (checked.length === 0) {
+                        alert("Please select at least one password!");
+                        return;
+                    }
 
-    const ids = Array.from(checked).map(cb => cb.dataset.id);
+                    const ids = Array.from(checked).map(cb => cb.dataset.id);
 
-    if(currentBulkMode === "delete"){
-        if(!confirm(`Delete ${checked.length} selected password(s)? This cannot be undone.`)) return;
-        try {
-            const res  = await fetch("/api/owner/strong-passwords/bulk-delete", {
-                method:  "POST",
-                headers: { "Content-Type": "application/json" },
-                body:    JSON.stringify({ ids })
-            });
-            const data = await res.json();
-            if(res.ok){ cancelSelectMode(); loadStrongPasswords(); }
-            else { alert("Delete failed: " + (data.error || "Unknown error")); }
-        } catch(err){ alert("Delete failed: " + err.message); }
+                    if (currentBulkMode === "delete") {
+                        if (!confirm(`Delete ${checked.length} selected password(s)? This cannot be undone.`)) return;
+                        try {
+                            const res = await fetch("/api/owner/strong-passwords/bulk-delete", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ ids })
+                            });
+                            const data = await res.json();
+                            if (res.ok) { cancelSelectMode(); loadStrongPasswords(); }
+                            else { alert("Delete failed: " + (data.error || "Unknown error")); }
+                        } catch (err) { alert("Delete failed: " + err.message); }
 
-    } else if(currentBulkMode === "unused" || currentBulkMode === "used"){
-        const is_used = currentBulkMode === "used" ? 1 : 0;
-        try {
-            const res  = await fetch("/api/owner/strong-passwords/bulk-update-status", {
-                method:  "POST",
-                headers: { "Content-Type": "application/json" },
-                body:    JSON.stringify({ ids, is_used })
-            });
-            const data = await res.json();
-            if(res.ok){ cancelSelectMode(); loadStrongPasswords(); }
-            else { alert("Update failed: " + (data.error || "Unknown error")); }
-        } catch(err){ alert("Update failed: " + err.message); }
-    }
-}
+                    } else if (currentBulkMode === "unused" || currentBulkMode === "used") {
+                        const is_used = currentBulkMode === "used" ? 1 : 0;
+                        try {
+                            const res = await fetch("/api/owner/strong-passwords/bulk-update-status", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ ids, is_used })
+                            });
+                            const data = await res.json();
+                            if (res.ok) { cancelSelectMode(); loadStrongPasswords(); }
+                            else { alert("Update failed: " + (data.error || "Unknown error")); }
+                        } catch (err) { alert("Update failed: " + err.message); }
+                    }
+                }
 
             </script>
 

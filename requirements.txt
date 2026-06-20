@@ -11,3 +11,5 @@ sendgrid
 cloudinary
 fuzzywuzzy
 python-Levenshtein
+better-profanity
+scikit-learn

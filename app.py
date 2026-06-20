@@ -39,7 +39,8 @@ import random
 import string
 import cloudinary
 import cloudinary.uploader
-
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 load_dotenv("databasehandler.env")
@@ -3758,7 +3759,113 @@ def request_category():
     conn.close()
     return jsonify({"status": "success"})
    
-   
+#--------------------owner dashooard madhe category request sathi ------------------------------   
+
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+@app.route("/api/owner/category-requests", methods=["GET"])
+def get_category_requests():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM category_requests ORDER BY requested_at DESC")
+        rows = cursor.fetchall()
+        cursor.close()
+
+        from datetime import datetime
+        for row in rows:
+            if isinstance(row.get("requested_at"), datetime):
+                row["requested_at"] = row["requested_at"].strftime("%Y-%m-%d %H:%M:%S")
+
+        # ── ML: TF-IDF + Cosine Similarity for Duplicate Detection ───────────
+        # Compares every request's "reason" text against all others.
+        # If similarity > 70%, it's flagged as a likely duplicate so the
+        # owner doesn't send the same request to the developer twice.
+        if len(rows) > 1:
+            reasons = [r.get("reason") or "" for r in rows]
+            try:
+                vectorizer = TfidfVectorizer(stop_words="english")
+                tfidf_matrix = vectorizer.fit_transform(reasons)
+                sim_matrix = cosine_similarity(tfidf_matrix)
+
+                for i, row in enumerate(rows):
+                    max_sim = 0.0
+                    dup_of  = None
+                    for j in range(len(rows)):
+                        if i != j and sim_matrix[i][j] > max_sim:
+                            max_sim = sim_matrix[i][j]
+                            dup_of  = rows[j]["id"]
+                    row["similarity_score"] = round(max_sim * 100, 1)
+                    row["is_duplicate"]     = max_sim >= 0.70
+                    row["duplicate_of"]     = dup_of if max_sim >= 0.70 else None
+            except Exception:
+                for row in rows:
+                    row["similarity_score"] = 0.0
+                    row["is_duplicate"]     = False
+                    row["duplicate_of"]     = None
+        else:
+            for row in rows:
+                row["similarity_score"] = 0.0
+                row["is_duplicate"]     = False
+                row["duplicate_of"]     = None
+
+        return jsonify({"requests": rows})
+
+    except Exception as e:
+        return jsonify({"error": str(e), "requests": []}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+@app.route("/api/owner/category-requests/<int:request_id>/send", methods=["POST"])
+def send_category_request(request_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM category_requests WHERE id = %s", (request_id,))
+        req = cursor.fetchone()
+        if not req:
+            return jsonify({"error": "Request not found"}), 404
+
+        # Send email via SendGrid (same setup as OTP emails)
+        from sendgrid import SendGridAPIClient
+        from sendgrid.helpers.mail import Mail
+
+        message = Mail(
+            from_email=os.environ.get("SENDER_EMAIL"),
+            to_emails="ankitabandal45@gmail.com",
+            subject=f"New Category Request: {req['category_name']}",
+            html_content=f"""
+                <h3>New Category Request</h3>
+                <p><strong>Requested by:</strong> {req['user_name']}</p>
+                <p><strong>Category:</strong> {req['category_name']}</p>
+                <p><strong>Reason:</strong> {req['reason']}</p>
+                <p><strong>Requested at:</strong> {req['requested_at']}</p>
+            """
+        )
+        sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+        sg.send(message)
+
+        # Update status so owner knows it's already sent
+        cursor.execute(
+            "UPDATE category_requests SET status = %s WHERE id = %s",
+            ("sent_to_developer", request_id)
+        )
+        conn.commit()
+        cursor.close()
+
+        return jsonify({"message": "Request sent to developer successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
    
 # ============================================================
 # STATIC FILE SERVING
