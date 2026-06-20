@@ -708,14 +708,13 @@
                             .replace("Awesome Product", item.name)
                             .replace("₹231.00", "₹" + productAmount);
 
-                });
+                    // ✅ Buy button - fetch ke andar
+                    document.querySelector('.buy-btn').addEventListener('click', function () {
+                        document.getElementById('paymentOverlay').style.display = 'flex';
+                    });
 
-        }    // Show payment overlay on Buy Now
-        document.querySelector('.buy-btn').addEventListener('click', function () {
-            document.getElementById('paymentOverlay').style.display = 'flex';
-        });
-
-        // Handle payment selection
+                }); // .then end
+        } // cartId if end  // Handle payment selection
         document.querySelectorAll('input[name="payment"]').forEach(radio => {
             radio.addEventListener('change', function () {
                 const upiOverlay = document.getElementById('upiOverlay');
@@ -767,8 +766,7 @@
             }
         });
         // URL se cart_id lo
-        const urlParams = new URLSearchParams(window.location.search);
-        const cartId = urlParams.get("cart_id");
+
         document.getElementById('payNowBtn').addEventListener('click', async function () {
 
             let res = await fetch("/create-order", {
