@@ -784,7 +784,6 @@
                 name: "My Store",
                 description: "Product Purchase",
                 order_id: order.id,
-
                 handler: async function (response) {
                     let verify = await fetch("/verify-payment", {
                         method: "POST",
@@ -798,22 +797,7 @@
                     });
 
                     let result = await verify.json();
-                    var rzp = new Razorpay(options);
 
-                    // Payment fail ya modal close hone pe
-                    rzp.on('payment.failed', function (response) {
-                        // DB mein failed update karo
-                        fetch("/verify-payment-failed", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ cart_id: cartId })
-                        });
-                        // Failed popup dikhao
-                        document.getElementById("paymentOverlay").style.display = "none";
-                        document.getElementById("failedPopup").style.display = "flex";
-                    });
-
-                    rzp.open();
                     if (result.status === "success") {
                         document.getElementById("paymentOverlay").style.display = "none";
                         document.getElementById("successPopup").style.display = "flex";
@@ -831,12 +815,36 @@
 
                 theme: {
                     color: "#3399cc"
+                },
+
+                modal: {
+                    ondismiss: function () {
+                        fetch("/verify-payment-failed", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ cart_id: cartId })
+                        });
+                        document.getElementById("failedPopup").style.display = "flex";
+                    }
                 }
             };
 
             var rzp = new Razorpay(options);
+
+            rzp.on('payment.failed', function (response) {
+                fetch("/verify-payment-failed", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ cart_id: cartId })
+                });
+                document.getElementById("paymentOverlay").style.display = "none";
+                document.getElementById("failedPopup").style.display = "flex";
+            });
+
             rzp.open();
         });
+
+
         function retryPayment() {
             document.getElementById("failedPopup").style.display = "none";
             document.getElementById("paymentOverlay").style.display = "flex";
@@ -856,7 +864,8 @@
             </div>
             <div style="padding:28px 32px;text-align:center;">
                 <p style="color:#475569;font-size:14px;line-height:1.7;margin-bottom:24px;">Your payment has been
-                    <strong>successfully completed!</strong><br>Thank you for shopping with ShopSphere! 🎉</p>
+                    <strong>successfully completed!</strong><br>Thank you for shopping with ShopSphere! 🎉
+                </p>
                 <button onclick="window.location.href='/dashboard'"
                     style="width:100%;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">
                     🏠 Back to Dashboard
