@@ -1194,9 +1194,7 @@
                     <tr>
                         <th>Sr. No.</th>
                         <th>ID</th>
-                        <th>User</th>
-                        <th>Category</th>
-                        <th>Reason</th>
+                        <th>Request Detail</th>
                         <th>Status</th>
                         <th>Requested At</th>
                         <th>🤖 Duplicate Check</th>
@@ -1205,7 +1203,7 @@
                 </thead>
                 <tbody id="categoryRequestsTableBody">
                     <tr>
-                        <td colspan="9" style="text-align:center;padding:20px;">Loading...</td>
+                        <td colspan="7" style="text-align:center;padding:20px;">Loading...</td>
                     </tr>
                 </tbody>
             </table>
@@ -2371,7 +2369,7 @@
 
                 async function loadCategoryRequests() {
                     const tbody = document.getElementById("categoryRequestsTableBody");
-                    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;">Loading...</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;">Loading...</td></tr>`;
                     try {
                         const res = await fetch("/api/owner/category-requests");
                         if (!res.ok) throw new Error("status " + res.status);
@@ -2379,7 +2377,7 @@
                         const rows = data.requests ?? [];
 
                         if (rows.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:#8b5cf6;">No category requests yet</td></tr>`;
+                            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#8b5cf6;">No category requests yet</td></tr>`;
                             return;
                         }
 
@@ -2387,16 +2385,28 @@
                         rows.forEach((row, i) => {
                             const isSent = row.status === "sent_to_developer";
                             const dupTag = row.is_duplicate
-                                ? `<span style="background:#fee2e2;color:#dc2626;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">⚠️ ${row.similarity_score}% match w/ #${row.duplicate_of}</span>`
-                                : `<span style="background:#dcfce7;color:#16a34a;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">✅ Unique</span>`;
+                                ? `<span style="background:#fee2e2;color:#dc2626;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;">⚠️ ${row.similarity_score}%</span>`
+                                : `<span style="background:#dcfce7;color:#16a34a;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;">✅ Unique</span>`;
 
                             const tr = document.createElement("tr");
                             tr.innerHTML = `
                 <td>${i + 1}</td>
                 <td>${row.id}</td>
-                <td>${row.user_name || "-"}</td>
-                <td>${row.category_name || "-"}</td>
-                <td style="max-width:220px;font-size:13px;">${row.reason || "-"}</td>
+                <td>
+                    <div class="req-detail-toggle" onclick="toggleRequestDetail(${row.id})"
+                        style="cursor:pointer;font-weight:700;color:#8b5cf6;
+                        display:flex;align-items:center;gap:6px;">
+                        <span id="req-arrow-${row.id}">▶</span>
+                        ${row.category_name || "Untitled Request"}
+                    </div>
+                    <div id="req-card-${row.id}" style="display:none;margin-top:10px;
+                        background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;
+                        padding:14px;font-size:13px;line-height:1.7;">
+                        <div><strong style="color:#6366f1;">User:</strong> ${row.user_name || "-"}</div>
+                        <div><strong style="color:#6366f1;">Category:</strong> ${row.category_name || "-"}</div>
+                        <div><strong style="color:#6366f1;">Reason:</strong> ${row.reason || "-"}</div>
+                    </div>
+                </td>
                 <td>${row.status || "-"}</td>
                 <td>${row.requested_at || "-"}</td>
                 <td>${dupTag}</td>
@@ -2404,7 +2414,7 @@
                     <button ${isSent ? "disabled" : ""} onclick="sendCategoryRequest(${row.id}, this)"
                         style="background:${isSent ? '#94a3b8' : '#8b5cf6'};color:white;border:none;
                         padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;
-                        cursor:${isSent ? 'not-allowed' : 'pointer'};">
+                        cursor:${isSent ? 'not-allowed' : 'pointer'};white-space:nowrap;">
                         ${isSent ? '✅ Sent' : '📧 Send'}
                     </button>
                 </td>
@@ -2413,10 +2423,18 @@
                         });
 
                     } catch (err) {
-                        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:red;">Failed to load</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:red;">Failed to load</td></tr>`;
                     }
                 }
 
+                function toggleRequestDetail(id) {
+                    const card = document.getElementById(`req-card-${id}`);
+                    const arrow = document.getElementById(`req-arrow-${id}`);
+                    const isOpen = card.style.display === "block";
+
+                    card.style.display = isOpen ? "none" : "block";
+                    arrow.textContent = isOpen ? "▶" : "▼";
+                }
                 async function sendCategoryRequest(id, btnEl) {
                     if (!confirm("Send this category request to the developer?")) return;
                     btnEl.disabled = true;
