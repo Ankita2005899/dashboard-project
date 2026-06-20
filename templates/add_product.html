@@ -588,7 +588,71 @@ form {
         </div>
     </div>
 
-    
+<!-- ===== REQUEST NEW CATEGORY SECTION ===== -->
+<div class="container my-4">
+    <div class="card shadow-sm p-4" style="border-radius:12px;background:white;border:2px dashed #a8bcee;">
+        
+        <h5 style="font-weight:700;color:#1e293b;margin-bottom:4px;">
+            📩 Request a New Category
+        </h5>
+        <p style="font-size:13px;color:#64748b;margin-bottom:20px;">
+            Can't find your product category? Request the owner to add a new one!
+        </p>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label style="font-size:13px;font-weight:600;color:#374151;">Category Name</label>
+                <input type="text" id="reqCategoryName" placeholder="e.g. Electronics, Books, Toys..."
+                    class="form-control mt-1" style="border-radius:8px;border:1px solid #cbd5e1;">
+            </div>
+            <div class="col-md-6">
+                <label style="font-size:13px;font-weight:600;color:#374151;">Your Name</label>
+                <input type="text" id="reqUserName" placeholder="Your name"
+                    class="form-control mt-1" style="border-radius:8px;border:1px solid #cbd5e1;">
+            </div>
+            <div class="col-12">
+                <label style="font-size:13px;font-weight:600;color:#374151;">Why this category is needed?</label>
+                <textarea id="reqReason" rows="3" placeholder="Explain why this category should be added..."
+                    class="form-control mt-1" style="border-radius:8px;border:1px solid #cbd5e1;resize:none;"></textarea>
+            </div>
+            <div class="col-12">
+                <button onclick="submitCategoryRequest()" 
+                    style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;border:none;padding:10px 28px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;">
+                    📨 Send Request to Owner
+                </button>
+                <span id="reqMsg" style="margin-left:14px;font-size:13px;display:none;"></span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function submitCategoryRequest() {
+    const category = document.getElementById("reqCategoryName").value.trim();
+    const name = document.getElementById("reqUserName").value.trim();
+    const reason = document.getElementById("reqReason").value.trim();
+    const msg = document.getElementById("reqMsg");
+
+    if (!category || !name || !reason) {
+        msg.style.display = "inline";
+        msg.style.color = "red";
+        msg.innerText = "⚠ Please fill all fields!";
+        return;
+    }
+
+    // Backend ready hone pe yahan fetch("/request-category") lagega
+    msg.style.display = "inline";
+    msg.style.color = "green";
+    msg.innerText = "✅ Request sent to owner successfully!";
+
+    document.getElementById("reqCategoryName").value = "";
+    document.getElementById("reqUserName").value = "";
+    document.getElementById("reqReason").value = "";
+
+    setTimeout(() => { msg.style.display = "none"; }, 3000);
+}
+</script>    
     
     <!-- JS -->
     <script>
