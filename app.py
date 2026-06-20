@@ -3787,8 +3787,10 @@ def get_category_requests():
         if len(rows) > 1:
             reasons = [r.get("reason") or "" for r in rows]
             try:
-                vectorizer = TfidfVectorizer(stop_words="english")
-                tfidf_matrix = vectorizer.fit_transform(reasons)
+                # Filter out empty/too-short reasons before vectorizing
+                valid_reasons = [r if r and len(r.strip()) >= 3 else "no_reason_provided" for r in reasons]
+                vectorizer = TfidfVectorizer(stop_words="english", min_df=1, token_pattern=r"(?u)\b\w+\b")
+                tfidf_matrix = vectorizer.fit_transform(valid_reasons)
                 sim_matrix = cosine_similarity(tfidf_matrix)
 
                 for i, row in enumerate(rows):
