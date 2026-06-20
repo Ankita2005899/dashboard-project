@@ -2646,7 +2646,6 @@ def create_order():
     })
     return jsonify(order)
 
-
 @app.route("/verify-payment", methods=["POST"])
 def verify_payment():
     data = request.get_json()
@@ -2654,6 +2653,7 @@ def verify_payment():
     razorpay_order_id   = data["razorpay_order_id"]
     razorpay_payment_id = data["razorpay_payment_id"]
     razorpay_signature  = data["razorpay_signature"]
+    product_id          = data.get("product_id")
 
     body = razorpay_order_id + "|" + razorpay_payment_id
 
@@ -2663,23 +2663,44 @@ def verify_payment():
         digestmod=hashlib.sha256
     ).hexdigest()
 
+    username = session.get("username")
+    user_id  = session.get("user_id")
+    table_name = f"{username}_{user_id}"
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
     if expected_signature == razorpay_signature:
-        # ✅ ADD THIS — Save order to MySQL
-        db = get_db_connection()
-        cursor = db.cursor()
+        # ✅ Payment successful
+        cursor.execute(f"""
+            UPDATE `{table_name}` 
+            SET mode = 'successful'
+            WHERE product_id = %s
+        """, (product_id,))
+
         cursor.execute("""
-            INSERT INTO orders 
-            (user_email, razorpay_payment_id, razorpay_order_id, status)
+            INSERT INTO orders (user_email, razorpay_payment_id, razorpay_order_id, status)
             VALUES (%s, %s, %s, 'PAID')
         """, (session.get("user_email"), razorpay_payment_id, razorpay_order_id))
+
         db.commit()
         cursor.close()
         db.close()
-
         return jsonify({"status": "success", "message": "Payment Successful"})
     else:
-        return jsonify({"status": "failed", "message": "Payment Failed"})
+        # ❌ Payment failed
+        cursor.execute(f"""
+            UPDATE `{table_name}` 
+            SET mode = 'failed'
+            WHERE product_id = %s
+        """, (product_id,))
 
+        db.commit()
+        cursor.close()
+        db.close()
+        return jsonify({"status": "failed", "message": "Payment Failed"})
+    
+    
 
 @app.route("/get-buynow-item/<int:id>")
 def get_buynow_item(id):

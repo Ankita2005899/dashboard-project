@@ -435,87 +435,106 @@
             padding-top: 100px;
         }
 
-/* ================= THEME SYNC (matches index.html toggle) ================= */
-:root {
-    --th-body-bg:     #d4f4f8;
-    --th-header-bg:   linear-gradient(135deg,#e0f2fe,#f0fdfa);
-    --th-border:      #cbd5e1;
-    --th-header-text: #1e293b;
-    --th-btn-bg:      white;
-    --th-btn-color:   #1e293b;
-    --th-card-bg:     #ffffff;
-    --th-form-bg:     #ffffff;
-    --th-text:        #111827;
-    --th-grid-lines:  rgba(0,0,0,0.06);
-}
+        /* ================= THEME SYNC (matches index.html toggle) ================= */
+        :root {
+            --th-body-bg: #d4f4f8;
+            --th-header-bg: linear-gradient(135deg, #e0f2fe, #f0fdfa);
+            --th-border: #cbd5e1;
+            --th-header-text: #1e293b;
+            --th-btn-bg: white;
+            --th-btn-color: #1e293b;
+            --th-card-bg: #ffffff;
+            --th-form-bg: #ffffff;
+            --th-text: #111827;
+            --th-grid-lines: rgba(0, 0, 0, 0.06);
+        }
 
-[data-theme="dark"] {
-    --th-body-bg:     #0a0a0f;
-    --th-header-bg:   linear-gradient(135deg,#12121a,#1a1a26);
-    --th-border:      rgba(255,255,255,0.12);
-    --th-header-text: #f0eee8;
-    --th-btn-bg:      #1a1a26;
-    --th-btn-color:   #f0eee8;
-    --th-card-bg:     #12121a;
-    --th-form-bg:     #12121a;
-    --th-text:        #f0eee8;
-    --th-grid-lines:  rgba(255,255,255,0.04);
-}
+        [data-theme="dark"] {
+            --th-body-bg: #0a0a0f;
+            --th-header-bg: linear-gradient(135deg, #12121a, #1a1a26);
+            --th-border: rgba(255, 255, 255, 0.12);
+            --th-header-text: #f0eee8;
+            --th-btn-bg: #1a1a26;
+            --th-btn-color: #f0eee8;
+            --th-card-bg: #12121a;
+            --th-form-bg: #12121a;
+            --th-text: #f0eee8;
+            --th-grid-lines: rgba(255, 255, 255, 0.04);
+        }
 
-body {
-    background-color: var(--th-body-bg) !important;
-    background-image:
-        linear-gradient(var(--th-grid-lines) 1px, transparent 1px),
-        linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important;
-    background-size: 60px 60px !important;
-    color: var(--th-text) !important;
-    transition: background 0.3s, color 0.3s;
-}
-.header {
-    background: var(--th-header-bg) !important;
-    border-bottom-color: var(--th-border) !important;
-    transition: background 0.3s;
-}
-.header-left h2 { color: var(--th-header-text) !important; }
-.header-btn {
-    background: var(--th-btn-bg) !important;
-    color: var(--th-btn-color) !important;
-    border-color: var(--th-border) !important;
-    transition: background 0.3s, color 0.3s;
-}
-.card {
-    background: var(--th-card-bg) !important;
-    transition: background 0.3s;
-}
-.payment-form {
-    background: var(--th-form-bg) !important;
-    color: var(--th-text) !important;
-    transition: background 0.3s;
-}
-.upi-details-popup {
-    background: var(--th-form-bg) !important;
-    color: var(--th-text) !important;
-    transition: background 0.3s;
-}
-.scanner-popup {
-    background: var(--th-form-bg) !important;
-    color: var(--th-text) !important;
-    transition: background 0.3s;
-}
-[data-theme="dark"] .delivery { background: #1e1e2e !important; color: var(--th-text) !important; }
-[data-theme="dark"] .section { border-bottom-color: rgba(255,255,255,0.08) !important; }
-[data-theme="dark"] .close-btn { color: var(--th-text) !important; }
+        body {
+            background-color: var(--th-body-bg) !important;
+            background-image:
+                linear-gradient(var(--th-grid-lines) 1px, transparent 1px),
+                linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important;
+            background-size: 60px 60px !important;
+            color: var(--th-text) !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .header {
+            background: var(--th-header-bg) !important;
+            border-bottom-color: var(--th-border) !important;
+            transition: background 0.3s;
+        }
+
+        .header-left h2 {
+            color: var(--th-header-text) !important;
+        }
+
+        .header-btn {
+            background: var(--th-btn-bg) !important;
+            color: var(--th-btn-color) !important;
+            border-color: var(--th-border) !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .card {
+            background: var(--th-card-bg) !important;
+            transition: background 0.3s;
+        }
+
+        .payment-form {
+            background: var(--th-form-bg) !important;
+            color: var(--th-text) !important;
+            transition: background 0.3s;
+        }
+
+        .upi-details-popup {
+            background: var(--th-form-bg) !important;
+            color: var(--th-text) !important;
+            transition: background 0.3s;
+        }
+
+        .scanner-popup {
+            background: var(--th-form-bg) !important;
+            color: var(--th-text) !important;
+            transition: background 0.3s;
+        }
+
+        [data-theme="dark"] .delivery {
+            background: #1e1e2e !important;
+            color: var(--th-text) !important;
+        }
+
+        [data-theme="dark"] .section {
+            border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        [data-theme="dark"] .close-btn {
+            color: var(--th-text) !important;
+        }
     </style>
 </head>
 
 <body>
-<!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
-<script>
-  (function(){
-    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-  })();
-</script>
+    <!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
+    <script>
+        (function () {
+            var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 
     <header class="header">
 
@@ -638,19 +657,20 @@ body {
     </div>
 
 
-<!-- Scanner Popup -->
-<div class="scanner-popup" id="scannerPopup">
-    <span class="close-btn" onclick="document.getElementById('scannerPopup').style.display='none'">&times;</span>
-    <h3>📱 Scan & Pay</h3>
-    <div class="scanner-section">
-        <p>Scan this QR code with any UPI app to pay</p>
-        <div class="scanner-box">
-            <img src="/static/QrCode.jpeg" class="scanner-img" alt="UPI QR Code">
+    <!-- Scanner Popup -->
+    <div class="scanner-popup" id="scannerPopup">
+        <span class="close-btn" onclick="document.getElementById('scannerPopup').style.display='none'">&times;</span>
+        <h3>📱 Scan & Pay</h3>
+        <div class="scanner-section">
+            <p>Scan this QR code with any UPI app to pay</p>
+            <div class="scanner-box">
+                <img src="/static/QrCode.jpeg" class="scanner-img" alt="UPI QR Code">
+            </div>
+            <p><strong>UPI ID:</strong> ankitabandal45@oksbi</p>
+            <button class="done-btn" onclick="document.getElementById('scannerPopup').style.display='none'">✅ Done -
+                Payment Complete</button>
         </div>
-        <p><strong>UPI ID:</strong> ankitabandal45@oksbi</p>
-        <button class="done-btn" onclick="document.getElementById('scannerPopup').style.display='none'">✅ Done - Payment Complete</button>
     </div>
-</div>
 
     <script>
 
@@ -766,14 +786,14 @@ body {
                 order_id: order.id,
 
                 handler: async function (response) {
-
                     let verify = await fetch("/verify-payment", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature
+                            razorpay_signature: response.razorpay_signature,
+                            product_id: productId   // ← yeh add karo
                         })
                     });
 
