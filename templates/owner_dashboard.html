@@ -3141,6 +3141,9 @@
                             const isUsed = row.is_used == 1;
                             const tr = document.createElement("tr");
                             tr.innerHTML = `
+                <td class="row-checkbox-td" style="display:none;">
+                    <input type="checkbox" class="password-checkbox" data-id="${row.id}">
+                </td>
                 <td>${i + 1}</td>
                 <td>${row.id}</td>
                 <td>
@@ -3164,7 +3167,6 @@
                         tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:red;">Failed to load</td></tr>`;
                     }
                 }
-
                 async function addStrongPassword() {
                     const password = document.getElementById("newPasswordInput").value.trim();
                     const is_used = document.getElementById("isUsedCheck").checked ? 1 : 0;
