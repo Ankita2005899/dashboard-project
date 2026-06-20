@@ -3556,7 +3556,7 @@ def get_strong_passwords():
     try:
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM strong_password ORDER BY id DESC")
+        cursor.execute("SELECT * FROM strong_password ORDER BY is_used DESC, id DESC")
         rows = cursor.fetchall()
         cursor.close()
         return jsonify({"passwords": rows})
@@ -3592,26 +3592,30 @@ def add_strong_password():
         if conn and conn.is_connected():
             conn.close()
             
-#________________________3 button part in password section ___---------------            
+#________________________3 button part in password section (" select for delete ") ___---------------            
 
-
-@app.route("/api/owner/strong-passwords/bulk-delete", methods=["POST"])
-def bulk_delete_strong_passwords():
+@app.route("/api/owner/strong-passwords/bulk-update-status", methods=["POST"])
+def bulk_update_password_status():
     conn = None
     try:
-        data = request.get_json()
-        ids  = data.get("ids", [])
+        data    = request.get_json()
+        ids     = data.get("ids", [])
+        is_used = int(data.get("is_used", 0))
+
         if not ids:
             return jsonify({"error": "No IDs provided"}), 400
 
         conn   = get_db_connection()
         cursor = conn.cursor()
         placeholders = ','.join(['%s'] * len(ids))
-        cursor.execute(f"DELETE FROM strong_password WHERE id IN ({placeholders})", tuple(ids))
-        deleted_count = cursor.rowcount
+        cursor.execute(
+            f"UPDATE strong_password SET is_used = %s WHERE id IN ({placeholders})",
+            tuple([is_used] + ids)
+        )
+        updated_count = cursor.rowcount
         conn.commit()
         cursor.close()
-        return jsonify({"message": f"{deleted_count} password(s) deleted"}), 200
+        return jsonify({"message": f"{updated_count} password(s) updated"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
