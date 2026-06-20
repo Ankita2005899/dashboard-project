@@ -3974,7 +3974,10 @@ def send_category_request(request_id):
                 {note_block}
             """
         )
-        sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+        sg_key = os.environ.get("SENDGRID_API_KEY")
+        print(f"DEBUG KEY -> len={len(sg_key) if sg_key else 0}, "
+              f"start={sg_key[:8] if sg_key else None}, end={sg_key[-4:] if sg_key else None}")
+        sg = SendGridAPIClient(sg_key)
         sg.send(message)
 
         cursor.execute(
