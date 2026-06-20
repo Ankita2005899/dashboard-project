@@ -1287,7 +1287,7 @@ def get_study_materials():
             "uploaded_at": row["uploaded_at"].strftime("%Y-%m-%d") if row["uploaded_at"] else None,
             "address": row["address"],
             "material": row["material"],
-            "detail": row["detail"]   # ← yeh add karo
+            "detail": row.get("detail", ""),
             "keywords": row.get("keywords", "")
 
         })
