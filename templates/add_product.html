@@ -418,7 +418,7 @@ form {
                             ADD THE PRODUCT DETAIL
                         </h4>
 
-                        <form action="/add-product" method="POST" enctype="multipart/form-data">
+                        <form action="/add-product" method="POST" enctype="multipart/form-data" id="productForm">
 
                             <!-- Upload Section -->
                             <div class="row mb-4">
@@ -589,7 +589,7 @@ form {
     </div>
 
 <!-- ===== REQUEST NEW CATEGORY SECTION ===== -->
-<div class="container my-4">
+<div class="container my-4" id="categoryRequestSection">
     <div class="card shadow-sm p-4" style="border-radius:12px;background:white;border:2px dashed #a8bcee;">
         
         <h5 style="font-weight:700;color:#1e293b;margin-bottom:4px;">
@@ -626,6 +626,30 @@ form {
 
     </div>
 </div>
+<!-- ===== FLOATING SCROLL BUTTONS (RIGHT SIDE) ===== -->
+<div style="position:fixed;right:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:9999;">
+    
+    <button onclick="scrollToForm()" title="Go to Form"
+        style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;border:none;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(99,102,241,0.4);width:110px;text-align:center;transition:all 0.2s;">
+        📋 Add Form
+    </button>
+
+    <button onclick="scrollToRequest()" title="Request Category"
+        style="background:linear-gradient(135deg,#f97316,#f59e0b);color:white;border:none;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(249,115,22,0.4);width:110px;text-align:center;transition:all 0.2s;">
+        📩 Request Category
+    </button>
+
+</div>
+
+<script>
+function scrollToForm() {
+    document.getElementById("productForm").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function scrollToRequest() {
+    document.getElementById("categoryRequestSection").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+</script>
+
 
 <script>
 function submitCategoryRequest() {
