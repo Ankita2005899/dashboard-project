@@ -32,25 +32,23 @@
         }
 
         /* ================= SIDEBAR ================= */
-        /* ================= SIDEBAR ================= */
-        .sidebar {
-            width: 260px;
-
-            /* colorful gradient background */
-            background: linear-gradient(180deg, #a8bcee, #bcc2c3, #81f5e8);
-
-            padding: 20px;
-
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-
-            display: flex;
-            flex-direction: column;
-
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
-        }
+      .sidebar {
+    top: 60px;
+    height: calc(100vh - 60px);
+    background: var(--th-sidebar-bg) !important;
+    transition: background 0.3s;
+    width: 260px;
+    background: linear-gradient(180deg, #a8bcee, #bcc2c3, #81f5e8);
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
 
         /* ================= SIDEBAR BUTTON ================= */
         .sidebar button {
@@ -640,11 +638,7 @@
             /* header height */
         }
 
-        .sidebar {
-            top: 60px;
-            /* push below header */
-            height: calc(100vh - 60px);
-        }
+       
 
         .main {
             margin-left: 260px;
@@ -868,10 +862,7 @@
             color: var(--th-text) !important;
         }
 
-        .sidebar {
-            background: var(--th-sidebar-bg) !important;
-            transition: background 0.3s;
-        }
+        
 
         .sidebar button {
             background: var(--th-btn-bg) !important;
@@ -985,7 +976,12 @@
     flex-shrink: 0;
     margin-top: 5px;
 }
-
+#notificationPanel {
+    z-index: 99999 !important;
+}
+#notifOverlay {
+    z-index: 99998 !important;
+}
 
     </style>
 
