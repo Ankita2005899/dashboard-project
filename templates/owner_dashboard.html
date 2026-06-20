@@ -2403,27 +2403,30 @@
                     </div>
                     <div id="req-card-${row.id}" style="display:none;margin-top:12px;
     background:white;border:1px solid #e2e8f0;border-radius:14px;
-    width:300px;max-width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.08);overflow:hidden;">
+    width:320px;max-width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
 
     <div style="background:linear-gradient(135deg,#8b5cf6,#a855f7);
-        padding:10px 16px;color:white;font-size:13px;font-weight:700;">
+        padding:10px 16px;color:white;font-size:13px;font-weight:700;
+        border-radius:14px 14px 0 0;">
         📋 Request Details
     </div>
 
     <div style="padding:16px;">
         <div style="display:flex;justify-content:space-between;align-items:center;
             padding:8px 0;border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;">User</span>
-            <span style="font-size:13px;font-weight:600;color:#1e293b;">${row.user_name || "-"}</span>
+            <span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;white-space:nowrap;">User</span>
+            <span style="font-size:13px;font-weight:600;color:#1e293b;text-align:right;">${row.user_name || "-"}</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;
-          s  padding:8px 0;border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;">Category</span>
-            <span style="font-size:13px;font-weight:600;color:#1e293b;">${row.category_name || "-"}</span>
+            padding:8px 0;border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;white-space:nowrap;">Category</span>
+            <span style="font-size:13px;font-weight:600;color:#1e293b;text-align:right;">${row.category_name || "-"}</span>
         </div>
         <div style="padding:10px 0 2px;">
             <span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;display:block;margin-bottom:6px;">Reason</span>
-            <span style="font-size:13px;color:#334155;line-height:1.6;display:block;">${row.reason || "-"}</span>
+            <span style="font-size:13px;color:#334155;line-height:1.6;display:block;
+                white-space:normal;word-wrap:break-word;word-break:break-word;
+                overflow-wrap:break-word;">${row.reason || "-"}</span>
         </div>
     </div>
 </div>
