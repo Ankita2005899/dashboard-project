@@ -2701,6 +2701,28 @@ def verify_payment():
         db.close()
         return jsonify({"status": "failed"})
     
+    
+@app.route("/verify-payment-failed", methods=["POST"])
+def verify_payment_failed():
+    data = request.get_json()
+    cart_id = data.get("cart_id")
+    username = session.get("username")
+    user_id = session.get("user_id")
+    table_name = f"{username}_{user_id}"
+
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute(f"""
+        UPDATE `{table_name}` 
+        SET mode = 'failed'
+        WHERE id = %s
+    """, (cart_id,))
+    db.commit()
+    cursor.close()
+    db.close()
+    return jsonify({"status": "updated"})    
+    
+    
 
 @app.route("/get-buynow-item/<int:id>")
 def get_buynow_item(id):
