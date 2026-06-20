@@ -32,23 +32,23 @@
         }
 
         /* ================= SIDEBAR ================= */
-      .sidebar {
-    top: 60px;
-    height: calc(100vh - 60px);
-    background: var(--th-sidebar-bg) !important;
-    transition: background 0.3s;
-    width: 260px;
-    background: linear-gradient(180deg, #a8bcee, #bcc2c3, #81f5e8);
-    padding: 20px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
-    z-index: 100;
-}
+        .sidebar {
+            top: 60px;
+            height: calc(100vh - 60px);
+            background: var(--th-sidebar-bg) !important;
+            transition: background 0.3s;
+            width: 260px;
+            background: linear-gradient(180deg, #a8bcee, #bcc2c3, #81f5e8);
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
 
         /* ================= SIDEBAR BUTTON ================= */
         .sidebar button {
@@ -638,7 +638,7 @@
             /* header height */
         }
 
-       
+
 
         .main {
             margin-left: 260px;
@@ -862,7 +862,7 @@
             color: var(--th-text) !important;
         }
 
-        
+
 
         .sidebar button {
             background: var(--th-btn-bg) !important;
@@ -944,45 +944,74 @@
 
 
         /* ===== NOTIFICATION PANEL STYLES ===== */
-.notif-item-dash {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 20px;
-    border-bottom: 1px solid #f1f5f9;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.notif-item-dash:hover { background: #f8fafc; }
-.unread-notif { background: #eef2ff; }
-.unread-notif:hover { background: #e0e7ff; }
-.notif-icon-dash {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-}
-.notif-title-dash { font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 3px; }
-.notif-desc-dash { font-size: 12px; color: #64748b; line-height: 1.5; }
-.notif-time-dash { font-size: 11px; color: #94a3b8; margin-top: 4px; }
-.unread-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #6366f1;
-    flex-shrink: 0;
-    margin-top: 5px;
-}
-#notificationPanel {
-    z-index: 99999 !important;
-}
-#notifOverlay {
-    z-index: 99998 !important;
-}
+        .notif-item-dash {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
 
+        .notif-item-dash:hover {
+            background: #f8fafc;
+        }
+
+        .unread-notif {
+            background: #eef2ff;
+        }
+
+        .unread-notif:hover {
+            background: #e0e7ff;
+        }
+
+        .notif-icon-dash {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .notif-title-dash {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 3px;
+        }
+
+        .notif-desc-dash {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .notif-time-dash {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .unread-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #6366f1;
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+
+        #notificationPanel {
+            z-index: 99999 !important;
+        }
+
+        #notifOverlay {
+            z-index: 99998 !important;
+        }
     </style>
 
 </head>
@@ -1043,9 +1072,10 @@
             <button>⚙ Settings</button>
 
             <!-- NOTIFICATIONS BUTTON -->
-<button onclick="openNotifications()" id="notifBtn">
-    🔔 Notifications <span id="notifBadge" style="background:#f97316;color:white;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px;">3</span>
-</button>
+            <button onclick="openNotifications()" id="notifBtn">
+                🔔 Notifications <span id="notifBadge"
+                    style="background:#f97316;color:white;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px;">3</span>
+            </button>
 
             <!-- ================= CART ================= -->
             <div class="cart" style="padding-bottom: 2px; margin-bottom: -7px;">
@@ -1150,100 +1180,108 @@
 
 
         <!-- ================= NOTIFICATION PANEL ================= -->
-<div id="notificationPanel" style="display:none;position:fixed;top:0;right:0;width:380px;height:100vh;background:white;box-shadow:-4px 0 20px rgba(0,0,0,0.15);z-index:9999;flex-direction:column;border-left:2px solid #e5e7eb;">
-    <!-- Header -->
-    <div style="padding:18px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#a8bcee,#81f5e8);">
-        <h3 style="font-size:16px;font-weight:700;color:#1e293b;">🔔 Notifications</h3>
-        <div style="display:flex;gap:10px;align-items:center;">
-            <span onclick="markAllRead()" style="font-size:12px;color:#4f46e5;cursor:pointer;font-weight:600;">Mark all read</span>
-            <button onclick="closeNotifications()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;padding:0;">✕</button>
-        </div>
-    </div>
-
-    <!-- Tabs -->
-    <div style="display:flex;border-bottom:1px solid #e5e7eb;">
-        <div id="tabCommon" onclick="switchNotifTab('common')" style="flex:1;text-align:center;padding:12px;font-size:13px;font-weight:600;cursor:pointer;color:#4f46e5;border-bottom:2px solid #4f46e5;">
-            Common
-        </div>
-        <div id="tabSpecial" onclick="switchNotifTab('special')" style="flex:1;text-align:center;padding:12px;font-size:13px;font-weight:600;cursor:pointer;color:#64748b;border-bottom:2px solid transparent;">
-            Special ✨
-        </div>
-    </div>
-
-    <!-- Common Notifications -->
-    <div id="commonNotifs" style="overflow-y:auto;flex:1;">
-
-        <div class="notif-item-dash unread-notif" id="cn1" onclick="readNotif('cn1')">
-            <div class="notif-icon-dash" style="background:#dbeafe;color:#1d4ed8;">📢</div>
-            <div style="flex:1;">
-                <div class="notif-title-dash">New feature launched</div>
-                <div class="notif-desc-dash">Fuzzy search is now live on ShopSphere!</div>
-                <div class="notif-time-dash">2 hours ago</div>
+        <div id="notificationPanel"
+            style="display:none;position:fixed;top:0;right:0;width:380px;height:100vh;background:white;box-shadow:-4px 0 20px rgba(0,0,0,0.15);z-index:9999;flex-direction:column;border-left:2px solid #e5e7eb;">
+            <!-- Header -->
+            <div
+                style="padding:18px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#a8bcee,#81f5e8);">
+                <h3 style="font-size:16px;font-weight:700;color:#1e293b;">🔔 Notifications</h3>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <span onclick="markAllRead()"
+                        style="font-size:12px;color:#4f46e5;cursor:pointer;font-weight:600;">Mark all read</span>
+                    <button onclick="closeNotifications()"
+                        style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;padding:0;">✕</button>
+                </div>
             </div>
-            <div class="unread-dot" id="dot-cn1"></div>
-        </div>
 
-        <div class="notif-item-dash unread-notif" id="cn2" onclick="readNotif('cn2')">
-            <div class="notif-icon-dash" style="background:#fef3c7;color:#b45309;">⚠️</div>
-            <div style="flex:1;">
-                <div class="notif-title-dash">Low stock alert</div>
-                <div class="notif-desc-dash">Physics Notes Class 12 has only 5 items left.</div>
-                <div class="notif-time-dash">5 hours ago</div>
+            <!-- Tabs -->
+            <div style="display:flex;border-bottom:1px solid #e5e7eb;">
+                <div id="tabCommon" onclick="switchNotifTab('common')"
+                    style="flex:1;text-align:center;padding:12px;font-size:13px;font-weight:600;cursor:pointer;color:#4f46e5;border-bottom:2px solid #4f46e5;">
+                    Common
+                </div>
+                <div id="tabSpecial" onclick="switchNotifTab('special')"
+                    style="flex:1;text-align:center;padding:12px;font-size:13px;font-weight:600;cursor:pointer;color:#64748b;border-bottom:2px solid transparent;">
+                    Special ✨
+                </div>
             </div>
-            <div class="unread-dot" id="dot-cn2"></div>
-        </div>
 
-        <div class="notif-item-dash" id="cn3" onclick="readNotif('cn3')">
-            <div class="notif-icon-dash" style="background:#dcfce7;color:#15803d;">✅</div>
-            <div style="flex:1;">
-                <div class="notif-title-dash">Maintenance done</div>
-                <div class="notif-desc-dash">All services are running smoothly.</div>
-                <div class="notif-time-dash">Yesterday</div>
+            <!-- Common Notifications -->
+            <div id="commonNotifs" style="overflow-y:auto;flex:1;">
+
+                <div class="notif-item-dash unread-notif" id="cn1" onclick="readNotif('cn1')">
+                    <div class="notif-icon-dash" style="background:#dbeafe;color:#1d4ed8;">📢</div>
+                    <div style="flex:1;">
+                        <div class="notif-title-dash">New feature launched</div>
+                        <div class="notif-desc-dash">Fuzzy search is now live on ShopSphere!</div>
+                        <div class="notif-time-dash">2 hours ago</div>
+                    </div>
+                    <div class="unread-dot" id="dot-cn1"></div>
+                </div>
+
+                <div class="notif-item-dash unread-notif" id="cn2" onclick="readNotif('cn2')">
+                    <div class="notif-icon-dash" style="background:#fef3c7;color:#b45309;">⚠️</div>
+                    <div style="flex:1;">
+                        <div class="notif-title-dash">Low stock alert</div>
+                        <div class="notif-desc-dash">Physics Notes Class 12 has only 5 items left.</div>
+                        <div class="notif-time-dash">5 hours ago</div>
+                    </div>
+                    <div class="unread-dot" id="dot-cn2"></div>
+                </div>
+
+                <div class="notif-item-dash" id="cn3" onclick="readNotif('cn3')">
+                    <div class="notif-icon-dash" style="background:#dcfce7;color:#15803d;">✅</div>
+                    <div style="flex:1;">
+                        <div class="notif-title-dash">Maintenance done</div>
+                        <div class="notif-desc-dash">All services are running smoothly.</div>
+                        <div class="notif-time-dash">Yesterday</div>
+                    </div>
+                    <div class="unread-dot" style="opacity:0"></div>
+                </div>
+
+                <div class="notif-item-dash" id="cn4" onclick="readNotif('cn4')">
+                    <div class="notif-icon-dash" style="background:#dbeafe;color:#1d4ed8;">👥</div>
+                    <div style="flex:1;">
+                        <div class="notif-title-dash">New users joined</div>
+                        <div class="notif-desc-dash">5 new users signed up today.</div>
+                        <div class="notif-time-dash">2 days ago</div>
+                    </div>
+                    <div class="unread-dot" style="opacity:0"></div>
+                </div>
+
             </div>
-            <div class="unread-dot" style="opacity:0"></div>
-        </div>
 
-        <div class="notif-item-dash" id="cn4" onclick="readNotif('cn4')">
-            <div class="notif-icon-dash" style="background:#dbeafe;color:#1d4ed8;">👥</div>
-            <div style="flex:1;">
-                <div class="notif-title-dash">New users joined</div>
-                <div class="notif-desc-dash">5 new users signed up today.</div>
-                <div class="notif-time-dash">2 days ago</div>
+            <!-- Special Notifications -->
+            <div id="specialNotifs" style="display:none;overflow-y:auto;flex:1;">
+
+                <div class="notif-item-dash unread-notif" id="sn1" onclick="readNotif('sn1')">
+                    <div class="notif-icon-dash" style="background:#ede9fe;color:#6d28d9;">⭐</div>
+                    <div style="flex:1;">
+                        <div class="notif-title-dash">Request approved</div>
+                        <div class="notif-desc-dash">Your "Veg Biryani" featured listing has been approved.</div>
+                        <div class="notif-time-dash">1 hour ago</div>
+                    </div>
+                    <div class="unread-dot" id="dot-sn1"></div>
+                </div>
+
+                <div class="notif-item-dash unread-notif" id="sn2" onclick="readNotif('sn2')">
+                    <div class="notif-icon-dash" style="background:#fce7f3;color:#be185d;">🎁</div>
+                    <div style="flex:1;">
+                        <div class="notif-title-dash">Special offer for you</div>
+                        <div class="notif-desc-dash">Exclusive 20% discount selected just for you!</div>
+                        <div class="notif-time-dash">3 hours ago</div>
+                    </div>
+                    <div class="unread-dot" id="dot-sn2"></div>
+                </div>
+
             </div>
-            <div class="unread-dot" style="opacity:0"></div>
+
         </div>
 
-    </div>
-
-    <!-- Special Notifications -->
-    <div id="specialNotifs" style="display:none;overflow-y:auto;flex:1;">
-
-        <div class="notif-item-dash unread-notif" id="sn1" onclick="readNotif('sn1')">
-            <div class="notif-icon-dash" style="background:#ede9fe;color:#6d28d9;">⭐</div>
-            <div style="flex:1;">
-                <div class="notif-title-dash">Request approved</div>
-                <div class="notif-desc-dash">Your "Veg Biryani" featured listing has been approved.</div>
-                <div class="notif-time-dash">1 hour ago</div>
-            </div>
-            <div class="unread-dot" id="dot-sn1"></div>
+        <!-- Overlay -->
+        <div id="notifOverlay" onclick="closeNotifications()"
+            style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9998;">
         </div>
-
-        <div class="notif-item-dash unread-notif" id="sn2" onclick="readNotif('sn2')">
-            <div class="notif-icon-dash" style="background:#fce7f3;color:#be185d;">🎁</div>
-            <div style="flex:1;">
-                <div class="notif-title-dash">Special offer for you</div>
-                <div class="notif-desc-dash">Exclusive 20% discount selected just for you!</div>
-                <div class="notif-time-dash">3 hours ago</div>
-            </div>
-            <div class="unread-dot" id="dot-sn2"></div>
-        </div>
-
-    </div>
-
-</div>
-
-<!-- Overlay -->
-<div id="notifOverlay" onclick="closeNotifications()" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9998;"></div>
 
 
 
@@ -1682,20 +1720,20 @@
 
             /* ================= INPUT SEARCH ================= */
             searchInput.addEventListener("keydown", function (e) {
-    if (e.key !== "Enter") return;
+                if (e.key !== "Enter") return;
 
-    const query = this.value.trim();
+                const query = this.value.trim();
 
-    if (query === "") {
-        searchGrid.innerHTML = "";
-        document.getElementById("searchResultsSection").style.display = "none";
-        return;
-    }
+                if (query === "") {
+                    searchGrid.innerHTML = "";
+                    document.getElementById("searchResultsSection").style.display = "none";
+                    return;
+                }
 
-    loadProducts(query);
-    trackSearch(query);
-    localStorage.setItem("lastSearchQuery", query);
-});
+                loadProducts(query);
+                trackSearch(query);
+                localStorage.setItem("lastSearchQuery", query);
+            });
 
         </script>
         <script>
@@ -1705,60 +1743,55 @@
                 document.documentElement.setAttribute('data-theme', theme);
             })();
         </script>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const starEl = document.getElementById("starRating");
-    if (starEl) {
-        starEl.addEventListener("click", function (e) {
-            if (e.target.classList.contains("star")) {
-                const val = parseInt(e.target.dataset.value);
-                document.querySelectorAll(".star").forEach((s, i) => {
-                    s.textContent = i < val ? "⭐" : "☆";
-                });
-                const msgs = ["😞 Poor", "😐 Fair", "🙂 Good", "😊 Very Good", "🤩 Excellent!"];
-                document.getElementById("ratingMsg").innerText = msgs[val - 1];
+        <script>
+            // Star Rating
+            document.getElementById("starRating").addEventListener("click", function (e) {
+                if (e.target.classList.contains("star")) {
+                    const val = parseInt(e.target.dataset.value);
+                    document.querySelectorAll(".star").forEach((s, i) => {
+                        s.textContent = i < val ? "⭐" : "☆";
+                    });
+                    const msgs = ["😞 Poor", "😐 Fair", "🙂 Good", "😊 Very Good", "🤩 Excellent!"];
+                    document.getElementById("ratingMsg").innerText = msgs[val - 1];
+                }
+            });
+            window.openNotifications = function () {
+                document.getElementById("notificationPanel").style.display = "flex";
+                document.getElementById("notifOverlay").style.display = "block";
             }
-        });
-    }
+            window.closeNotifications = function () {
+                document.getElementById("notificationPanel").style.display = "none";
+                document.getElementById("notifOverlay").style.display = "none";
+            }
+            window.switchNotifTab = function (tab) {
+                document.getElementById("commonNotifs").style.display = tab === "common" ? "block" : "none";
+                document.getElementById("specialNotifs").style.display = tab === "special" ? "block" : "none";
+                document.getElementById("tabCommon").style.color = tab === "common" ? "#4f46e5" : "#64748b";
+                document.getElementById("tabCommon").style.borderBottom = tab === "common" ? "2px solid #4f46e5" : "2px solid transparent";
+                document.getElementById("tabSpecial").style.color = tab === "special" ? "#4f46e5" : "#64748b";
+                document.getElementById("tabSpecial").style.borderBottom = tab === "special" ? "2px solid #4f46e5" : "2px solid transparent";
+            }
+            window.readNotif = function (id) {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove("unread-notif");
+                const dot = document.getElementById("dot-" + id);
+                if (dot) dot.style.opacity = "0";
+                updateBadge();
+            }
+            window.markAllRead = function () {
+                document.querySelectorAll(".unread-notif").forEach(el => el.classList.remove("unread-notif"));
+                document.querySelectorAll(".unread-dot").forEach(d => d.style.opacity = "0");
+                updateBadge();
+            }
+            window.updateBadge = function () {
+                const count = document.querySelectorAll(".unread-notif").length;
+                const badge = document.getElementById("notifBadge");
+                if (count === 0) badge.style.display = "none";
+                else { badge.style.display = "inline"; badge.textContent = count; }
+            }
 
-// ===== NOTIFICATION PANEL JS =====
-function openNotifications() {
-    document.getElementById("notificationPanel").style.display = "flex";
-    document.getElementById("notifOverlay").style.display = "block";
-}
-function closeNotifications() {
-    document.getElementById("notificationPanel").style.display = "none";
-    document.getElementById("notifOverlay").style.display = "none";
-}
-function switchNotifTab(tab) {
-    document.getElementById("commonNotifs").style.display = tab === "common" ? "block" : "none";
-    document.getElementById("specialNotifs").style.display = tab === "special" ? "block" : "none";
-    document.getElementById("tabCommon").style.color = tab === "common" ? "#4f46e5" : "#64748b";
-    document.getElementById("tabCommon").style.borderBottom = tab === "common" ? "2px solid #4f46e5" : "2px solid transparent";
-    document.getElementById("tabSpecial").style.color = tab === "special" ? "#4f46e5" : "#64748b";
-    document.getElementById("tabSpecial").style.borderBottom = tab === "special" ? "2px solid #4f46e5" : "2px solid transparent";
-}
-function readNotif(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove("unread-notif");
-    const dot = document.getElementById("dot-" + id);
-    if (dot) dot.style.opacity = "0";
-    updateBadge();
-}
-function markAllRead() {
-    document.querySelectorAll(".unread-notif").forEach(el => el.classList.remove("unread-notif"));
-    document.querySelectorAll(".unread-dot").forEach(d => d.style.opacity = "0");
-    updateBadge();
-}
-function updateBadge() {
-    const count = document.querySelectorAll(".unread-notif").length;
-    const badge = document.getElementById("notifBadge");
-    if (count === 0) badge.style.display = "none";
-    else { badge.style.display = "inline"; badge.textContent = count; }
-}
+        </script>
 
-}); // DOMContentLoaded end
-</script>
         <!-- SUCCESS POPUP -->
 
 
