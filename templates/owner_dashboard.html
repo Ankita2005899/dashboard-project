@@ -1189,24 +1189,26 @@
                 <button onclick="closeCategoryRequestsModal()" class="send-btn">Close</button>
             </div>
 
-            <table class="buyers-table">
-                <thead>
-                    <tr>
-                        <th>Sr. No.</th>
-                        <th>ID</th>
-                        <th>Request Detail</th>
-                        <th>Status</th>
-                        <th>Requested At</th>
-                        <th>🤖 Duplicate Check</th>
-                        <th>Send</th>
-                    </tr>
-                </thead>
-                <tbody id="categoryRequestsTableBody">
-                    <tr>
-                        <td colspan="7" style="text-align:center;padding:20px;">Loading...</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div style="overflow-x:auto;width:100%;">
+                <table class="buyers-table" style="min-width:850px;">
+                    <thead>
+                        <tr>
+                            <th style="white-space:nowrap;">Sr. No.</th>
+                            <th style="white-space:nowrap;">ID</th>
+                            <th style="white-space:nowrap;min-width:200px;">Request Detail</th>
+                            <th style="white-space:nowrap;">Status</th>
+                            <th style="white-space:nowrap;">Requested At</th>
+                            <th style="white-space:nowrap;">🤖 Duplicate Check</th>
+                            <th style="white-space:nowrap;">Send</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoryRequestsTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align:center;padding:20px;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <!-- ADD ABOVE ↑ -->
@@ -2399,14 +2401,32 @@
                         <span id="req-arrow-${row.id}">▶</span>
                         ${row.category_name || "Untitled Request"}
                     </div>
-                    <div id="req-card-${row.id}" style="display:none;margin-top:10px;
-                        background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;
-                        padding:16px;font-size:13px;line-height:1.8;
-                        width:280px;max-width:100%;box-shadow:0 2px 8px rgba(139,92,246,0.1);">
-                        <div style="margin-bottom:8px;"><strong style="color:#6366f1;">User:</strong><br>${row.user_name || "-"}</div>
-                        <div style="margin-bottom:8px;"><strong style="color:#6366f1;">Category:</strong><br>${row.category_name || "-"}</div>
-                        <div><strong style="color:#6366f1;">Reason:</strong><br>${row.reason || "-"}</div>
-                    </div>
+                    <div id="req-card-${row.id}" style="display:none;margin-top:12px;
+    background:white;border:1px solid #e2e8f0;border-radius:14px;
+    width:300px;max-width:100%;box-shadow:0 4px 16px rgba(0,0,0,0.08);overflow:hidden;">
+
+    <div style="background:linear-gradient(135deg,#8b5cf6,#a855f7);
+        padding:10px 16px;color:white;font-size:13px;font-weight:700;">
+        📋 Request Details
+    </div>
+
+    <div style="padding:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;
+            padding:8px 0;border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;">User</span>
+            <span style="font-size:13px;font-weight:600;color:#1e293b;">${row.user_name || "-"}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;
+          s  padding:8px 0;border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;">Category</span>
+            <span style="font-size:13px;font-weight:600;color:#1e293b;">${row.category_name || "-"}</span>
+        </div>
+        <div style="padding:10px 0 2px;">
+            <span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;display:block;margin-bottom:6px;">Reason</span>
+            <span style="font-size:13px;color:#334155;line-height:1.6;display:block;">${row.reason || "-"}</span>
+        </div>
+    </div>
+</div>
                 </td>
                 <td>${row.status || "-"}</td>
                 <td>${row.requested_at || "-"}</td>
