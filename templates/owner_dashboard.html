@@ -1178,7 +1178,40 @@
 
     </header>
 
+    <!-- ADD HERE ↓ -->
+    <div id="categoryRequestsModal" class="modal-overlay">
+        <div class="buyers-modal" style="max-width:900px;">
+            <div class="buyers-header">
+                <div>
+                    <h3 style="color:#8b5cf6;">📂 Category Requests</h3>
+                    <small>Requests submitted by customers — review and send to developer</small>
+                </div>
+                <button onclick="closeCategoryRequestsModal()" class="send-btn">Close</button>
+            </div>
 
+            <table class="buyers-table">
+                <thead>
+                    <tr>
+                        <th>Sr. No.</th>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Category</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Requested At</th>
+                        <th>🤖 Duplicate Check</th>
+                        <th>Send</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryRequestsTableBody">
+                    <tr>
+                        <td colspan="9" style="text-align:center;padding:20px;">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- ADD ABOVE ↑ -->
     <!-- Reward Distribution Modal -->
     <div id="rewardDistributionModal" class="modal-overlay">
         <div class="reward-distribution-modal">
@@ -1639,40 +1672,7 @@
                     </div>
                 </div>
 
-                <!-- ADD HERE ↓ -->
-                <div id="categoryRequestsModal" class="modal-overlay">
-                    <div class="buyers-modal" style="max-width:900px;">
-                        <div class="buyers-header">
-                            <div>
-                                <h3 style="color:#8b5cf6;">📂 Category Requests</h3>
-                                <small>Requests submitted by customers — review and send to developer</small>
-                            </div>
-                            <button onclick="closeCategoryRequestsModal()" class="send-btn">Close</button>
-                        </div>
 
-                        <table class="buyers-table">
-                            <thead>
-                                <tr>
-                                    <th>Sr. No.</th>
-                                    <th>ID</th>
-                                    <th>User</th>
-                                    <th>Category</th>
-                                    <th>Reason</th>
-                                    <th>Status</th>
-                                    <th>Requested At</th>
-                                    <th>🤖 Duplicate Check</th>
-                                    <th>Send</th>
-                                </tr>
-                            </thead>
-                            <tbody id="categoryRequestsTableBody">
-                                <tr>
-                                    <td colspan="9" style="text-align:center;padding:20px;">Loading...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <!-- ADD ABOVE ↑ -->
 
                 <div class="buyers-section">
                     <h3>Top products by unique buyers</h3>
