@@ -3824,6 +3824,9 @@ def get_category_requests():
 def send_category_request(request_id):
     conn = None
     try:
+        body       = request.get_json(silent=True) or {}
+        owner_note = body.get("note", "").strip()
+
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM category_requests WHERE id = %s", (request_id,))
@@ -3831,9 +3834,15 @@ def send_category_request(request_id):
         if not req:
             return jsonify({"error": "Request not found"}), 404
 
-        # Send email via SendGrid (same setup as OTP emails)
         from sendgrid import SendGridAPIClient
         from sendgrid.helpers.mail import Mail
+
+        note_block = f"""
+            <div style="margin-top:14px;padding:12px;background:#f0f9ff;
+                border-left:4px solid #6366f1;border-radius:6px;">
+                <strong>Owner's Note:</strong><br>{owner_note}
+            </div>
+        """ if owner_note else ""
 
         message = Mail(
             from_email=os.environ.get("SENDER_EMAIL"),
@@ -3845,12 +3854,12 @@ def send_category_request(request_id):
                 <p><strong>Category:</strong> {req['category_name']}</p>
                 <p><strong>Reason:</strong> {req['reason']}</p>
                 <p><strong>Requested at:</strong> {req['requested_at']}</p>
+                {note_block}
             """
         )
         sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
         sg.send(message)
 
-        # Update status so owner knows it's already sent
         cursor.execute(
             "UPDATE category_requests SET status = %s WHERE id = %s",
             ("sent_to_developer", request_id)

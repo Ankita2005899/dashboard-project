@@ -2434,14 +2434,63 @@
                 <td>${row.status || "-"}</td>
                 <td>${row.requested_at || "-"}</td>
                 <td>${dupTag}</td>
-                <td>
-                    <button ${isSent ? "disabled" : ""} onclick="sendCategoryRequest(${row.id}, this)"
-                        style="background:${isSent ? '#94a3b8' : '#8b5cf6'};color:white;border:none;
-                        padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;
-                        cursor:${isSent ? 'not-allowed' : 'pointer'};white-space:nowrap;">
-                        ${isSent ? '✅ Sent' : '📧 Send'}
-                    </button>
-                </td>
+                <td style="min-width:240px;">
+    <input type="text" id="msg-input-${row.id}"
+        placeholder="Add a note for developer..."
+        oninput="onMessageInput(${row.id})"
+        onfocus="onMessageInput(${row.id})"
+        style="width:100%;padding:6px 10px;border:1.5px solid #d8b4fe;border-radius:6px;
+        font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;">
+
+    <div id="msg-badge-${row.id}" style="display:none;cursor:pointer;
+        background:#ede9fe;color:#7c3aed;font-size:11px;font-weight:700;
+        padding:5px 10px;border-radius:6px;margin-bottom:6px;text-align:center;"
+        onclick="reopenMessagePopup(${row.id})">
+        ✓ Note ready — click to edit
+    </div>
+
+    <button ${isSent ? "disabled" : ""} onclick="sendCategoryRequest(${row.id}, this)"
+        style="background:${isSent ? '#94a3b8' : '#8b5cf6'};color:white;border:none;
+        padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;
+        cursor:${isSent ? 'not-allowed' : 'pointer'};white-space:nowrap;width:100%;">
+        ${isSent ? '✅ Sent' : '📧 Send'}
+    </button>
+
+    <div id="msg-popup-${row.id}" style="display:none;margin-top:10px;
+        background:white;border:1px solid #e2e8f0;border-radius:14px;
+        box-shadow:0 4px 16px rgba(0,0,0,0.1);width:280px;">
+
+        <div style="background:linear-gradient(135deg,#8b5cf6,#a855f7);
+            padding:10px 14px;color:white;font-size:12px;font-weight:700;
+            border-radius:14px 14px 0 0;">
+            ✉️ Message Preview
+        </div>
+
+        <div style="padding:12px;">
+            <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;
+                padding:10px;margin-bottom:10px;font-size:11px;">
+                <div style="font-weight:700;color:#6366f1;margin-bottom:4px;">📋 Request Details</div>
+                <div><strong>User:</strong> ${row.user_name || "-"}</div>
+                <div><strong>Category:</strong> ${row.category_name || "-"}</div>
+                <div style="margin-top:4px;word-wrap:break-word;"><strong>Reason:</strong> ${row.reason || "-"}</div>
+            </div>
+
+            <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;">Your Note</div>
+            <div id="msg-livepreview-${row.id}" style="font-size:12px;color:#334155;
+                background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;
+                padding:8px;min-height:40px;white-space:pre-wrap;word-wrap:break-word;">
+                <span style="color:#94a3b8;">Start typing above...</span>
+            </div>
+
+            <button onclick="completeMessage(${row.id})"
+                style="margin-top:10px;width:100%;background:#10b981;color:white;
+                border:none;padding:7px;border-radius:8px;font-weight:700;
+                font-size:12px;cursor:pointer;">
+                ✅ Complete
+            </button>
+        </div>
+    </div>
+</td>
             `;
                             tbody.appendChild(tr);
                         });
@@ -2459,17 +2508,78 @@
                     card.style.display = isOpen ? "none" : "block";
                     arrow.textContent = isOpen ? "▶" : "▼";
                 }
+                const messageState = {}; // tracks each row's note + completion status
+
+                function onMessageInput(id) {
+                    const input = document.getElementById(`msg-input-${id}`);
+                    const popup = document.getElementById(`msg-popup-${id}`);
+                    const preview = document.getElementById(`msg-livepreview-${id}`);
+                    const badge = document.getElementById(`msg-badge-${id}`);
+
+                    if (!messageState[id]) messageState[id] = { text: "", completed: false };
+                    messageState[id].text = input.value;
+                    messageState[id].completed = false;
+
+                    badge.style.display = "none";
+                    popup.style.display = "block";
+
+                    if (input.value.trim()) {
+                        preview.textContent = input.value;
+                        preview.style.color = "#334155";
+                    } else {
+                        preview.innerHTML = `<span style="color:#94a3b8;">Start typing above...</span>`;
+                    }
+                }
+
+                function completeMessage(id) {
+                    const popup = document.getElementById(`msg-popup-${id}`);
+                    const badge = document.getElementById(`msg-badge-${id}`);
+                    const input = document.getElementById(`msg-input-${id}`);
+
+                    if (!input.value.trim()) {
+                        alert("Please write a note before marking it complete!");
+                        return;
+                    }
+
+                    if (!messageState[id]) messageState[id] = { text: "", completed: false };
+                    messageState[id].text = input.value;
+                    messageState[id].completed = true;
+
+                    popup.style.display = "none";
+                    badge.style.display = "block";
+                }
+
+                function reopenMessagePopup(id) {
+                    document.getElementById(`msg-badge-${id}`).style.display = "none";
+                    document.getElementById(`msg-popup-${id}`).style.display = "block";
+                }
+
                 async function sendCategoryRequest(id, btnEl) {
-                    if (!confirm("Send this category request to the developer?")) return;
+                    const state = messageState[id];
+                    const noteText = state ? state.text.trim() : "";
+
+                    const confirmMsg = noteText
+                        ? "Have you finished writing your note? Click OK to send this request along with your note to the developer."
+                        : "Send this category request to the developer? (No note added)";
+
+                    if (!confirm(confirmMsg)) return;
+
                     btnEl.disabled = true;
                     btnEl.textContent = "Sending...";
 
                     try {
-                        const res = await fetch(`/api/owner/category-requests/${id}/send`, { method: "POST" });
+                        const res = await fetch(`/api/owner/category-requests/${id}/send`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ note: noteText })
+                        });
                         const data = await res.json();
+
                         if (res.ok) {
                             btnEl.textContent = "✅ Sent";
                             btnEl.style.background = "#94a3b8";
+                            const badge = document.getElementById(`msg-badge-${id}`);
+                            if (badge) badge.style.display = "none";
                         } else {
                             alert("Failed: " + (data.error || "Unknown error"));
                             btnEl.disabled = false;
