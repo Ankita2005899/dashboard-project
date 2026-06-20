@@ -1195,15 +1195,19 @@
                         <tr>
                             <th style="white-space:nowrap;">Sr. No.</th>
                             <th style="white-space:nowrap;">ID</th>
-                            <th style="white-space:nowrap;min-width:200px;">Request Detail</th>
+                            <th style="white-space:nowrap;min-width:220px;">Request Detail</th>
+                            <th style="white-space:nowrap;">🎯 Priority</th>
+                            <th style="white-space:nowrap;">💬 Sentiment</th>
+                            <th style="white-space:nowrap;">🔗 Cluster</th>
                             <th style="white-space:nowrap;">Status</th>
                             <th style="white-space:nowrap;">Requested At</th>
-                            <th style="white-space:nowrap;">🤖 Duplicate Check</th>
+                            <th style="white-space:nowrap;">🤖 Duplicate</th>
                         </tr>
                     </thead>
                     <tbody id="categoryRequestsTableBody">
                         <tr>
-                            <td colspan="6" style="text-align:center;padding:20px;">Loading...</td>
+                            <td colspan="9" style="text-align:center;padding:20px;">Loading...</td>
+
                         </tr>
                     </tbody>
                 </table>
@@ -2370,7 +2374,7 @@
 
                 async function loadCategoryRequests() {
                     const tbody = document.getElementById("categoryRequestsTableBody");
-                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;">Loading...</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;">Loading...</td></tr>`;
                     try {
                         const res = await fetch("/api/owner/category-requests");
                         if (!res.ok) throw new Error("status " + res.status);
@@ -2378,16 +2382,54 @@
                         const rows = data.requests ?? [];
 
                         if (rows.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#8b5cf6;">No category requests yet</td></tr>`;
+                            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:#8b5cf6;">No category requests yet</td></tr>`;
                             return;
                         }
 
                         tbody.innerHTML = "";
                         rows.forEach((row, i) => {
                             const isSent = row.status === "sent_to_developer";
+
+                            // ── Duplicate badge ──────────────────────────────────────────
                             const dupTag = row.is_duplicate
                                 ? `<span style="background:#fee2e2;color:#dc2626;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;">⚠️ ${row.similarity_score}%</span>`
                                 : `<span style="background:#dcfce7;color:#16a34a;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;">✅ Unique</span>`;
+
+                            // ── Priority badge ───────────────────────────────────────────
+                            const priorityColors = {
+                                High: { bg: "#fef2f2", color: "#dc2626" },
+                                Medium: { bg: "#fffbeb", color: "#d97706" },
+                                Low: { bg: "#f0fdf4", color: "#16a34a" }
+                            };
+                            const pc = priorityColors[row.priority_label] || priorityColors.Low;
+                            const priorityTag = `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                <span style="background:${pc.bg};color:${pc.color};padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;">
+                    ${row.priority_label === "High" ? "🔥" : row.priority_label === "Medium" ? "⚡" : "🟢"} ${row.priority_label}
+                </span>
+                <span style="font-size:10px;color:#94a3b8;">${row.priority_score}%</span>
+            </div>`;
+
+                            // ── Sentiment badge ──────────────────────────────────────────
+                            const sentimentMap = {
+                                positive: { bg: "#dcfce7", color: "#16a34a", emoji: "😊" },
+                                negative: { bg: "#fee2e2", color: "#dc2626", emoji: "😟" },
+                                neutral: { bg: "#f1f5f9", color: "#64748b", emoji: "😐" }
+                            };
+                            const sm = sentimentMap[row.sentiment] || sentimentMap.neutral;
+                            const sentimentTag = `<span style="background:${sm.bg};color:${sm.color};padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap;">
+                ${sm.emoji} ${row.sentiment.charAt(0).toUpperCase() + row.sentiment.slice(1)}
+            </span>`;
+
+                            // ── Cluster badge ────────────────────────────────────────────
+                            const clusterColors = ["#ede9fe", "#fce7f3", "#ffedd5"];
+                            const clusterTextColors = ["#7c3aed", "#be185d", "#c2410c"];
+                            const cid = row.cluster_id ?? 0;
+                            const clusterTag = `<span style="background:${clusterColors[cid % 3]};color:${clusterTextColors[cid % 3]};
+                padding:3px 8px;border-radius:12px;font-size:11px;font-weight:700;
+                white-space:nowrap;max-width:120px;display:inline-block;
+                overflow:hidden;text-overflow:ellipsis;" title="${row.cluster_label}">
+                ${row.cluster_label}
+            </span>`;
 
                             const tr = document.createElement("tr");
                             tr.innerHTML = `
@@ -2427,59 +2469,46 @@
                                     white-space:normal;word-wrap:break-word;word-break:break-word;
                                     overflow-wrap:break-word;">${row.reason || "-"}</span>
                             </div>
+
+                            <!-- 🤖 ML Auto-Summary -->
+                            <div style="margin-top:10px;padding:10px;background:#f5f3ff;
+                                border-left:3px solid #8b5cf6;border-radius:6px;">
+                                <span style="font-size:10px;font-weight:700;color:#8b5cf6;
+                                    text-transform:uppercase;letter-spacing:0.6px;">🤖 AI Summary</span>
+                                <p style="font-size:12px;color:#4c1d95;margin:4px 0 0;line-height:1.5;">
+                                    ${row.auto_summary || "-"}
+                                </p>
+                            </div>
                         </div>
 
-                        <!-- ✍️ Note + Send — only visible when card is open -->
-                        <div style="
-                            padding:16px 16px 18px;
-                            border-top:1px solid #ede9fe;
+                        <!-- ✍️ Note + Send -->
+                        <div style="padding:16px 16px 18px;border-top:1px solid #ede9fe;
                             background:linear-gradient(135deg,#faf5ff 0%,#f0fdf4 100%);
                             border-radius:0 0 14px 14px;
-                            display:flex;
-                            flex-direction:column;
-                            align-items:center;
-                            gap:10px;
-                        ">
+                            display:flex;flex-direction:column;align-items:center;gap:10px;">
                             <div style="width:100%;font-size:10px;font-weight:700;color:#8b5cf6;
                                 text-transform:uppercase;letter-spacing:0.8px;margin-bottom:2px;">
                                 ✉️ Note for Developer
                             </div>
                             <textarea id="msg-input-${row.id}" rows="3"
                                 placeholder="Write a note to send with this request..."
-                                style="
-                                    width:100%;
-                                    padding:10px 12px;
-                                    border:2px solid #d8b4fe;
-                                    border-radius:10px;
-                                    font-size:12px;
-                                    font-family:'Segoe UI',sans-serif;
-                                    resize:vertical;
-                                    outline:none;
-                                    box-sizing:border-box;
-                                    background:#fff;
-                                    color:#334155;
+                                style="width:100%;padding:10px 12px;border:2px solid #d8b4fe;
+                                    border-radius:10px;font-size:12px;font-family:'Segoe UI',sans-serif;
+                                    resize:vertical;outline:none;box-sizing:border-box;
+                                    background:#fff;color:#334155;
                                     box-shadow:0 2px 8px rgba(139,92,246,0.08);
-                                    transition:border-color 0.2s, box-shadow 0.2s;
-                                    line-height:1.5;
-                                "
+                                    transition:border-color 0.2s, box-shadow 0.2s;line-height:1.5;"
                                 onfocus="this.style.borderColor='#8b5cf6';this.style.boxShadow='0 0 0 3px rgba(139,92,246,0.15)'"
                                 onblur="this.style.borderColor='#d8b4fe';this.style.boxShadow='0 2px 8px rgba(139,92,246,0.08)'"
                             ></textarea>
                             <button ${isSent ? "disabled" : ""} onclick="sendCategoryRequest(${row.id}, this)"
-                                style="
-                                    background:${isSent ? '#94a3b8' : 'linear-gradient(135deg,#8b5cf6,#a855f7)'};
-                                    color:white;
-                                    border:none;
-                                    padding:9px 28px;
-                                    border-radius:20px;
-                                    font-size:12px;
-                                    font-weight:700;
+                                style="background:${isSent ? '#94a3b8' : 'linear-gradient(135deg,#8b5cf6,#a855f7)'};
+                                    color:white;border:none;padding:9px 28px;border-radius:20px;
+                                    font-size:12px;font-weight:700;
                                     cursor:${isSent ? 'not-allowed' : 'pointer'};
                                     letter-spacing:0.5px;
                                     box-shadow:${isSent ? 'none' : '0 4px 12px rgba(139,92,246,0.3)'};
-                                    transition:transform 0.15s, box-shadow 0.15s;
-                                    white-space:nowrap;
-                                "
+                                    transition:transform 0.15s, box-shadow 0.15s;white-space:nowrap;"
                                 onmouseover="if(!this.disabled){this.style.transform='scale(1.04)';this.style.boxShadow='0 6px 18px rgba(139,92,246,0.4)';}"
                                 onmouseout="if(!this.disabled){this.style.transform='';this.style.boxShadow='0 4px 12px rgba(139,92,246,0.3)';}"
                             >
@@ -2488,6 +2517,9 @@
                         </div>
                     </div>
                 </td>
+                <td>${priorityTag}</td>
+                <td>${sentimentTag}</td>
+                <td>${clusterTag}</td>
                 <td>${row.status || "-"}</td>
                 <td>${row.requested_at || "-"}</td>
                 <td>${dupTag}</td>
@@ -2496,10 +2528,9 @@
                         });
 
                     } catch (err) {
-                        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:red;">Failed to load</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:red;">Failed to load</td></tr>`;
                     }
                 }
-
                 function toggleRequestDetail(id) {
                     const card = document.getElementById(`req-card-${id}`);
                     const arrow = document.getElementById(`req-arrow-${id}`);

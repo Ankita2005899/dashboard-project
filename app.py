@@ -3775,51 +3775,162 @@ def get_category_requests():
             if isinstance(row.get("requested_at"), datetime):
                 row["requested_at"] = row["requested_at"].strftime("%Y-%m-%d %H:%M:%S")
 
-        # ── ML: TF-IDF + Cosine Similarity (safe version) ─────────────────────
+        # ── Default ML fields ──────────────────────────────────────────────────
         for row in rows:
             row["similarity_score"] = 0.0
             row["is_duplicate"]     = False
             row["duplicate_of"]     = None
+            row["sentiment"]        = "neutral"
+            row["sentiment_score"]  = 0.0
+            row["priority_score"]   = 0.0
+            row["priority_label"]   = "Low"
+            row["auto_summary"]     = (row.get("reason") or "")[:80]
+            row["cluster_id"]       = 0
+            row["cluster_label"]    = "Uncategorized"
 
-        if len(rows) > 1:
+        if len(rows) >= 1:
             try:
                 from sklearn.feature_extraction.text import TfidfVectorizer
                 from sklearn.metrics.pairwise import cosine_similarity
+                import numpy as np
 
-                # Replace empty/very short reasons with a placeholder so vectorizer never crashes
                 reasons = []
                 for r in rows:
                     text = (r.get("reason") or "").strip()
-                    reasons.append(text if len(text) >= 3 else "no_reason_text_placeholder")
+                    reasons.append(text if len(text) >= 3 else "no_reason_placeholder")
+
+                cat_names = []
+                for r in rows:
+                    text = (r.get("category_name") or "").strip()
+                    cat_names.append(text if len(text) >= 2 else "unknown")
 
                 vectorizer   = TfidfVectorizer(token_pattern=r"(?u)\b\w+\b")
                 tfidf_matrix = vectorizer.fit_transform(reasons)
-                sim_matrix   = cosine_similarity(tfidf_matrix)
 
+                # ── 1. TF-IDF + Cosine Similarity (Duplicate Detection) ─────────
+                if len(rows) > 1:
+                    sim_matrix = cosine_similarity(tfidf_matrix)
+                    for i, row in enumerate(rows):
+                        max_sim = 0.0
+                        dup_of  = None
+                        for j in range(len(rows)):
+                            if i != j and sim_matrix[i][j] > max_sim:
+                                max_sim = sim_matrix[i][j]
+                                dup_of  = rows[j]["id"]
+                        row["similarity_score"] = round(float(max_sim) * 100, 1)
+                        row["is_duplicate"]     = bool(max_sim >= 0.70)
+                        row["duplicate_of"]     = dup_of if max_sim >= 0.70 else None
+
+                # ── 2. Sentiment Analysis (Keyword-based, no heavy model needed) ─
+                positive_words = {"great","love","need","want","amazing","important",
+                                  "useful","necessary","excellent","good","benefit",
+                                  "helpful","required","essential","popular","urgent"}
+                negative_words = {"bad","terrible","useless","waste","stupid","hate",
+                                  "boring","never","worst","broken","missing","lack",
+                                  "absent","poor","disappointing"}
+                urgency_words  = {"urgent","asap","immediately","critical","must",
+                                  "please","needed","require","now","soon"}
+
+                for row in rows:
+                    tokens = set((row.get("reason") or "").lower().split())
+                    pos = len(tokens & positive_words)
+                    neg = len(tokens & negative_words)
+                    urg = len(tokens & urgency_words)
+                    score = pos - neg + (urg * 0.5)
+                    if score > 0.5:
+                        sentiment = "positive"
+                    elif score < -0.5:
+                        sentiment = "negative"
+                    else:
+                        sentiment = "neutral"
+                    row["sentiment"]       = sentiment
+                    row["sentiment_score"] = round(score, 2)
+
+                # ── 3. Smart Priority Scoring ──────────────────────────────────
+                #    Combines: reason length, uniqueness, sentiment, urgency
+                reason_lengths = [len((r.get("reason") or "")) for r in rows]
+                max_len = max(reason_lengths) if reason_lengths else 1
+
+                for row in rows:
+                    reason_len   = len((row.get("reason") or ""))
+                    length_score = min(reason_len / max_len, 1.0)          # 0-1
+                    unique_score = 1.0 - (row["similarity_score"] / 100)   # 0-1 (more unique = higher)
+                    sent_score   = {"positive": 1.0, "neutral": 0.5, "negative": 0.2}.get(row["sentiment"], 0.5)
+
+                    # Urgency from reason text
+                    tokens = set((row.get("reason") or "").lower().split())
+                    urgency_bonus = 0.2 if tokens & urgency_words else 0.0
+
+                    priority = (length_score * 0.3) + (unique_score * 0.4) + (sent_score * 0.2) + urgency_bonus
+                    priority = round(priority * 100, 1)
+
+                    if priority >= 70:
+                        label = "High"
+                    elif priority >= 40:
+                        label = "Medium"
+                    else:
+                        label = "Low"
+
+                    row["priority_score"] = priority
+                    row["priority_label"] = label
+
+                # ── 4. Category Name Clustering (K-Means on TF-IDF of names) ──
+                if len(rows) >= 3:
+                    from sklearn.cluster import KMeans
+                    n_clusters = min(3, len(rows))
+
+                    cat_vectorizer = TfidfVectorizer(token_pattern=r"(?u)\b\w+\b", analyzer="char_wb", ngram_range=(2,4))
+                    cat_matrix     = cat_vectorizer.fit_transform(cat_names)
+
+                    km = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+                    labels = km.fit_predict(cat_matrix)
+
+                    cluster_colors = ["🔵", "🟣", "🟠"]
+                    cluster_names  = {}
+                    for cluster_id in range(n_clusters):
+                        members = [cat_names[i] for i, l in enumerate(labels) if l == cluster_id]
+                        cluster_names[cluster_id] = members[0] if members else f"Group {cluster_id+1}"
+
+                    for i, row in enumerate(rows):
+                        cid = int(labels[i])
+                        row["cluster_id"]    = cid
+                        row["cluster_label"] = f"{cluster_colors[cid]} {cluster_names[cid]}"
+
+                # ── 5. Auto-Summary (extractive: pick best sentence by TF-IDF weight) ─
+                feature_names = vectorizer.get_feature_names_out()
                 for i, row in enumerate(rows):
-                    max_sim = 0.0
-                    dup_of  = None
-                    for j in range(len(rows)):
-                        if i != j and sim_matrix[i][j] > max_sim:
-                            max_sim = sim_matrix[i][j]
-                            dup_of  = rows[j]["id"]
-                    row["similarity_score"] = round(float(max_sim) * 100, 1)
-                    row["is_duplicate"]     = bool(max_sim >= 0.70)
-                    row["duplicate_of"]     = dup_of if max_sim >= 0.70 else None
+                    reason = (row.get("reason") or "").strip()
+                    sentences = [s.strip() for s in reason.replace(".", ". ").split(".") if len(s.strip()) > 10]
+                    if not sentences:
+                        row["auto_summary"] = reason[:80] + ("..." if len(reason) > 80 else "")
+                        continue
+                    # Score each sentence by sum of TF-IDF weights of its words
+                    tfidf_row = tfidf_matrix[i].toarray()[0]
+                    word_scores = dict(zip(feature_names, tfidf_row))
+                    best_sent, best_score = sentences[0], -1
+                    for sent in sentences:
+                        s_score = sum(word_scores.get(w.lower(), 0) for w in sent.split())
+                        if s_score > best_score:
+                            best_score = s_score
+                            best_sent  = sent
+                    row["auto_summary"] = best_sent[:100] + ("..." if len(best_sent) > 100 else "")
 
             except Exception as ml_err:
-                # If ML fails for any reason, just skip it — don't break the whole route
-                print("ML similarity check failed:", ml_err)
+                import traceback
+                print("ML block failed:", traceback.format_exc())
 
         return jsonify({"requests": rows})
 
     except Exception as e:
-        print("get_category_requests crashed:", e)
+        import traceback
+        print("get_category_requests crashed:", traceback.format_exc())
         return jsonify({"error": str(e), "requests": []}), 500
     finally:
         if conn and conn.is_connected():
             conn.close()
-
+            
+            
+            
 @app.route("/api/owner/category-requests/<int:request_id>/send", methods=["POST"])
 def send_category_request(request_id):
     conn = None
@@ -3832,7 +3943,13 @@ def send_category_request(request_id):
         cursor.execute("SELECT * FROM category_requests WHERE id = %s", (request_id,))
         req = cursor.fetchone()
         if not req:
+            cursor.close()
             return jsonify({"error": "Request not found"}), 404
+
+        # ✅ Fix datetime
+        from datetime import datetime
+        if isinstance(req.get("requested_at"), datetime):
+            req["requested_at"] = req["requested_at"].strftime("%Y-%m-%d %H:%M:%S")
 
         from sendgrid import SendGridAPIClient
         from sendgrid.helpers.mail import Mail
@@ -3866,15 +3983,18 @@ def send_category_request(request_id):
         )
         conn.commit()
         cursor.close()
-
         return jsonify({"message": "Request sent to developer successfully"}), 200
 
     except Exception as e:
+        import traceback
+        print("send_category_request crashed:", traceback.format_exc())
         return jsonify({"error": str(e)}), 500
     finally:
         if conn and conn.is_connected():
             conn.close()
-   
+            
+            
+             
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
