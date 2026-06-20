@@ -1754,7 +1754,8 @@
         </script>
         <script>
             // Star Rating
-            document.getElementById("starRating").addEventListener("click", function (e) {
+            var _sr = document.getElementById("starRating");
+            if(_sr) _sr.addEventListener("click", function (e) {
                 if (e.target.classList.contains("star")) {
                     const val = parseInt(e.target.dataset.value);
                     document.querySelectorAll(".star").forEach((s, i) => {
