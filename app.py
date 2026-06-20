@@ -2168,7 +2168,7 @@ def products_search():
         keyword_score = fuzz.partial_ratio(query.lower(), (product["keywords"] or "").lower())
         best_score = max(name_score, keyword_score)
 
-        if best_score >= 70:  # 70% match hone pe show karo
+        if best_score >= 50:  # 70% match hone pe show karo
             product["match_score"] = best_score
             results.append(product)
 
