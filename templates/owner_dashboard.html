@@ -1283,7 +1283,7 @@
                     <div onclick="enableSelectMode()"
                         style="padding:12px 16px;cursor:pointer;font-size:14px;font-weight:600;color:#334155;border-bottom:1px solid #f1f5f9;"
                         onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
-                        1️⃣ Select for Detail
+                        1️⃣ Select for Delete
                     </div>
                     <div onclick="bulkMarkStatus(0)"
                         style="padding:12px 16px;cursor:pointer;font-size:14px;font-weight:600;color:#334155;border-bottom:1px solid #f1f5f9;"
@@ -2384,10 +2384,7 @@
 
                             const tr = document.createElement("tr");
                             tr.innerHTML = `
-    <td class="row-checkbox-td" style="display:none;">
-        <input type="checkbox" class="password-checkbox" data-id="${row.id}">
-    </td>
-    <td>${i + 1}</td>
+      <td>${i + 1}</td>
     <td>${row.id}</td>
                 <td>
                     <div class="customer-info">
@@ -2976,6 +2973,9 @@
                             const initials = (row.username || "?").substring(0, 2).toUpperCase();
                             const tr = document.createElement("tr");
                             tr.innerHTML = `
+                <td class="row-checkbox-td" style="display:none;">
+                    <input type="checkbox" class="password-checkbox" data-id="${row.id}">
+                </td>
                 <td>${i + 1}</td>
                 <td>${row.id}</td>
                 <td><div class="customer-info">
@@ -3124,7 +3124,7 @@
 
                 async function loadStrongPasswords() {
                     const tbody = document.getElementById("strongPasswordTableBody");
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;">Loading...</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;">Loading...</td></tr>`;
                     try {
                         const res = await fetch("/api/owner/strong-passwords");
                         if (!res.ok) throw new Error("status " + res.status);
@@ -3161,7 +3161,7 @@
                         });
 
                     } catch (err) {
-                        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:red;">Failed to load</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:red;">Failed to load</td></tr>`;
                     }
                 }
 
@@ -3200,71 +3200,71 @@
                     }
                 }
 
-// ── 3-Dot Menu ──────────────────────────────────────────────────────────────
-function togglePasswordMenu(e){
-    e.stopPropagation();
-    const menu = document.getElementById("passwordMenuDropdown");
-    menu.style.display = menu.style.display === "none" ? "block" : "none";
-}
+                // ── 3-Dot Menu ──────────────────────────────────────────────────────────────
+                function togglePasswordMenu(e) {
+                    e.stopPropagation();
+                    const menu = document.getElementById("passwordMenuDropdown");
+                    menu.style.display = menu.style.display === "none" ? "block" : "none";
+                }
 
-document.addEventListener("click", () => {
-    const menu = document.getElementById("passwordMenuDropdown");
-    if(menu) menu.style.display = "none";
-});
+                document.addEventListener("click", () => {
+                    const menu = document.getElementById("passwordMenuDropdown");
+                    if (menu) menu.style.display = "none";
+                });
 
-// ── Select Mode (Option 1) ─────────────────────────────────────────────────
-function enableSelectMode(){
-    document.getElementById("passwordMenuDropdown").style.display = "none";
-    document.getElementById("checkboxHeaderTh").style.display     = "";
-    document.querySelectorAll(".row-checkbox-td").forEach(td => td.style.display = "");
-    document.getElementById("deleteSelectedBar").style.display    = "block";
-}
+                // ── Select Mode (Option 1) ─────────────────────────────────────────────────
+                function enableSelectMode() {
+                    document.getElementById("passwordMenuDropdown").style.display = "none";
+                    document.getElementById("checkboxHeaderTh").style.display = "";
+                    document.querySelectorAll(".row-checkbox-td").forEach(td => td.style.display = "");
+                    document.getElementById("deleteSelectedBar").style.display = "block";
+                }
 
-function cancelSelectMode(){
-    document.getElementById("checkboxHeaderTh").style.display  = "none";
-    document.querySelectorAll(".row-checkbox-td").forEach(td => td.style.display = "none");
-    document.getElementById("deleteSelectedBar").style.display = "none";
-    document.querySelectorAll(".password-checkbox").forEach(cb => cb.checked = false);
-}
+                function cancelSelectMode() {
+                    document.getElementById("checkboxHeaderTh").style.display = "none";
+                    document.querySelectorAll(".row-checkbox-td").forEach(td => td.style.display = "none");
+                    document.getElementById("deleteSelectedBar").style.display = "none";
+                    document.querySelectorAll(".password-checkbox").forEach(cb => cb.checked = false);
+                }
 
-function toggleSelectAll(masterCb){
-    document.querySelectorAll(".password-checkbox").forEach(cb => cb.checked = masterCb.checked);
-}
+                function toggleSelectAll(masterCb) {
+                    document.querySelectorAll(".password-checkbox").forEach(cb => cb.checked = masterCb.checked);
+                }
 
-async function deleteSelectedPasswords(){
-    const checked = document.querySelectorAll(".password-checkbox:checked");
-    if(checked.length === 0){
-        alert("Please select at least one password to delete!");
-        return;
-    }
-    if(!confirm(`Delete ${checked.length} selected password(s)? This cannot be undone.`)) return;
+                async function deleteSelectedPasswords() {
+                    const checked = document.querySelectorAll(".password-checkbox:checked");
+                    if (checked.length === 0) {
+                        alert("Please select at least one password to delete!");
+                        return;
+                    }
+                    if (!confirm(`Delete ${checked.length} selected password(s)? This cannot be undone.`)) return;
 
-    const ids = Array.from(checked).map(cb => cb.dataset.id);
+                    const ids = Array.from(checked).map(cb => cb.dataset.id);
 
-    try {
-        const res  = await fetch("/api/owner/strong-passwords/bulk-delete", {
-            method:  "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ ids })
-        });
-        const data = await res.json();
+                    try {
+                        const res = await fetch("/api/owner/strong-passwords/bulk-delete", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ ids })
+                        });
+                        const data = await res.json();
 
-        if(res.ok){
-            cancelSelectMode();
-            loadStrongPasswords();
-        } else {
-            alert("Delete failed: " + (data.error || "Unknown error"));
-        }
-    } catch(err){
-        alert("Delete failed: " + err.message);
-    }
-}
+                        if (res.ok) {
+                            cancelSelectMode();
+                            loadStrongPasswords();
+                        } else {
+                            alert("Delete failed: " + (data.error || "Unknown error"));
+                        }
+                    } catch (err) {
+                        alert("Delete failed: " + err.message);
+                    }
+                }
 
-// ── Placeholder for Option 2 & 3 (you'll explain these next) ─────────────────
-function bulkMarkStatus(value){
-    document.getElementById("passwordMenuDropdown").style.display = "none";
-    alert("This option will be wired up once you confirm the exact behavior!");
-}
+                // ── Placeholder for Option 2 & 3 (you'll explain these next) ─────────────────
+                function bulkMarkStatus(value) {
+                    document.getElementById("passwordMenuDropdown").style.display = "none";
+                    alert("This option will be wired up once you confirm the exact behavior!");
+                }
             </script>
 
 
