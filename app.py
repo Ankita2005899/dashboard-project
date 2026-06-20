@@ -3593,7 +3593,33 @@ def add_strong_password():
             conn.close()
             
 #________________________3 button part in password section (" select for delete ") ___---------------            
+@app.route("/api/owner/strong-passwords/bulk-delete", methods=["POST"])
+def bulk_delete_strong_passwords():
+    conn = None
+    try:
+        data = request.get_json()
+        ids  = data.get("ids", [])
+        if not ids:
+            return jsonify({"error": "No IDs provided"}), 400
 
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        placeholders = ','.join(['%s'] * len(ids))
+        cursor.execute(f"DELETE FROM strong_password WHERE id IN ({placeholders})", tuple(ids))
+        deleted_count = cursor.rowcount
+        conn.commit()
+        cursor.close()
+        return jsonify({"message": f"{deleted_count} password(s) deleted"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+            
+            
+            
+            
 @app.route("/api/owner/strong-passwords/bulk-update-status", methods=["POST"])
 def bulk_update_password_status():
     conn = None
