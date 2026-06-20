@@ -952,19 +952,41 @@
         }
 
 
-        /* ===== NOTIFICATION PANEL STYLES ===== */
+        /* ===== NOTIFICATION POPUP STYLES ===== */
+        #notificationPanel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 480px;
+            max-height: 75vh;
+            background: white;
+            border-radius: 12px;
+            border: 2px solid #cbd5e1;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18);
+            z-index: 99999;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #notifOverlay {
+            z-index: 99998 !important;
+        }
+
         .notif-item-dash {
             display: flex;
             align-items: flex-start;
             gap: 12px;
             padding: 14px 20px;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid #e5e7eb;
             cursor: pointer;
             transition: background 0.2s;
         }
 
         .notif-item-dash:hover {
-            background: #f8fafc;
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.06), rgba(245, 158, 11, 0.06));
+            border-left: 3px solid #f97316;
         }
 
         .unread-notif {
@@ -1012,14 +1034,6 @@
             background: #6366f1;
             flex-shrink: 0;
             margin-top: 5px;
-        }
-
-        #notificationPanel {
-            z-index: 99999 !important;
-        }
-
-        #notifOverlay {
-            z-index: 99998 !important;
         }
     </style>
 
@@ -1192,8 +1206,8 @@
 
 
     <!-- ================= NOTIFICATION PANEL ================= -->
-    <div id="notificationPanel"
-        style="display:none;position:fixed;top:0;right:0;width:380px;height:100vh;background:white;box-shadow:-4px 0 20px rgba(0,0,0,0.15);z-index:9999;flex-direction:column;border-left:2px solid #e5e7eb;">
+    <!-- ================= NOTIFICATION PANEL ================= -->
+    <div id="notificationPanel">
         <!-- Header -->
         <div
             style="padding:18px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#a8bcee,#81f5e8);">
@@ -1292,7 +1306,7 @@
 
     <!-- Overlay -->
     <div id="notifOverlay" onclick="closeNotifications()"
-        style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:9998;">
+        style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:9998;">
     </div>
 
 
