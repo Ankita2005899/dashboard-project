@@ -702,34 +702,42 @@
 
 
     <script>
- function submitCategoryRequest() {
+function submitCategoryRequest() {
     const category = document.getElementById("reqCategoryName").value.trim();
     const name = document.getElementById("reqUserName").value.trim();
     const reason = document.getElementById("reqReason").value.trim();
     const msg = document.getElementById("reqMsg");
 
     if (!category || !name || !reason) {
-        msg.style.display = "inline";
+        msg.style.display = "block";
         msg.style.color = "red";
         msg.innerText = "⚠ Please fill all fields!";
         return;
     }
 
-    // Popup turant dikhao
-    document.getElementById("categorySuccessPopup").style.display = "flex";
-
-    // DB mein background mein save karo
     fetch("/request-category", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_name: name, category_name: category, reason: reason })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            // Popup dikhao
+            document.getElementById("categorySuccessPopup").style.display = "flex";
+            document.getElementById("reqCategoryName").value = "";
+            document.getElementById("reqUserName").value = "";
+            document.getElementById("reqReason").value = "";
+            msg.style.display = "none";
+        } else {
+            // Errors dikhao
+            msg.style.display = "block";
+            msg.style.color = "red";
+            msg.innerHTML = data.errors.join("<br>");
+        }
     });
-
-    // Fields clear karo
-    document.getElementById("reqCategoryName").value = "";
-    document.getElementById("reqUserName").value = "";
-    document.getElementById("reqReason").value = "";
 }
+
 
 </script>
 <!-- SUCCESS POPUP -->

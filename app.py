@@ -14,6 +14,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import razorpay
 import mysql.connector
+from better_profanity import profanity
 
 #----------------login github entry-------------------------
 from sendgrid import SendGridAPIClient
@@ -3673,7 +3674,71 @@ def request_category():
     conn.close()
     return jsonify({"status": "success"})
 
-    
+#-----------------properly correct detail request form madhe enter kari la ---------------------- 
+
+
+@app.route("/request-category", methods=["POST"])
+def request_category():
+    data = request.get_json()
+    user_name = data.get("user_name", "").strip()
+    category_name = data.get("category_name", "").strip()
+    reason = data.get("reason", "").strip()
+
+    errors = []
+
+    # 1. Category Name validation
+    if len(category_name) < 3:
+        errors.append("❌ Category name must be at least 3 characters.")
+    if not re.match(r'^[a-zA-Z\s]+$', category_name):
+        errors.append("❌ Category name must contain only letters.")
+    if re.match(r'^(.)\1+$', category_name.replace(" ","")):
+        errors.append("❌ Category name looks invalid (e.g. 'aaa').")
+
+    # 2. Name validation
+    if len(user_name) < 3:
+        errors.append("❌ Name must be at least 3 characters.")
+    if not re.match(r'^[a-zA-Z\s]+$', user_name):
+        errors.append("❌ Name must contain only letters, no numbers.")
+    if re.match(r'^(.)\1+$', user_name.replace(" ","")):
+        errors.append("❌ Name looks invalid (e.g. 'aaa').")
+
+    # 3. Reason validation — ML style
+    words = reason.split()
+    unique_words = set(w.lower() for w in words)
+
+    if len(words) < 15:
+        errors.append(f"❌ Reason too short — write at least 15 words. (You wrote {len(words)})")
+    if len(unique_words) < 8:
+        errors.append("❌ Reason looks repetitive — please write meaningful content.")
+    if not re.search(r'[.!?]', reason):
+        errors.append("❌ Reason must have proper sentences (use . or ! or ?).")
+
+    # 4. Spam/random text check
+    def is_random_text(text):
+        words_list = text.lower().split()
+        short_words = [w for w in words_list if len(w) <= 2]
+        return len(short_words) > len(words_list) * 0.6
+
+    if is_random_text(reason):
+        errors.append("❌ Reason contains too many short/random words.")
+
+    if errors:
+        return jsonify({"status": "error", "errors": errors})
+
+    # Sab theek hai — DB mein save karo
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO category_requests (user_name, category_name, reason)
+        VALUES (%s, %s, %s)
+    """, (user_name, category_name, reason))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({"status": "success"})
+   
+   
+   
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
