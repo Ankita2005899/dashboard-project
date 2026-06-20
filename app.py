@@ -33,10 +33,14 @@ from openpyxl.styles import Alignment, Font
 from dotenv import load_dotenv
 #firebase database sathi
 import mysql.connector
+# app.py ke top pe — flask, mysql ke imports ke saath
+from fuzzywuzzy import fuzz
 import random
 import string
 import cloudinary
 import cloudinary.uploader
+
+
 
 load_dotenv("databasehandler.env")
 
@@ -2132,69 +2136,47 @@ def search_products():
     conn.close()
     return jsonify(results)
 
-
 @app.route("/products/search")
 def products_search():
     query = request.args.get("q", "").strip()
+    if not query:
+        return jsonify([])
+
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    like_pattern = f"%{query}%"
 
-    price_filter = None
-    name_query = query
-    if " of " in query.lower():
-        parts = query.lower().split(" of ")
-        name_query = parts[0].strip()
-        try:
-            price_filter = float(parts[-1].strip())
-        except:
-            pass
-
-    name_pattern = f"%{name_query}%"
-
-    try:
-        direct_price = float(query)
-        price_filter = direct_price
-        name_pattern = "%%"
-    except:
-        pass
-
-    if price_filter is not None:
-        cursor.execute("""
-            SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, COALESCE(searched_count,0) AS searched_count
-            FROM (
-                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM card 
-                    WHERE (name LIKE %s OR keywords LIKE %s) AND price = %s
-                UNION ALL
-                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM study_material 
-                    WHERE (name LIKE %s OR keywords LIKE %s) AND price = %s
-                UNION ALL
-                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM food_items 
-                    WHERE (name LIKE %s OR keywords LIKE %s) AND price = %s
-            ) AS combined
-            ORDER BY searched_count DESC
-        """, (name_pattern, name_pattern, price_filter,
-              name_pattern, name_pattern, price_filter,
-              name_pattern, name_pattern, price_filter))
-    else:
-        cursor.execute("""
-            SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, COALESCE(searched_count,0) AS searched_count
-            FROM (
-                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM card WHERE name LIKE %s OR keywords LIKE %s
-                UNION ALL
-                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM study_material WHERE name LIKE %s OR keywords LIKE %s
-                UNION ALL
-                SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count FROM food_items WHERE name LIKE %s OR keywords LIKE %s
-            ) AS combined
-            ORDER BY searched_count DESC
-        """, (like_pattern, like_pattern,
-              like_pattern, like_pattern,
-              like_pattern, like_pattern))
-
-    results = cursor.fetchall()
+    # Sab products fetch karo teeno tables se
+    cursor.execute("""
+        SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, 
+               COALESCE(searched_count, 0) AS searched_count, keywords
+        FROM (
+            SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count, keywords FROM card
+            UNION ALL
+            SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count, keywords FROM study_material
+            UNION ALL
+            SELECT id, name, price, image, video, category, availability, detail, address, uploaded_at, searched_count, keywords FROM food_items
+        ) AS combined
+    """)
+    all_products = cursor.fetchall()
     cursor.close()
     conn.close()
+
+    # Fuzzy match karo
+    results = []
+    for product in all_products:
+        name_score = fuzz.partial_ratio(query.lower(), (product["name"] or "").lower())
+        keyword_score = fuzz.partial_ratio(query.lower(), (product["keywords"] or "").lower())
+        best_score = max(name_score, keyword_score)
+
+        if best_score >= 70:  # 70% match hone pe show karo
+            product["match_score"] = best_score
+            results.append(product)
+
+    # Best match pehle dikhao
+    results.sort(key=lambda x: (x["match_score"], x["searched_count"]), reverse=True)
+
     return jsonify(results)
+
 
 
 

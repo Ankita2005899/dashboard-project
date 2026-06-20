@@ -9,3 +9,5 @@ python-dotenv
 requests
 sendgrid
 cloudinary
+fuzzywuzzy
+python-Levenshtein
