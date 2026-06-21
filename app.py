@@ -45,6 +45,13 @@ from flask_mail import Mail, Message
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from flask_mail import Mail as FlaskMail, Message
+import socket
+
+# Force IPv4 connections to avoid Render's IPv6 SMTP timeout/hang issue
+_original_getaddrinfo = socket.getaddrinfo
+def _ipv4_only_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+    return _original_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+socket.getaddrinfo = _ipv4_only_getaddrinfo
 
 
 load_dotenv("databasehandler.env")
