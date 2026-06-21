@@ -2876,7 +2876,7 @@ def verify_payment():
     razorpay_order_id   = data["razorpay_order_id"]
     razorpay_payment_id = data["razorpay_payment_id"]
     razorpay_signature  = data["razorpay_signature"]
-    cart_id             = data.get("cart_id")  # cart_id use karo
+    cart_id             = data.get("cart_id")
 
     body = razorpay_order_id + "|" + razorpay_payment_id
 
@@ -2888,17 +2888,63 @@ def verify_payment():
 
     username = session.get("username")
     user_id  = session.get("user_id")
-    table_name = f"{username}_{user_id}"  # e.g. sanket_3
+    table_name = f"{username}_{user_id}"
+
+    # ✅ Sanitized username for activity table
+    safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+    if safe_username[0].isdigit():
+        safe_username = "user_" + safe_username
+    activity_table = f"{safe_username}_{user_id}_product_activity"
+
+    # ✅ IST time
+    ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
+    ist_now_str = ist_now.strftime('%Y-%m-%d %H:%M:%S')
+    ist_month = ist_now.strftime('%B')
 
     db = get_db_connection()
     cursor = db.cursor()
 
     if expected_signature == razorpay_signature:
+        # ✅ Cart table update
         cursor.execute(f"""
             UPDATE `{table_name}` 
             SET mode = 'successful'
             WHERE id = %s
-        """, (cart_id,))  # id use karo, product_id nahi
+        """, (cart_id,))
+
+        # ✅ Purchased product ki detail fetch karo
+        cursor.execute(f"""
+            SELECT product_id, category FROM `{table_name}`
+            WHERE id = %s
+        """, (cart_id,))
+        purchased_item = cursor.fetchone()
+
+        if purchased_item:
+            product_id = purchased_item[0]
+            category   = purchased_item[1]
+
+            # ✅ product_activity update
+            cursor.execute(f"""
+                SELECT today_purchase_count FROM `{activity_table}`
+                WHERE product_id = %s AND category = %s
+            """, (product_id, category))
+            existing = cursor.fetchone()
+
+            if existing:
+                new_count = existing[0] + 1
+                cursor.execute(f"""
+                    UPDATE `{activity_table}`
+                    SET today_purchase_count = %s,
+                        purchased_time = %s,
+                        growth = %s
+                    WHERE product_id = %s AND category = %s
+                """, (new_count, ist_now_str, round(new_count / 100, 2), product_id, category))
+            else:
+                cursor.execute(f"""
+                    INSERT INTO `{activity_table}`
+                    (product_id, category, today_purchase_count, purchased_time, month, growth)
+                    VALUES (%s, %s, 1, %s, %s, %s)
+                """, (product_id, category, ist_now_str, ist_month, 0.01))
 
         try:
             cursor.execute("""
@@ -2906,12 +2952,13 @@ def verify_payment():
                 VALUES (%s, %s, %s, 'PAID')
             """, (session.get("user_email"), razorpay_payment_id, razorpay_order_id))
         except:
-            pass  # orders table nahi hai toh skip karo
+            pass
 
         db.commit()
         cursor.close()
         db.close()
         return jsonify({"status": "success"})
+
     else:
         cursor.execute(f"""
             UPDATE `{table_name}` 
@@ -2923,6 +2970,7 @@ def verify_payment():
         cursor.close()
         db.close()
         return jsonify({"status": "failed"})
+
     
     
 @app.route("/verify-payment-failed", methods=["POST"])
@@ -2943,8 +2991,8 @@ def verify_payment_failed():
     db.commit()
     cursor.close()
     db.close()
-    return jsonify({"status": "updated"})    
-    
+    return jsonify({"status": "updated"})
+
     
 
 @app.route("/get-buynow-item/<int:id>")
