@@ -198,8 +198,6 @@ def create_user_product_activity_table(username, user_id):
 
 #--------------------sare route ko automatically fix kar ne ke leya because 1 point {username}_{id} madhe jar aahe tar {username}_{id}_product_activity madhe sagale ssaav mahanun ------------------------
 
-
-
 @app.route("/fix-all-activity-tables")
 def fix_all_activity_tables():
     if not session.get("user_id"):
@@ -208,7 +206,6 @@ def fix_all_activity_tables():
     db = get_db_connection()
     cursor = db.cursor()
 
-    # Sabhi product_activity tables dhundho
     cursor.execute("""
         SELECT table_name 
         FROM information_schema.tables 
@@ -222,12 +219,29 @@ def fix_all_activity_tables():
 
     for (table_name,) in tables:
         try:
+            # Pehle check karo add_to_cart_time exist karta hai
+            cursor.execute(f"""
+                SELECT COUNT(*) FROM information_schema.columns 
+                WHERE table_schema = DATABASE() 
+                AND table_name = %s 
+                AND column_name = 'add_to_cart_time'
+            """, (table_name,))
+            has_old_col = cursor.fetchone()[0]
+
+            if has_old_col:
+                # Rename old column to new name
+                cursor.execute(f"""
+                    ALTER TABLE `{table_name}`
+                    CHANGE COLUMN `add_to_cart_time` `add_to_cart_date_time` DATETIME
+                """)
+
+            # search_time aur purchased_time bhi DATETIME karo
             cursor.execute(f"""
                 ALTER TABLE `{table_name}`
-                MODIFY COLUMN add_to_cart_date_time DATETIME,
                 MODIFY COLUMN search_time DATETIME,
                 MODIFY COLUMN purchased_time DATETIME
             """)
+
             fixed.append(table_name)
         except Exception as e:
             errors.append(f"{table_name}: {str(e)}")
@@ -241,6 +255,9 @@ def fix_all_activity_tables():
         "fixed_tables": fixed,
         "errors": errors
     })
+    
+    
+    
 # ============================================================
 # PRODUCT SYNC HELPERS
 # ============================================================
