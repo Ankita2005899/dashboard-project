@@ -43,6 +43,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail as SendGridMail
 import socket
+from search_analytics_api import search_bp
+from collections import defaultdict
 
 load_dotenv("databasehandler.env")
 
@@ -60,6 +62,8 @@ print("HTML file exists?", os.path.exists(html_file_path))
 app = Flask(__name__, template_folder=TEMPLATE_DIR)
 app.secret_key = "secret123"
 app.secret_key = "shopco_secret_key_2026"
+app.register_blueprint(search_bp)
+
 
 cloudinary.config(
     cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"),
@@ -4314,9 +4318,100 @@ def send_category_request(request_id):
     finally:
         if conn and conn.is_connected():
             conn.close()
-            
-            
-             
+   
+   
+#---------------owner search data of ( owner_section ) ------------------------------------            
+@app.route("/api/owner/search-analytics", methods=["GET"])
+def search_analytics():
+    conn = None
+    cursor = None
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("SELECT id, username FROM user_activity WHERE username IS NOT NULL")
+        users = cursor.fetchall()
+
+        aggregated = defaultdict(lambda: {
+            "total_searches": 0,
+            "users_who_searched": set(),
+            "category": None,
+            "growth_sum": 0.0,
+            "growth_count": 0,
+            "last_searched": None,
+        })
+
+        for user in users:
+            uid = user["id"]
+            uname = user["username"]
+            tbl_name = f"{uname}_{uid}_product_activity"
+
+            if not re.fullmatch(r"[A-Za-z0-9_]+", tbl_name):
+                continue
+
+            cursor.execute(
+                "SELECT COUNT(*) AS cnt FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = %s",
+                (tbl_name,)
+            )
+            if cursor.fetchone()["cnt"] == 0:
+                continue
+
+            cursor.execute(f"""
+                SELECT name, category,
+                       COALESCE(today_search_count, 0) AS today_search_count,
+                       COALESCE(growth_on_search, '0') AS growth_on_search,
+                       search_time
+                FROM `{tbl_name}`
+                WHERE today_search_count IS NOT NULL AND today_search_count > 0
+            """)
+            rows = cursor.fetchall()
+
+            for row in rows:
+                pname = (row["name"] or "").strip()
+                if not pname:
+                    continue
+
+                bucket = aggregated[pname]
+                bucket["total_searches"] += int(row["today_search_count"] or 0)
+                bucket["users_who_searched"].add(uid)
+
+                if bucket["category"] is None and row["category"]:
+                    bucket["category"] = row["category"]
+
+                try:
+                    g = float(str(row["growth_on_search"]).replace("%", "") or 0)
+                    bucket["growth_sum"] += g
+                    bucket["growth_count"] += 1
+                except (ValueError, TypeError):
+                    pass
+
+                if row["search_time"]:
+                    ts = str(row["search_time"])
+                    if bucket["last_searched"] is None or ts > bucket["last_searched"]:
+                        bucket["last_searched"] = ts
+
+        results = []
+        for pname, bucket in aggregated.items():
+            avg_growth = round(bucket["growth_sum"] / bucket["growth_count"], 2) if bucket["growth_count"] > 0 else 0.0
+            results.append({
+                "product_name": pname,
+                "category": bucket["category"] or "Uncategorized",
+                "total_searches": bucket["total_searches"],
+                "users_who_searched": len(bucket["users_who_searched"]),
+                "growth": avg_growth,
+                "last_searched": bucket["last_searched"],
+            })
+
+        results.sort(key=lambda x: x["total_searches"], reverse=True)
+        return jsonify({"results": results})
+
+    except Exception as e:
+        return jsonify({"error": str(e), "results": []}), 500
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
