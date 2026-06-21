@@ -41,18 +41,9 @@ import cloudinary
 import cloudinary.uploader
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from flask_mail import Mail, Message
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-from flask_mail import Mail as FlaskMail, Message
+from sendgrid.helpers.mail import Mail as SendGridMail
 import socket
-
-# Force IPv4 connections to avoid Render's IPv6 SMTP timeout/hang issue
-_original_getaddrinfo = socket.getaddrinfo
-def _ipv4_only_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
-    return _original_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
-socket.getaddrinfo = _ipv4_only_getaddrinfo
-
 
 load_dotenv("databasehandler.env")
 
@@ -880,7 +871,7 @@ def send_otp():
 
     try:
         sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-        message = Mail(
+        message = SendGridMail(
             from_email=os.getenv("SENDER_EMAIL"),
             to_emails=email,
             subject="ShopSphere Login OTP",
@@ -3777,8 +3768,6 @@ app.config['MAIL_USE_TLS']  = True
 app.config['MAIL_USERNAME'] = os.environ.get('SENDER_EMAIL')
 app.config['MAIL_PASSWORD'] = os.environ.get('owner_section_category_request_message')
 
-mail = FlaskMail(app)
-
 @app.route("/api/owner/category-requests", methods=["GET"])
 def get_category_requests():
     conn = None
@@ -3971,6 +3960,8 @@ def send_category_request(request_id):
             req["requested_at"] = req["requested_at"].strftime("%Y-%m-%d %H:%M:%S")
 
 
+        
+
         note_block = f"""
             <div style="margin-top:14px;padding:12px;background:#f0f9ff;
                 border-left:4px solid #6366f1;border-radius:6px;">
@@ -3978,11 +3969,11 @@ def send_category_request(request_id):
             </div>
         """ if owner_note else ""
 
-        msg = Message(
+        message = SendGridMail(
+            from_email=os.environ.get("SENDER_EMAIL"),
+            to_emails="ankitabandal45@gmail.com",
             subject=f"New Category Request: {req['category_name']}",
-            sender=os.environ.get('SENDER_EMAIL'),
-            recipients=["ankitabandal45@gmail.com"],
-            html=f"""
+            html_content=f"""
                 <h3>New Category Request</h3>
                 <p><strong>Requested by:</strong> {req['user_name']}</p>
                 <p><strong>Category:</strong> {req['category_name']}</p>
@@ -3991,7 +3982,8 @@ def send_category_request(request_id):
                 {note_block}
             """
         )
-        mail.send(msg)
+        sg = SendGridAPIClient(os.environ.get("SHOPSPHERE_SENDGRID_KEY"))
+        sg.send(message)
 
         cursor.execute(
             "UPDATE category_requests SET status = %s WHERE id = %s",
