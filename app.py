@@ -167,7 +167,6 @@ def ensure_user_table(username, user_id):
     cursor.close()
     db.close()
 
-
 def create_user_product_activity_table(username, user_id):
     table_name = f"{username}_{user_id}_product_activity"
 
@@ -181,13 +180,13 @@ def create_user_product_activity_table(username, user_id):
             name VARCHAR(255),
             category VARCHAR(100),
             today_search_count INT DEFAULT 0,
-            search_time TIME,
+            search_time DATETIME,
             growth_on_search VARCHAR(20),
             today_add_to_cart_count INT DEFAULT 0,
-            add_to_cart_date_time TIME,
+            add_to_cart_date_time DATETIME,
             growth_in_addtocart VARCHAR(20),
             today_purchase_count INT DEFAULT 0,
-            purchased_time TIME,
+            purchased_time DATETIME,
             month VARCHAR(20),
             growth FLOAT DEFAULT 0
         )
@@ -197,7 +196,51 @@ def create_user_product_activity_table(username, user_id):
     cursor.close()
     db.close()
 
+#--------------------sare route ko automatically fix kar ne ke leya because 1 point {username}_{id} madhe jar aahe tar {username}_{id}_product_activity madhe sagale ssaav mahanun ------------------------
 
+
+
+@app.route("/fix-all-activity-tables")
+def fix_all_activity_tables():
+    if not session.get("user_id"):
+        return jsonify({"error": "unauthorized"}), 401
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    # Sabhi product_activity tables dhundho
+    cursor.execute("""
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = DATABASE() 
+        AND table_name LIKE '%_product_activity'
+    """)
+    tables = cursor.fetchall()
+
+    fixed = []
+    errors = []
+
+    for (table_name,) in tables:
+        try:
+            cursor.execute(f"""
+                ALTER TABLE `{table_name}`
+                MODIFY COLUMN add_to_cart_date_time DATETIME,
+                MODIFY COLUMN search_time DATETIME,
+                MODIFY COLUMN purchased_time DATETIME
+            """)
+            fixed.append(table_name)
+        except Exception as e:
+            errors.append(f"{table_name}: {str(e)}")
+
+    db.commit()
+    cursor.close()
+    db.close()
+
+    return jsonify({
+        "success": True,
+        "fixed_tables": fixed,
+        "errors": errors
+    })
 # ============================================================
 # PRODUCT SYNC HELPERS
 # ============================================================
