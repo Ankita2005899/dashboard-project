@@ -2236,7 +2236,17 @@ def search_products():
     processed = set()
     username = session.get("username")
     user_id = session.get("user_id")
-    table_name = f"{username}_{user_id}_product_activity"
+
+    # ✅ Sanitized username use karo
+    safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+    if safe_username[0].isdigit():
+        safe_username = "user_" + safe_username
+    table_name = f"{safe_username}_{user_id}_product_activity"
+
+    # ✅ IST time Python se
+    ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
+    ist_now_str = ist_now.strftime('%Y-%m-%d %H:%M:%S')
+    ist_month = ist_now.strftime('%B')
 
     for item in results:
         key = (item["category"], item["id"])
@@ -2244,12 +2254,20 @@ def search_products():
             continue
         processed.add(key)
 
+        # ✅ Global searched_count update
         cursor.execute(f"""
             UPDATE {item['category']} SET searched_count = COALESCE(searched_count,0) + 1,
-            last_searched_time = NOW()
+            last_searched_time = %s
             WHERE id = %s
-        """, (item["id"],))
+        """, (ist_now_str, item["id"],))
 
+        # ✅ search_logs mein INSERT
+        cursor.execute("""
+            INSERT INTO search_logs (user_id, product_id, category, search_time)
+            VALUES (%s, %s, %s, %s)
+        """, (user_id, item["id"], item["category"], ist_now_str))
+
+        # ✅ product_activity update
         cursor.execute(f"""
             SELECT today_search_count FROM `{table_name}`
             WHERE product_id = %s AND category = %s
@@ -2261,16 +2279,16 @@ def search_products():
             cursor.execute(f"""
                 UPDATE `{table_name}`
                 SET today_search_count = %s,
-                    search_time = NOW(),
+                    search_time = %s,
                     growth_on_search = %s
                 WHERE product_id = %s AND category = %s
-            """, (new_count, f"{new_count}/100", item["id"], item["category"]))
+            """, (new_count, ist_now_str, f"{new_count}/100", item["id"], item["category"]))
         else:
             cursor.execute(f"""
                 INSERT INTO `{table_name}`
                 (product_id, name, category, today_search_count, search_time, month, growth_on_search)
-                VALUES (%s, %s, %s, 1, NOW(), MONTHNAME(NOW()), %s)
-            """, (item["id"], item["name"], item["category"], "1/100"))
+                VALUES (%s, %s, %s, 1, %s, %s, %s)
+            """, (item["id"], item["name"], item["category"], ist_now_str, ist_month, "1/100"))
 
     conn.commit()
 
@@ -2284,7 +2302,6 @@ def search_products():
     cursor.close()
     conn.close()
     return jsonify(results)
-
 
 
 @app.route("/products/search")
