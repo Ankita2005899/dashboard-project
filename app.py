@@ -870,7 +870,10 @@ def send_otp():
     session["otp_email"] = email
 
     try:
-        sg = SendGridAPIClient(os.getenv("SHOPSPHERE_SENDGRID_KEY"))
+        sg_key = os.getenv("SHOPSPHERE_SENDGRID_KEY")
+        print(f"DEBUG OTP KEY -> len={len(sg_key) if sg_key else 0}, "
+            f"start={sg_key[:8] if sg_key else None}, end={sg_key[-4:] if sg_key else None}")
+        sg = SendGridAPIClient(sg_key)
         message = SendGridMail(
             from_email=os.getenv("SENDER_EMAIL"),
             to_emails=email,
