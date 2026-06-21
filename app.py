@@ -192,10 +192,31 @@ def create_user_product_activity_table(username, user_id):
         )
     """)
 
+    # ✅ Purani tables fix karo — add_to_cart_time → add_to_cart_date_time
+    cursor.execute(f"""
+        SELECT COUNT(*) FROM information_schema.columns 
+        WHERE table_schema = DATABASE() 
+        AND table_name = %s 
+        AND column_name = 'add_to_cart_time'
+    """, (table_name,))
+    has_old_col = cursor.fetchone()[0]
+
+    if has_old_col:
+        cursor.execute(f"""
+            ALTER TABLE `{table_name}`
+            CHANGE COLUMN `add_to_cart_time` `add_to_cart_date_time` DATETIME
+        """)
+
+    # ✅ search_time aur purchased_time DATETIME karo
+    cursor.execute(f"""
+        ALTER TABLE `{table_name}`
+        MODIFY COLUMN search_time DATETIME,
+        MODIFY COLUMN purchased_time DATETIME
+    """)
+
     db.commit()
     cursor.close()
     db.close()
-
 #--------------------sare route ko automatically fix kar ne ke leya because 1 point {username}_{id} madhe jar aahe tar {username}_{id}_product_activity madhe sagale ssaav mahanun ------------------------
 
 @app.route("/fix-all-activity-tables")
