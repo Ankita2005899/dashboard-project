@@ -1216,7 +1216,7 @@ def send_owner_otp():
             "https://api.sendgrid.com/v3/mail/send",
             data=payload,
             headers={
-                "Authorization": f"Bearer {os.getenv('SENDGRID_API_KEY')}",
+                "Authorization": f"Bearer {os.getenv('SHOPSPHERE_SENDGRID_KEY')}",
                 "Content-Type": "application/json"
             }
         )
