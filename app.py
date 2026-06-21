@@ -2319,29 +2319,34 @@ def track_add_to_cart():
     user_id = session.get("user_id")
     table_name = f"{username}_{user_id}_product_activity"
 
+    # ✅ Python se IST time
+    ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
+    ist_time = ist_now.strftime('%Y-%m-%d %H:%M:%S')
+    ist_month = ist_now.strftime('%B')
+
     cursor.execute(f"SELECT today_add_to_cart_count FROM `{table_name}` WHERE product_id = %s", (product_id,))
     existing = cursor.fetchone()
-
-    cursor.execute("SELECT CONVERT_TZ(NOW(), '+00:00', '+05:30')")
-    ist_time = cursor.fetchone()[0]
 
     if existing:
         new_count = existing[0] + 1
         cursor.execute(f"""
-            UPDATE `{table_name}` SET today_add_to_cart_count = %s, add_to_cart_date_time = %s, growth_in_addtocart = %s
+            UPDATE `{table_name}` SET today_add_to_cart_count = %s, 
+            add_to_cart_date_time = %s, growth_in_addtocart = %s
             WHERE product_id = %s
         """, (new_count, ist_time, f"{new_count}/100", product_id))
     else:
         cursor.execute(f"""
             INSERT INTO `{table_name}`
             (product_id, name, category, today_add_to_cart_count, add_to_cart_date_time, growth_in_addtocart, month)
-            VALUES (%s,%s,%s,%s,%s,%s,MONTHNAME(%s))
-        """, (product_id, product_name, product_category, 1, ist_time, "1/100", ist_time))
+            VALUES (%s,%s,%s,%s,%s,%s,%s)
+        """, (product_id, product_name, product_category, 1, ist_time, "1/100", ist_month))
 
     conn.commit()
     cursor.close()
     conn.close()
     return jsonify({"message": "cart activity recorded", "time": str(ist_time)})
+
+
 
 
 @app.route("/owner-addtocart-data")
