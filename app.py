@@ -1476,6 +1476,7 @@ def get_cart_items():
         db.close()
 
     return jsonify(items)
+
 @app.route("/add-to-cart", methods=["POST"])
 def add_to_cart():
     print("👉 ROUTE HIT:", request.path)
@@ -1585,15 +1586,15 @@ def add_to_cart():
                 cursor.execute(f"""
                     UPDATE `{activity_table}`
                     SET today_add_to_cart_count = %s,
-                        add_to_cart_time = DATE(DATE_ADD(NOW(), INTERVAL 330 MINUTE)),
+                        add_to_cart_date_time = DATE_ADD(NOW(), INTERVAL 330 MINUTE),
                         growth_in_addtocart = %s
                     WHERE product_id = %s AND category = %s
                 """, (new_count, f"{new_count}/100", item["id"], item["category"]))
             else:
                 cursor.execute(f"""
                     INSERT INTO `{activity_table}`
-                    (product_id, name, category, today_add_to_cart_count, add_to_cart_time, month, growth_in_addtocart)
-                    VALUES (%s, %s, %s, 1, DATE(DATE_ADD(NOW(), INTERVAL 330 MINUTE)), MONTHNAME(NOW()), '1/100')
+                    (product_id, name, category, today_add_to_cart_count, add_to_cart_date_time, month, growth_in_addtocart)
+                    VALUES (%s, %s, %s, 1, DATE_ADD(NOW(), INTERVAL 330 MINUTE), MONTHNAME(NOW()), '1/100')
                 """, (item["id"], item["name"], item["category"]))
 
         # ✅ Loop ke BAAD commit
@@ -2107,7 +2108,6 @@ def search_product():
     except Exception as e:
         print("Error logging search:", e)
         return jsonify({"status": "error"})
-
 @app.route("/search-products")
 def search_products():
     now = int(time.time())
@@ -2148,7 +2148,7 @@ def search_products():
 
         cursor.execute(f"""
             UPDATE {item['category']} SET searched_count = COALESCE(searched_count,0) + 1,
-            last_searched_time = DATE(DATE_ADD(NOW(), INTERVAL 330 MINUTE))
+            last_searched_time = DATE_ADD(NOW(), INTERVAL 330 MINUTE)
             WHERE id = %s
         """, (item["id"],))
 
@@ -2163,7 +2163,7 @@ def search_products():
             cursor.execute(f"""
                 UPDATE `{table_name}`
                 SET today_search_count = %s,
-                    search_time = DATE(DATE_ADD(NOW(), INTERVAL 330 MINUTE)),
+                    search_time = DATE_ADD(NOW(), INTERVAL 330 MINUTE),
                     growth_on_search = %s
                 WHERE product_id = %s AND category = %s
             """, (new_count, f"{new_count}/100", item["id"], item["category"]))
@@ -2171,7 +2171,7 @@ def search_products():
             cursor.execute(f"""
                 INSERT INTO `{table_name}`
                 (product_id, name, category, today_search_count, search_time, month, growth_on_search)
-                VALUES (%s, %s, %s, 1, DATE(DATE_ADD(NOW(), INTERVAL 330 MINUTE)), MONTHNAME(NOW()), %s)
+                VALUES (%s, %s, %s, 1, DATE_ADD(NOW(), INTERVAL 330 MINUTE), MONTHNAME(NOW()), %s)
             """, (item["id"], item["name"], item["category"], "1/100"))
 
     conn.commit()
@@ -2186,7 +2186,6 @@ def search_products():
     cursor.close()
     conn.close()
     return jsonify(results)
-
 
 @app.route("/products/search")
 def products_search():
