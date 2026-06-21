@@ -2355,7 +2355,7 @@ def track_search():
         return jsonify({"status": "empty"})
 
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     like_pattern = f"%{query}%"
 
     product_tables = ["card", "food_items", "study_material"]
@@ -2367,6 +2367,20 @@ def track_search():
                 last_searched_time = NOW()
             WHERE name = %s OR keywords LIKE %s
         """, (query, like_pattern))
+
+        # search_logs mein insert karo
+        cursor.execute(f"""
+            SELECT id, category FROM `{table}`
+            WHERE name = %s OR keywords LIKE %s
+        """, (query, like_pattern))
+        matched = cursor.fetchall()
+
+        user_id = session.get("user_id")
+        for product in matched:
+            cursor.execute("""
+                INSERT INTO search_logs (user_id, product_id, category, search_time)
+                VALUES (%s, %s, %s, NOW())
+            """, (user_id, product["id"], product["category"]))
 
     conn.commit()
     cursor.close()
