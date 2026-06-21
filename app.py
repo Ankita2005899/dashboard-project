@@ -1475,7 +1475,8 @@ def get_cart_items():
         db.close()
 
     return jsonify(items)
-from datetime import datetime, timedelta
+
+
 
 @app.route("/add-to-cart", methods=["POST"])
 def add_to_cart():
@@ -1512,7 +1513,7 @@ def add_to_cart():
         client_table = get_cart_table_name(username, user_id)
         activity_table = f"{username}_{user_id}_product_activity"
 
-        # ✅ IST time Python se
+        # IST time fallback
         ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
         ist_now_str = ist_now.strftime('%Y-%m-%d %H:%M:%S')
         ist_month = ist_now.strftime('%B')
@@ -1579,6 +1580,14 @@ def add_to_cart():
                 item.get("address", ""), item["id"], 0
             ))
 
+            # ✅ client_table se actual date fetch karo (jo sahi time hai)
+            cursor.execute(f"""
+                SELECT date FROM `{client_table}`
+                ORDER BY id DESC LIMIT 1
+            """)
+            cart_date = cursor.fetchone()
+            actual_datetime = cart_date[0] if cart_date else ist_now_str
+
             # ✅ Product activity update
             cursor.execute(f"""
                 SELECT id, today_add_to_cart_count FROM `{activity_table}`
@@ -1594,13 +1603,13 @@ def add_to_cart():
                         add_to_cart_date_time = %s,
                         growth_in_addtocart = %s
                     WHERE product_id = %s AND category = %s
-                """, (new_count, ist_now_str, f"{new_count}/100", item["id"], item["category"]))
+                """, (new_count, actual_datetime, f"{new_count}/100", item["id"], item["category"]))
             else:
                 cursor.execute(f"""
                     INSERT INTO `{activity_table}`
                     (product_id, name, category, today_add_to_cart_count, add_to_cart_date_time, month, growth_in_addtocart)
                     VALUES (%s, %s, %s, 1, %s, %s, '1/100')
-                """, (item["id"], item["name"], item["category"], ist_now_str, ist_month))
+                """, (item["id"], item["name"], item["category"], actual_datetime, ist_month))
 
         # ✅ Loop ke BAAD commit
         db.commit()
@@ -1617,6 +1626,7 @@ def add_to_cart():
         except:
             pass
         return jsonify({"success": False, "error": str(e)}), 500
+    
     
     
     
