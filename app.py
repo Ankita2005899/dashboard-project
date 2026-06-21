@@ -1476,6 +1476,7 @@ def get_cart_items():
         db.close()
 
     return jsonify(items)
+from datetime import datetime, timedelta
 
 @app.route("/add-to-cart", methods=["POST"])
 def add_to_cart():
@@ -1511,6 +1512,11 @@ def add_to_cart():
 
         client_table = get_cart_table_name(username, user_id)
         activity_table = f"{username}_{user_id}_product_activity"
+
+        # ✅ IST time Python se
+        ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
+        ist_now_str = ist_now.strftime('%Y-%m-%d %H:%M:%S')
+        ist_month = ist_now.strftime('%B')
 
         for item in cart:
             if item["category"] not in table_map:
@@ -1586,16 +1592,16 @@ def add_to_cart():
                 cursor.execute(f"""
                     UPDATE `{activity_table}`
                     SET today_add_to_cart_count = %s,
-                        add_to_cart_date_time = DATE_ADD(NOW(), INTERVAL 330 MINUTE),
+                        add_to_cart_date_time = %s,
                         growth_in_addtocart = %s
                     WHERE product_id = %s AND category = %s
-                """, (new_count, f"{new_count}/100", item["id"], item["category"]))
+                """, (new_count, ist_now_str, f"{new_count}/100", item["id"], item["category"]))
             else:
                 cursor.execute(f"""
                     INSERT INTO `{activity_table}`
                     (product_id, name, category, today_add_to_cart_count, add_to_cart_date_time, month, growth_in_addtocart)
-                    VALUES (%s, %s, %s, 1, DATE_ADD(NOW(), INTERVAL 330 MINUTE), MONTHNAME(NOW()), '1/100')
-                """, (item["id"], item["name"], item["category"]))
+                    VALUES (%s, %s, %s, 1, %s, %s, '1/100')
+                """, (item["id"], item["name"], item["category"], ist_now_str, ist_month))
 
         # ✅ Loop ke BAAD commit
         db.commit()
