@@ -870,7 +870,7 @@ def send_otp():
     session["otp_email"] = email
 
     try:
-        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+        sg = SendGridAPIClient(os.getenv("SHOPSPHERE_SENDGRID_KEY"))
         message = SendGridMail(
             from_email=os.getenv("SENDER_EMAIL"),
             to_emails=email,
