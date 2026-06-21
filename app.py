@@ -2108,7 +2108,29 @@ def search_product():
         print("Error logging search:", e)
         return jsonify({"status": "error"})
     
-    
+@app.route("/fix-activity-datetime")
+def fix_activity_datetime():
+    if not session.get("user_id"):
+        return jsonify({"error": "unauthorized"}), 401
+
+    user_id = session.get("user_id")
+    username = session.get("username")
+    activity_table = f"{username}_{user_id}_product_activity"
+
+    try:
+        db = get_db_connection()
+        cursor = db.cursor()
+        cursor.execute(f"""
+            UPDATE `{activity_table}`
+            SET add_to_cart_date_time = NOW()
+            WHERE add_to_cart_date_time IS NOT NULL
+        """)
+        db.commit()
+        cursor.close()
+        db.close()
+        return jsonify({"success": True, "message": "datetime fixed"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500    
     
 @app.route("/search-products")
 def search_products():
