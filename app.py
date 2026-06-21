@@ -3961,80 +3961,76 @@ def send_category_request(request_id):
         
 
         note_block = f"""
-            <div style="margin-top:14px;padding:12px;background:#f0f9ff;
-                border-left:4px solid #6366f1;border-radius:6px;">
-                <strong>Owner's Note:</strong><br>{owner_note}
+            <div style="margin-top:18px;background:#f0f9ff;border-left:4px solid #6366f1;
+                border-radius:0 10px 10px 0;padding:14px 16px;">
+                <div style="font-size:11px;font-weight:700;color:#6366f1;
+                    text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">✏️ Owner's Note</div>
+                <div style="font-size:14px;color:#334155;line-height:1.6;">{owner_note}</div>
             </div>
         """ if owner_note else ""
 
-message = SendGridMail(
-    from_email=os.environ.get("SENDER_EMAIL"),
-    to_emails="ankitabandal45@gmail.com",
-    subject=f"New Category Request: {req['category_name']}",
-    html_content=f"""
-        <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:0 auto;
-            background:#f8fafc;padding:24px;">
+        message = SendGridMail(
+            from_email=os.environ.get("SENDER_EMAIL"),
+            to_emails="ankitabandal45@gmail.com",
+            subject=f"New Category Request: {req['category_name']}",
+            html_content=f"""
+                <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:0 auto;
+                    background:#f8fafc;padding:24px;">
 
-            <div style="background:white;border-radius:16px;overflow:hidden;
-                box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+                    <div style="background:white;border-radius:16px;overflow:hidden;
+                        box-shadow:0 4px 20px rgba(0,0,0,0.08);">
 
-                <div style="background:linear-gradient(135deg,#8b5cf6,#a855f7);
-                    padding:20px 24px;color:white;">
-                    <div style="font-size:13px;opacity:0.9;font-weight:600;letter-spacing:0.5px;
-                        text-transform:uppercase;margin-bottom:4px;">📂 New Category Request</div>
-                    <div style="font-size:20px;font-weight:800;">{req['category_name']}</div>
-                </div>
+                        <div style="background:linear-gradient(135deg,#8b5cf6,#a855f7);
+                            padding:20px 24px;color:white;">
+                            <div style="font-size:13px;opacity:0.9;font-weight:600;letter-spacing:0.5px;
+                                text-transform:uppercase;margin-bottom:4px;">📂 New Category Request</div>
+                            <div style="font-size:20px;font-weight:800;">{req['category_name']}</div>
+                        </div>
 
-                <div style="padding:24px;">
+                        <div style="padding:24px;">
 
-                    <div style="display:flex;justify-content:space-between;align-items:center;
-                        padding:12px 0;border-bottom:1px solid #f1f5f9;">
-                        <span style="font-size:11px;font-weight:700;color:#94a3b8;
-                            text-transform:uppercase;letter-spacing:0.5px;">Requested By</span>
-                        <span style="font-size:14px;font-weight:700;color:#1e293b;">{req['user_name']}</span>
+                            <div style="display:flex;justify-content:space-between;align-items:center;
+                                padding:12px 0;border-bottom:1px solid #f1f5f9;">
+                                <span style="font-size:11px;font-weight:700;color:#94a3b8;
+                                    text-transform:uppercase;letter-spacing:0.5px;">Requested By</span>
+                                <span style="font-size:14px;font-weight:700;color:#1e293b;">{req['user_name']}</span>
+                            </div>
+
+                            <div style="display:flex;justify-content:space-between;align-items:center;
+                                padding:12px 0;border-bottom:1px solid #f1f5f9;">
+                                <span style="font-size:11px;font-weight:700;color:#94a3b8;
+                                    text-transform:uppercase;letter-spacing:0.5px;">Category</span>
+                                <span style="font-size:14px;font-weight:700;color:#1e293b;">{req['category_name']}</span>
+                            </div>
+
+                            <div style="display:flex;justify-content:space-between;align-items:center;
+                                padding:12px 0;border-bottom:1px solid #f1f5f9;">
+                                <span style="font-size:11px;font-weight:700;color:#94a3b8;
+                                    text-transform:uppercase;letter-spacing:0.5px;">Requested At</span>
+                                <span style="font-size:13px;font-weight:600;color:#64748b;">{req['requested_at']}</span>
+                            </div>
+
+                            <div style="padding-top:14px;">
+                                <div style="font-size:11px;font-weight:700;color:#94a3b8;
+                                    text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Reason</div>
+                                <div style="font-size:14px;color:#334155;line-height:1.7;
+                                    background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;
+                                    padding:14px;">{req['reason']}</div>
+                            </div>
+
+                            {note_block}
+
+                        </div>
+
+                        <div style="background:#f8fafc;padding:14px 24px;text-align:center;
+                            border-top:1px solid #f1f5f9;">
+                            <span style="font-size:11px;color:#94a3b8;">ShopSphere Owner Dashboard</span>
+                        </div>
                     </div>
+</div>
+            """
+        )
 
-                    <div style="display:flex;justify-content:space-between;align-items:center;
-                        padding:12px 0;border-bottom:1px solid #f1f5f9;">
-                        <span style="font-size:11px;font-weight:700;color:#94a3b8;
-                            text-transform:uppercase;letter-spacing:0.5px;">Category</span>
-                        <span style="font-size:14px;font-weight:700;color:#1e293b;">{req['category_name']}</span>
-                    </div>
-
-                    <div style="display:flex;justify-content:space-between;align-items:center;
-                        padding:12px 0;border-bottom:1px solid #f1f5f9;">
-                        <span style="font-size:11px;font-weight:700;color:#94a3b8;
-                            text-transform:uppercase;letter-spacing:0.5px;">Requested At</span>
-                        <span style="font-size:13px;font-weight:600;color:#64748b;">{req['requested_at']}</span>
-                    </div>
-
-                    <div style="padding-top:14px;">
-                        <div style="font-size:11px;font-weight:700;color:#94a3b8;
-                            text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Reason</div>
-                        <div style="font-size:14px;color:#334155;line-height:1.7;
-                            background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;
-                            padding:14px;">{req['reason']}</div>
-                    </div>
-
-                    {f'''
-                    <div style="margin-top:18px;background:#f0f9ff;border-left:4px solid #6366f1;
-                        border-radius:0 10px 10px 0;padding:14px 16px;">
-                        <div style="font-size:11px;font-weight:700;color:#6366f1;
-                            text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">✏️ Owner's Note</div>
-                        <div style="font-size:14px;color:#334155;line-height:1.6;">{owner_note}</div>
-                    </div>
-                    ''' if owner_note else ''}
-
-                </div>
-
-                <div style="background:#f8fafc;padding:14px 24px;text-align:center;
-                    border-top:1px solid #f1f5f9;">
-                    <span style="font-size:11px;color:#94a3b8;">ShopSphere Owner Dashboard</span>
-                </div>
-            </div>
-        </div>
-    """
-)
         sg = SendGridAPIClient(os.environ.get("SHOPSPHERE_SENDGRID_KEY"))
         sg.send(message)
 
