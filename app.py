@@ -1477,7 +1477,6 @@ def get_cart_items():
 
     return jsonify(items)
 
-
 @app.route("/add-to-cart", methods=["POST"])
 def add_to_cart():
     print("👉 ROUTE HIT:", request.path)
@@ -1507,8 +1506,8 @@ def add_to_cart():
             "food": "food_items"
         }
 
-        # Use sanitized table name consistently
         client_table = get_cart_table_name(username, user_id)
+        activity_table = f"{username}_{user_id}_product_activity"
 
         for item in cart:
             price = float(item["price"])
@@ -1569,6 +1568,30 @@ def add_to_cart():
                 item.get("address", ""), item["id"], 0
             ))
 
+            # ✅ Product activity update (same loop ke andar, sahi indentation)
+            cursor.execute(f"""
+                SELECT id, today_add_to_cart_count FROM `{activity_table}`
+                WHERE product_id = %s AND category = %s
+            """, (item["id"], item["category"]))
+            act_existing = cursor.fetchone()
+
+            if act_existing:
+                new_count = act_existing[1] + 1
+                cursor.execute(f"""
+                    UPDATE `{activity_table}`
+                    SET today_add_to_cart_count = %s,
+                        add_to_cart_time = NOW(),
+                        growth_in_addtocart = %s
+                    WHERE product_id = %s AND category = %s
+                """, (new_count, f"{new_count}/100", item["id"], item["category"]))
+            else:
+                cursor.execute(f"""
+                    INSERT INTO `{activity_table}`
+                    (product_id, name, category, today_add_to_cart_count, add_to_cart_time, month, growth_in_addtocart)
+                    VALUES (%s, %s, %s, 1, NOW(), MONTHNAME(NOW()), '1/100')
+                """, (item["id"], item["name"], item["category"]))
+
+        # ✅ Loop ke BAAD commit — sahi jagah
         db.commit()
         cursor.close()
         db.close()
@@ -1583,7 +1606,7 @@ def add_to_cart():
         except:
             pass
         return jsonify({"success": False, "error": str(e)}), 500
-
+    
 
 @app.route("/remove-from-cart", methods=["POST"])
 def remove_from_cart():
@@ -1978,19 +2001,25 @@ def availabilities_vc_xml():
     db.close()
     return Response(xml_str, mimetype="application/xml")
 
-
 @app.route("/get-addtocart-data")
 def get_addtocart_data_from_db():
+    username = session.get("username")
+    user_id = session.get("user_id")
+
+    if not username or not user_id:
+        return jsonify([])
+
+    activity_table = f"{username}_{user_id}_product_activity"
+
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
 
-    cursor.execute("""
-        SELECT id AS product_id, name, category, availability AS todays_addtocart_count, last_addtocart_time FROM card
-        UNION ALL
-        SELECT id, name, category, availability, last_addtocart_time FROM study_material
-        UNION ALL
-        SELECT id, name, category, availability, last_addtocart_time FROM food_items
-        ORDER BY product_id;
+    cursor.execute(f"""
+        SELECT product_id, name, category, 
+               today_add_to_cart_count, add_to_cart_time, growth_in_addtocart
+        FROM `{activity_table}`
+        WHERE today_add_to_cart_count > 0
+        ORDER BY today_add_to_cart_count DESC
     """)
     rows = cursor.fetchall()
     cursor.close()
