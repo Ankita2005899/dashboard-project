@@ -4330,6 +4330,8 @@ def search_analytics():
         cursor.execute("SELECT id, username FROM user_activity WHERE username IS NOT NULL")
         users = cursor.fetchall()
 
+        print(f"DEBUG: Found {len(users)} users", flush=True)
+
         aggregated = defaultdict(lambda: {
             "total_searches": 0,
             "users_who_searched": set(),
@@ -4344,7 +4346,10 @@ def search_analytics():
             uname = user["username"]
             tbl_name = f"{uname}_{uid}_product_activity"
 
+            print(f"DEBUG: Checking table {tbl_name}", flush=True)
+
             if not re.fullmatch(r"[A-Za-z0-9_]+", tbl_name):
+                print(f"DEBUG: Skipping unsafe table name: {tbl_name}", flush=True)
                 continue
 
             cursor.execute(
@@ -4352,6 +4357,7 @@ def search_analytics():
                 (tbl_name,)
             )
             if cursor.fetchone()["cnt"] == 0:
+                print(f"DEBUG: Table {tbl_name} does not exist, skipping", flush=True)
                 continue
 
             cursor.execute(f"""
@@ -4363,6 +4369,7 @@ def search_analytics():
                 WHERE today_search_count IS NOT NULL AND today_search_count > 0
             """)
             rows = cursor.fetchall()
+            print(f"DEBUG: {tbl_name} has {len(rows)} search rows", flush=True)
 
             for row in rows:
                 pname = (row["name"] or "").strip()
@@ -4401,15 +4408,19 @@ def search_analytics():
             })
 
         results.sort(key=lambda x: x["total_searches"], reverse=True)
+        print(f"DEBUG: Returning {len(results)} products", flush=True)
         return jsonify({"results": results})
 
     except Exception as e:
+        print(f"DEBUG ERROR: {str(e)}", flush=True)
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e), "results": []}), 500
 
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
-
+        
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
