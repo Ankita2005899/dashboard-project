@@ -3765,11 +3765,6 @@ def request_category():
     return jsonify({"status": "success"})
    
 #--------------------owner dashooard madhe category request sathi ------------------------------   
-app.config['MAIL_SERVER']   = 'smtp.gmail.com'
-app.config['MAIL_PORT']     = 587
-app.config['MAIL_USE_TLS']  = True
-app.config['MAIL_USERNAME'] = os.environ.get('SENDER_EMAIL')
-app.config['MAIL_PASSWORD'] = os.environ.get('owner_section_category_request_message')
 
 @app.route("/api/owner/category-requests", methods=["GET"])
 def get_category_requests():
