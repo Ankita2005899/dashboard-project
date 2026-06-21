@@ -1244,14 +1244,32 @@
                     🎁 Reward Distribution
                 </button>
 
-                <button class="header-btn" onclick="openStrongPasswordModal()"
-                    style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;">
-                    🔐 Strong Passwords
-                </button>
-                <button class="header-btn" onclick="openCategoryRequestsModal()"
-                    style="background:linear-gradient(135deg,#8b5cf6,#a855f7);color:white;border:none;">
-                    📂 Category Requests
-                </button>
+                <div style="position:relative;">
+                    <button id="headerMenuBtn" onclick="toggleHeaderMenu(event)" class="header-btn"
+                        style="font-size:18px;font-weight:800;padding:8px 16px;">
+                        ☰
+                    </button>
+
+                    <div id="headerMenuDropdown" style="display:none;position:absolute;top:48px;right:0;
+        background:white;border:2px solid #e2e8f0;border-radius:12px;
+        box-shadow:0 8px 24px rgba(0,0,0,0.15);z-index:1000;min-width:220px;overflow:hidden;">
+
+                        <button onclick="openStrongPasswordModal(); closeHeaderMenu();" style="width:100%;text-align:left;background:none;border:none;
+            padding:14px 18px;font-size:14px;font-weight:600;color:#1e293b;
+            cursor:pointer;display:flex;align-items:center;gap:10px;
+            border-bottom:1px solid #f1f5f9;" onmouseover="this.style.background='#f8fafc'"
+                            onmouseout="this.style.background='white'">
+                            🔐 Strong Passwords
+                        </button>
+
+                        <button onclick="openCategoryRequestsModal(); closeHeaderMenu();" style="width:100%;text-align:left;background:none;border:none;
+            padding:14px 18px;font-size:14px;font-weight:600;color:#1e293b;
+            cursor:pointer;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f8fafc'"
+                            onmouseout="this.style.background='white'">
+                            📂 Category Requests
+                        </button>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -3644,6 +3662,22 @@
                         } catch (err) { alert("Update failed: " + err.message); }
                     }
                 }
+
+
+                function toggleHeaderMenu(e) {
+                    e.stopPropagation();
+                    const menu = document.getElementById("headerMenuDropdown");
+                    menu.style.display = menu.style.display === "none" ? "block" : "none";
+                }
+
+                function closeHeaderMenu() {
+                    document.getElementById("headerMenuDropdown").style.display = "none";
+                }
+
+                document.addEventListener("click", () => {
+                    const menu = document.getElementById("headerMenuDropdown");
+                    if (menu) menu.style.display = "none";
+                });
 
             </script>
 
