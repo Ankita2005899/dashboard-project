@@ -4384,10 +4384,15 @@ def search_analytics():
                     bucket["category"] = row["category"]
 
                 try:
-                    g = float(str(row["growth_on_search"]).replace("%", "") or 0)
+                    raw = str(row["growth_on_search"] or "0").strip()
+                    if "/" in raw:
+                        parts = raw.split("/")
+                        g = float(parts[0]) / float(parts[1]) * 100
+                    else:
+                        g = float(raw.replace("%", "") or 0)
                     bucket["growth_sum"] += g
                     bucket["growth_count"] += 1
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, ZeroDivisionError):
                     pass
 
                 if row["search_time"]:
