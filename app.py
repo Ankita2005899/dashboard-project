@@ -1577,19 +1577,22 @@ def add_to_cart():
 
             if act_existing:
                 new_count = act_existing[1] + 1
+                # activity UPDATE mein change karo
                 cursor.execute(f"""
                     UPDATE `{activity_table}`
                     SET today_add_to_cart_count = %s,
-                        add_to_cart_time = NOW(),
+                        add_to_cart_time = CONVERT_TZ(NOW(), '+00:00', '+05:30'),
                         growth_in_addtocart = %s
                     WHERE product_id = %s AND category = %s
                 """, (new_count, f"{new_count}/100", item["id"], item["category"]))
             else:
+                # activity INSERT mein change karo
                 cursor.execute(f"""
                     INSERT INTO `{activity_table}`
                     (product_id, name, category, today_add_to_cart_count, add_to_cart_time, month, growth_in_addtocart)
-                    VALUES (%s, %s, %s, 1, NOW(), MONTHNAME(NOW()), '1/100')
+                    VALUES (%s, %s, %s, 1, CONVERT_TZ(NOW(), '+00:00', '+05:30'), MONTHNAME(NOW()), '1/100')
                 """, (item["id"], item["name"], item["category"]))
+
 
         # ✅ Loop ke BAAD commit — sahi jagah
         db.commit()
@@ -2151,14 +2154,18 @@ def search_products():
 
         if existing:
             new_count = existing["today_search_count"] + 1
+            # search UPDATE
             cursor.execute(f"""
-                UPDATE `{table_name}` SET today_search_count = %s, search_time = NOW(), growth_on_search = %s
+                UPDATE `{table_name}` SET today_search_count = %s, 
+                search_time = CONVERT_TZ(NOW(), '+00:00', '+05:30'), 
+                growth_on_search = %s
                 WHERE product_id = %s
             """, (new_count, f"{new_count}/100", item["id"]))
         else:
+            # search INSERT
             cursor.execute(f"""
-                INSERT INTO `{table_name}` (product_id, name, category, today_search_count, search_time, month, growth_on_search)
-                VALUES (%s,%s,%s,1,NOW(),MONTHNAME(NOW()),%s)
+                    INSERT INTO `{table_name}` (product_id, name, category, today_search_count, search_time, month, growth_on_search)
+                    VALUES (%s,%s,%s,1,CONVERT_TZ(NOW(), '+00:00', '+05:30'),MONTHNAME(NOW()),%s)
             """, (item["id"], item["name"], item["category"], "1/100"))
 
     conn.commit()
