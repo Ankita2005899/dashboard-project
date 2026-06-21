@@ -2347,7 +2347,6 @@ def products_search():
 
 
 
-
 @app.route("/track-search")
 def track_search():
     query = request.args.get("q", "").strip()
@@ -2360,32 +2359,69 @@ def track_search():
 
     product_tables = ["card", "food_items", "study_material"]
 
+    username = session.get("username")
+    user_id = session.get("user_id")
+
+    # ✅ Sanitized username
+    safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+    if safe_username[0].isdigit():
+        safe_username = "user_" + safe_username
+    activity_table = f"{safe_username}_{user_id}_product_activity"
+
+    # ✅ IST time
+    ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
+    ist_now_str = ist_now.strftime('%Y-%m-%d %H:%M:%S')
+    ist_month = ist_now.strftime('%B')
+
     for table in product_tables:
         cursor.execute(f"""
             UPDATE `{table}` 
             SET searched_count = searched_count + 1,
-                last_searched_time = NOW()
+                last_searched_time = %s
             WHERE name = %s OR keywords LIKE %s
-        """, (query, like_pattern))
+        """, (ist_now_str, query, like_pattern))
 
-        # search_logs mein insert karo
         cursor.execute(f"""
             SELECT id, category FROM `{table}`
             WHERE name = %s OR keywords LIKE %s
         """, (query, like_pattern))
         matched = cursor.fetchall()
 
-        user_id = session.get("user_id")
         for product in matched:
+            # ✅ search_logs INSERT
             cursor.execute("""
                 INSERT INTO search_logs (user_id, product_id, category, search_time)
-                VALUES (%s, %s, %s, NOW())
-            """, (user_id, product["id"], product["category"]))
+                VALUES (%s, %s, %s, %s)
+            """, (user_id, product["id"], product["category"], ist_now_str))
+
+            # ✅ product_activity UPDATE/INSERT
+            cursor.execute(f"""
+                SELECT today_search_count FROM `{activity_table}`
+                WHERE product_id = %s AND category = %s
+            """, (product["id"], product["category"]))
+            existing = cursor.fetchone()
+
+            if existing:
+                new_count = existing["today_search_count"] + 1
+                cursor.execute(f"""
+                    UPDATE `{activity_table}`
+                    SET today_search_count = %s,
+                        search_time = %s,
+                        growth_on_search = %s
+                    WHERE product_id = %s AND category = %s
+                """, (new_count, ist_now_str, f"{new_count}/100", product["id"], product["category"]))
+            else:
+                cursor.execute(f"""
+                    INSERT INTO `{activity_table}`
+                    (product_id, name, category, today_search_count, search_time, month, growth_on_search)
+                    VALUES (%s, %s, %s, 1, %s, %s, %s)
+                """, (product["id"], query, product["category"], ist_now_str, ist_month, "1/100"))
 
     conn.commit()
     cursor.close()
     conn.close()
     return jsonify({"status": "updated"})
+
 
 
 @app.route('/products/search-user')
