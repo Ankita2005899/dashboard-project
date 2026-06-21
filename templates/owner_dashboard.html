@@ -2104,7 +2104,7 @@
 
             <!-- 📈 Category Trends Chart Modal -->
             <div id="categoryTrendsModal" class="modal-overlay">
-                <div class="buyers-modal" style="max-width:700px;">
+                <div class="buyers-modal" style="max-width:1400px;width:95%;">
                     <div class="buyers-header">
                         <div>
                             <h3 id="trendsModalTitle" style="color:#6366f1;">📈 Category Trends</h3>
@@ -2112,7 +2112,7 @@
                         </div>
                         <button onclick="closeCategoryTrendsChart()" class="send-btn">Close</button>
                     </div>
-                    <div style="height:320px;padding:10px;">
+                    <div style="height:640px;padding:10px;">
                         <canvas id="categoryTrendsCanvas"></canvas>
                     </div>
                 </div>
@@ -2121,6 +2121,7 @@
             <!-- 🔍 Owner Product Detail Mini Modal -->
             <<!-- 🔍 Owner Product Detail Mini Modal -->
                 <div id="ownerProductDetailModal" class="modal-overlay" style="z-index:10000;">
+
                     <div class="buyers-modal" style="max-width:750px;width:92%;">
                         <div class="buyers-header">
                             <h3 style="color:#8b5cf6;font-size:18px;">🔍 Product Details</h3>
@@ -2582,6 +2583,10 @@
 
                         document.getElementById("ownerProductDetailModal").style.display = "flex";
                     }
+                    function closeOwnerProductDetail() {
+                        document.getElementById("ownerProductDetailModal").style.display = "none";
+                    }
+                    // ── Category Trends Chart (Search / Purchased / Add to Cart) ──────────────────
                     // ── Category Trends Chart (Search / Purchased / Add to Cart) ──────────────────
                     // 🤖 ML: Time-series trend per category — same EWMA foundation used for
                     // detecting demand shifts, applied here per-category instead of per-product.
