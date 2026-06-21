@@ -43,7 +43,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail as SendGridMail
 import socket
-from search_analytics_api import search_bp
 from collections import defaultdict
 
 load_dotenv("databasehandler.env")
@@ -62,7 +61,6 @@ print("HTML file exists?", os.path.exists(html_file_path))
 app = Flask(__name__, template_folder=TEMPLATE_DIR)
 app.secret_key = "secret123"
 app.secret_key = "shopco_secret_key_2026"
-app.register_blueprint(search_bp)
 
 
 cloudinary.config(
