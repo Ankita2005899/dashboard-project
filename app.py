@@ -1476,6 +1476,7 @@ def get_cart_items():
         db.close()
 
     return jsonify(items)
+
 @app.route("/add-to-cart", methods=["POST"])
 def add_to_cart():
     print("👉 ROUTE HIT:", request.path)
@@ -1585,7 +1586,7 @@ def add_to_cart():
                 cursor.execute(f"""
                     UPDATE `{activity_table}`
                     SET today_add_to_cart_count = %s,
-                        add_to_cart_date_time = NOW(),
+                        add_to_cart_date_time = DATE_ADD(NOW(), INTERVAL 330 MINUTE),
                         growth_in_addtocart = %s
                     WHERE product_id = %s AND category = %s
                 """, (new_count, f"{new_count}/100", item["id"], item["category"]))
@@ -1593,7 +1594,7 @@ def add_to_cart():
                 cursor.execute(f"""
                     INSERT INTO `{activity_table}`
                     (product_id, name, category, today_add_to_cart_count, add_to_cart_date_time, month, growth_in_addtocart)
-                    VALUES (%s, %s, %s, 1, NOW(), MONTHNAME(NOW()), '1/100')
+                    VALUES (%s, %s, %s, 1, DATE_ADD(NOW(), INTERVAL 330 MINUTE), MONTHNAME(NOW()), '1/100')
                 """, (item["id"], item["name"], item["category"]))
 
         # ✅ Loop ke BAAD commit
@@ -1611,9 +1612,9 @@ def add_to_cart():
         except:
             pass
         return jsonify({"success": False, "error": str(e)}), 500
-
-
-
+    
+    
+    
 @app.route("/remove-from-cart", methods=["POST"])
 def remove_from_cart():
     print("👉 ROUTE HIT:", request.path)
