@@ -2119,345 +2119,378 @@
             </div>
 
             <!-- 🔍 Owner Product Detail Mini Modal -->
-            <div id="ownerProductDetailModal" class="modal-overlay" style="z-index:10000 !important;">
-                <div class="buyers-modal" style="max-width:420px;">
-                    <div class="buyers-header">
-                        <h3 style="color:#8b5cf6;font-size:16px;">🔍 Product Details</h3>
-                        <button onclick="closeOwnerProductDetail()" class="send-btn">Close</button>
+            <<!-- 🔍 Owner Product Detail Mini Modal -->
+                <div id="ownerProductDetailModal" class="modal-overlay" style="z-index:10000;">
+                    <div class="buyers-modal" style="max-width:750px;width:92%;">
+                        <div class="buyers-header">
+                            <h3 style="color:#8b5cf6;font-size:18px;">🔍 Product Details</h3>
+                            <button onclick="closeOwnerProductDetail()" class="send-btn">Close</button>
+                        </div>
+
+                        <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:10px;">
+
+                            <div style="flex:0 0 280px;display:flex;flex-direction:column;gap:12px;">
+                                <img id="ownerModalImage" onerror="this.style.display='none'"
+                                    style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;border:2px solid #e2e8f0;">
+                                <video id="ownerModalVideo" controls
+                                    style="width:100%;max-height:220px;border-radius:10px;border:1px solid #e2e8f0;display:none;">
+                                    <source id="ownerModalVideoSource" src="" type="video/mp4">
+                                </video>
+                                <div id="ownerNoVideoMsg"
+                                    style="display:none;background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:8px;padding:12px;text-align:center;color:#94a3b8;font-size:13px;">
+                                    📵 Video not uploaded
+                                </div>
+                            </div>
+
+                            <div style="flex:1 1 300px;max-height:70vh;overflow-y:auto;padding-right:6px;">
+                                <h2 id="ownerModalName" style="font-size:18px;margin:0 0 10px;font-weight:700;"></h2>
+                                <p style="margin:4px 0;font-size:14px;"><b>Available:</b> <span
+                                        id="ownerModalAvailability"></span></p>
+                                <p style="margin:4px 0;font-size:14px;"><b>Price:</b> ₹<span
+                                        id="ownerModalPrice"></span></p>
+                                <hr style="margin:12px 0;border:0;border-top:1px solid #e5e7eb;">
+                                <p style="margin:4px 0;font-size:14px;">📅 <b>Uploaded:</b> <span
+                                        id="ownerModalDate"></span></p>
+                                <p style="margin:4px 0;font-size:14px;">📍 <b>Address:</b> <span
+                                        id="ownerModalAddress"></span></p>
+                                <div id="ownerModalMaterial"
+                                    style="font-size:13px;border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-top:8px;">
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
-                    <div id="ownerProductDetailBody" style="padding:6px;"></div>
                 </div>
-            </div>
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <script>
-                // Month colors cycling
-                const monthColors = ["blue", "green", "yellow", "blue", "green", "yellow", "blue", "green", "yellow", "blue", "green", "yellow"];
-                const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-                const monthListDiv = document.getElementById("monthList");
-                const yearSelect = document.getElementById("yearSelect");
-                let currentPage = ""; // stores which page to redirect
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script>
+                    // Month colors cycling
+                    const monthColors = ["blue", "green", "yellow", "blue", "green", "yellow", "blue", "green", "yellow", "blue", "green", "yellow"];
+                    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                    const monthListDiv = document.getElementById("monthList");
+                    const yearSelect = document.getElementById("yearSelect");
+                    let currentPage = ""; // stores which page to redirect
 
-                // Fill Year dropdown (past years only)
-                const currentYear = new Date().getFullYear();
-                for (let y = currentYear - 1; y >= 2000; y--) {
-                    const opt = document.createElement("option");
-                    opt.value = y; opt.innerText = y;
-                    yearSelect.appendChild(opt);
-                }
-
-                // Open Modal for a given page
-                function openMonthModal(page) {
-                    currentPage = page;
-                    document.getElementById("modalTitle").innerText = "Select Month & Year for " + page.replace(/^\w/, c => c.toUpperCase());
-
-                    // Clear previous month buttons
-                    monthListDiv.innerHTML = "";
-
-                    months.forEach((m, i) => {
-                        const btn = document.createElement("div");
-                        btn.classList.add("month-btn");
-                        btn.setAttribute("data-color", monthColors[i]);
-                        btn.innerText = m;
-                        btn.onclick = () => btn.classList.toggle("selected");
-                        monthListDiv.appendChild(btn);
-                    });
-
-                    document.getElementById("monthModal").style.display = "flex";
-                }
-
-                // Close Modal
-                function closeMonthModal() {
-                    document.getElementById("monthModal").style.display = "none";
-                }
-
-                // Confirm selection and redirect
-                function confirmMonths() {
-                    const selectedMonths = [];
-                    document.querySelectorAll(".month-btn.selected").forEach(b => selectedMonths.push(b.innerText));
-                    const year = yearSelect.value;
-                    if (selectedMonths.length === 0) {
-                        alert("Please select at least one month");
-                        return;
+                    // Fill Year dropdown (past years only)
+                    const currentYear = new Date().getFullYear();
+                    for (let y = currentYear - 1; y >= 2000; y--) {
+                        const opt = document.createElement("option");
+                        opt.value = y; opt.innerText = y;
+                        yearSelect.appendChild(opt);
                     }
-                    // Redirect to page after confirmation
-                    if (currentPage === "search") window.location.href = "/search?year=" + year + "&months=" + selectedMonths.join(",");
-                    else if (currentPage === "addtocart") window.location.href = "/addtocart?year=" + year + "&months=" + selectedMonths.join(",");
-                    else if (currentPage === "purchased") window.location.href = "/purchased?year=" + year + "&months=" + selectedMonths.join(",");
-                }
 
-                function openSearchPage() {
-                    window.location.href = "/searchfortheownersection";
-                }
+                    // Open Modal for a given page
+                    function openMonthModal(page) {
+                        currentPage = page;
+                        document.getElementById("modalTitle").innerText = "Select Month & Year for " + page.replace(/^\w/, c => c.toUpperCase());
 
+                        // Clear previous month buttons
+                        monthListDiv.innerHTML = "";
 
-                function openActiveBuyersModal() {
-                    document.getElementById("activeBuyersModal").style.display = "flex";
-                }
+                        months.forEach((m, i) => {
+                            const btn = document.createElement("div");
+                            btn.classList.add("month-btn");
+                            btn.setAttribute("data-color", monthColors[i]);
+                            btn.innerText = m;
+                            btn.onclick = () => btn.classList.toggle("selected");
+                            monthListDiv.appendChild(btn);
+                        });
 
-                function closeActiveBuyersModal() {
-                    document.getElementById("activeBuyersModal").style.display = "none";
-                }
-
-                function searchBuyers() {
-                    const raw = document.getElementById("buyerSearch").value.toLowerCase().trim();
-                    const terms = raw.split(",").map(t => t.trim()).filter(t => t.length > 0);
-                    const allRows = document.querySelectorAll("#activeBuyersTableBody tr");
-
-                    let i = 0;
-                    while (i < allRows.length) {
-                        const dataRow = allRows[i];
-                        const panelRow = allRows[i + 1];
-
-                        if (dataRow.classList.contains("buyer-accordion-panel")) {
-                            i++;
-                            continue;
-                        }
-
-                        if (terms.length === 0) {
-                            dataRow.style.display = "";
-                            if (panelRow) panelRow.style.display = "";
-                        } else {
-                            const cells = Array.from(dataRow.querySelectorAll("td"))
-                                .slice(0, -1)
-                                .map(td => td.innerText.toLowerCase().trim());
-
-                            const match = terms.some(term => {
-                                if (term.length <= 2) {
-                                    return cells[0] === term || cells[1] === term;
-                                } else {
-                                    return cells.some(cellText => cellText.includes(term));
-                                }
-                            });
-
-                            dataRow.style.display = match ? "" : "none";
-                            if (panelRow) {
-                                if (panelRow.classList.contains("open")) {
-                                    panelRow.style.display = "table-row";
-                                } else {
-                                    panelRow.style.display = "none";
-                                }
-                            }
-                        }
-                        i += 2;
+                        document.getElementById("monthModal").style.display = "flex";
                     }
-                }
 
-
-                function openChurnModal() {
-                    document.getElementById("churnModal").style.display = "flex";
-                }
-
-                function closeChurnModal() {
-                    document.getElementById("churnModal").style.display = "none";
-                }
-
-                const ctx = document.getElementById('customerTrendChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                        datasets: [
-                            {
-                                label: 'Churn Risk',
-                                data: [22, 30, 38, 35, 42, 48],
-                                borderColor: '#ef4444',
-                                backgroundColor: 'transparent',
-                                tension: 0.4
-                            },
-                            {
-                                label: 'Retention Success',
-                                data: [40, 45, 50, 58, 63, 68],
-                                borderColor: '#10b981',
-                                backgroundColor: 'transparent',
-                                tension: 0.4
-                            },
-                            {
-                                label: 'Purchase Frequency',
-                                data: [12, 18, 22, 28, 31, 36],
-                                borderColor: '#3b82f6',
-                                backgroundColor: 'transparent',
-                                tension: 0.4
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
+                    // Close Modal
+                    function closeMonthModal() {
+                        document.getElementById("monthModal").style.display = "none";
                     }
-                });
-                function openTotalCustomersModal() {
-                    document.getElementById("totalCustomersModal").style.display = "flex";
-                }
 
-                function closeTotalCustomersModal() {
-                    document.getElementById("totalCustomersModal").style.display = "none";
-                }
-                function searchTotalCustomers() {
-                    const raw = document.getElementById("customerSearch").value.toLowerCase().trim();
-                    const allRows = document.querySelectorAll("#totalCustomersTableBody tr");
-
-                    const terms = raw.split(",").map(t => t.trim()).filter(t => t.length > 0);
-
-                    let i = 0;
-                    while (i < allRows.length) {
-                        const dataRow = allRows[i];
-                        const panelRow = allRows[i + 1];
-
-                        if (dataRow.classList.contains("accordion-panel")) {
-                            i++;
-                            continue;
-                        }
-
-                        if (terms.length === 0) {
-                            dataRow.style.display = "";
-                            if (panelRow) panelRow.style.display = "";
-                        } else {
-                            const cells = Array.from(dataRow.querySelectorAll("td"))
-                                .slice(0, -1)
-                                .map(td => td.innerText.toLowerCase().trim());
-
-                            const match = terms.some(term => {
-                                if (term.length <= 2) {
-                                    return cells[0] === term || cells[1] === term;
-                                } else {
-                                    return cells.some(cellText => cellText.includes(term));
-                                }
-                            });
-
-                            dataRow.style.display = match ? "" : "none";
-
-                            if (panelRow) {
-                                if (panelRow.classList.contains("open")) {
-                                    panelRow.style.display = "table-row";
-                                } else {
-                                    panelRow.style.display = "none";
-                                }
-                            }
-                        }         // ← closes else
-
-                        i += 2;
-                    }             // ← closes while
-                }                 // ← closes function
-
-                function openTotalCustomersModal() {
-                    const modal = document.getElementById("totalCustomersModal");
-                    modal.style.display = "flex";
-                }
-
-                function closeTotalCustomersModal() {
-                    const modal = document.getElementById("totalCustomersModal");
-                    modal.style.display = "none";
-                }
-
-                function openNewCustomersModal() {
-                    document.getElementById("newCustomersModal").style.display = "flex";
-                    loadNewCustomers(); // ← add this line
-                }
-
-                function closeNewCustomersModal() {
-                    document.getElementById("newCustomersModal").style.display = "none";
-                    document.getElementById("currentLoginBtn").style.display = "inline-block";
-                    document.getElementById("undoLoginBtn").style.display = "none";
-                }
-
-
-                function searchNewCustomers() {
-                    let input = document.getElementById("newCustomerSearch").value.toLowerCase();
-                    let rows = document.querySelectorAll("#newCustomersTableBody tr");
-
-                    rows.forEach(row => {
-                        let text = row.innerText.toLowerCase();
-                        row.style.display = text.includes(input) ? "" : "none";
-                    });
-                }
-
-                function openAvgOrdersModal() {
-                    document.getElementById("avgOrdersModal").style.display = "flex";
-                }
-
-                function closeAvgOrdersModal() {
-                    document.getElementById("avgOrdersModal").style.display = "none";
-                }
-
-                function searchAvgOrders() {
-                    let input = document.getElementById("avgOrdersSearch").value.toLowerCase();
-                    let rows = document.querySelectorAll("#avgOrdersTableBody tr");
-
-                    rows.forEach(row => {
-                        let text = row.innerText.toLowerCase();
-                        row.style.display = text.includes(input) ? "" : "none";
-                    });
-                }
-
-                window.onclick = function (e) {
-                    document.querySelectorAll(".modal-overlay").forEach(modal => {
-                        if (e.target === modal) {
-                            modal.style.display = "none";
-                        }
-                    });
-                }
-
-                // ── Product Catalog (Owner Preview) ───────────────────────────────────────────
-                let catalogCurrentTab = "kitchen";
-                let catalogTrendsChart = null;
-
-                const catalogEndpoints = {
-                    kitchen: "/get-products",
-                    study: "/get-study-materials",
-                    food: "/get-food-items"
-                };
-                const catalogLabels = {
-                    kitchen: "🍳 Kitchen Items",
-                    study: "📚 Study Materials",
-                    food: "🍔 Food Items"
-                };
-
-                function openProductCatalogModal() {
-                    document.getElementById("productCatalogModal").style.display = "flex";
-                    switchCatalogTab("kitchen");
-                }
-                function closeProductCatalogModal() {
-                    document.getElementById("productCatalogModal").style.display = "none";
-                }
-
-                function switchCatalogTab(tab) {
-                    catalogCurrentTab = tab;
-                    ["kitchen", "study", "food"].forEach(t => {
-                        const btn = document.getElementById(`catalogTab-${t}`);
-                        if (t === tab) {
-                            btn.style.background = "#8b5cf6";
-                            btn.style.color = "white";
-                        } else {
-                            btn.style.background = "white";
-                            btn.style.color = "#8b5cf6";
-                        }
-                    });
-                    loadCatalogProducts(tab);
-                }
-
-                async function loadCatalogProducts(tab) {
-                    const grid = document.getElementById("catalogGrid");
-                    grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#94a3b8;">Loading...</p>`;
-
-                    try {
-                        const res = await fetch(catalogEndpoints[tab]);
-                        const products = await res.json();
-
-                        if (!products || products.length === 0) {
-                            grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#94a3b8;">No products in this category</p>`;
+                    // Confirm selection and redirect
+                    function confirmMonths() {
+                        const selectedMonths = [];
+                        document.querySelectorAll(".month-btn.selected").forEach(b => selectedMonths.push(b.innerText));
+                        const year = yearSelect.value;
+                        if (selectedMonths.length === 0) {
+                            alert("Please select at least one month");
                             return;
                         }
+                        // Redirect to page after confirmation
+                        if (currentPage === "search") window.location.href = "/search?year=" + year + "&months=" + selectedMonths.join(",");
+                        else if (currentPage === "addtocart") window.location.href = "/addtocart?year=" + year + "&months=" + selectedMonths.join(",");
+                        else if (currentPage === "purchased") window.location.href = "/purchased?year=" + year + "&months=" + selectedMonths.join(",");
+                    }
 
-                        grid.innerHTML = "";
-                        products.forEach(p => {
-                            const availability = Number(p.availability || 0);
-                            const card = document.createElement("div");
-                            card.style.cssText = `
+                    function openSearchPage() {
+                        window.location.href = "/searchfortheownersection";
+                    }
+
+
+                    function openActiveBuyersModal() {
+                        document.getElementById("activeBuyersModal").style.display = "flex";
+                    }
+
+                    function closeActiveBuyersModal() {
+                        document.getElementById("activeBuyersModal").style.display = "none";
+                    }
+
+                    function searchBuyers() {
+                        const raw = document.getElementById("buyerSearch").value.toLowerCase().trim();
+                        const terms = raw.split(",").map(t => t.trim()).filter(t => t.length > 0);
+                        const allRows = document.querySelectorAll("#activeBuyersTableBody tr");
+
+                        let i = 0;
+                        while (i < allRows.length) {
+                            const dataRow = allRows[i];
+                            const panelRow = allRows[i + 1];
+
+                            if (dataRow.classList.contains("buyer-accordion-panel")) {
+                                i++;
+                                continue;
+                            }
+
+                            if (terms.length === 0) {
+                                dataRow.style.display = "";
+                                if (panelRow) panelRow.style.display = "";
+                            } else {
+                                const cells = Array.from(dataRow.querySelectorAll("td"))
+                                    .slice(0, -1)
+                                    .map(td => td.innerText.toLowerCase().trim());
+
+                                const match = terms.some(term => {
+                                    if (term.length <= 2) {
+                                        return cells[0] === term || cells[1] === term;
+                                    } else {
+                                        return cells.some(cellText => cellText.includes(term));
+                                    }
+                                });
+
+                                dataRow.style.display = match ? "" : "none";
+                                if (panelRow) {
+                                    if (panelRow.classList.contains("open")) {
+                                        panelRow.style.display = "table-row";
+                                    } else {
+                                        panelRow.style.display = "none";
+                                    }
+                                }
+                            }
+                            i += 2;
+                        }
+                    }
+
+
+                    function openChurnModal() {
+                        document.getElementById("churnModal").style.display = "flex";
+                    }
+
+                    function closeChurnModal() {
+                        document.getElementById("churnModal").style.display = "none";
+                    }
+
+                    const ctx = document.getElementById('customerTrendChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                            datasets: [
+                                {
+                                    label: 'Churn Risk',
+                                    data: [22, 30, 38, 35, 42, 48],
+                                    borderColor: '#ef4444',
+                                    backgroundColor: 'transparent',
+                                    tension: 0.4
+                                },
+                                {
+                                    label: 'Retention Success',
+                                    data: [40, 45, 50, 58, 63, 68],
+                                    borderColor: '#10b981',
+                                    backgroundColor: 'transparent',
+                                    tension: 0.4
+                                },
+                                {
+                                    label: 'Purchase Frequency',
+                                    data: [12, 18, 22, 28, 31, 36],
+                                    borderColor: '#3b82f6',
+                                    backgroundColor: 'transparent',
+                                    tension: 0.4
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                    function openTotalCustomersModal() {
+                        document.getElementById("totalCustomersModal").style.display = "flex";
+                    }
+
+                    function closeTotalCustomersModal() {
+                        document.getElementById("totalCustomersModal").style.display = "none";
+                    }
+                    function searchTotalCustomers() {
+                        const raw = document.getElementById("customerSearch").value.toLowerCase().trim();
+                        const allRows = document.querySelectorAll("#totalCustomersTableBody tr");
+
+                        const terms = raw.split(",").map(t => t.trim()).filter(t => t.length > 0);
+
+                        let i = 0;
+                        while (i < allRows.length) {
+                            const dataRow = allRows[i];
+                            const panelRow = allRows[i + 1];
+
+                            if (dataRow.classList.contains("accordion-panel")) {
+                                i++;
+                                continue;
+                            }
+
+                            if (terms.length === 0) {
+                                dataRow.style.display = "";
+                                if (panelRow) panelRow.style.display = "";
+                            } else {
+                                const cells = Array.from(dataRow.querySelectorAll("td"))
+                                    .slice(0, -1)
+                                    .map(td => td.innerText.toLowerCase().trim());
+
+                                const match = terms.some(term => {
+                                    if (term.length <= 2) {
+                                        return cells[0] === term || cells[1] === term;
+                                    } else {
+                                        return cells.some(cellText => cellText.includes(term));
+                                    }
+                                });
+
+                                dataRow.style.display = match ? "" : "none";
+
+                                if (panelRow) {
+                                    if (panelRow.classList.contains("open")) {
+                                        panelRow.style.display = "table-row";
+                                    } else {
+                                        panelRow.style.display = "none";
+                                    }
+                                }
+                            }         // ← closes else
+
+                            i += 2;
+                        }             // ← closes while
+                    }                 // ← closes function
+
+                    function openTotalCustomersModal() {
+                        const modal = document.getElementById("totalCustomersModal");
+                        modal.style.display = "flex";
+                    }
+
+                    function closeTotalCustomersModal() {
+                        const modal = document.getElementById("totalCustomersModal");
+                        modal.style.display = "none";
+                    }
+
+                    function openNewCustomersModal() {
+                        document.getElementById("newCustomersModal").style.display = "flex";
+                        loadNewCustomers(); // ← add this line
+                    }
+
+                    function closeNewCustomersModal() {
+                        document.getElementById("newCustomersModal").style.display = "none";
+                        document.getElementById("currentLoginBtn").style.display = "inline-block";
+                        document.getElementById("undoLoginBtn").style.display = "none";
+                    }
+
+
+                    function searchNewCustomers() {
+                        let input = document.getElementById("newCustomerSearch").value.toLowerCase();
+                        let rows = document.querySelectorAll("#newCustomersTableBody tr");
+
+                        rows.forEach(row => {
+                            let text = row.innerText.toLowerCase();
+                            row.style.display = text.includes(input) ? "" : "none";
+                        });
+                    }
+
+                    function openAvgOrdersModal() {
+                        document.getElementById("avgOrdersModal").style.display = "flex";
+                    }
+
+                    function closeAvgOrdersModal() {
+                        document.getElementById("avgOrdersModal").style.display = "none";
+                    }
+
+                    function searchAvgOrders() {
+                        let input = document.getElementById("avgOrdersSearch").value.toLowerCase();
+                        let rows = document.querySelectorAll("#avgOrdersTableBody tr");
+
+                        rows.forEach(row => {
+                            let text = row.innerText.toLowerCase();
+                            row.style.display = text.includes(input) ? "" : "none";
+                        });
+                    }
+
+                    window.onclick = function (e) {
+                        document.querySelectorAll(".modal-overlay").forEach(modal => {
+                            if (e.target === modal) {
+                                modal.style.display = "none";
+                            }
+                        });
+                    }
+
+                    // ── Product Catalog (Owner Preview) ───────────────────────────────────────────
+                    let catalogCurrentTab = "kitchen";
+                    let catalogTrendsChart = null;
+
+                    const catalogEndpoints = {
+                        kitchen: "/get-products",
+                        study: "/get-study-materials",
+                        food: "/get-food-items"
+                    };
+                    const catalogLabels = {
+                        kitchen: "🍳 Kitchen Items",
+                        study: "📚 Study Materials",
+                        food: "🍔 Food Items"
+                    };
+
+                    function openProductCatalogModal() {
+                        document.getElementById("productCatalogModal").style.display = "flex";
+                        switchCatalogTab("kitchen");
+                    }
+                    function closeProductCatalogModal() {
+                        document.getElementById("productCatalogModal").style.display = "none";
+                    }
+
+                    function switchCatalogTab(tab) {
+                        catalogCurrentTab = tab;
+                        ["kitchen", "study", "food"].forEach(t => {
+                            const btn = document.getElementById(`catalogTab-${t}`);
+                            if (t === tab) {
+                                btn.style.background = "#8b5cf6";
+                                btn.style.color = "white";
+                            } else {
+                                btn.style.background = "white";
+                                btn.style.color = "#8b5cf6";
+                            }
+                        });
+                        loadCatalogProducts(tab);
+                    }
+
+                    async function loadCatalogProducts(tab) {
+                        const grid = document.getElementById("catalogGrid");
+                        grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#94a3b8;">Loading...</p>`;
+
+                        try {
+                            const res = await fetch(catalogEndpoints[tab]);
+                            const products = await res.json();
+
+                            if (!products || products.length === 0) {
+                                grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#94a3b8;">No products in this category</p>`;
+                                return;
+                            }
+
+                            grid.innerHTML = "";
+                            products.forEach(p => {
+                                const availability = Number(p.availability || 0);
+                                const card = document.createElement("div");
+                                card.style.cssText = `
                 background:white;border:1px solid #e2e8f0;border-radius:14px;
                 overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.06);
                 display:flex;flex-direction:column;`;
 
-                            card.innerHTML = `
+                                card.innerHTML = `
                 <img src="${p.image || ''}" onerror="this.style.display='none'"
                     style="width:100%;height:140px;object-fit:cover;">
                 <div style="padding:12px;display:flex;flex-direction:column;gap:6px;flex:1;">
@@ -2480,196 +2513,218 @@
                     </div>
                 </div>
             `;
-                            grid.appendChild(card);
-                        });
+                                grid.appendChild(card);
+                            });
 
-                    } catch (err) {
-                        grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:red;">Failed to load products</p>`;
+                        } catch (err) {
+                            grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:red;">Failed to load products</p>`;
+                        }
                     }
-                }
 
-                function blockOwnerBuy() {
-                    alert("🚫 Card buying is only active to customer.");
-                }
+                    function blockOwnerBuy() {
+                        alert("🚫 Card buying is only active to customer.");
+                    }
 
-                function viewOwnerProductDetail(p) {
-                    const body = document.getElementById("ownerProductDetailBody");
-                    const videoUrl = p.video
-                        ? (p.video.startsWith("http") ? p.video : (p.video.startsWith("/") ? p.video : "/static/uploads/" + p.video))
-                        : null;
+                    function viewOwnerProductDetail(p) {
+                        document.getElementById("ownerModalImage").src = p.image || "";
+                        document.getElementById("ownerModalName").innerText = p.name || "";
+                        document.getElementById("ownerModalAvailability").innerText = p.availability || 0;
+                        document.getElementById("ownerModalPrice").innerText = p.price || 0;
 
-                    body.innerHTML = `
-        <img src="${p.image || ''}" onerror="this.style.display='none'"
-            style="width:100%;height:180px;object-fit:cover;border-radius:10px;margin-bottom:10px;">
+                        const dateVal = p.uploaded_at
+                            ? new Date(p.uploaded_at).toISOString().split("T")[0]
+                            : (p.uploaded_date || p.date || "N/A");
+                        document.getElementById("ownerModalDate").innerText = dateVal;
+                        document.getElementById("ownerModalAddress").innerText = p.address || "N/A";
 
-        ${videoUrl ? `
-            <video controls style="width:100%;border-radius:10px;margin-bottom:10px;">
-                <source src="${videoUrl}" type="video/mp4">
-            </video>
-        ` : `
-            <div style="background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:8px;
-                padding:10px;text-align:center;color:#94a3b8;font-size:12px;margin-bottom:10px;">
-                📵 Video not uploaded
-            </div>
-        `}
-
-        <h3 style="font-size:16px;margin:0 0 8px;">${p.name}</h3>
-        <p style="font-size:13px;margin:4px 0;"><b>Price:</b> ₹${p.price}</p>
-        <p style="font-size:13px;margin:4px 0;"><b>Available:</b> ${p.availability || 0}</p>
-        <p style="font-size:13px;margin:4px 0;"><b>Uploaded:</b> ${p.uploaded_date || p.date || '-'}</p>
-        <p style="font-size:13px;margin:4px 0;"><b>Address:</b> ${p.address || '-'}</p>
-        <p style="font-size:13px;margin:4px 0;"><b>Made of:</b> ${p.made_of || '-'}</p>
-        <p style="font-size:13px;margin:4px 0;"><b>Used for:</b> ${p.used_for || '-'}</p>
-    `;
-                    document.getElementById("ownerProductDetailModal").style.display = "flex";
-                }
-                function closeOwnerProductDetail() {
-                    document.getElementById("ownerProductDetailModal").style.display = "none";
-                }
-
-                // ── Category Trends Chart (Search / Purchased / Add to Cart) ──────────────────
-                // 🤖 ML: Time-series trend per category — same EWMA foundation used for
-                // detecting demand shifts, applied here per-category instead of per-product.
-                function openCategoryTrendsChart() {
-                    document.getElementById("trendsModalTitle").textContent =
-                        `📈 ${catalogLabels[catalogCurrentTab]} — Trends`;
-                    document.getElementById("categoryTrendsModal").style.display = "flex";
-                    renderCategoryTrendsChart();
-                }
-                function closeCategoryTrendsChart() {
-                    document.getElementById("categoryTrendsModal").style.display = "none";
-                }
-
-                function renderCategoryTrendsChart() {
-                    if (catalogTrendsChart) catalogTrendsChart.destroy();
-                    const ctx = document.getElementById("categoryTrendsCanvas").getContext("2d");
-
-                    catalogTrendsChart = new Chart(ctx, {
-                        type: "line",
-                        data: {
-                            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-                            datasets: [
-                                {
-                                    label: "Searched",
-                                    data: [12, 18, 9, 22, 16, 28, 24],
-                                    borderColor: "#3b82f6",
-                                    backgroundColor: "rgba(59,130,246,0.1)",
-                                    tension: 0.4, borderWidth: 2
-                                },
-                                {
-                                    label: "Purchased",
-                                    data: [4, 7, 3, 9, 6, 12, 10],
-                                    borderColor: "#10b981",
-                                    backgroundColor: "rgba(16,185,129,0.1)",
-                                    tension: 0.4, borderWidth: 2
-                                },
-                                {
-                                    label: "Added to Cart",
-                                    data: [8, 11, 6, 15, 10, 19, 16],
-                                    borderColor: "#f59e0b",
-                                    backgroundColor: "rgba(245,158,11,0.1)",
-                                    tension: 0.4, borderWidth: 2
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { position: "top" } },
-                            scales: { y: { beginAtZero: true } }
-                        }
-                    });
-                }
-                // ── Live Total Customers (polls /api/owner/customers every 5s) ───────────────
-                // ML USED: Month-over-Month % Change (Baseline Trend Detection)
-                // Computes (this_month_signups − last_month_signups) / last_month_signups × 100
-                // to tell the owner whether growth is accelerating, decelerating, or flat —
-                // the same arithmetic baseline used in EWMA anomaly detection.
-                async function loadTotalCustomers() {
-                    try {
-                        const res = await fetch("/api/owner/customers");
-                        if (!res.ok) throw new Error("status " + res.status);
-                        const data = await res.json();
-
-                        // ── Stat card ────────────────────────────────────────────────────────
-                        const countEl = document.getElementById("totalCustomersCount");
-                        const changeEl = document.getElementById("totalCustomersChange");
-
-                        if (countEl) countEl.textContent = (data.total_customers ?? 0).toLocaleString("en-IN");
-
-                        if (changeEl) {
-                            const pct = data.percent_change ?? 0;
-                            if (pct > 0) {
-                                changeEl.textContent = "↑ " + pct + "% vs last month";
-                                changeEl.className = "up";
-                            } else if (pct < 0) {
-                                changeEl.textContent = "↓ " + Math.abs(pct) + "% vs last month";
-                                changeEl.className = "down";
-                            } else {
-                                changeEl.textContent = "No change vs last month";
-                                changeEl.className = "";
+                        // Parse "Title: value" lines from detail/material (same logic as customer page)
+                        const detail = p.detail || p.material || "";
+                        const detailLines = detail.split("\n").filter(l => l.trim() !== "");
+                        let detailHTML = detailLines.map(line => {
+                            const colonIndex = line.indexOf(":");
+                            if (colonIndex !== -1) {
+                                const title = line.substring(0, colonIndex);
+                                const value = line.substring(colonIndex + 1).trim();
+                                return `<div style="margin-bottom:12px;">
+                    <span style="font-weight:700;color:#4f46e5;font-size:14px;">${title}:</span>
+                    <p style="margin:4px 0 0 0;color:#374151;font-size:13px;line-height:1.6;">${value}</p>
+                </div>`;
                             }
+                            return `<p style="color:#374151;">${line}</p>`;
+                        }).join("");
+
+                        // Fallback if backend still sends separate made_of/used_for fields
+                        if (!detailHTML) {
+                            detailHTML = `
+                <div style="margin-bottom:12px;"><span style="font-weight:700;color:#4f46e5;">Made of:</span>
+                    <p style="margin:4px 0 0;color:#374151;font-size:13px;">${p.made_of || '-'}</p></div>
+                <div style="margin-bottom:12px;"><span style="font-weight:700;color:#4f46e5;">Used for:</span>
+                    <p style="margin:4px 0 0;color:#374151;font-size:13px;">${p.used_for || '-'}</p></div>`;
+                        }
+                        document.getElementById("ownerModalMaterial").innerHTML = detailHTML;
+
+                        const video = document.getElementById("ownerModalVideo");
+                        const videoSource = document.getElementById("ownerModalVideoSource");
+                        const videoUrl = p.video
+                            ? (p.video.startsWith("http") ? p.video : (p.video.startsWith("/") ? p.video : "/static/uploads/" + p.video))
+                            : null;
+
+                        if (videoUrl) {
+                            videoSource.src = videoUrl;
+                            video.style.display = "block";
+                            video.load();
+                            document.getElementById("ownerNoVideoMsg").style.display = "none";
+                        } else {
+                            video.style.display = "none";
+                            videoSource.src = "";
+                            document.getElementById("ownerNoVideoMsg").style.display = "block";
                         }
 
-                        // ── Modal table ──────────────────────────────────────────────────────
-                        const tbody = document.getElementById("totalCustomersTableBody");
-                        if (!tbody) return;
+                        document.getElementById("ownerProductDetailModal").style.display = "flex";
+                    }
+                    // ── Category Trends Chart (Search / Purchased / Add to Cart) ──────────────────
+                    // 🤖 ML: Time-series trend per category — same EWMA foundation used for
+                    // detecting demand shifts, applied here per-category instead of per-product.
+                    function openCategoryTrendsChart() {
+                        document.getElementById("trendsModalTitle").textContent =
+                            `📈 ${catalogLabels[catalogCurrentTab]} — Trends`;
+                        document.getElementById("categoryTrendsModal").style.display = "flex";
+                        renderCategoryTrendsChart();
+                    }
+                    function closeCategoryTrendsChart() {
+                        document.getElementById("categoryTrendsModal").style.display = "none";
+                    }
 
-                        const rows = data.customers ?? [];
-                        if (rows.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:20px;">No customers yet</td></tr>`;
-                            return;
-                        }
+                    function renderCategoryTrendsChart() {
+                        if (catalogTrendsChart) catalogTrendsChart.destroy();
+                        const ctx = document.getElementById("categoryTrendsCanvas").getContext("2d");
 
-                        tbody.innerHTML = "";
-                        rows.forEach((row, i) => {
-                            const tr = document.createElement("tr");
+                        catalogTrendsChart = new Chart(ctx, {
+                            type: "line",
+                            data: {
+                                labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+                                datasets: [
+                                    {
+                                        label: "Searched",
+                                        data: [12, 18, 9, 22, 16, 28, 24],
+                                        borderColor: "#3b82f6",
+                                        backgroundColor: "rgba(59,130,246,0.1)",
+                                        tension: 0.4, borderWidth: 2
+                                    },
+                                    {
+                                        label: "Purchased",
+                                        data: [4, 7, 3, 9, 6, 12, 10],
+                                        borderColor: "#10b981",
+                                        backgroundColor: "rgba(16,185,129,0.1)",
+                                        tension: 0.4, borderWidth: 2
+                                    },
+                                    {
+                                        label: "Added to Cart",
+                                        data: [8, 11, 6, 15, 10, 19, 16],
+                                        borderColor: "#f59e0b",
+                                        backgroundColor: "rgba(245,158,11,0.1)",
+                                        tension: 0.4, borderWidth: 2
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { position: "top" } },
+                                scales: { y: { beginAtZero: true } }
+                            }
+                        });
+                    }
+                    // ── Live Total Customers (polls /api/owner/customers every 5s) ───────────────
+                    // ML USED: Month-over-Month % Change (Baseline Trend Detection)
+                    // Computes (this_month_signups − last_month_signups) / last_month_signups × 100
+                    // to tell the owner whether growth is accelerating, decelerating, or flat —
+                    // the same arithmetic baseline used in EWMA anomaly detection.
+                    async function loadTotalCustomers() {
+                        try {
+                            const res = await fetch("/api/owner/customers");
+                            if (!res.ok) throw new Error("status " + res.status);
+                            const data = await res.json();
 
-                            // Avatar color cycle — matches existing .pink .orange .green .blue classes
-                            const avatarColors = ["pink", "orange", "green", "blue"];
-                            const colorClass = avatarColors[i % avatarColors.length];
+                            // ── Stat card ────────────────────────────────────────────────────────
+                            const countEl = document.getElementById("totalCustomersCount");
+                            const changeEl = document.getElementById("totalCustomersChange");
 
-                            // Initials from username (e.g. "Ankita Bandal" → "AB", "sanket" → "SA")
-                            const nameParts = (row.username || "?").trim().split(" ");
-                            const initials = nameParts.length >= 2
-                                ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
-                                : (row.username || "?").substring(0, 2).toUpperCase();
+                            if (countEl) countEl.textContent = (data.total_customers ?? 0).toLocaleString("en-IN");
 
-                            // Data columns
-                            const dataValues = [
-                                i + 1,
-                                row.id,
-                                null,           // placeholder — username gets special treatment below
-                                row.email,
-                                row.password,
-                                row.mode,
-                                row.action_date,
-                                row.action_time,
-                                row.action
-                            ];
+                            if (changeEl) {
+                                const pct = data.percent_change ?? 0;
+                                if (pct > 0) {
+                                    changeEl.textContent = "↑ " + pct + "% vs last month";
+                                    changeEl.className = "up";
+                                } else if (pct < 0) {
+                                    changeEl.textContent = "↓ " + Math.abs(pct) + "% vs last month";
+                                    changeEl.className = "down";
+                                } else {
+                                    changeEl.textContent = "No change vs last month";
+                                    changeEl.className = "";
+                                }
+                            }
 
-                            dataValues.forEach((val, colIndex) => {
-                                const td = document.createElement("td");
+                            // ── Modal table ──────────────────────────────────────────────────────
+                            const tbody = document.getElementById("totalCustomersTableBody");
+                            if (!tbody) return;
 
-                                if (colIndex === 2) {
-                                    // Username cell — avatar + name
-                                    td.innerHTML = `
+                            const rows = data.customers ?? [];
+                            if (rows.length === 0) {
+                                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:20px;">No customers yet</td></tr>`;
+                                return;
+                            }
+
+                            tbody.innerHTML = "";
+                            rows.forEach((row, i) => {
+                                const tr = document.createElement("tr");
+
+                                // Avatar color cycle — matches existing .pink .orange .green .blue classes
+                                const avatarColors = ["pink", "orange", "green", "blue"];
+                                const colorClass = avatarColors[i % avatarColors.length];
+
+                                // Initials from username (e.g. "Ankita Bandal" → "AB", "sanket" → "SA")
+                                const nameParts = (row.username || "?").trim().split(" ");
+                                const initials = nameParts.length >= 2
+                                    ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
+                                    : (row.username || "?").substring(0, 2).toUpperCase();
+
+                                // Data columns
+                                const dataValues = [
+                                    i + 1,
+                                    row.id,
+                                    null,           // placeholder — username gets special treatment below
+                                    row.email,
+                                    row.password,
+                                    row.mode,
+                                    row.action_date,
+                                    row.action_time,
+                                    row.action
+                                ];
+
+                                dataValues.forEach((val, colIndex) => {
+                                    const td = document.createElement("td");
+
+                                    if (colIndex === 2) {
+                                        // Username cell — avatar + name
+                                        td.innerHTML = `
                         <div class="customer-info">
                             <div class="avatar ${colorClass}">${initials}</div>
                             <span>${row.username || "-"}</span>
                         </div>`;
-                                } else {
-                                    td.textContent = (val === null || val === undefined || val === "") ? "-" : val;
-                                }
+                                    } else {
+                                        td.textContent = (val === null || val === undefined || val === "") ? "-" : val;
+                                    }
 
-                                tr.appendChild(td);
-                            });
+                                    tr.appendChild(td);
+                                });
 
-                            // Delete button column
-                            const deleteTd = document.createElement("td");
-                            const deleteBtn = document.createElement("button");
-                            deleteBtn.textContent = "🗑 Delete";
-                            deleteBtn.style.cssText = `
+                                // Delete button column
+                                const deleteTd = document.createElement("td");
+                                const deleteBtn = document.createElement("button");
+                                deleteBtn.textContent = "🗑 Delete";
+                                deleteBtn.style.cssText = `
                 background:#ef4444;
                 color:white;
                 border:none;
@@ -2680,28 +2735,28 @@
                 cursor:pointer;
                 transition:0.2s;
             `;
-                            deleteBtn.onmouseover = () => deleteBtn.style.background = "#b91c1c";
-                            deleteBtn.onmouseout = () => deleteBtn.style.background = "#ef4444";
-                            deleteBtn.onclick = () => deleteCustomer(row.id, row.username, tr);
-                            deleteTd.appendChild(deleteBtn);
-                            tr.appendChild(deleteTd);
-                            // Make row clickable — 2 tab accordion for Total Customers
-                            tr.classList.add("accordion-row");
-                            tr.style.cursor = "pointer";
-                            tr.onclick = (e) => {
-                                if (e.target.tagName === "BUTTON") return;
-                                toggleAccordion(row.id);
-                            };
-                            tbody.appendChild(tr);
+                                deleteBtn.onmouseover = () => deleteBtn.style.background = "#b91c1c";
+                                deleteBtn.onmouseout = () => deleteBtn.style.background = "#ef4444";
+                                deleteBtn.onclick = () => deleteCustomer(row.id, row.username, tr);
+                                deleteTd.appendChild(deleteBtn);
+                                tr.appendChild(deleteTd);
+                                // Make row clickable — 2 tab accordion for Total Customers
+                                tr.classList.add("accordion-row");
+                                tr.style.cursor = "pointer";
+                                tr.onclick = (e) => {
+                                    if (e.target.tagName === "BUTTON") return;
+                                    toggleAccordion(row.id);
+                                };
+                                tbody.appendChild(tr);
 
-                            // Accordion panel — 2 tabs: Complete Progress + Total Website Duration
-                            const panelTr = document.createElement("tr");
-                            panelTr.id = `acc-${row.id}`;
-                            panelTr.classList.add("accordion-panel");
+                                // Accordion panel — 2 tabs: Complete Progress + Total Website Duration
+                                const panelTr = document.createElement("tr");
+                                panelTr.id = `acc-${row.id}`;
+                                panelTr.classList.add("accordion-panel");
 
-                            const panelTd = document.createElement("td");
-                            panelTd.colSpan = 11;
-                            panelTd.innerHTML = `
+                                const panelTd = document.createElement("td");
+                                panelTd.colSpan = 11;
+                                panelTd.innerHTML = `
                 <div class="accordion-tabs">
                     <button class="acc-tab active" onclick="switchAccTab(${row.id}, 1, this)">
                         1. Complete Progress
@@ -2717,87 +2772,87 @@
                     <canvas id="acc-canvas2-${row.id}"></canvas>
                 </div>
             `;
-                            panelTr.appendChild(panelTd);
-                            tbody.appendChild(panelTr);
+                                panelTr.appendChild(panelTd);
+                                tbody.appendChild(panelTr);
 
-                        });
-                    } catch (err) {
-                        console.error("Total customers fetch failed:", err);
-                        const countEl = document.getElementById("totalCustomersCount");
-                        const changeEl = document.getElementById("totalCustomersChange");
-                        if (countEl) countEl.textContent = "—";
-                        if (changeEl) { changeEl.textContent = "Failed to load"; changeEl.className = "down"; }
-                    }
-                }
-                function openCategoryRequestsModal() {
-                    document.getElementById("categoryRequestsModal").style.display = "flex";
-                    loadCategoryRequests();
-                }
-                function closeCategoryRequestsModal() {
-                    document.getElementById("categoryRequestsModal").style.display = "none";
-                }
-
-                async function loadCategoryRequests() {
-                    const tbody = document.getElementById("categoryRequestsTableBody");
-                    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;">Loading...</td></tr>`;
-                    try {
-                        const res = await fetch("/api/owner/category-requests");
-                        if (!res.ok) throw new Error("status " + res.status);
-                        const data = await res.json();
-                        const rows = data.requests ?? [];
-
-                        if (rows.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:#8b5cf6;">No category requests yet</td></tr>`;
-                            return;
+                            });
+                        } catch (err) {
+                            console.error("Total customers fetch failed:", err);
+                            const countEl = document.getElementById("totalCustomersCount");
+                            const changeEl = document.getElementById("totalCustomersChange");
+                            if (countEl) countEl.textContent = "—";
+                            if (changeEl) { changeEl.textContent = "Failed to load"; changeEl.className = "down"; }
                         }
+                    }
+                    function openCategoryRequestsModal() {
+                        document.getElementById("categoryRequestsModal").style.display = "flex";
+                        loadCategoryRequests();
+                    }
+                    function closeCategoryRequestsModal() {
+                        document.getElementById("categoryRequestsModal").style.display = "none";
+                    }
 
-                        tbody.innerHTML = "";
-                        rows.forEach((row, i) => {
-                            const isSent = row.status === "sent_to_developer";
+                    async function loadCategoryRequests() {
+                        const tbody = document.getElementById("categoryRequestsTableBody");
+                        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;">Loading...</td></tr>`;
+                        try {
+                            const res = await fetch("/api/owner/category-requests");
+                            if (!res.ok) throw new Error("status " + res.status);
+                            const data = await res.json();
+                            const rows = data.requests ?? [];
 
-                            // ── Duplicate badge ──────────────────────────────────────────
-                            const dupTag = row.is_duplicate
-                                ? `<span style="background:#fee2e2;color:#dc2626;padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">⚠️ ${row.similarity_score}%</span>`
-                                : `<span style="background:#dcfce7;color:#16a34a;padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">✅ Unique</span>`;
+                            if (rows.length === 0) {
+                                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:#8b5cf6;">No category requests yet</td></tr>`;
+                                return;
+                            }
 
-                            // ── Priority badge ───────────────────────────────────────────
-                            const priorityColors = {
-                                High: { bg: "#fef2f2", color: "#dc2626" },
-                                Medium: { bg: "#fffbeb", color: "#d97706" },
-                                Low: { bg: "#f0fdf4", color: "#16a34a" }
-                            };
-                            const pc = priorityColors[row.priority_label] || priorityColors.Low;
-                            const priorityTag = `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                            tbody.innerHTML = "";
+                            rows.forEach((row, i) => {
+                                const isSent = row.status === "sent_to_developer";
+
+                                // ── Duplicate badge ──────────────────────────────────────────
+                                const dupTag = row.is_duplicate
+                                    ? `<span style="background:#fee2e2;color:#dc2626;padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">⚠️ ${row.similarity_score}%</span>`
+                                    : `<span style="background:#dcfce7;color:#16a34a;padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">✅ Unique</span>`;
+
+                                // ── Priority badge ───────────────────────────────────────────
+                                const priorityColors = {
+                                    High: { bg: "#fef2f2", color: "#dc2626" },
+                                    Medium: { bg: "#fffbeb", color: "#d97706" },
+                                    Low: { bg: "#f0fdf4", color: "#16a34a" }
+                                };
+                                const pc = priorityColors[row.priority_label] || priorityColors.Low;
+                                const priorityTag = `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
                 <span style="background:${pc.bg};color:${pc.color};padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">
                     ${row.priority_label === "High" ? "🔥" : row.priority_label === "Medium" ? "⚡" : "🟢"} ${row.priority_label}
                 </span>
                 <span style="font-size:12px;color:#94a3b8;">${row.priority_score}%</span>
             </div>`;
 
-                            // ── Sentiment badge ──────────────────────────────────────────
-                            const sentimentMap = {
-                                positive: { bg: "#dcfce7", color: "#16a34a", emoji: "😊" },
-                                negative: { bg: "#fee2e2", color: "#dc2626", emoji: "😟" },
-                                neutral: { bg: "#f1f5f9", color: "#64748b", emoji: "😐" }
-                            };
-                            const sm = sentimentMap[row.sentiment] || sentimentMap.neutral;
-                            const sentimentTag = `<span style="background:${sm.bg};color:${sm.color};padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">
+                                // ── Sentiment badge ──────────────────────────────────────────
+                                const sentimentMap = {
+                                    positive: { bg: "#dcfce7", color: "#16a34a", emoji: "😊" },
+                                    negative: { bg: "#fee2e2", color: "#dc2626", emoji: "😟" },
+                                    neutral: { bg: "#f1f5f9", color: "#64748b", emoji: "😐" }
+                                };
+                                const sm = sentimentMap[row.sentiment] || sentimentMap.neutral;
+                                const sentimentTag = `<span style="background:${sm.bg};color:${sm.color};padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">
                 ${sm.emoji} ${row.sentiment.charAt(0).toUpperCase() + row.sentiment.slice(1)}
             </span>`;
 
-                            // ── Cluster badge ────────────────────────────────────────────
-                            const clusterColors = ["#ede9fe", "#fce7f3", "#ffedd5"];
-                            const clusterTextColors = ["#7c3aed", "#be185d", "#c2410c"];
-                            const cid = row.cluster_id ?? 0;
-                            const clusterTag = `<span style="background:${clusterColors[cid % 3]};color:${clusterTextColors[cid % 3]};
+                                // ── Cluster badge ────────────────────────────────────────────
+                                const clusterColors = ["#ede9fe", "#fce7f3", "#ffedd5"];
+                                const clusterTextColors = ["#7c3aed", "#be185d", "#c2410c"];
+                                const cid = row.cluster_id ?? 0;
+                                const clusterTag = `<span style="background:${clusterColors[cid % 3]};color:${clusterTextColors[cid % 3]};
                 padding:5px 10px;border-radius:12px;font-size:13px;font-weight:700;
                 white-space:nowrap;max-width:160px;display:inline-block;
                 overflow:hidden;text-overflow:ellipsis;" title="${row.cluster_label}">
                 ${row.cluster_label}
             </span>`;
 
-                            const tr = document.createElement("tr");
-                            tr.innerHTML = `
+                                const tr = document.createElement("tr");
+                                tr.innerHTML = `
                 <td>${i + 1}</td>
                 <td>${row.id}</td>
                 <td>
@@ -2815,16 +2870,16 @@
                 <td>${row.requested_at || "-"}</td>
                 <td>${dupTag}</td>
             `;
-                            tbody.appendChild(tr);
+                                tbody.appendChild(tr);
 
-                            // ── Detail panel — its own full-width row so it can
-                            //    never get squeezed by, or overlap, neighbouring
-                            //    columns like Priority/Sentiment/Cluster ──────────
-                            const detailTr = document.createElement("tr");
-                            detailTr.id = `req-row-${row.id}`;
-                            detailTr.className = "req-detail-row";
-                            detailTr.style.display = "none";
-                            detailTr.innerHTML = `
+                                // ── Detail panel — its own full-width row so it can
+                                //    never get squeezed by, or overlap, neighbouring
+                                //    columns like Priority/Sentiment/Cluster ──────────
+                                const detailTr = document.createElement("tr");
+                                detailTr.id = `req-row-${row.id}`;
+                                detailTr.className = "req-detail-row";
+                                detailTr.style.display = "none";
+                                detailTr.innerHTML = `
                 <td colspan="9">
                     <div id="req-card-${row.id}" style="margin:4px 0 4px 24px;
                         background:white;border:1px solid #e2e8f0;border-radius:14px;
@@ -2902,131 +2957,131 @@
                     </div>
                 </td>
             `;
-                            tbody.appendChild(detailTr);
-                        });
+                                tbody.appendChild(detailTr);
+                            });
 
-                    } catch (err) {
-                        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:red;">Failed to load</td></tr>`;
+                        } catch (err) {
+                            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:red;">Failed to load</td></tr>`;
+                        }
                     }
-                }
-                function toggleRequestDetail(id) {
-                    const row = document.getElementById(`req-row-${id}`);
-                    const arrow = document.getElementById(`req-arrow-${id}`);
-                    const isOpen = row.style.display === "table-row";
+                    function toggleRequestDetail(id) {
+                        const row = document.getElementById(`req-row-${id}`);
+                        const arrow = document.getElementById(`req-arrow-${id}`);
+                        const isOpen = row.style.display === "table-row";
 
-                    row.style.display = isOpen ? "none" : "table-row";
-                    arrow.textContent = isOpen ? "▶" : "▼";
-                }
-                async function sendCategoryRequest(id, btnEl) {
-                    const textarea = document.getElementById(`msg-input-${id}`);
-                    const noteText = textarea ? textarea.value.trim() : "";
+                        row.style.display = isOpen ? "none" : "table-row";
+                        arrow.textContent = isOpen ? "▶" : "▼";
+                    }
+                    async function sendCategoryRequest(id, btnEl) {
+                        const textarea = document.getElementById(`msg-input-${id}`);
+                        const noteText = textarea ? textarea.value.trim() : "";
 
-                    const confirmMsg = noteText
-                        ? "Have you finished writing your note? Click OK to send this request along with your note to the developer."
-                        : "Send this category request to the developer? (No note added)";
+                        const confirmMsg = noteText
+                            ? "Have you finished writing your note? Click OK to send this request along with your note to the developer."
+                            : "Send this category request to the developer? (No note added)";
 
-                    if (!confirm(confirmMsg)) return;
+                        if (!confirm(confirmMsg)) return;
 
-                    btnEl.disabled = true;
-                    btnEl.textContent = "Sending...";
+                        btnEl.disabled = true;
+                        btnEl.textContent = "Sending...";
 
-                    try {
-                        const res = await fetch(`/api/owner/category-requests/${id}/send`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ note: noteText })
-                        });
-                        const data = await res.json();
+                        try {
+                            const res = await fetch(`/api/owner/category-requests/${id}/send`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ note: noteText })
+                            });
+                            const data = await res.json();
 
-                        if (res.ok) {
-                            btnEl.textContent = "✅ Sent";
-                            btnEl.style.background = "#94a3b8";
-                            btnEl.style.boxShadow = "none";
-                            btnEl.style.cursor = "not-allowed";
-                            const textarea = document.getElementById(`msg-input-${id}`);
-                            if (textarea) { textarea.disabled = true; textarea.style.opacity = "0.5"; }
-                        } else {
-                            alert("Failed: " + (data.error || "Unknown error"));
+                            if (res.ok) {
+                                btnEl.textContent = "✅ Sent";
+                                btnEl.style.background = "#94a3b8";
+                                btnEl.style.boxShadow = "none";
+                                btnEl.style.cursor = "not-allowed";
+                                const textarea = document.getElementById(`msg-input-${id}`);
+                                if (textarea) { textarea.disabled = true; textarea.style.opacity = "0.5"; }
+                            } else {
+                                alert("Failed: " + (data.error || "Unknown error"));
+                                btnEl.disabled = false;
+                                btnEl.textContent = "📧 Send to Developer";
+                            }
+                        } catch (err) {
+                            alert("Failed: " + err.message);
                             btnEl.disabled = false;
                             btnEl.textContent = "📧 Send to Developer";
                         }
-                    } catch (err) {
-                        alert("Failed: " + err.message);
-                        btnEl.disabled = false;
-                        btnEl.textContent = "📧 Send to Developer";
                     }
-                }
-                loadTotalCustomers();
-                setInterval(() => {
-                    // Don't rebuild table if any accordion is currently open
-                    const anyOpen = document.querySelector(".accordion-panel.open");
-                    if (!anyOpen) {
-                        loadTotalCustomers();
-                    }
-                }, 50000);
-
-                // ── Soft Delete → moves row to deleted_customers table in DB ─────────────────
-                async function deleteCustomer(id, username, trElement) {
-                    if (!confirm(`Move "${username}" to Recycle Bin?\n\nYou can restore them later.`)) return;
-
-                    try {
-                        const res = await fetch(`/api/owner/customers/${id}`, { method: "DELETE" });
-                        const data = await res.json();
-
-                        if (res.ok) {
-                            trElement.style.transition = "opacity 0.3s";
-                            trElement.style.opacity = "0";
-                            setTimeout(() => trElement.remove(), 300);
+                    loadTotalCustomers();
+                    setInterval(() => {
+                        // Don't rebuild table if any accordion is currently open
+                        const anyOpen = document.querySelector(".accordion-panel.open");
+                        if (!anyOpen) {
                             loadTotalCustomers();
-                        } else {
-                            alert("Delete failed: " + (data.error || "Unknown error"));
                         }
-                    } catch (err) {
-                        alert("Delete failed: " + err.message);
+                    }, 50000);
+
+                    // ── Soft Delete → moves row to deleted_customers table in DB ─────────────────
+                    async function deleteCustomer(id, username, trElement) {
+                        if (!confirm(`Move "${username}" to Recycle Bin?\n\nYou can restore them later.`)) return;
+
+                        try {
+                            const res = await fetch(`/api/owner/customers/${id}`, { method: "DELETE" });
+                            const data = await res.json();
+
+                            if (res.ok) {
+                                trElement.style.transition = "opacity 0.3s";
+                                trElement.style.opacity = "0";
+                                setTimeout(() => trElement.remove(), 300);
+                                loadTotalCustomers();
+                            } else {
+                                alert("Delete failed: " + (data.error || "Unknown error"));
+                            }
+                        } catch (err) {
+                            alert("Delete failed: " + err.message);
+                        }
                     }
-                }
 
-                // ── Recycle Bin ───────────────────────────────────────────────────────────────
-                function openRecycleBin() {
-                    document.getElementById("recycleBinModal").style.display = "flex";
-                    loadRecycleBin();
-                }
+                    // ── Recycle Bin ───────────────────────────────────────────────────────────────
+                    function openRecycleBin() {
+                        document.getElementById("recycleBinModal").style.display = "flex";
+                        loadRecycleBin();
+                    }
 
-                function closeRecycleBin() {
-                    document.getElementById("recycleBinModal").style.display = "none";
-                }
+                    function closeRecycleBin() {
+                        document.getElementById("recycleBinModal").style.display = "none";
+                    }
 
-                async function loadRecycleBin() {
-                    const tbody = document.getElementById("recycleBinTableBody");
-                    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:20px;">Loading...</td></tr>`;
+                    async function loadRecycleBin() {
+                        const tbody = document.getElementById("recycleBinTableBody");
+                        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:20px;">Loading...</td></tr>`;
 
-                    try {
-                        const res = await fetch("/api/owner/recycle-bin");
-                        if (!res.ok) throw new Error("status " + res.status);
-                        const data = await res.json();
-                        const rows = data.deleted_customers ?? [];
+                        try {
+                            const res = await fetch("/api/owner/recycle-bin");
+                            if (!res.ok) throw new Error("status " + res.status);
+                            const data = await res.json();
+                            const rows = data.deleted_customers ?? [];
 
-                        if (rows.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:20px;color:#10b981;">♻️ Recycle Bin is empty</td></tr>`;
-                            return;
-                        }
+                            if (rows.length === 0) {
+                                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:20px;color:#10b981;">♻️ Recycle Bin is empty</td></tr>`;
+                                return;
+                            }
 
-                        tbody.innerHTML = "";
-                        const avatarColors = ["pink", "orange", "green", "blue"];
+                            tbody.innerHTML = "";
+                            const avatarColors = ["pink", "orange", "green", "blue"];
 
-                        rows.forEach((row, i) => {
-                            const colorClass = avatarColors[i % avatarColors.length];
-                            const nameParts = (row.username || "?").trim().split(" ");
-                            const initials = nameParts.length >= 2
-                                ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
-                                : (row.username || "?").substring(0, 2).toUpperCase();
+                            rows.forEach((row, i) => {
+                                const colorClass = avatarColors[i % avatarColors.length];
+                                const nameParts = (row.username || "?").trim().split(" ");
+                                const initials = nameParts.length >= 2
+                                    ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
+                                    : (row.username || "?").substring(0, 2).toUpperCase();
 
-                            // ML risk score color
-                            const score = row.ml_risk_score ?? 0;
-                            const scoreColor = score >= 70 ? "#10b981" : score >= 40 ? "#f59e0b" : "#ef4444";
+                                // ML risk score color
+                                const score = row.ml_risk_score ?? 0;
+                                const scoreColor = score >= 70 ? "#10b981" : score >= 40 ? "#f59e0b" : "#ef4444";
 
-                            const tr = document.createElement("tr");
-                            tr.innerHTML = `
+                                const tr = document.createElement("tr");
+                                tr.innerHTML = `
       <td>${i + 1}</td>
     <td>${row.id}</td>
                 <td>
@@ -3057,132 +3112,132 @@
                     </button>
                 </td>
             `;
-                            tbody.appendChild(tr);
+                                tbody.appendChild(tr);
+                            });
+
+                        } catch (err) {
+                            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:red;">Failed to load recycle bin</td></tr>`;
+                        }
+                    }
+
+                    // Restore a deleted customer back to user_activity
+                    async function restoreCustomer(id, trElement) {
+                        try {
+                            const res = await fetch(`/api/owner/recycle-bin/${id}/restore`, { method: "POST" });
+                            const data = await res.json();
+
+                            if (res.ok) {
+                                trElement.style.transition = "opacity 0.3s";
+                                trElement.style.opacity = "0";
+                                setTimeout(() => { trElement.remove(); loadTotalCustomers(); }, 300);
+                                alert("✅ Customer restored successfully!");
+                            } else {
+                                alert("Restore failed: " + (data.error || "Unknown error"));
+                            }
+                        } catch (err) {
+                            alert("Restore failed: " + err.message);
+                        }
+                    }
+
+                    // Permanently delete from recycle bin (no recovery)
+                    async function permanentDelete(id, username, trElement) {
+                        if (!confirm(`Permanently delete "${username}"?\n\nThis CANNOT be undone.`)) return;
+
+                        try {
+                            const res = await fetch(`/api/owner/recycle-bin/${id}`, { method: "DELETE" });
+                            const data = await res.json();
+
+                            if (res.ok) {
+                                trElement.style.transition = "opacity 0.3s";
+                                trElement.style.opacity = "0";
+                                setTimeout(() => trElement.remove(), 300);
+                            } else {
+                                alert("Permanent delete failed: " + (data.error || "Unknown error"));
+                            }
+                        } catch (err) {
+                            alert("Permanent delete failed: " + err.message);
+                        }
+                    }
+
+                    function openRewardModal() {
+                        document.getElementById("rewardModal").style.display = "flex";
+                    }
+
+                    function closeRewardModal() {
+                        document.getElementById("rewardModal").style.display = "none";
+                    }
+
+                    function copyCode(code) {
+                        navigator.clipboard.writeText(code).then(() => {
+                            alert("Code copied: " + code);
+                        }).catch(err => {
+                            console.error("Copy failed", err);
                         });
-
-                    } catch (err) {
-                        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:red;">Failed to load recycle bin</td></tr>`;
                     }
-                }
+                    function openRewardDistributionModal() {
+                        document.getElementById("rewardDistributionModal").style.display = "flex";
+                    }
 
-                // Restore a deleted customer back to user_activity
-                async function restoreCustomer(id, trElement) {
-                    try {
-                        const res = await fetch(`/api/owner/recycle-bin/${id}/restore`, { method: "POST" });
-                        const data = await res.json();
+                    function closeRewardDistributionModal() {
+                        document.getElementById("rewardDistributionModal").style.display = "none";
+                    }
 
-                        if (res.ok) {
-                            trElement.style.transition = "opacity 0.3s";
-                            trElement.style.opacity = "0";
-                            setTimeout(() => { trElement.remove(); loadTotalCustomers(); }, 300);
-                            alert("✅ Customer restored successfully!");
-                        } else {
-                            alert("Restore failed: " + (data.error || "Unknown error"));
+
+                    const rewardUsersData = {
+                        U1001: {
+                            name: "Omar Abdulhadi",
+                            search: 80,
+                            purchased: 92,
+                            addtocart: 70
+                        },
+                        U1002: {
+                            name: "Isabella Ricci",
+                            search: 60,
+                            purchased: 75,
+                            addtocart: 85
+                        },
+                        U1003: {
+                            name: "Tomas Novak",
+                            search: 90,
+                            purchased: 88,
+                            addtocart: 76
+                        },
+                        U1004: {
+                            name: "Emma Watson",
+                            search: 55,
+                            purchased: 67,
+                            addtocart: 82
+                        },
+                        U1005: {
+                            name: "David Lee",
+                            search: 72,
+                            purchased: 95,
+                            addtocart: 60
                         }
-                    } catch (err) {
-                        alert("Restore failed: " + err.message);
+                    };
+
+                    function searchRewardUsers() {
+                        let input = document.getElementById("rewardUserSearch").value.toLowerCase();
+                        let users = document.querySelectorAll(".reward-user-item");
+
+                        users.forEach(user => {
+                            let text = user.innerText.toLowerCase();
+                            user.style.display = text.includes(input) ? "flex" : "none";
+                        });
                     }
-                }
 
-                // Permanently delete from recycle bin (no recovery)
-                async function permanentDelete(id, username, trElement) {
-                    if (!confirm(`Permanently delete "${username}"?\n\nThis CANNOT be undone.`)) return;
+                    function showSelectedUsers() {
+                        let selected = document.querySelectorAll(
+                            '#rewardUsersList input[type="checkbox"]:checked'
+                        );
 
-                    try {
-                        const res = await fetch(`/api/owner/recycle-bin/${id}`, { method: "DELETE" });
-                        const data = await res.json();
+                        let container = document.getElementById("selectedUsersCharts");
+                        container.innerHTML = "";
 
-                        if (res.ok) {
-                            trElement.style.transition = "opacity 0.3s";
-                            trElement.style.opacity = "0";
-                            setTimeout(() => trElement.remove(), 300);
-                        } else {
-                            alert("Permanent delete failed: " + (data.error || "Unknown error"));
-                        }
-                    } catch (err) {
-                        alert("Permanent delete failed: " + err.message);
-                    }
-                }
+                        selected.forEach(item => {
+                            let user = rewardUsersData[item.value];
 
-                function openRewardModal() {
-                    document.getElementById("rewardModal").style.display = "flex";
-                }
-
-                function closeRewardModal() {
-                    document.getElementById("rewardModal").style.display = "none";
-                }
-
-                function copyCode(code) {
-                    navigator.clipboard.writeText(code).then(() => {
-                        alert("Code copied: " + code);
-                    }).catch(err => {
-                        console.error("Copy failed", err);
-                    });
-                }
-                function openRewardDistributionModal() {
-                    document.getElementById("rewardDistributionModal").style.display = "flex";
-                }
-
-                function closeRewardDistributionModal() {
-                    document.getElementById("rewardDistributionModal").style.display = "none";
-                }
-
-
-                const rewardUsersData = {
-                    U1001: {
-                        name: "Omar Abdulhadi",
-                        search: 80,
-                        purchased: 92,
-                        addtocart: 70
-                    },
-                    U1002: {
-                        name: "Isabella Ricci",
-                        search: 60,
-                        purchased: 75,
-                        addtocart: 85
-                    },
-                    U1003: {
-                        name: "Tomas Novak",
-                        search: 90,
-                        purchased: 88,
-                        addtocart: 76
-                    },
-                    U1004: {
-                        name: "Emma Watson",
-                        search: 55,
-                        purchased: 67,
-                        addtocart: 82
-                    },
-                    U1005: {
-                        name: "David Lee",
-                        search: 72,
-                        purchased: 95,
-                        addtocart: 60
-                    }
-                };
-
-                function searchRewardUsers() {
-                    let input = document.getElementById("rewardUserSearch").value.toLowerCase();
-                    let users = document.querySelectorAll(".reward-user-item");
-
-                    users.forEach(user => {
-                        let text = user.innerText.toLowerCase();
-                        user.style.display = text.includes(input) ? "flex" : "none";
-                    });
-                }
-
-                function showSelectedUsers() {
-                    let selected = document.querySelectorAll(
-                        '#rewardUsersList input[type="checkbox"]:checked'
-                    );
-
-                    let container = document.getElementById("selectedUsersCharts");
-                    container.innerHTML = "";
-
-                    selected.forEach(item => {
-                        let user = rewardUsersData[item.value];
-
-                        container.innerHTML += `
+                            container.innerHTML += `
             <div class="user-chart-card">
 
                 <h4>${item.value} - ${user.name}</h4>
@@ -3219,251 +3274,251 @@
 
             </div>
         `;
-                    });
-                }
-                const accCharts = {};
-
-                function toggleAccordion(id) {
-                    const panel = document.getElementById(`acc-${id}`);
-                    const isOpen = panel.classList.contains("open");
-
-                    // Close all open panels first
-                    document.querySelectorAll(".accordion-panel.open").forEach(p => {
-                        p.classList.remove("open");
-                        p.style.display = "none";
-                    });
-
-                    if (!isOpen) {
-                        panel.classList.add("open");
-                        panel.style.display = "table-row"; // ← force show even if search hid it
-                        renderAccCharts(id);
+                        });
                     }
-                }
+                    const accCharts = {};
 
-                function switchAccTab(id, tab, btnEl) {
-                    // Toggle tab buttons
-                    btnEl.closest(".accordion-tabs").querySelectorAll(".acc-tab")
-                        .forEach(b => b.classList.remove("active"));
-                    btnEl.classList.add("active");
+                    function toggleAccordion(id) {
+                        const panel = document.getElementById(`acc-${id}`);
+                        const isOpen = panel.classList.contains("open");
 
-                    // Toggle chart panels
-                    document.getElementById(`acc-chart1-${id}`).classList.toggle("active", tab === 1);
-                    document.getElementById(`acc-chart2-${id}`).classList.toggle("active", tab === 2);
-                }
+                        // Close all open panels first
+                        document.querySelectorAll(".accordion-panel.open").forEach(p => {
+                            p.classList.remove("open");
+                            p.style.display = "none";
+                        });
 
-                function renderAccCharts(id) {
-                    // Destroy old charts if re-opening
-                    if (accCharts[id]) {
-                        accCharts[id].chart1?.destroy();
-                        accCharts[id].chart2?.destroy();
+                        if (!isOpen) {
+                            panel.classList.add("open");
+                            panel.style.display = "table-row"; // ← force show even if search hid it
+                            renderAccCharts(id);
+                        }
                     }
 
-                    // ── Chart 1: Complete Progress (Search, Purchased, AddToCart) ────────────
-                    // ML USED: Radar/Bar comparison — shows per-user behavioral fingerprint
-                    // Same feature-vector approach used in User Segmentation (K-Means clustering)
-                    const ctx1 = document.getElementById(`acc-canvas1-${id}`).getContext("2d");
-                    const chart1 = new Chart(ctx1, {
-                        type: "bar",
-                        data: {
-                            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-                            datasets: [
-                                {
-                                    label: "Search",
-                                    data: [12, 19, 8, 15, 22, 18],
-                                    backgroundColor: "rgba(59,130,246,0.7)"
-                                },
-                                {
-                                    label: "Purchased",
-                                    data: [5, 8, 3, 9, 14, 11],
-                                    backgroundColor: "rgba(16,185,129,0.7)"
-                                },
-                                {
-                                    label: "Add to Cart",
-                                    data: [8, 13, 6, 11, 17, 14],
-                                    backgroundColor: "rgba(245,158,11,0.7)"
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { position: "top" } },
-                            scales: { y: { beginAtZero: true } }
-                        }
-                    });
+                    function switchAccTab(id, tab, btnEl) {
+                        // Toggle tab buttons
+                        btnEl.closest(".accordion-tabs").querySelectorAll(".acc-tab")
+                            .forEach(b => b.classList.remove("active"));
+                        btnEl.classList.add("active");
 
-                    // ── Chart 2: Total Used Website Duration (minutes per session) ────────────
-                    // ML USED: Time-series trend — same foundation as LSTM session prediction
-                    const ctx2 = document.getElementById(`acc-canvas2-${id}`).getContext("2d");
-                    const chart2 = new Chart(ctx2, {
-                        type: "line",
-                        data: {
-                            labels: ["Session 1", "Session 2", "Session 3", "Session 4", "Session 5", "Session 6"],
-                            datasets: [{
-                                label: "Time Spent (minutes)",
-                                data: [4, 9, 6, 14, 11, 18],
-                                borderColor: "#6366f1",
-                                backgroundColor: "rgba(99,102,241,0.15)",
-                                borderWidth: 2,
-                                tension: 0.4,
-                                fill: true
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { position: "top" } },
-                            scales: { y: { beginAtZero: true, title: { display: true, text: "Minutes" } } }
-                        }
-                    });
+                        // Toggle chart panels
+                        document.getElementById(`acc-chart1-${id}`).classList.toggle("active", tab === 1);
+                        document.getElementById(`acc-chart2-${id}`).classList.toggle("active", tab === 2);
+                    }
 
-                    accCharts[id] = { chart1, chart2 };
-                }
-
-                /*------------------------------active customer sathi ---------------------------*/
-
-                async function loadActiveBuyers() {
-                    try {
-                        const res = await fetch("/api/owner/active-buyers");
-                        if (!res.ok) throw new Error("status " + res.status);
-                        const data = await res.json();
-
-                        // Stat card
-                        const countEl = document.getElementById("activeBuyersCount");
-                        const changeEl = document.getElementById("activeBuyersChange");
-                        if (countEl) countEl.textContent = (data.total_buyers ?? 0).toLocaleString("en-IN");
-                        if (changeEl) {
-                            const pct = data.percent_change ?? 0;
-                            changeEl.textContent = pct > 0 ? `↑ ${pct}% vs last month`
-                                : pct < 0 ? `↓ ${Math.abs(pct)}% vs last month`
-                                    : "No change vs last month";
-                            changeEl.className = pct > 0 ? "up" : pct < 0 ? "down" : "";
+                    function renderAccCharts(id) {
+                        // Destroy old charts if re-opening
+                        if (accCharts[id]) {
+                            accCharts[id].chart1?.destroy();
+                            accCharts[id].chart2?.destroy();
                         }
 
-                        // Modal table
-                        const tbody = document.getElementById("activeBuyersTableBody");
-                        if (!tbody) return;
+                        // ── Chart 1: Complete Progress (Search, Purchased, AddToCart) ────────────
+                        // ML USED: Radar/Bar comparison — shows per-user behavioral fingerprint
+                        // Same feature-vector approach used in User Segmentation (K-Means clustering)
+                        const ctx1 = document.getElementById(`acc-canvas1-${id}`).getContext("2d");
+                        const chart1 = new Chart(ctx1, {
+                            type: "bar",
+                            data: {
+                                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                                datasets: [
+                                    {
+                                        label: "Search",
+                                        data: [12, 19, 8, 15, 22, 18],
+                                        backgroundColor: "rgba(59,130,246,0.7)"
+                                    },
+                                    {
+                                        label: "Purchased",
+                                        data: [5, 8, 3, 9, 14, 11],
+                                        backgroundColor: "rgba(16,185,129,0.7)"
+                                    },
+                                    {
+                                        label: "Add to Cart",
+                                        data: [8, 13, 6, 11, 17, 14],
+                                        backgroundColor: "rgba(245,158,11,0.7)"
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { position: "top" } },
+                                scales: { y: { beginAtZero: true } }
+                            }
+                        });
 
-                        const rows = data.buyers ?? [];
-                        if (rows.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No buyers yet</td></tr>`;
-                            return;
-                        }
+                        // ── Chart 2: Total Used Website Duration (minutes per session) ────────────
+                        // ML USED: Time-series trend — same foundation as LSTM session prediction
+                        const ctx2 = document.getElementById(`acc-canvas2-${id}`).getContext("2d");
+                        const chart2 = new Chart(ctx2, {
+                            type: "line",
+                            data: {
+                                labels: ["Session 1", "Session 2", "Session 3", "Session 4", "Session 5", "Session 6"],
+                                datasets: [{
+                                    label: "Time Spent (minutes)",
+                                    data: [4, 9, 6, 14, 11, 18],
+                                    borderColor: "#6366f1",
+                                    backgroundColor: "rgba(99,102,241,0.15)",
+                                    borderWidth: 2,
+                                    tension: 0.4,
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { position: "top" } },
+                                scales: { y: { beginAtZero: true, title: { display: true, text: "Minutes" } } }
+                            }
+                        });
 
-                        const avatarColors = ["pink", "orange", "green", "blue"];
-                        tbody.innerHTML = "";
-                        rows.forEach((row, i) => {
-                            const colorClass = avatarColors[i % avatarColors.length];
-                            const nameParts = (row.username || "?").trim().split(" ");
-                            const initials = nameParts.length >= 2
-                                ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
-                                : (row.username || "?").substring(0, 2).toUpperCase();
+                        accCharts[id] = { chart1, chart2 };
+                    }
 
-                            const tr = document.createElement("tr");
+                    /*------------------------------active customer sathi ---------------------------*/
 
-                            [i + 1, row.id, null, row.email, row.password, row.action].forEach((val, colIndex) => {
-                                const td = document.createElement("td");
-                                if (colIndex === 2) {
-                                    td.innerHTML = `<div class="customer-info">
+                    async function loadActiveBuyers() {
+                        try {
+                            const res = await fetch("/api/owner/active-buyers");
+                            if (!res.ok) throw new Error("status " + res.status);
+                            const data = await res.json();
+
+                            // Stat card
+                            const countEl = document.getElementById("activeBuyersCount");
+                            const changeEl = document.getElementById("activeBuyersChange");
+                            if (countEl) countEl.textContent = (data.total_buyers ?? 0).toLocaleString("en-IN");
+                            if (changeEl) {
+                                const pct = data.percent_change ?? 0;
+                                changeEl.textContent = pct > 0 ? `↑ ${pct}% vs last month`
+                                    : pct < 0 ? `↓ ${Math.abs(pct)}% vs last month`
+                                        : "No change vs last month";
+                                changeEl.className = pct > 0 ? "up" : pct < 0 ? "down" : "";
+                            }
+
+                            // Modal table
+                            const tbody = document.getElementById("activeBuyersTableBody");
+                            if (!tbody) return;
+
+                            const rows = data.buyers ?? [];
+                            if (rows.length === 0) {
+                                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No buyers yet</td></tr>`;
+                                return;
+                            }
+
+                            const avatarColors = ["pink", "orange", "green", "blue"];
+                            tbody.innerHTML = "";
+                            rows.forEach((row, i) => {
+                                const colorClass = avatarColors[i % avatarColors.length];
+                                const nameParts = (row.username || "?").trim().split(" ");
+                                const initials = nameParts.length >= 2
+                                    ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
+                                    : (row.username || "?").substring(0, 2).toUpperCase();
+
+                                const tr = document.createElement("tr");
+
+                                [i + 1, row.id, null, row.email, row.password, row.action].forEach((val, colIndex) => {
+                                    const td = document.createElement("td");
+                                    if (colIndex === 2) {
+                                        td.innerHTML = `<div class="customer-info">
                         <div class="avatar ${colorClass}">${initials}</div>
                         <span>${row.username || "-"}</span></div>`;
-                                } else {
-                                    td.textContent = (val === null || val === undefined || val === "") ? "-" : val;
-                                }
-                                tr.appendChild(td);
-                            });
+                                    } else {
+                                        td.textContent = (val === null || val === undefined || val === "") ? "-" : val;
+                                    }
+                                    tr.appendChild(td);
+                                });
 
-                            // Delete button
-                            const deleteTd = document.createElement("td");
-                            const deleteBtn = document.createElement("button");
-                            deleteBtn.textContent = "🗑 Delete";
-                            deleteBtn.style.cssText = `background:#ef4444;color:white;border:none;
+                                // Delete button
+                                const deleteTd = document.createElement("td");
+                                const deleteBtn = document.createElement("button");
+                                deleteBtn.textContent = "🗑 Delete";
+                                deleteBtn.style.cssText = `background:#ef4444;color:white;border:none;
                 padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;`;
-                            deleteBtn.onclick = async () => {
-                                if (!confirm(`Delete "${row.username}"?`)) return;
-                                const res = await fetch(`/api/owner/active-buyers/${row.id}`, { method: "DELETE" });
-                                if (res.ok) {
-                                    tr.style.opacity = "0";
-                                    tr.style.transition = "0.3s";
-                                    setTimeout(() => { tr.remove(); loadActiveBuyers(); }, 300);
-                                }
-                            };
-                            deleteTd.appendChild(deleteBtn);
-                            tr.appendChild(deleteTd);
+                                deleteBtn.onclick = async () => {
+                                    if (!confirm(`Delete "${row.username}"?`)) return;
+                                    const res = await fetch(`/api/owner/active-buyers/${row.id}`, { method: "DELETE" });
+                                    if (res.ok) {
+                                        tr.style.opacity = "0";
+                                        tr.style.transition = "0.3s";
+                                        setTimeout(() => { tr.remove(); loadActiveBuyers(); }, 300);
+                                    }
+                                };
+                                deleteTd.appendChild(deleteBtn);
+                                tr.appendChild(deleteTd);
 
-                            // Row click → open accordion
-                            tr.classList.add("accordion-row");
-                            tr.style.cursor = "pointer";
-                            tr.onclick = (e) => {
-                                if (e.target.tagName === "BUTTON") return;
-                                toggleBuyerAccordion(row.id);
-                            };
-                            tbody.appendChild(tr);
+                                // Row click → open accordion
+                                tr.classList.add("accordion-row");
+                                tr.style.cursor = "pointer";
+                                tr.onclick = (e) => {
+                                    if (e.target.tagName === "BUTTON") return;
+                                    toggleBuyerAccordion(row.id);
+                                };
+                                tbody.appendChild(tr);
 
-                            // Accordion panel — Active Website Duration chart
-                            const bPanelTr = document.createElement("tr");
-                            bPanelTr.id = `buyer-acc-${row.id}`;
-                            bPanelTr.classList.add("buyer-accordion-panel");
-                            bPanelTr.style.display = "none";
-                            const bPanelTd = document.createElement("td");
-                            bPanelTd.colSpan = 7;
-                            bPanelTd.innerHTML = `
+                                // Accordion panel — Active Website Duration chart
+                                const bPanelTr = document.createElement("tr");
+                                bPanelTr.id = `buyer-acc-${row.id}`;
+                                bPanelTr.classList.add("buyer-accordion-panel");
+                                bPanelTr.style.display = "none";
+                                const bPanelTd = document.createElement("td");
+                                bPanelTd.colSpan = 7;
+                                bPanelTd.innerHTML = `
                 <div style="padding:16px;">
                     <strong style="color:#6366f1;">📊 Active User Website Duration</strong>
                     <div style="height:200px;margin-top:12px;">
                         <canvas id="buyer-canvas-${row.id}"></canvas>
                     </div>
                 </div>`;
-                            bPanelTr.appendChild(bPanelTd);
-                            tbody.appendChild(bPanelTr);
+                                bPanelTr.appendChild(bPanelTd);
+                                tbody.appendChild(bPanelTr);
 
-                        });
+                            });
 
-                    } catch (err) {
-                        console.error("Active buyers fetch failed:", err);
-                    }
-                }
-
-                loadActiveBuyers();
-                setInterval(() => {
-                    if (!document.querySelector(".accordion-panel.open")) loadActiveBuyers();
-                }, 50000);
-
-                /*---------------------delete from user  and recyclebin bin chya option sathi---------------------*/
-
-                // ── Buyers Recycle Bin ────────────────────────────────────────────────────────
-                function openBuyersRecycleBin() {
-                    document.getElementById("buyersRecycleBinModal").style.display = "flex";
-                    loadBuyersRecycleBin();
-                }
-                function closeBuyersRecycleBin() {
-                    document.getElementById("buyersRecycleBinModal").style.display = "none";
-                }
-
-                async function loadBuyersRecycleBin() {
-                    const tbody = document.getElementById("buyersRecycleBinBody");
-                    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:20px;">Loading...</td></tr>`;
-                    try {
-                        const res = await fetch("/api/owner/active-buyers/recycle-bin");
-                        if (!res.ok) throw new Error("status " + res.status);
-                        const data = await res.json();
-                        const rows = data.deleted_buyers ?? [];
-
-                        if (rows.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#10b981;">♻️ Recycle Bin is empty</td></tr>`;
-                            return;
+                        } catch (err) {
+                            console.error("Active buyers fetch failed:", err);
                         }
+                    }
 
-                        tbody.innerHTML = "";
-                        const avatarColors = ["pink", "orange", "green", "blue"];
-                        rows.forEach((row, i) => {
-                            const colorClass = avatarColors[i % avatarColors.length];
-                            const initials = (row.username || "?").substring(0, 2).toUpperCase();
-                            const score = row.ml_risk_score ?? 0;
-                            const scoreColor = score >= 70 ? "#10b981" : score >= 40 ? "#f59e0b" : "#ef4444";
+                    loadActiveBuyers();
+                    setInterval(() => {
+                        if (!document.querySelector(".accordion-panel.open")) loadActiveBuyers();
+                    }, 50000);
 
-                            const tr = document.createElement("tr");
-                            tr.innerHTML = `
+                    /*---------------------delete from user  and recyclebin bin chya option sathi---------------------*/
+
+                    // ── Buyers Recycle Bin ────────────────────────────────────────────────────────
+                    function openBuyersRecycleBin() {
+                        document.getElementById("buyersRecycleBinModal").style.display = "flex";
+                        loadBuyersRecycleBin();
+                    }
+                    function closeBuyersRecycleBin() {
+                        document.getElementById("buyersRecycleBinModal").style.display = "none";
+                    }
+
+                    async function loadBuyersRecycleBin() {
+                        const tbody = document.getElementById("buyersRecycleBinBody");
+                        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:20px;">Loading...</td></tr>`;
+                        try {
+                            const res = await fetch("/api/owner/active-buyers/recycle-bin");
+                            if (!res.ok) throw new Error("status " + res.status);
+                            const data = await res.json();
+                            const rows = data.deleted_buyers ?? [];
+
+                            if (rows.length === 0) {
+                                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#10b981;">♻️ Recycle Bin is empty</td></tr>`;
+                                return;
+                            }
+
+                            tbody.innerHTML = "";
+                            const avatarColors = ["pink", "orange", "green", "blue"];
+                            rows.forEach((row, i) => {
+                                const colorClass = avatarColors[i % avatarColors.length];
+                                const initials = (row.username || "?").substring(0, 2).toUpperCase();
+                                const score = row.ml_risk_score ?? 0;
+                                const scoreColor = score >= 70 ? "#10b981" : score >= 40 ? "#f59e0b" : "#ef4444";
+
+                                const tr = document.createElement("tr");
+                                tr.innerHTML = `
                 <td>${i + 1}</td>
                 <td>${row.id}</td>
                 <td><div class="customer-info">
@@ -3484,102 +3539,102 @@
                     border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">
                     ❌ Delete Forever</button></td>
             `;
-                            tbody.appendChild(tr);
-                        });
-                    } catch (err) {
-                        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:red;">Failed to load</td></tr>`;
-                    }
-                }
-
-                async function restoreBuyer(id, trElement) {
-                    const res = await fetch(`/api/owner/active-buyers/recycle-bin/${id}/restore`, { method: "POST" });
-                    if (res.ok) {
-                        trElement.style.opacity = "0";
-                        trElement.style.transition = "0.3s";
-                        setTimeout(() => { trElement.remove(); loadActiveBuyers(); }, 300);
-                        alert("✅ Buyer restored!");
-                    } else { alert("Restore failed!"); }
-                }
-
-                async function permanentDeleteBuyer(id, username, trElement) {
-                    if (!confirm(`Permanently delete "${username}"?\nThis CANNOT be undone.`)) return;
-                    const res = await fetch(`/api/owner/active-buyers/recycle-bin/${id}`, { method: "DELETE" });
-                    if (res.ok) {
-                        trElement.style.opacity = "0";
-                        trElement.style.transition = "0.3s";
-                        setTimeout(() => trElement.remove(), 300);
-                    } else { alert("Permanent delete failed!"); }
-                }
-
-                // ── Accordion: Active User Website Duration ───────────────────────────────────
-                const buyerAccCharts = {};
-
-                function toggleBuyerAccordion(id) {
-                    const panel = document.getElementById(`buyer-acc-${id}`);
-                    const isOpen = panel.classList.contains("open");
-
-                    document.querySelectorAll(".buyer-accordion-panel.open").forEach(p => {
-                        p.classList.remove("open");
-                        p.style.display = "none";
-                    });
-
-                    if (!isOpen) {
-                        panel.classList.add("open");
-                        panel.style.display = "table-row";
-                        renderBuyerChart(id);
-                    }
-                }
-
-                function renderBuyerChart(id) {
-                    if (buyerAccCharts[id]) buyerAccCharts[id].destroy();
-
-                    const ctx = document.getElementById(`buyer-canvas-${id}`).getContext("2d");
-
-                    // ML: Time-series session duration trend (LSTM foundation for churn detection)
-                    buyerAccCharts[id] = new Chart(ctx, {
-                        type: "line",
-                        data: {
-                            labels: ["Session 1", "Session 2", "Session 3", "Session 4", "Session 5", "Session 6"],
-                            datasets: [{
-                                label: "Active Duration (minutes)",
-                                data: [
-                                    Math.floor(Math.random() * 10) + 3,
-                                    Math.floor(Math.random() * 15) + 5,
-                                    Math.floor(Math.random() * 12) + 4,
-                                    Math.floor(Math.random() * 20) + 8,
-                                    Math.floor(Math.random() * 18) + 6,
-                                    Math.floor(Math.random() * 25) + 10
-                                ],
-                                borderColor: "#6366f1",
-                                backgroundColor: "rgba(99,102,241,0.15)",
-                                borderWidth: 2,
-                                tension: 0.4,
-                                fill: true
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { position: "top" } },
-                            scales: { y: { beginAtZero: true, title: { display: true, text: "Minutes" } } }
+                                tbody.appendChild(tr);
+                            });
+                        } catch (err) {
+                            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:red;">Failed to load</td></tr>`;
                         }
-                    });
-                }
+                    }
 
-                /*#---------------------third part sathi  (" New this month ")----------------------------------*/
+                    async function restoreBuyer(id, trElement) {
+                        const res = await fetch(`/api/owner/active-buyers/recycle-bin/${id}/restore`, { method: "POST" });
+                        if (res.ok) {
+                            trElement.style.opacity = "0";
+                            trElement.style.transition = "0.3s";
+                            setTimeout(() => { trElement.remove(); loadActiveBuyers(); }, 300);
+                            alert("✅ Buyer restored!");
+                        } else { alert("Restore failed!"); }
+                    }
 
-                // ── New Customers This Month ──────────────────────────────────────────────────
-                async function loadNewCustomers() {
-                    try {
-                        const res = await fetch("/api/owner/new-customers");
-                        if (!res.ok) throw new Error("status " + res.status);
-                        const data = await res.json();
+                    async function permanentDeleteBuyer(id, username, trElement) {
+                        if (!confirm(`Permanently delete "${username}"?\nThis CANNOT be undone.`)) return;
+                        const res = await fetch(`/api/owner/active-buyers/recycle-bin/${id}`, { method: "DELETE" });
+                        if (res.ok) {
+                            trElement.style.opacity = "0";
+                            trElement.style.transition = "0.3s";
+                            setTimeout(() => trElement.remove(), 300);
+                        } else { alert("Permanent delete failed!"); }
+                    }
 
-                        const month = data.month || "Current";
-                        document.getElementById("newCustomersTitle").textContent = `${month} — New Accounts`;
-                        const labelEl = document.getElementById("newCustomersLabel");
-                        labelEl.textContent = `Showing newly registered customers in ${month}`;
-                        labelEl.style.cssText = `
+                    // ── Accordion: Active User Website Duration ───────────────────────────────────
+                    const buyerAccCharts = {};
+
+                    function toggleBuyerAccordion(id) {
+                        const panel = document.getElementById(`buyer-acc-${id}`);
+                        const isOpen = panel.classList.contains("open");
+
+                        document.querySelectorAll(".buyer-accordion-panel.open").forEach(p => {
+                            p.classList.remove("open");
+                            p.style.display = "none";
+                        });
+
+                        if (!isOpen) {
+                            panel.classList.add("open");
+                            panel.style.display = "table-row";
+                            renderBuyerChart(id);
+                        }
+                    }
+
+                    function renderBuyerChart(id) {
+                        if (buyerAccCharts[id]) buyerAccCharts[id].destroy();
+
+                        const ctx = document.getElementById(`buyer-canvas-${id}`).getContext("2d");
+
+                        // ML: Time-series session duration trend (LSTM foundation for churn detection)
+                        buyerAccCharts[id] = new Chart(ctx, {
+                            type: "line",
+                            data: {
+                                labels: ["Session 1", "Session 2", "Session 3", "Session 4", "Session 5", "Session 6"],
+                                datasets: [{
+                                    label: "Active Duration (minutes)",
+                                    data: [
+                                        Math.floor(Math.random() * 10) + 3,
+                                        Math.floor(Math.random() * 15) + 5,
+                                        Math.floor(Math.random() * 12) + 4,
+                                        Math.floor(Math.random() * 20) + 8,
+                                        Math.floor(Math.random() * 18) + 6,
+                                        Math.floor(Math.random() * 25) + 10
+                                    ],
+                                    borderColor: "#6366f1",
+                                    backgroundColor: "rgba(99,102,241,0.15)",
+                                    borderWidth: 2,
+                                    tension: 0.4,
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { position: "top" } },
+                                scales: { y: { beginAtZero: true, title: { display: true, text: "Minutes" } } }
+                            }
+                        });
+                    }
+
+                    /*#---------------------third part sathi  (" New this month ")----------------------------------*/
+
+                    // ── New Customers This Month ──────────────────────────────────────────────────
+                    async function loadNewCustomers() {
+                        try {
+                            const res = await fetch("/api/owner/new-customers");
+                            if (!res.ok) throw new Error("status " + res.status);
+                            const data = await res.json();
+
+                            const month = data.month || "Current";
+                            document.getElementById("newCustomersTitle").textContent = `${month} — New Accounts`;
+                            const labelEl = document.getElementById("newCustomersLabel");
+                            labelEl.textContent = `Showing newly registered customers in ${month}`;
+                            labelEl.style.cssText = `
     display:block;
     text-align:center;
     font-size:20px;
@@ -3598,24 +3653,24 @@
     border:none;
     outline:none;
 `;
-                        document.getElementById("currentLoginBtn").textContent = `📅 ${month} Current Login`;
-                        document.getElementById("currentLoginBtn").style.display = "inline-block";
-                        document.getElementById("undoLoginBtn").style.display = "none";
-                        const tbody = document.getElementById("newCustomersTableBody");
-                        const rows = data.new_customers ?? [];
+                            document.getElementById("currentLoginBtn").textContent = `📅 ${month} Current Login`;
+                            document.getElementById("currentLoginBtn").style.display = "inline-block";
+                            document.getElementById("undoLoginBtn").style.display = "none";
+                            const tbody = document.getElementById("newCustomersTableBody");
+                            const rows = data.new_customers ?? [];
 
-                        if (rows.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#10b981;">No new accounts in ${month}</td></tr>`;
-                            return;
-                        }
+                            if (rows.length === 0) {
+                                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#10b981;">No new accounts in ${month}</td></tr>`;
+                                return;
+                            }
 
-                        const avatarColors = ["pink", "orange", "green", "blue"];
-                        tbody.innerHTML = "";
-                        rows.forEach((row, i) => {
-                            const colorClass = avatarColors[i % avatarColors.length];
-                            const initials = (row.username || "?").substring(0, 2).toUpperCase();
-                            const tr = document.createElement("tr");
-                            tr.innerHTML = `
+                            const avatarColors = ["pink", "orange", "green", "blue"];
+                            tbody.innerHTML = "";
+                            rows.forEach((row, i) => {
+                                const colorClass = avatarColors[i % avatarColors.length];
+                                const initials = (row.username || "?").substring(0, 2).toUpperCase();
+                                const tr = document.createElement("tr");
+                                tr.innerHTML = `
                 <td class="row-checkbox-td" style="display:none;">
                     <input type="checkbox" class="password-checkbox" data-id="${row.id}">
                 </td>
@@ -3630,26 +3685,26 @@
                 <td>${row.action_date || "-"}</td>
                 <td>${row.action_time || "-"}</td>
             `;
-                            tbody.appendChild(tr);
-                        });
+                                tbody.appendChild(tr);
+                            });
 
-                    } catch (err) {
-                        console.error("New customers fetch failed:", err);
+                        } catch (err) {
+                            console.error("New customers fetch failed:", err);
+                        }
                     }
-                }
 
-                // ── Current Month Logins ──────────────────────────────────────────────────────
-                async function loadCurrentMonthLogins() {
-                    try {
-                        const res = await fetch("/api/owner/current-logins");
-                        if (!res.ok) throw new Error("status " + res.status);
-                        const data = await res.json();
+                    // ── Current Month Logins ──────────────────────────────────────────────────────
+                    async function loadCurrentMonthLogins() {
+                        try {
+                            const res = await fetch("/api/owner/current-logins");
+                            if (!res.ok) throw new Error("status " + res.status);
+                            const data = await res.json();
 
-                        const month = data.month || "Current";
-                        document.getElementById("newCustomersTitle").textContent = `${month} Current Login`;
-                        const labelEl = document.getElementById("newCustomersLabel");
-                        labelEl.textContent = `${month} Current Login Detail`;
-                        labelEl.style.cssText = `
+                            const month = data.month || "Current";
+                            document.getElementById("newCustomersTitle").textContent = `${month} Current Login`;
+                            const labelEl = document.getElementById("newCustomersLabel");
+                            labelEl.textContent = `${month} Current Login Detail`;
+                            labelEl.style.cssText = `
     display:block;
     text-align:center;
     font-size:20px;
@@ -3668,24 +3723,24 @@
     border:none;
     outline:none;
 `;
-                        document.getElementById("currentLoginBtn").style.display = "none";
-                        document.getElementById("undoLoginBtn").style.display = "inline-block";
+                            document.getElementById("currentLoginBtn").style.display = "none";
+                            document.getElementById("undoLoginBtn").style.display = "inline-block";
 
-                        const tbody = document.getElementById("newCustomersTableBody");
-                        const rows = data.logins ?? [];
+                            const tbody = document.getElementById("newCustomersTableBody");
+                            const rows = data.logins ?? [];
 
-                        if (rows.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;">No logins found</td></tr>`;
-                            return;
-                        }
+                            if (rows.length === 0) {
+                                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;">No logins found</td></tr>`;
+                                return;
+                            }
 
-                        const avatarColors = ["pink", "orange", "green", "blue"];
-                        tbody.innerHTML = "";
-                        rows.forEach((row, i) => {
-                            const colorClass = avatarColors[i % avatarColors.length];
-                            const initials = (row.username || "?").substring(0, 2).toUpperCase();
-                            const tr = document.createElement("tr");
-                            tr.innerHTML = `
+                            const avatarColors = ["pink", "orange", "green", "blue"];
+                            tbody.innerHTML = "";
+                            rows.forEach((row, i) => {
+                                const colorClass = avatarColors[i % avatarColors.length];
+                                const initials = (row.username || "?").substring(0, 2).toUpperCase();
+                                const tr = document.createElement("tr");
+                                tr.innerHTML = `
                 <td>${i + 1}</td>
                 <td>${row.id}</td>
                 <td><div class="customer-info">
@@ -3697,93 +3752,93 @@
                 <td>-</td>
                 <td>-</td>
             `;
-                            tbody.appendChild(tr);
-                        });
+                                tbody.appendChild(tr);
+                            });
 
-                    } catch (err) {
-                        console.error("Current logins fetch failed:", err);
+                        } catch (err) {
+                            console.error("Current logins fetch failed:", err);
+                        }
                     }
-                }
 
-                /*#-----------------------third part madhe square var complete current month login and signup show karila --------------------------*/
+                    /*#-----------------------third part madhe square var complete current month login and signup show karila --------------------------*/
 
 
-                async function loadNewThisMonth() {
-                    try {
-                        const res = await fetch("/api/owner/new-this-month");
-                        if (!res.ok) throw new Error("status " + res.status);
-                        const data = await res.json();
+                    async function loadNewThisMonth() {
+                        try {
+                            const res = await fetch("/api/owner/new-this-month");
+                            if (!res.ok) throw new Error("status " + res.status);
+                            const data = await res.json();
 
-                        // Left — login count
-                        const countEl = document.getElementById("newThisMonthCount");
-                        if (countEl) countEl.textContent = (data.login_count ?? 0).toLocaleString("en-IN");
+                            // Left — login count
+                            const countEl = document.getElementById("newThisMonthCount");
+                            if (countEl) countEl.textContent = (data.login_count ?? 0).toLocaleString("en-IN");
 
-                        // Right — new accounts count
-                        const accEl = document.getElementById("newThisMonthAccCount");
-                        if (accEl) accEl.textContent = (data.new_accounts ?? 0).toLocaleString("en-IN");
+                            // Right — new accounts count
+                            const accEl = document.getElementById("newThisMonthAccCount");
+                            if (accEl) accEl.textContent = (data.new_accounts ?? 0).toLocaleString("en-IN");
 
-                        // Month label
-                        const now = new Date();
-                        const monthName = now.toLocaleString("en-IN", { month: "long" });
-                        const labelEl = document.getElementById("newThisMonthLabel");
-                        if (labelEl) labelEl.textContent = `${monthName} ${now.getFullYear()}`;
+                            // Month label
+                            const now = new Date();
+                            const monthName = now.toLocaleString("en-IN", { month: "long" });
+                            const labelEl = document.getElementById("newThisMonthLabel");
+                            if (labelEl) labelEl.textContent = `${monthName} ${now.getFullYear()}`;
 
-                        // % change
-                        const changeEl = document.getElementById("newThisMonthChange");
-                        if (changeEl) {
-                            const pct = data.percent_change ?? 0;
-                            if (pct > 0) {
-                                changeEl.textContent = `↑ ${pct}% vs last month`;
-                                changeEl.className = "up";
-                            } else if (pct < 0) {
-                                changeEl.textContent = `↓ ${Math.abs(pct)}% vs last month`;
-                                changeEl.className = "down";
-                            } else {
-                                changeEl.textContent = "No change vs last month";
-                                changeEl.className = "";
+                            // % change
+                            const changeEl = document.getElementById("newThisMonthChange");
+                            if (changeEl) {
+                                const pct = data.percent_change ?? 0;
+                                if (pct > 0) {
+                                    changeEl.textContent = `↑ ${pct}% vs last month`;
+                                    changeEl.className = "up";
+                                } else if (pct < 0) {
+                                    changeEl.textContent = `↓ ${Math.abs(pct)}% vs last month`;
+                                    changeEl.className = "down";
+                                } else {
+                                    changeEl.textContent = "No change vs last month";
+                                    changeEl.className = "";
+                                }
                             }
+                        } catch (err) {
+                            console.error("New this month fetch failed:", err);
                         }
-                    } catch (err) {
-                        console.error("New this month fetch failed:", err);
                     }
-                }
 
 
-                loadNewThisMonth();
-                setInterval(loadNewThisMonth, 30000);
+                    loadNewThisMonth();
+                    setInterval(loadNewThisMonth, 30000);
 
-                // ── Strong Password Manager ───────────────────────────────────────────────────
-                function openStrongPasswordModal() {
-                    document.getElementById("strongPasswordModal").style.display = "flex";
-                    loadStrongPasswords();
-                }
+                    // ── Strong Password Manager ───────────────────────────────────────────────────
+                    function openStrongPasswordModal() {
+                        document.getElementById("strongPasswordModal").style.display = "flex";
+                        loadStrongPasswords();
+                    }
 
-                function closeStrongPasswordModal() {
-                    document.getElementById("strongPasswordModal").style.display = "none";
-                    document.getElementById("newPasswordInput").value = "";
-                    document.getElementById("isUsedCheck").checked = false;
-                    document.getElementById("passwordSaveMsg").textContent = "";
-                }
+                    function closeStrongPasswordModal() {
+                        document.getElementById("strongPasswordModal").style.display = "none";
+                        document.getElementById("newPasswordInput").value = "";
+                        document.getElementById("isUsedCheck").checked = false;
+                        document.getElementById("passwordSaveMsg").textContent = "";
+                    }
 
-                async function loadStrongPasswords() {
-                    const tbody = document.getElementById("strongPasswordTableBody");
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;">Loading...</td></tr>`;
-                    try {
-                        const res = await fetch("/api/owner/strong-passwords");
-                        if (!res.ok) throw new Error("status " + res.status);
-                        const data = await res.json();
-                        const rows = data.passwords ?? [];
+                    async function loadStrongPasswords() {
+                        const tbody = document.getElementById("strongPasswordTableBody");
+                        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;">Loading...</td></tr>`;
+                        try {
+                            const res = await fetch("/api/owner/strong-passwords");
+                            if (!res.ok) throw new Error("status " + res.status);
+                            const data = await res.json();
+                            const rows = data.passwords ?? [];
 
-                        if (rows.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#6366f1;">No passwords stored yet</td></tr>`;
-                            return;
-                        }
+                            if (rows.length === 0) {
+                                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#6366f1;">No passwords stored yet</td></tr>`;
+                                return;
+                            }
 
-                        tbody.innerHTML = "";
-                        rows.forEach((row, i) => {
-                            const isUsed = row.is_used == 1;
-                            const tr = document.createElement("tr");
-                            tr.innerHTML = `
+                            tbody.innerHTML = "";
+                            rows.forEach((row, i) => {
+                                const isUsed = row.is_used == 1;
+                                const tr = document.createElement("tr");
+                                tr.innerHTML = `
                 <td class="row-checkbox-td" style="display:none;">
                     <input type="checkbox" class="password-checkbox" data-id="${row.id}">
                 </td>
@@ -3803,155 +3858,155 @@
                     </span>
                 </td>
             `;
-                            tbody.appendChild(tr);
-                        });
+                                tbody.appendChild(tr);
+                            });
 
-                    } catch (err) {
-                        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:red;">Failed to load</td></tr>`;
-                    }
-                }
-                async function addStrongPassword() {
-                    const password = document.getElementById("newPasswordInput").value.trim();
-                    const is_used = document.getElementById("isUsedCheck").checked ? 1 : 0;
-                    const msgEl = document.getElementById("passwordSaveMsg");
-
-                    if (!password) {
-                        msgEl.style.color = "#ef4444";
-                        msgEl.textContent = "❌ Please enter a password!";
-                        return;
-                    }
-
-                    try {
-                        const res = await fetch("/api/owner/strong-passwords", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ password, is_used })
-                        });
-                        const data = await res.json();
-
-                        if (res.ok) {
-                            msgEl.style.color = "#10b981";
-                            msgEl.textContent = "✅ Password saved successfully!";
-                            document.getElementById("newPasswordInput").value = "";
-                            document.getElementById("isUsedCheck").checked = false;
-                            loadStrongPasswords();
-                        } else {
-                            msgEl.style.color = "#ef4444";
-                            msgEl.textContent = "❌ " + (data.error || "Failed to save");
+                        } catch (err) {
+                            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:red;">Failed to load</td></tr>`;
                         }
-                    } catch (err) {
-                        msgEl.style.color = "#ef4444";
-                        msgEl.textContent = "❌ Error: " + err.message;
                     }
-                }
+                    async function addStrongPassword() {
+                        const password = document.getElementById("newPasswordInput").value.trim();
+                        const is_used = document.getElementById("isUsedCheck").checked ? 1 : 0;
+                        const msgEl = document.getElementById("passwordSaveMsg");
 
-                // ── 3-Dot Menu ──────────────────────────────────────────────────────────────
-                function togglePasswordMenu(e) {
-                    e.stopPropagation();
-                    const menu = document.getElementById("passwordMenuDropdown");
-                    menu.style.display = menu.style.display === "none" ? "block" : "none";
-                }
+                        if (!password) {
+                            msgEl.style.color = "#ef4444";
+                            msgEl.textContent = "❌ Please enter a password!";
+                            return;
+                        }
 
-                document.addEventListener("click", () => {
-                    const menu = document.getElementById("passwordMenuDropdown");
-                    if (menu) menu.style.display = "none";
-                });
-
-                // ── Select Mode (shared for delete / mark used / mark unused) ────────────────
-                let currentBulkMode = null; // 'delete' | 'used' | 'unused'
-
-                function enableSelectMode(mode) {
-                    currentBulkMode = mode;
-                    document.getElementById("passwordMenuDropdown").style.display = "none";
-                    document.getElementById("checkboxHeaderTh").style.display = "";
-                    document.querySelectorAll(".row-checkbox-td").forEach(td => td.style.display = "");
-                    document.getElementById("deleteSelectedBar").style.display = "block";
-
-                    const btn = document.getElementById("bulkActionBtn");
-                    if (mode === "delete") {
-                        btn.textContent = "🗑 Delete Selected";
-                        btn.style.background = "#ef4444";
-                    } else if (mode === "unused") {
-                        btn.textContent = "⏳ Mark as Unused";
-                        btn.style.background = "#f59e0b";
-                    } else if (mode === "used") {
-                        btn.textContent = "✅ Mark as Used";
-                        btn.style.background = "#10b981";
-                    }
-                }
-
-                function cancelSelectMode() {
-                    currentBulkMode = null;
-                    document.getElementById("checkboxHeaderTh").style.display = "none";
-                    document.querySelectorAll(".row-checkbox-td").forEach(td => td.style.display = "none");
-                    document.getElementById("deleteSelectedBar").style.display = "none";
-                    document.querySelectorAll(".password-checkbox").forEach(cb => cb.checked = false);
-                }
-
-                function toggleSelectAll(masterCb) {
-                    document.querySelectorAll(".password-checkbox").forEach(cb => cb.checked = masterCb.checked);
-                }
-
-                // ── Runs the correct action based on which menu option was selected ──────────
-                async function runBulkAction() {
-                    const checked = document.querySelectorAll(".password-checkbox:checked");
-                    if (checked.length === 0) {
-                        alert("Please select at least one password!");
-                        return;
-                    }
-
-                    const ids = Array.from(checked).map(cb => cb.dataset.id);
-
-                    if (currentBulkMode === "delete") {
-                        if (!confirm(`Delete ${checked.length} selected password(s)? This cannot be undone.`)) return;
                         try {
-                            const res = await fetch("/api/owner/strong-passwords/bulk-delete", {
+                            const res = await fetch("/api/owner/strong-passwords", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ ids })
+                                body: JSON.stringify({ password, is_used })
                             });
                             const data = await res.json();
-                            if (res.ok) { cancelSelectMode(); loadStrongPasswords(); }
-                            else { alert("Delete failed: " + (data.error || "Unknown error")); }
-                        } catch (err) { alert("Delete failed: " + err.message); }
 
-                    } else if (currentBulkMode === "unused" || currentBulkMode === "used") {
-                        const is_used = currentBulkMode === "used" ? 1 : 0;
-                        try {
-                            const res = await fetch("/api/owner/strong-passwords/bulk-update-status", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ ids, is_used })
-                            });
-                            const data = await res.json();
-                            if (res.ok) { cancelSelectMode(); loadStrongPasswords(); }
-                            else { alert("Update failed: " + (data.error || "Unknown error")); }
-                        } catch (err) { alert("Update failed: " + err.message); }
+                            if (res.ok) {
+                                msgEl.style.color = "#10b981";
+                                msgEl.textContent = "✅ Password saved successfully!";
+                                document.getElementById("newPasswordInput").value = "";
+                                document.getElementById("isUsedCheck").checked = false;
+                                loadStrongPasswords();
+                            } else {
+                                msgEl.style.color = "#ef4444";
+                                msgEl.textContent = "❌ " + (data.error || "Failed to save");
+                            }
+                        } catch (err) {
+                            msgEl.style.color = "#ef4444";
+                            msgEl.textContent = "❌ Error: " + err.message;
+                        }
                     }
-                }
+
+                    // ── 3-Dot Menu ──────────────────────────────────────────────────────────────
+                    function togglePasswordMenu(e) {
+                        e.stopPropagation();
+                        const menu = document.getElementById("passwordMenuDropdown");
+                        menu.style.display = menu.style.display === "none" ? "block" : "none";
+                    }
+
+                    document.addEventListener("click", () => {
+                        const menu = document.getElementById("passwordMenuDropdown");
+                        if (menu) menu.style.display = "none";
+                    });
+
+                    // ── Select Mode (shared for delete / mark used / mark unused) ────────────────
+                    let currentBulkMode = null; // 'delete' | 'used' | 'unused'
+
+                    function enableSelectMode(mode) {
+                        currentBulkMode = mode;
+                        document.getElementById("passwordMenuDropdown").style.display = "none";
+                        document.getElementById("checkboxHeaderTh").style.display = "";
+                        document.querySelectorAll(".row-checkbox-td").forEach(td => td.style.display = "");
+                        document.getElementById("deleteSelectedBar").style.display = "block";
+
+                        const btn = document.getElementById("bulkActionBtn");
+                        if (mode === "delete") {
+                            btn.textContent = "🗑 Delete Selected";
+                            btn.style.background = "#ef4444";
+                        } else if (mode === "unused") {
+                            btn.textContent = "⏳ Mark as Unused";
+                            btn.style.background = "#f59e0b";
+                        } else if (mode === "used") {
+                            btn.textContent = "✅ Mark as Used";
+                            btn.style.background = "#10b981";
+                        }
+                    }
+
+                    function cancelSelectMode() {
+                        currentBulkMode = null;
+                        document.getElementById("checkboxHeaderTh").style.display = "none";
+                        document.querySelectorAll(".row-checkbox-td").forEach(td => td.style.display = "none");
+                        document.getElementById("deleteSelectedBar").style.display = "none";
+                        document.querySelectorAll(".password-checkbox").forEach(cb => cb.checked = false);
+                    }
+
+                    function toggleSelectAll(masterCb) {
+                        document.querySelectorAll(".password-checkbox").forEach(cb => cb.checked = masterCb.checked);
+                    }
+
+                    // ── Runs the correct action based on which menu option was selected ──────────
+                    async function runBulkAction() {
+                        const checked = document.querySelectorAll(".password-checkbox:checked");
+                        if (checked.length === 0) {
+                            alert("Please select at least one password!");
+                            return;
+                        }
+
+                        const ids = Array.from(checked).map(cb => cb.dataset.id);
+
+                        if (currentBulkMode === "delete") {
+                            if (!confirm(`Delete ${checked.length} selected password(s)? This cannot be undone.`)) return;
+                            try {
+                                const res = await fetch("/api/owner/strong-passwords/bulk-delete", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ ids })
+                                });
+                                const data = await res.json();
+                                if (res.ok) { cancelSelectMode(); loadStrongPasswords(); }
+                                else { alert("Delete failed: " + (data.error || "Unknown error")); }
+                            } catch (err) { alert("Delete failed: " + err.message); }
+
+                        } else if (currentBulkMode === "unused" || currentBulkMode === "used") {
+                            const is_used = currentBulkMode === "used" ? 1 : 0;
+                            try {
+                                const res = await fetch("/api/owner/strong-passwords/bulk-update-status", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ ids, is_used })
+                                });
+                                const data = await res.json();
+                                if (res.ok) { cancelSelectMode(); loadStrongPasswords(); }
+                                else { alert("Update failed: " + (data.error || "Unknown error")); }
+                            } catch (err) { alert("Update failed: " + err.message); }
+                        }
+                    }
 
 
-                function toggleHeaderMenu(e) {
-                    e.stopPropagation();
-                    const menu = document.getElementById("headerMenuDropdown");
-                    menu.style.display = menu.style.display === "none" ? "block" : "none";
-                }
+                    function toggleHeaderMenu(e) {
+                        e.stopPropagation();
+                        const menu = document.getElementById("headerMenuDropdown");
+                        menu.style.display = menu.style.display === "none" ? "block" : "none";
+                    }
 
-                function closeHeaderMenu() {
-                    document.getElementById("headerMenuDropdown").style.display = "none";
-                }
+                    function closeHeaderMenu() {
+                        document.getElementById("headerMenuDropdown").style.display = "none";
+                    }
 
-                document.addEventListener("click", () => {
-                    const menu = document.getElementById("headerMenuDropdown");
-                    if (menu) menu.style.display = "none";
-                });
+                    document.addEventListener("click", () => {
+                        const menu = document.getElementById("headerMenuDropdown");
+                        if (menu) menu.style.display = "none";
+                    });
 
-            </script>
+                </script>
 
 
-            <footer class="footer">
-                © 2026 Product Dashboard | All Rights Reserved
-            </footer>
+                <footer class="footer">
+                    © 2026 Product Dashboard | All Rights Reserved
+                </footer>
 </body>
 
 </html>
