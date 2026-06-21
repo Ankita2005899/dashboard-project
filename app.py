@@ -2110,7 +2110,7 @@ def search_product():
     
     
     
-    @app.route("/search-products")
+@app.route("/search-products")
 def search_products():
     now = int(time.time())
     last_call = session.get("last_search_call", 0)
