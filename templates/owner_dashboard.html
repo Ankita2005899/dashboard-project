@@ -2094,9 +2094,37 @@
                         </button>
                     </div>
 
-                    <div id="catalogGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-            gap:18px;max-height:60vh;overflow-y:auto;padding:4px;">
-                        <p style="grid-column:1/-1;text-align:center;color:#94a3b8;">Loading...</p>
+                    <div style="display:flex;gap:18px;align-items:flex-start;">
+
+                        <!-- 📊 Total Activity (left side) -->
+                        <div
+                            style="flex:0 0 190px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:16px;">
+                            <h4 style="margin:0 0 14px;font-size:14px;color:#1e293b;font-weight:700;">📊 Total Activity
+                            </h4>
+                            <div style="display:flex;flex-direction:column;gap:14px;">
+                                <div>
+                                    <p style="margin:0;font-size:12px;color:#64748b;font-weight:600;">🔍 Search</p>
+                                    <p id="catalogStatSearch"
+                                        style="margin:2px 0 0;font-size:20px;font-weight:800;color:#3b82f6;">0</p>
+                                </div>
+                                <div>
+                                    <p style="margin:0;font-size:12px;color:#64748b;font-weight:600;">🛒 Purchased</p>
+                                    <p id="catalogStatPurchased"
+                                        style="margin:2px 0 0;font-size:20px;font-weight:800;color:#10b981;">0</p>
+                                </div>
+                                <div>
+                                    <p style="margin:0;font-size:12px;color:#64748b;font-weight:600;">➕ Add to Cart</p>
+                                    <p id="catalogStatCart"
+                                        style="margin:2px 0 0;font-size:20px;font-weight:800;color:#f59e0b;">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="catalogGrid" style="flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+                gap:18px;max-height:60vh;overflow-y:auto;padding:4px;">
+                            <p style="grid-column:1/-1;text-align:center;color:#94a3b8;">Loading...</p>
+                        </div>
+
                     </div>
 
                 </div>
@@ -2467,6 +2495,20 @@
                             }
                         });
                         loadCatalogProducts(tab);
+                        updateCatalogActivityStats(tab);
+                    }
+
+                    // 📊 Total Activity card (left side of catalog) — Search / Purchased / Add to Cart
+                    const catalogActivityStats = {
+                        kitchen: { search: 129, purchased: 51, cart: 85 },
+                        study: { search: 96, purchased: 38, cart: 62 },
+                        food: { search: 154, purchased: 67, cart: 102 }
+                    };
+                    function updateCatalogActivityStats(tab) {
+                        const stats = catalogActivityStats[tab] || { search: 0, purchased: 0, cart: 0 };
+                        document.getElementById("catalogStatSearch").textContent = stats.search;
+                        document.getElementById("catalogStatPurchased").textContent = stats.purchased;
+                        document.getElementById("catalogStatCart").textContent = stats.cart;
                     }
 
                     async function loadCatalogProducts(tab) {
