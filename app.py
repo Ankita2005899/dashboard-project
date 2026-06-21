@@ -185,7 +185,7 @@ def create_user_product_activity_table(username, user_id):
             search_time TIME,
             growth_on_search VARCHAR(20),
             today_add_to_cart_count INT DEFAULT 0,
-            add_to_cart_time TIME,
+            add_to_cart_date_time TIME,
             growth_in_addtocart VARCHAR(20),
             today_purchase_count INT DEFAULT 0,
             purchased_time TIME,
@@ -2022,7 +2022,7 @@ def get_addtocart_data_from_db():
 
     cursor.execute(f"""
         SELECT product_id, name, category, 
-               today_add_to_cart_count, add_to_cart_time, growth_in_addtocart
+               today_add_to_cart_count, add_to_cart_date_time, growth_in_addtocart
         FROM `{activity_table}`
         WHERE today_add_to_cart_count > 0
         ORDER BY today_add_to_cart_count DESC
@@ -2312,13 +2312,13 @@ def track_add_to_cart():
     if existing:
         new_count = existing[0] + 1
         cursor.execute(f"""
-            UPDATE `{table_name}` SET today_add_to_cart_count = %s, add_to_cart_time = %s, growth_in_addtocart = %s
+            UPDATE `{table_name}` SET today_add_to_cart_count = %s, add_to_cart_date_time = %s, growth_in_addtocart = %s
             WHERE product_id = %s
         """, (new_count, ist_time, f"{new_count}/100", product_id))
     else:
         cursor.execute(f"""
             INSERT INTO `{table_name}`
-            (product_id, name, category, today_add_to_cart_count, add_to_cart_time, growth_in_addtocart, month)
+            (product_id, name, category, today_add_to_cart_count, add_to_cart_date_time, growth_in_addtocart, month)
             VALUES (%s,%s,%s,%s,%s,%s,MONTHNAME(%s))
         """, (product_id, product_name, product_category, 1, ist_time, "1/100", ist_time))
 
@@ -2344,7 +2344,7 @@ def owner_addtocart_data():
             continue
 
         cursor.execute(f"""
-            SELECT product_id, name, category, today_add_to_cart_count, add_to_cart_time FROM `{table_name}`
+            SELECT product_id, name, category, today_add_to_cart_count, add_to_cart_date_time FROM `{table_name}`
         """)
 
         for r in cursor.fetchall():
@@ -2355,12 +2355,12 @@ def owner_addtocart_data():
                     "name": r["name"],
                     "category": r["category"],
                     "count": 0,
-                    "time": r["add_to_cart_time"]
+                    "time": r["add_to_cart_date_time"]
                 }
             combined[pid]["count"] += (r["today_add_to_cart_count"] or 0)
-            if r["add_to_cart_time"]:
-                if combined[pid]["time"] is None or r["add_to_cart_time"] > combined[pid]["time"]:
-                    combined[pid]["time"] = r["add_to_cart_time"]
+            if r["add_to_cart_date_time"]:
+                if combined[pid]["time"] is None or r["add_to_cart_date_time"] > combined[pid]["time"]:
+                    combined[pid]["time"] = r["add_to_cart_date_time"]
 
     cursor.close()
     conn.close()
