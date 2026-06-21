@@ -1477,7 +1477,7 @@ def get_cart_items():
 
     return jsonify(items)
 
-@app.route("/add-to-cart", methods=["POST"])
+mein bhi:provide mi this complete route13:54Claude responded: 2 extra fixes jo maine include kiye:python@app.route("/add-to-cart", methods=["POST"])
 def add_to_cart():
     print("👉 ROUTE HIT:", request.path)
 
@@ -1503,7 +1503,8 @@ def add_to_cart():
         table_map = {
             "kitchen": "card",
             "study": "study_material",
-            "food": "food_items"
+            "food": "food_items",
+            "food_items": "food_items"
         }
 
         client_table = get_cart_table_name(username, user_id)
@@ -1568,7 +1569,7 @@ def add_to_cart():
                 item.get("address", ""), item["id"], 0
             ))
 
-            # ✅ Product activity update (same loop ke andar, sahi indentation)
+            # ✅ Product activity update
             cursor.execute(f"""
                 SELECT id, today_add_to_cart_count FROM `{activity_table}`
                 WHERE product_id = %s AND category = %s
@@ -1577,24 +1578,21 @@ def add_to_cart():
 
             if act_existing:
                 new_count = act_existing[1] + 1
-                # activity UPDATE mein change karo
                 cursor.execute(f"""
                     UPDATE `{activity_table}`
                     SET today_add_to_cart_count = %s,
-                        add_to_cart_time = CONVERT_TZ(NOW(), '+00:00', '+05:30'),
+                        add_to_cart_time = DATE_ADD(NOW(), INTERVAL 330 MINUTE),
                         growth_in_addtocart = %s
                     WHERE product_id = %s AND category = %s
                 """, (new_count, f"{new_count}/100", item["id"], item["category"]))
             else:
-                # activity INSERT mein change karo
                 cursor.execute(f"""
                     INSERT INTO `{activity_table}`
                     (product_id, name, category, today_add_to_cart_count, add_to_cart_time, month, growth_in_addtocart)
-                    VALUES (%s, %s, %s, 1, CONVERT_TZ(NOW(), '+00:00', '+05:30'), MONTHNAME(NOW()), '1/100')
+                    VALUES (%s, %s, %s, 1, DATE_ADD(NOW(), INTERVAL 330 MINUTE), MONTHNAME(NOW()), '1/100')
                 """, (item["id"], item["name"], item["category"]))
 
-
-        # ✅ Loop ke BAAD commit — sahi jagah
+        # ✅ Loop ke BAAD commit
         db.commit()
         cursor.close()
         db.close()
@@ -1608,8 +1606,8 @@ def add_to_cart():
             db.close()
         except:
             pass
-        return jsonify({"success": False, "error": str(e)}), 500
-    
+        return jsonify({"success": False, "error": str(e)}), 500 
+
 
 @app.route("/remove-from-cart", methods=["POST"])
 def remove_from_cart():
@@ -2130,7 +2128,7 @@ def search_products():
             UNION ALL
             SELECT id, name, category, searched_count, last_searched_time FROM food_items WHERE name LIKE %s
         ) AS combined
-    """, (like_pattern,like_pattern,like_pattern))
+    """, (like_pattern, like_pattern, like_pattern))
     results = cursor.fetchall()
 
     processed = set()
@@ -2145,38 +2143,43 @@ def search_products():
         processed.add(key)
 
         cursor.execute(f"""
-            UPDATE {item['category']} SET searched_count = COALESCE(searched_count,0) + 1, last_searched_time = NOW()
+            UPDATE {item['category']} SET searched_count = COALESCE(searched_count,0) + 1,
+            last_searched_time = DATE_ADD(NOW(), INTERVAL 330 MINUTE)
             WHERE id = %s
         """, (item["id"],))
 
-        cursor.execute(f"SELECT today_search_count FROM `{table_name}` WHERE product_id = %s", (item["id"],))
+        cursor.execute(f"SELECT today_search_count FROM `{table_name}` WHERE product_id = %s AND category = %s",
+                       (item["id"], item["category"]))
         existing = cursor.fetchone()
 
         if existing:
             new_count = existing["today_search_count"] + 1
-            # search UPDATE
             cursor.execute(f"""
-                UPDATE `{table_name}` SET today_search_count = %s, 
-                search_time = CONVERT_TZ(NOW(), '+00:00', '+05:30'), 
-                growth_on_search = %s
-                WHERE product_id = %s
-            """, (new_count, f"{new_count}/100", item["id"]))
+                UPDATE `{table_name}`
+                SET today_search_count = %s,
+                    search_time = DATE_ADD(NOW(), INTERVAL 330 MINUTE),
+                    growth_on_search = %s
+                WHERE product_id = %s AND category = %s
+            """, (new_count, f"{new_count}/100", item["id"], item["category"]))
         else:
-            # search INSERT
             cursor.execute(f"""
-                    INSERT INTO `{table_name}` (product_id, name, category, today_search_count, search_time, month, growth_on_search)
-                    VALUES (%s,%s,%s,1,CONVERT_TZ(NOW(), '+00:00', '+05:30'),MONTHNAME(NOW()),%s)
+                INSERT INTO `{table_name}`
+                (product_id, name, category, today_search_count, search_time, month, growth_on_search)
+                VALUES (%s, %s, %s, 1, DATE_ADD(NOW(), INTERVAL 330 MINUTE), MONTHNAME(NOW()), %s)
             """, (item["id"], item["name"], item["category"], "1/100"))
 
     conn.commit()
 
     for item in results:
-        cursor.execute(f"SELECT COALESCE(searched_count,0) AS searched_count FROM {item['category']} WHERE id = %s", (item["id"],))
+        cursor.execute(f"SELECT COALESCE(searched_count,0) AS searched_count FROM {item['category']} WHERE id = %s",
+                       (item["id"],))
         item["searched_count"] = cursor.fetchone()["searched_count"]
 
     cursor.close()
     conn.close()
     return jsonify(results)
+
+
 
 @app.route("/products/search")
 def products_search():
