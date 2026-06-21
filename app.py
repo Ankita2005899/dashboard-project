@@ -20,14 +20,13 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 #------------------------------
-from datetime import date, timedelta
 from flask import (
     Flask, render_template, request, jsonify,
     redirect, url_for, session, send_from_directory,
     Response, render_template_string, flash
 )
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font
 from dotenv import load_dotenv
