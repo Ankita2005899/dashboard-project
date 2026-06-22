@@ -4355,7 +4355,7 @@ def search_analytics():
 
             try:
                 cursor.execute(f"""
-                    SELECT product_id, name, category,
+                    SELECT name, category,
                            COALESCE(today_search_count, 0) AS today_search_count,
                            COALESCE(growth_on_search, '0') AS growth_on_search,
                            search_time
@@ -4366,14 +4366,11 @@ def search_analytics():
                 print(f"DEBUG: {tbl_name} has {len(rows)} search rows", flush=True)
 
                 for row in rows:
-                    # ✅ product_map se actual naam lo
-                    actual_name = product_map.get((row["product_id"], row["category"]))
-                    if not actual_name:
+                    pname = (row["name"] or "").strip()
+                    if not pname:
                         continue
 
-                    # ✅ Unique label
-                    unique_key = f"{actual_name} ({row['category']}) #{row['product_id']}"
-                    bucket = aggregated[unique_key]
+                    bucket = aggregated[pname]
                     bucket["total_searches"] += int(row["today_search_count"] or 0)
                     bucket["users_who_searched"].add(tbl_name)  # table name as unique user identifier
 
