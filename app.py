@@ -1597,7 +1597,10 @@ def add_to_cart():
         }
 
         client_table = get_cart_table_name(username, user_id)
-        activity_table = f"{username}_{user_id}_product_activity"
+        safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+        if safe_username and safe_username[0].isdigit():
+            safe_username = "user_" + safe_username
+        activity_table = f"{safe_username}_{user_id}_product_activity"
 
         # IST time fallback
         ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
@@ -2470,7 +2473,10 @@ def track_add_to_cart():
 
     username = session.get("username")
     user_id = session.get("user_id")
-    table_name = f"{username}_{user_id}_product_activity"
+    safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+    if safe_username and safe_username[0].isdigit():
+        safe_username = "user_" + safe_username
+    table_name = f"{safe_username}_{user_id}_product_activity"
 
     # ✅ Python se IST time
     ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
