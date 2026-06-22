@@ -2387,7 +2387,7 @@ def track_search():
         """, (ist_now_str, query, like_pattern))
 
         cursor.execute(f"""
-            SELECT id, category FROM `{table}`
+            SELECT id, name, category FROM `{table}`
             WHERE name = %s OR keywords LIKE %s
         """, (query, like_pattern))
         matched = cursor.fetchall()
@@ -2420,7 +2420,7 @@ def track_search():
                     INSERT INTO `{activity_table}`
                     (product_id, name, category, today_search_count, search_time, month, growth_on_search)
                     VALUES (%s, %s, %s, 1, %s, %s, %s)
-                """, (product["id"], query, product["category"], ist_now_str, ist_month, "1/100"))
+                """, (product["id"], product["name"], product["category"], ist_now_str, ist_month, "1/100")) 
 
     conn.commit()
     cursor.close()
