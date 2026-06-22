@@ -1501,7 +1501,7 @@
                 Product Search Data
             </button>
 
-            <button onclick="window.location.href='/addtocartfortheownersection'">
+            <button onclick="openCartAnalyticsPage()">
                 Product Add to Cart Data
             </button>
 
@@ -4767,6 +4767,106 @@
         </div>
     </div>
 
+    <!-- ===================== ADD TO CART ANALYTICS MODAL ===================== -->
+    <div id="cartAnalyticsModal" class="modal-overlay" style="display:none;">
+        <div class="buyers-modal" style="max-width:1400px;width:97%;">
+
+            <div class="buyers-header" style="margin-bottom:20px;">
+                <div>
+                    <h3 style="margin:0;font-size:20px;color:#10b981;">🛒 Product Add to Cart Analytics</h3>
+                    <small style="color:#64748b;">All users · all add-to-cart items · real-time from DB</small>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <select id="cartCategoryFilter" onchange="applyCartFilter()"
+                        style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;
+                       font-size:13px;font-weight:600;background:var(--input-bg);color:var(--input-color);cursor:pointer;">
+                        <option value="">All Categories</option>
+                    </select>
+                    <select id="cartSortOrder" onchange="applyCartFilter()"
+                        style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;
+                       font-size:13px;font-weight:600;background:var(--input-bg);color:var(--input-color);cursor:pointer;">
+                        <option value="desc">Most Added ↓</option>
+                        <option value="asc">Least Added ↑</option>
+                    </select>
+                    <button onclick="loadCartAnalytics()" style="background:#10b981;color:white;border:none;padding:8px 16px;
+                       border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">
+                        🔄 Refresh
+                    </button>
+                    <button onclick="closeCartAnalyticsModal()" class="send-btn">Close</button>
+                </div>
+            </div>
+
+            <input type="text" id="cartProductInput" placeholder="Search product name or category..." class="search-box"
+                onkeyup="applyCartFilter()" style="margin-bottom:16px;">
+
+            <!-- BAR CHART -->
+            <div style="background:var(--user-chart-card-bg);border-radius:14px;
+                padding:20px;margin-bottom:24px;border:1px solid var(--user-item-border);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                    <div>
+                        <h4 style="margin:0;font-size:16px;color:var(--graph-h3);">📊 Add to Cart Count per Product</h4>
+                        <p style="margin:4px 0 0;font-size:12px;color:var(--graph-p);">
+                            Total add-to-cart aggregated across all users
+                        </p>
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="switchCartChart('bar')" id="cartChartTypeBar" style="padding:6px 14px;border-radius:8px;border:2px solid #10b981;
+                           background:#10b981;color:white;font-weight:700;cursor:pointer;font-size:12px;">
+                            Bar
+                        </button>
+                        <button onclick="switchCartChart('doughnut')" id="cartChartTypeDoughnut" style="padding:6px 14px;border-radius:8px;border:2px solid #10b981;
+                           background:white;color:#10b981;font-weight:700;cursor:pointer;font-size:12px;">
+                            Donut
+                        </button>
+                    </div>
+                </div>
+                <div style="position:relative;height:320px;">
+                    <canvas id="cartBarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- DATA TABLE -->
+            <div style="overflow-x:auto;">
+                <table class="buyers-table" style="min-width:900px;">
+                    <thead>
+                        <tr>
+                            <th style="width:5%;">Sr.</th>
+                            <th style="width:28%;white-space:normal;">Product Name</th>
+                            <th style="width:14%;">Category</th>
+                            <th style="width:12%;text-align:center;">🛒 Total Added</th>
+                            <th style="width:12%;text-align:center;">👥 Users Added</th>
+                            <th style="width:14%;text-align:center;">📈 Growth</th>
+                            <th style="width:15%;text-align:center;">🕐 Last Added</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cartAnalyticsTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align:center;padding:30px;color:#94a3b8;">
+                                Click "Product Add to Cart Data" to load...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SUMMARY BAR -->
+            <div id="cartSummaryBar" style="display:none;margin-top:16px;padding:14px 20px;
+        background:linear-gradient(135deg,#f0fdf4,#eff6ff);border-radius:12px;
+        display:flex;gap:30px;flex-wrap:wrap;">
+                <span style="font-size:13px;font-weight:700;color:#1e293b;">
+                    📦 Total Products: <span id="cartSummaryTotalProducts" style="color:#10b981;">0</span>
+                </span>
+                <span style="font-size:13px;font-weight:700;color:#1e293b;">
+                    🛒 Total Added: <span id="cartSummaryTotalAdded" style="color:#3b82f6;">0</span>
+                </span>
+                <span style="font-size:13px;font-weight:700;color:#1e293b;">
+                    🏆 Most Added: <span id="cartSummaryTopProduct" style="color:#f59e0b;">—</span>
+                </span>
+            </div>
+
+        </div>
+    </div>
+
     <script>
         let searchChartInstance = null;
         let searchAllData = [];
@@ -4904,6 +5004,145 @@
             document.getElementById("summaryTopProduct").textContent = rows[0] ? `${rows[0].product_name} (${rows[0].total_searches})` : "—";
         }
     </script>
+
+    <script>
+        let cartChartInstance = null;
+        let cartAllData = [];
+        let cartCurrentType = 'bar';
+
+        function openCartAnalyticsPage() {
+            document.getElementById("cartAnalyticsModal").style.display = "flex";
+            loadCartAnalytics();
+        }
+
+        function closeCartAnalyticsModal() {
+            document.getElementById("cartAnalyticsModal").style.display = "none";
+        }
+
+        async function loadCartAnalytics() {
+            const tbody = document.getElementById("cartAnalyticsTableBody");
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;">⏳ Loading...</td></tr>`;
+            try {
+                const res = await fetch("/api/owner/addtocart-analytics");
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                const data = await res.json();
+                cartAllData = data.results ?? [];
+
+                const catFilter = document.getElementById("cartCategoryFilter");
+                const existingCats = new Set(Array.from(catFilter.options).map(o => o.value).filter(v => v !== ""));
+                [...new Set(cartAllData.map(r => r.category).filter(Boolean))].forEach(cat => {
+                    if (!existingCats.has(cat)) {
+                        const opt = document.createElement("option");
+                        opt.value = cat; opt.textContent = cat;
+                        catFilter.appendChild(opt);
+                    }
+                });
+                applyCartFilter();
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:#ef4444;">
+                ❌ Failed: ${err.message}</td></tr>`;
+            }
+        }
+
+        function applyCartFilter() {
+            const query = document.getElementById("cartProductInput").value.toLowerCase().trim();
+            const cat = document.getElementById("cartCategoryFilter").value;
+            const sortDir = document.getElementById("cartSortOrder").value;
+            let filtered = cartAllData.filter(r =>
+                (!query || r.product_name.toLowerCase().includes(query) || (r.category || "").toLowerCase().includes(query))
+                && (!cat || r.category === cat)
+            );
+            filtered.sort((a, b) => sortDir === "desc" ? b.total_addtocart - a.total_addtocart : a.total_addtocart - b.total_addtocart);
+            renderCartTable(filtered);
+            renderCartChart(filtered);
+            renderCartSummaryBar(filtered);
+        }
+
+        function renderCartTable(rows) {
+            const tbody = document.getElementById("cartAnalyticsTableBody");
+            if (rows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:#94a3b8;">No data found.</td></tr>`;
+                return;
+            }
+            const maxS = Math.max(...rows.map(r => r.total_addtocart), 1);
+            tbody.innerHTML = "";
+            rows.forEach((row, i) => {
+                const pct = Math.round((row.total_addtocart / maxS) * 100);
+                const g = parseFloat(row.growth ?? 0);
+                const gColor = g > 0 ? "#10b981" : g < 0 ? "#ef4444" : "#94a3b8";
+                const gArrow = g > 0 ? "↑" : g < 0 ? "↓" : "—";
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                <td style="font-weight:700;color:#94a3b8;">${i + 1}</td>
+                <td>
+                    <div style="font-weight:700;color:var(--card-text-h2);margin-bottom:4px;white-space:normal;">${row.product_name || "—"}</div>
+                    <div style="height:6px;background:var(--metric-bar-bg);border-radius:6px;overflow:hidden;max-width:200px;">
+                        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#10b981,#3b82f6);border-radius:6px;"></div>
+                    </div>
+                </td>
+                <td><span style="background:#d1fae5;color:#065f46;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:700;">${row.category || "—"}</span></td>
+                <td style="text-align:center;font-size:20px;font-weight:800;color:#10b981;">${(row.total_addtocart || 0).toLocaleString("en-IN")}</td>
+                <td style="text-align:center;font-size:16px;font-weight:700;color:#6366f1;">${(row.users_who_added || 0).toLocaleString("en-IN")}</td>
+                <td style="text-align:center;font-weight:800;color:${gColor};">${gArrow} ${Math.abs(g).toFixed(1)}%</td>
+                <td style="text-align:center;font-size:12px;color:#64748b;">${row.last_added ? new Date(row.last_added).toLocaleString("en-IN") : "—"}</td>
+            `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        const CART_CHART_COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#14b8a6", "#f97316", "#ec4899", "#6366f1", "#84cc16"];
+
+        function renderCartChart(rows) {
+            if (cartChartInstance) { cartChartInstance.destroy(); cartChartInstance = null; }
+            const top = rows.slice(0, 15);
+            const labels = top.map(r => r.product_name.length > 18 ? r.product_name.substring(0, 16) + "…" : r.product_name);
+            const values = top.map(r => r.total_addtocart);
+            const colors = top.map((_, i) => CART_CHART_COLORS[i % CART_CHART_COLORS.length]);
+            const isBar = cartCurrentType === "bar";
+            const ctx = document.getElementById("cartBarChart").getContext("2d");
+            cartChartInstance = new Chart(ctx, {
+                type: cartCurrentType,
+                data: {
+                    labels,
+                    datasets: [{
+                        label: "Total Add to Cart", data: values,
+                        backgroundColor: isBar ? colors.map(c => c + "cc") : colors,
+                        borderColor: isBar ? colors : "#fff",
+                        borderWidth: isBar ? 0 : 2,
+                        borderRadius: isBar ? 8 : 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: !isBar, position: "right" } },
+                    scales: isBar ? {
+                        x: { ticks: { font: { size: 11 }, maxRotation: 35 } },
+                        y: { beginAtZero: true, title: { display: true, text: "Add to Cart Count" } }
+                    } : {}
+                }
+            });
+        }
+
+        function switchCartChart(type) {
+            cartCurrentType = type;
+            document.getElementById("cartChartTypeBar").style.background = type === "bar" ? "#10b981" : "white";
+            document.getElementById("cartChartTypeBar").style.color = type === "bar" ? "white" : "#10b981";
+            document.getElementById("cartChartTypeDoughnut").style.background = type === "doughnut" ? "#10b981" : "white";
+            document.getElementById("cartChartTypeDoughnut").style.color = type === "doughnut" ? "white" : "#10b981";
+            applyCartFilter();
+        }
+
+        function renderCartSummaryBar(rows) {
+            const bar = document.getElementById("cartSummaryBar");
+            if (rows.length === 0) { bar.style.display = "none"; return; }
+            bar.style.display = "flex";
+            const total = rows.reduce((s, r) => s + (r.total_addtocart || 0), 0);
+            document.getElementById("cartSummaryTotalProducts").textContent = rows.length.toLocaleString("en-IN");
+            document.getElementById("cartSummaryTotalAdded").textContent = total.toLocaleString("en-IN");
+            document.getElementById("cartSummaryTopProduct").textContent = rows[0] ? `${rows[0].product_name} (${rows[0].total_addtocart})` : "—";
+        }
+    </script>
+
     <footer class="footer">
         © 2026 Product Dashboard | All Rights Reserved
     </footer>
