@@ -4494,7 +4494,123 @@ def owner_all_dashboard_cards():
     except Exception as e:
         return jsonify([]), 500
     
-    
+#----------------------Product add to card data  of ( owner_section )------------------------- 
+
+
+@app.route("/api/owner/addtocart-analytics", methods=["GET"])
+def addtocart_analytics():
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # ✅ Seedha saari product_activity tables lo
+        cursor.execute("""
+            SELECT table_name FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            AND table_name LIKE '%_product_activity'
+        """)
+        all_tables = [list(row.values())[0] for row in cursor.fetchall()]
+
+        print(f"DEBUG: Found {len(all_tables)} activity tables", flush=True)
+
+        aggregated = defaultdict(lambda: {
+            "total_addtocart": 0,
+            "users_who_added": set(),
+            "category": None,
+            "growth_sum": 0.0,
+            "growth_count": 0,
+            "last_added": None,
+        })
+
+        for tbl_name in all_tables:
+            try:
+                cursor.execute(f"""
+                    SELECT name, category,
+                           COALESCE(today_add_to_cart_count, 0) AS today_add_to_cart_count,
+                           COALESCE(growth_in_addtocart, '0') AS growth_in_addtocart,
+                           add_to_cart_date_time
+                    FROM `{tbl_name}`
+                    WHERE today_add_to_cart_count IS NOT NULL AND today_add_to_cart_count > 0
+                """)
+                rows = cursor.fetchall()
+
+                for row in rows:
+                    pname = (row["name"] or "").strip()
+                    if not pname:
+                        continue
+
+                    bucket = aggregated[pname]
+                    bucket["total_addtocart"] += int(row["today_add_to_cart_count"] or 0)
+                    bucket["users_who_added"].add(tbl_name)
+
+                    if bucket["category"] is None and row["category"]:
+                        bucket["category"] = row["category"]
+
+                    try:
+                        raw = str(row["growth_in_addtocart"] or "0").strip()
+                        if "/" in raw:
+                            parts = raw.split("/")
+                            g = float(parts[0]) / float(parts[1]) * 100
+                        else:
+                            g = float(raw.replace("%", "") or 0)
+                        bucket["growth_sum"] += g
+                        bucket["growth_count"] += 1
+                    except (ValueError, TypeError, ZeroDivisionError):
+                        pass
+
+                    if row["add_to_cart_date_time"]:
+                        ts = str(row["add_to_cart_date_time"])
+                        if bucket["last_added"] is None or ts > bucket["last_added"]:
+                            bucket["last_added"] = ts
+
+            except Exception as e:
+                print(f"DEBUG: Skipping {tbl_name} — {str(e)}", flush=True)
+                continue
+
+        # ✅ ML: Normalize popularity score 0-100
+        all_counts = [b["total_addtocart"] for b in aggregated.values()]
+        max_count = max(all_counts) if all_counts else 1
+
+        results = []
+        for pname, bucket in aggregated.items():
+            avg_growth = round(bucket["growth_sum"] / bucket["growth_count"], 2) if bucket["growth_count"] > 0 else 0.0
+            popularity_score = round((bucket["total_addtocart"] / max_count) * 100, 1)
+
+            if avg_growth >= 70:
+                trend = "🔥 Hot"
+            elif avg_growth >= 40:
+                trend = "📈 Rising"
+            elif avg_growth >= 10:
+                trend = "➡️ Stable"
+            else:
+                trend = "📉 Low"
+
+            results.append({
+                "product_name": pname,
+                "category": bucket["category"] or "Uncategorized",
+                "total_addtocart": bucket["total_addtocart"],
+                "users_who_added": len(bucket["users_who_added"]),
+                "growth": avg_growth,
+                "popularity_score": popularity_score,
+                "trend": trend,
+                "last_added": bucket["last_added"],
+            })
+
+        results.sort(key=lambda x: x["popularity_score"], reverse=True)
+        return jsonify({"results": results})
+
+    except Exception as e:
+        print(f"DEBUG ERROR: {str(e)}", flush=True)
+        return jsonify({"error": str(e), "results": []}), 500
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
+
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
