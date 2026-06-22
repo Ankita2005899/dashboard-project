@@ -2149,44 +2149,74 @@
                 </div>
             </div>
             <!-- 🃏 Dashboard Card Preview Modal -->
-            <div id="dashCardPreviewModal" class="modal-overlay" style="z-index:10001;">
-                <div
-                    style="background:white;border-radius:16px;padding:28px;width:300px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
-                    <button onclick="closeDashCardPreview()"
-                        style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8;">✕</button>
-                    <p
-                        style="font-size:11px;color:#94a3b8;margin:0 0 14px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">
-                        📋 Customer View Preview</p>
+            <!-- 🃏 Dashboard Card Preview Modal — exact replica of customer dashboard.html product modal -->
+            <div id="dashCardPreviewModal" class="modal-overlay" style="z-index:10001;align-items:center;">
+                <div style="background:white;width:90%;max-width:750px;margin:auto;border-radius:12px;
+                    padding:24px;position:relative;border:2px solid #cbd5e1;
+                    box-shadow:0 4px 12px rgba(0,0,0,0.08);max-height:90vh;overflow-y:auto;">
 
-                    <!-- Card exactly as it looks on dashboard.html -->
-                    <div
-                        style="background:#ffffff;padding:14px;border-radius:10px;border:2px solid #cbd5e1;box-shadow:0 4px 10px rgba(0,0,0,0.06);">
-                        <img id="previewCardImg" src="" onerror="this.style.display='none'"
-                            style="width:100%;height:160px;object-fit:cover;border-radius:8px;">
-                        <h3 id="previewCardName"
-                            style="margin:10px 0 4px;font-size:16px;font-weight:700;color:#1e293b;"></h3>
-                        <p id="previewCardAvail" style="font-size:14px;color:#555;margin:0;"></p>
-                        <h4 id="previewCardPrice" style="margin-top:8px;font-size:16px;font-weight:700;color:#8b5cf6;">
-                        </h4>
-                        <div style="display:flex;gap:10px;margin-top:12px;">
-                            <button onclick="showOwnerBuyBlock()"
-                                style="flex:1;padding:8px;border-radius:6px;border:none;cursor:pointer;font-weight:600;background:linear-gradient(135deg,#4f46e5,#6366f1);color:white;">
-                                🛒 Add to Cart
-                            </button>
-                            <button onclick="showOwnerBuyBlock()"
-                                style="flex:1;padding:8px;border-radius:6px;border:none;cursor:pointer;font-weight:600;background:#10b981;color:white;">
-                                ℹ See Details
-                            </button>
+                    <!-- Close button styled exactly like dashboard.html -->
+                    <button onclick="closeDashCardPreview()" style="position:absolute;top:12px;right:16px;font-size:26px;background:transparent;
+                        border:2px solid #cbd5e1;border-radius:8px;color:#1e293b;font-weight:600;
+                        cursor:pointer;padding:4px 8px;transition:all 0.25s;"
+                        onmouseover="this.style.background='linear-gradient(135deg,#f97316,#f59e0b)';this.style.color='white';this.style.borderColor='#f97316'"
+                        onmouseout="this.style.background='transparent';this.style.color='#1e293b';this.style.borderColor='#cbd5e1'">×</button>
+
+                    <!-- Modal body: left (image/video/rating) + right (details) -->
+                    <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;">
+
+                        <!-- LEFT -->
+                        <div style="flex:0 0 280px;display:flex;flex-direction:column;gap:12px;">
+                            <img id="previewCardImg" src="" onerror="this.style.display='none'"
+                                style="width:100%;max-height:300px;object-fit:cover;border-radius:10px;border:2px solid #cbd5e1;">
+
+                            <video id="previewCardVideo" controls
+                                style="display:none;width:100%;max-height:300px;border-radius:10px;border:1px solid #cbd5e1;">
+                                <source id="previewCardVideoSrc" src="" type="video/mp4">
+                            </video>
+                            <div id="previewNoVideo"
+                                style="display:none;background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:8px;padding:12px;text-align:center;color:#94a3b8;font-size:13px;">
+                                📵 Video not uploaded
+                            </div>
+
+                            <!-- Rating section — disabled for owner with message -->
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;">
+                                <p style="font-weight:700;color:#4f46e5;margin-bottom:8px;font-size:14px;">⭐ Rate this
+                                    Product</p>
+                                <div style="display:flex;gap:6px;font-size:24px;cursor:not-allowed;opacity:0.5;">
+                                    <span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
+                                </div>
+                                <p style="font-size:12px;color:#94a3b8;margin-top:6px;">Rating is for customers only</p>
+                            </div>
                         </div>
-                        <div id="ownerBuyBlock"
-                            style="display:none;margin-top:10px;background:#fef3c7;border:1px solid #f59e0b;
-                            border-radius:8px;padding:10px;font-size:12px;color:#92400e;font-weight:600;text-align:center;">
-                            ⚠️ This feature is only available for users in the dashboard screen.
+
+                        <!-- RIGHT -->
+                        <div style="flex:1 1 300px;display:flex;flex-direction:column;gap:12px;word-wrap:break-word;">
+                            <h2 id="previewCardName"
+                                style="font-size:20px;margin-bottom:8px;font-weight:700;color:#1e293b;"></h2>
+                            <p style="font-size:15px;margin:4px 0;"><b>Available:</b> <span
+                                    id="previewCardAvail"></span></p>
+                            <p style="font-size:15px;margin:4px 0;"><b>Price:</b> ₹<span id="previewCardPrice"></span>
+                            </p>
+                            <hr style="margin:12px 0;border:0;border-top:1px solid #e5e7eb;">
+                            <p style="font-size:15px;margin:4px 0;">📅 <b>Uploaded:</b> <span
+                                    id="previewCardDate"></span></p>
+                            <p style="font-size:15px;margin:4px 0;">📍 <b>Address:</b> <span
+                                    id="previewCardAddress"></span></p>
+                            <div id="previewCardMaterial"
+                                style="font-size:14px;max-height:280px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;padding:10px;">
+                            </div>
+
+                            <!-- Owner-only warning replacing Add to Cart -->
+                            <div style="margin-top:8px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;
+                                padding:12px;font-size:13px;color:#92400e;font-weight:600;text-align:center;">
+                                ⚠️ This feature is only available for users in the dashboard screen.
+                            </div>
                         </div>
+
                     </div>
                 </div>
-            </div>
-            <!-- 🗂️ All Dashboard Cards Modal -->
+            </div> <!-- 🗂️ All Dashboard Cards Modal -->
             <div id="allDashboardCardsModal" class="modal-overlay" style="z-index:9999;">
                 <div class="buyers-modal" style="max-width:1150px;width:96%;">
                     <div class="buyers-header">
@@ -2715,20 +2745,57 @@
                 function openDashCardPreview(r) {
                     document.getElementById("previewCardImg").src = r.image || "";
                     document.getElementById("previewCardName").textContent = r.name || "—";
+
                     const avail = Number(r.availability);
-                    const availEl = document.getElementById("previewCardAvail");
-                    availEl.innerHTML = avail > 0
-                        ? `Available: ${avail}`
+                    document.getElementById("previewCardAvail").innerHTML = avail > 0
+                        ? avail
                         : `<span style="color:red">Out of Stock</span>`;
-                    document.getElementById("previewCardPrice").textContent = `₹${r.price || 0}`;
-                    document.getElementById("ownerBuyBlock").style.display = "none";
+                    document.getElementById("previewCardPrice").textContent = r.price || 0;
+
+                    const dateVal = r.uploaded_at
+                        ? new Date(r.uploaded_at).toISOString().split("T")[0]
+                        : (r.date ? new Date(r.date).toISOString().split("T")[0] : "N/A");
+                    document.getElementById("previewCardDate").textContent = dateVal;
+                    document.getElementById("previewCardAddress").textContent = r.address || "N/A";
+
+                    // Parse detail lines exactly like dashboard.html viewDetails()
+                    const detail = r.detail || r.material || "";
+                    const detailLines = detail.split("\n").filter(l => l.trim());
+                    const detailHTML = detailLines.map(line => {
+                        const ci = line.indexOf(":");
+                        if (ci !== -1) {
+                            const title = line.substring(0, ci);
+                            const value = line.substring(ci + 1).trim();
+                            return `<div style="margin-bottom:12px;">
+                                    <span style="font-weight:700;color:#4f46e5;font-size:14px;">${title}:</span>
+                                    <p style="margin:4px 0 0;color:#374151;font-size:13px;line-height:1.6;">${value}</p>
+                                </div>`;
+                        }
+                        return `<p style="color:#374151;">${line}</p>`;
+                    }).join("");
+                    document.getElementById("previewCardMaterial").innerHTML = detailHTML || "<p style='color:#94a3b8;font-size:13px;'>No details available</p>";
+
+                    // Video
+                    const video = document.getElementById("previewCardVideo");
+                    const videoSrc = document.getElementById("previewCardVideoSrc");
+                    const videoUrl = r.video
+                        ? (r.video.startsWith("http") ? r.video : r.video.startsWith("/") ? r.video : "/static/uploads/" + r.video)
+                        : null;
+                    if (videoUrl) {
+                        videoSrc.src = videoUrl;
+                        video.style.display = "block";
+                        video.load();
+                        document.getElementById("previewNoVideo").style.display = "none";
+                    } else {
+                        video.style.display = "none";
+                        videoSrc.src = "";
+                        document.getElementById("previewNoVideo").style.display = "block";
+                    }
+
                     document.getElementById("dashCardPreviewModal").style.display = "flex";
                 }
                 function closeDashCardPreview() {
                     document.getElementById("dashCardPreviewModal").style.display = "none";
-                }
-                function showOwnerBuyBlock() {
-                    document.getElementById("ownerBuyBlock").style.display = "block";
                 }
 
                 // ── All Dashboard Cards Modal ──────────────────────────────────────────────────
