@@ -2094,17 +2094,28 @@
                         </button>
                     </div>
 
-                    <div id="catalogGrid"
-                        style="display:flex;flex-wrap:nowrap;gap:18px;overflow-x:auto;max-height:60vh;padding:4px;">
-                        <p style="color:#94a3b8;">Loading...</p>
-                    </div>
+                    <div style="display:flex;gap:0;align-items:stretch;">
 
-                    <!-- 📊 Per-product Activity table — labels shown once on the left,
-                         one value column per product, aligned to the card order above -->
-                    <div style="margin-top:18px;overflow-x:auto;">
-                        <table id="catalogActivityTable" style="border-collapse:collapse;font-size:12px;"></table>
-                    </div>
+                        <!-- Label strip — shown once, aligned to card stat rows -->
+                        <div id="catalogStatLabels"
+                            style="display:none;flex-direction:column;justify-content:flex-end;padding-bottom:12px;padding-right:8px;flex-shrink:0;">
+                            <div
+                                style="height:36px;display:flex;align-items:center;font-size:11px;font-weight:700;color:#1e293b;white-space:nowrap;">
+                                🔍 Search</div>
+                            <div
+                                style="height:36px;display:flex;align-items:center;font-size:11px;font-weight:700;color:#1e293b;white-space:nowrap;">
+                                🛒 Purchased</div>
+                            <div
+                                style="height:36px;display:flex;align-items:center;font-size:11px;font-weight:700;color:#1e293b;white-space:nowrap;">
+                                ➕ Add to Cart</div>
+                        </div>
 
+                        <div id="catalogGrid"
+                            style="display:flex;flex-wrap:nowrap;gap:18px;overflow-x:auto;padding:4px;flex:1;">
+                            <p style="color:#94a3b8;">Loading...</p>
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
@@ -2489,28 +2500,6 @@
                             cart: 5 + (hash % 95)
                         };
                     }
-                    function renderCatalogActivityTable(products) {
-                        const table = document.getElementById("catalogActivityTable");
-                        if (!products || products.length === 0) { table.innerHTML = ""; return; }
-
-                        const rows = [
-                            { label: "🔍 Search", key: "search", color: "#3b82f6" },
-                            { label: "🛒 Purchased", key: "purchased", color: "#10b981" },
-                            { label: "➕ Add to Cart", key: "cart", color: "#f59e0b" }
-                        ];
-                        const productStats = products.map(p => hashProductStats(p.name || ""));
-
-                        let html = "";
-                        rows.forEach(row => {
-                            html += `<tr>
-                <td style="padding:8px 14px;font-weight:700;color:#1e293b;white-space:nowrap;border-bottom:1px solid #f1f5f9;">${row.label}</td>`;
-                            productStats.forEach(stats => {
-                                html += `<td style="padding:8px 14px;text-align:center;font-weight:800;color:${row.color};border-bottom:1px solid #f1f5f9;min-width:90px;">${stats[row.key]}</td>`;
-                            });
-                            html += `</tr>`;
-                        });
-                        table.innerHTML = html;
-                    }
 
                     async function loadCatalogProducts(tab) {
                         const grid = document.getElementById("catalogGrid");
@@ -2520,8 +2509,8 @@
                             const res = await fetch(catalogEndpoints[tab]);
                             const products = await res.json();
                             if (!products || products.length === 0) {
-                                grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#94a3b8;">No products in this category</p>`;
-                                renderCatalogActivityTable([]);
+                                grid.innerHTML = `<p style="text-align:center;color:#94a3b8;">No products in this category</p>`;
+                                document.getElementById("catalogStatLabels").style.display = "none";
                                 return;
                             }
 
@@ -2534,6 +2523,7 @@
                 overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.06);
                 display:flex;flex-direction:column;flex:0 0 220px;width:220px;`;
 
+                                const stats = hashProductStats(p.name || "");
                                 card.innerHTML = `
                 <img src="${p.image || ''}" onerror="this.style.display='none'"
                     style="width:100%;height:140px;object-fit:cover;">
@@ -2555,11 +2545,16 @@
                             ℹ Details
                         </button>
                     </div>
+                    <div style="border-top:1px solid #f1f5f9;margin-top:8px;padding-top:6px;display:flex;flex-direction:column;">
+                        <div style="height:36px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#3b82f6;">${stats.search}</div>
+                        <div style="height:36px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#10b981;">${stats.purchased}</div>
+                        <div style="height:36px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#f59e0b;">${stats.cart}</div>
+                    </div>
                 </div>
             `;
                                 grid.appendChild(card);
                             });
-                            renderCatalogActivityTable(products);
+                            document.getElementById("catalogStatLabels").style.display = "flex";
 
                         } catch (err) {
                             grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:red;">Failed to load products</p>`;
