@@ -4979,7 +4979,11 @@
                     plugins: { legend: { display: !isBar, position: "right" } },
                     scales: isBar ? {
                         x: { ticks: { font: { size: 11 }, maxRotation: 35 } },
-                        y: { beginAtZero: true, title: { display: true, text: "Search Count" } }
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: "Search Count" },
+                            ticks: { stepSize: 1, precision: 0 }
+                        }
                     } : {}
                 }
             });
@@ -5117,7 +5121,11 @@
                     plugins: { legend: { display: !isBar, position: "right" } },
                     scales: isBar ? {
                         x: { ticks: { font: { size: 11 }, maxRotation: 35 } },
-                        y: { beginAtZero: true, title: { display: true, text: "Add to Cart Count" } }
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: "Add to Cart Count" },
+                            ticks: { stepSize: 1, precision: 0 }
+                        }
                     } : {}
                 }
             });
