@@ -4636,6 +4636,125 @@ def addtocart_analytics():
         if cursor: cursor.close()
         if conn: conn.close()
 
+#----------------------Product Purchased data  of ( owner_section )------------------------- 
+
+
+
+@app.route("/api/owner/purchased-analytics", methods=["GET"])
+def purchased_analytics():
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # ✅ Actual product names fetch karo
+        cursor.execute("""
+            SELECT id, name, category FROM card
+            UNION ALL
+            SELECT id, name, category FROM study_material
+            UNION ALL
+            SELECT id, name, category FROM food_items
+        """)
+        all_products = cursor.fetchall()
+        product_map = {(p["id"], p["category"]): p["name"] for p in all_products}
+
+        cursor.execute("""
+            SELECT table_name FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            AND table_name LIKE '%_product_activity'
+        """)
+        all_tables = [list(row.values())[0] for row in cursor.fetchall()]
+
+        aggregated = defaultdict(lambda: {
+            "total_purchased": 0,
+            "users_who_purchased": set(),
+            "category": None,
+            "growth_sum": 0.0,
+            "growth_count": 0,
+            "last_purchased": None,
+        })
+
+        for tbl_name in all_tables:
+            try:
+                cursor.execute(f"""
+                    SELECT product_id, category,
+                           COALESCE(today_purchase_count, 0) AS today_purchase_count,
+                           COALESCE(growth, 0) AS growth,
+                           purchased_time
+                    FROM `{tbl_name}`
+                    WHERE today_purchase_count IS NOT NULL AND today_purchase_count > 0
+                """)
+                rows = cursor.fetchall()
+
+                for row in rows:
+                    actual_name = product_map.get((row["product_id"], row["category"]))
+                    if not actual_name:
+                        continue
+
+                    unique_key = f"{actual_name} ({row['category']}) #{row['product_id']}"
+                    bucket = aggregated[unique_key]
+                    bucket["total_purchased"] += int(row["today_purchase_count"] or 0)
+                    bucket["users_who_purchased"].add(tbl_name)
+
+                    if bucket["category"] is None and row["category"]:
+                        bucket["category"] = row["category"]
+
+                    try:
+                        g = float(row["growth"] or 0)
+                        bucket["growth_sum"] += g * 100
+                        bucket["growth_count"] += 1
+                    except (ValueError, TypeError):
+                        pass
+
+                    if row["purchased_time"]:
+                        ts = str(row["purchased_time"])
+                        if bucket["last_purchased"] is None or ts > bucket["last_purchased"]:
+                            bucket["last_purchased"] = ts
+
+            except Exception as e:
+                print(f"DEBUG: Skipping {tbl_name} — {str(e)}", flush=True)
+                continue
+
+        # ✅ ML: Normalize popularity score 0-100
+        all_counts = [b["total_purchased"] for b in aggregated.values()]
+        max_count = max(all_counts) if all_counts else 1
+
+        results = []
+        for pname, bucket in aggregated.items():
+            avg_growth = round(bucket["growth_sum"] / bucket["growth_count"], 2) if bucket["growth_count"] > 0 else 0.0
+            popularity_score = round((bucket["total_purchased"] / max_count) * 100, 1)
+
+            if avg_growth >= 70:
+                trend = "🔥 Hot"
+            elif avg_growth >= 40:
+                trend = "📈 Rising"
+            elif avg_growth >= 10:
+                trend = "➡️ Stable"
+            else:
+                trend = "📉 Low"
+
+            results.append({
+                "product_name": pname,
+                "category": bucket["category"] or "Uncategorized",
+                "total_purchased": bucket["total_purchased"],
+                "users_who_purchased": len(bucket["users_who_purchased"]),
+                "growth": avg_growth,
+                "popularity_score": popularity_score,
+                "trend": trend,
+                "last_purchased": bucket["last_purchased"],
+            })
+
+        results.sort(key=lambda x: x["popularity_score"], reverse=True)
+        return jsonify({"results": results})
+
+    except Exception as e:
+        print(f"DEBUG ERROR: {str(e)}", flush=True)
+        return jsonify({"error": str(e), "results": []}), 500
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 
 # ============================================================

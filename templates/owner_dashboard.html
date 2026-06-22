@@ -1505,7 +1505,7 @@
                 Product Add to Cart Data
             </button>
 
-            <button onclick="openMonthModal('purchased')">
+            <button onclick="openPurchasedAnalyticsPage()">
                 Product Purchased Data
             </button>
 
@@ -5008,8 +5008,103 @@
             document.getElementById("summaryTopProduct").textContent = rows[0] ? `${rows[0].product_name} (${rows[0].total_searches})` : "—";
         }
     </script>
+    <!-- ===================== PURCHASED ANALYTICS MODAL ===================== -->
+    <div id="purchasedAnalyticsModal" class="modal-overlay" style="display:none;">
+        <div class="buyers-modal" style="max-width:1400px;width:97%;">
+            <div class="buyers-header" style="margin-bottom:20px;">
+                <div>
+                    <h3 style="margin:0;font-size:20px;color:#f59e0b;">🛍️ Product Purchased Analytics</h3>
+                    <small style="color:#64748b;">All users · all purchased items · real-time from DB</small>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <select id="purchasedCategoryFilter" onchange="applyPurchasedFilter()"
+                        style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;
+                       font-size:13px;font-weight:600;background:var(--input-bg);color:var(--input-color);cursor:pointer;">
+                        <option value="">All Categories</option>
+                    </select>
+                    <select id="purchasedSortOrder" onchange="applyPurchasedFilter()"
+                        style="padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;
+                       font-size:13px;font-weight:600;background:var(--input-bg);color:var(--input-color);cursor:pointer;">
+                        <option value="desc">Most Purchased ↓</option>
+                        <option value="asc">Least Purchased ↑</option>
+                    </select>
+                    <button onclick="loadPurchasedAnalytics()" style="background:#f59e0b;color:white;border:none;padding:8px 16px;
+                       border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">
+                        🔄 Refresh
+                    </button>
+                    <button onclick="closePurchasedAnalyticsModal()" class="send-btn">Close</button>
+                </div>
+            </div>
+
+            <input type="text" id="purchasedProductInput" placeholder="Search product name or category..."
+                class="search-box" onkeyup="applyPurchasedFilter()" style="margin-bottom:16px;">
+
+            <div style="background:var(--user-chart-card-bg);border-radius:14px;
+                padding:20px;margin-bottom:24px;border:1px solid var(--user-item-border);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                    <div>
+                        <h4 style="margin:0;font-size:16px;color:var(--graph-h3);">📊 Purchase Count per Product</h4>
+                        <p style="margin:4px 0 0;font-size:12px;color:var(--graph-p);">
+                            Total purchases aggregated across all users
+                        </p>
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="switchPurchasedChart('bar')" id="purchasedChartTypeBar" style="padding:6px 14px;border-radius:8px;border:2px solid #f59e0b;
+                               background:#f59e0b;color:white;font-weight:700;cursor:pointer;font-size:12px;">
+                            Bar
+                        </button>
+                        <button onclick="switchPurchasedChart('doughnut')" id="purchasedChartTypeDoughnut" style="padding:6px 14px;border-radius:8px;border:2px solid #f59e0b;
+                               background:white;color:#f59e0b;font-weight:700;cursor:pointer;font-size:12px;">
+                            Donut
+                        </button>
+                    </div>
+                </div>
+                <div style="position:relative;height:320px;">
+                    <canvas id="purchasedBarChart"></canvas>
+                </div>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="buyers-table" style="min-width:900px;">
+                    <thead>
+                        <tr>
+                            <th style="width:5%;">Sr.</th>
+                            <th style="width:28%;white-space:normal;">Product Name</th>
+                            <th style="width:14%;">Category</th>
+                            <th style="width:12%;text-align:center;">🛍️ Total Purchased</th>
+                            <th style="width:12%;text-align:center;">👥 Users Purchased</th>
+                            <th style="width:14%;text-align:center;">📈 Growth</th>
+                            <th style="width:15%;text-align:center;">🕐 Last Purchased</th>
+                        </tr>
+                    </thead>
+                    <tbody id="purchasedAnalyticsTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align:center;padding:30px;color:#94a3b8;">
+                                Click "Product Purchased Data" to load...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="purchasedSummaryBar" style="display:none;margin-top:16px;padding:14px 20px;
+        background:linear-gradient(135deg,#fffbeb,#fff7ed);border-radius:12px;
+        display:flex;gap:30px;flex-wrap:wrap;">
+                <span style="font-size:13px;font-weight:700;color:#1e293b;">
+                    📦 Total Products: <span id="purchasedSummaryTotalProducts" style="color:#f59e0b;">0</span>
+                </span>
+                <span style="font-size:13px;font-weight:700;color:#1e293b;">
+                    🛍️ Total Purchased: <span id="purchasedSummaryTotalCount" style="color:#3b82f6;">0</span>
+                </span>
+                <span style="font-size:13px;font-weight:700;color:#1e293b;">
+                    🏆 Most Purchased: <span id="purchasedSummaryTopProduct" style="color:#ef4444;">—</span>
+                </span>
+            </div>
+        </div>
+    </div>
 
     <script>
+
         let cartChartInstance = null;
         let cartAllData = [];
         let cartCurrentType = 'bar';
@@ -5077,18 +5172,18 @@
                 const gArrow = g > 0 ? "↑" : g < 0 ? "↓" : "—";
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-                <td style="font-weight:700;color:#94a3b8;">${i + 1}</td>
-                <td>
-                    <div style="font-weight:700;color:var(--card-text-h2);margin-bottom:4px;white-space:normal;">${row.product_name || "—"}</div>
-                    <div style="height:6px;background:var(--metric-bar-bg);border-radius:6px;overflow:hidden;max-width:200px;">
-                        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#10b981,#3b82f6);border-radius:6px;"></div>
-                    </div>
-                </td>
-                <td><span style="background:#d1fae5;color:#065f46;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:700;">${row.category || "—"}</span></td>
-                <td style="text-align:center;font-size:20px;font-weight:800;color:#10b981;">${(row.total_addtocart || 0).toLocaleString("en-IN")}</td>
-                <td style="text-align:center;font-size:16px;font-weight:700;color:#6366f1;">${(row.users_who_added || 0).toLocaleString("en-IN")}</td>
-                <td style="text-align:center;font-weight:800;color:${gColor};">${gArrow} ${Math.abs(g).toFixed(1)}%</td>
-                <td style="text-align:center;font-size:12px;color:#64748b;">${row.last_added ? new Date(row.last_added).toLocaleString("en-IN") : "—"}</td>
+            <td style="font-weight:700;color:#94a3b8;">${i + 1}</td>
+            <td>
+                <div style="font-weight:700;color:var(--card-text-h2);margin-bottom:4px;white-space:normal;">${row.product_name || "—"}</div>
+                <div style="height:6px;background:var(--metric-bar-bg);border-radius:6px;overflow:hidden;max-width:200px;">
+                    <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#10b981,#3b82f6);border-radius:6px;"></div>
+                </div>
+            </td>
+            <td><span style="background:#d1fae5;color:#065f46;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:700;">${row.category || "—"}</span></td>
+            <td style="text-align:center;font-size:20px;font-weight:800;color:#10b981;">${(row.total_addtocart || 0).toLocaleString("en-IN")}</td>
+            <td style="text-align:center;font-size:16px;font-weight:700;color:#6366f1;">${(row.users_who_added || 0).toLocaleString("en-IN")}</td>
+            <td style="text-align:center;font-weight:800;color:${gColor};">${gArrow} ${Math.abs(g).toFixed(1)}%</td>
+            <td style="text-align:center;font-size:12px;color:#64748b;">${row.last_added ? new Date(row.last_added).toLocaleString("en-IN") : "—"}</td>
             `;
                 tbody.appendChild(tr);
             });
@@ -5148,6 +5243,148 @@
             document.getElementById("cartSummaryTotalProducts").textContent = rows.length.toLocaleString("en-IN");
             document.getElementById("cartSummaryTotalAdded").textContent = total.toLocaleString("en-IN");
             document.getElementById("cartSummaryTopProduct").textContent = rows[0] ? `${rows[0].product_name} (${rows[0].total_addtocart})` : "—";
+        }
+    </script>
+
+    <script>
+        let purchasedChartInstance = null;
+        let purchasedAllData = [];
+        let purchasedCurrentType = 'bar';
+
+        function openPurchasedAnalyticsPage() {
+            document.getElementById("purchasedAnalyticsModal").style.display = "flex";
+            loadPurchasedAnalytics();
+        }
+
+        function closePurchasedAnalyticsModal() {
+            document.getElementById("purchasedAnalyticsModal").style.display = "none";
+        }
+
+        async function loadPurchasedAnalytics() {
+            const tbody = document.getElementById("purchasedAnalyticsTableBody");
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;">⏳ Loading...</td></tr>`;
+            try {
+                const res = await fetch("/api/owner/purchased-analytics");
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                const data = await res.json();
+                purchasedAllData = data.results ?? [];
+
+                const catFilter = document.getElementById("purchasedCategoryFilter");
+                const existingCats = new Set(Array.from(catFilter.options).map(o => o.value).filter(v => v !== ""));
+                [...new Set(purchasedAllData.map(r => r.category).filter(Boolean))].forEach(cat => {
+                    if (!existingCats.has(cat)) {
+                        const opt = document.createElement("option");
+                        opt.value = cat; opt.textContent = cat;
+                        catFilter.appendChild(opt);
+                    }
+                });
+                applyPurchasedFilter();
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:#ef4444;">
+                ❌ Failed: ${err.message}</td></tr>`;
+            }
+        }
+
+        function applyPurchasedFilter() {
+            const query = document.getElementById("purchasedProductInput").value.toLowerCase().trim();
+            const cat = document.getElementById("purchasedCategoryFilter").value;
+            const sortDir = document.getElementById("purchasedSortOrder").value;
+            let filtered = purchasedAllData.filter(r =>
+                (!query || r.product_name.toLowerCase().includes(query) || (r.category || "").toLowerCase().includes(query))
+                && (!cat || r.category === cat)
+            );
+            filtered.sort((a, b) => sortDir === "desc" ? b.total_purchased - a.total_purchased : a.total_purchased - b.total_purchased);
+            renderPurchasedTable(filtered);
+            renderPurchasedChart(filtered);
+            renderPurchasedSummaryBar(filtered);
+        }
+
+        function renderPurchasedTable(rows) {
+            const tbody = document.getElementById("purchasedAnalyticsTableBody");
+            if (rows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:#94a3b8;">No data found.</td></tr>`;
+                return;
+            }
+            const maxS = Math.max(...rows.map(r => r.total_purchased), 1);
+            tbody.innerHTML = "";
+            rows.forEach((row, i) => {
+                const pct = Math.round((row.total_purchased / maxS) * 100);
+                const g = parseFloat(row.growth ?? 0);
+                const gColor = g > 0 ? "#10b981" : g < 0 ? "#ef4444" : "#94a3b8";
+                const gArrow = g > 0 ? "↑" : g < 0 ? "↓" : "—";
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                <td style="font-weight:700;color:#94a3b8;">${i + 1}</td>
+                <td>
+                    <div style="font-weight:700;color:var(--card-text-h2);margin-bottom:4px;white-space:normal;">${row.product_name || "—"}</div>
+                    <div style="height:6px;background:var(--metric-bar-bg);border-radius:6px;overflow:hidden;max-width:200px;">
+                        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#f59e0b,#ef4444);border-radius:6px;"></div>
+                    </div>
+                </td>
+                <td><span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:700;">${row.category || "—"}</span></td>
+                <td style="text-align:center;font-size:20px;font-weight:800;color:#f59e0b;">${(row.total_purchased || 0).toLocaleString("en-IN")}</td>
+                <td style="text-align:center;font-size:16px;font-weight:700;color:#6366f1;">${(row.users_who_purchased || 0).toLocaleString("en-IN")}</td>
+                <td style="text-align:center;font-weight:800;color:${gColor};">${gArrow} ${Math.abs(g).toFixed(1)}%</td>
+                <td style="text-align:center;font-size:12px;color:#64748b;">${row.last_purchased ? new Date(row.last_purchased).toLocaleString("en-IN") : "—"}</td>
+            `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        const PURCHASED_CHART_COLORS = ["#f59e0b", "#ef4444", "#10b981", "#3b82f6", "#8b5cf6", "#14b8a6", "#f97316", "#ec4899", "#6366f1", "#84cc16"];
+
+        function renderPurchasedChart(rows) {
+            if (purchasedChartInstance) { purchasedChartInstance.destroy(); purchasedChartInstance = null; }
+            const top = rows.slice(0, 15);
+            const labels = top.map(r => r.product_name.length > 18 ? r.product_name.substring(0, 16) + "…" : r.product_name);
+            const values = top.map(r => r.total_purchased);
+            const colors = top.map((_, i) => PURCHASED_CHART_COLORS[i % PURCHASED_CHART_COLORS.length]);
+            const isBar = purchasedCurrentType === "bar";
+            const ctx = document.getElementById("purchasedBarChart").getContext("2d");
+            purchasedChartInstance = new Chart(ctx, {
+                type: purchasedCurrentType,
+                data: {
+                    labels,
+                    datasets: [{
+                        label: "Total Purchased", data: values,
+                        backgroundColor: isBar ? colors.map(c => c + "cc") : colors,
+                        borderColor: isBar ? colors : "#fff",
+                        borderWidth: isBar ? 0 : 2,
+                        borderRadius: isBar ? 8 : 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: !isBar, position: "right" } },
+                    scales: isBar ? {
+                        x: { ticks: { font: { size: 11 }, maxRotation: 35 } },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: "Purchase Count" },
+                            ticks: { stepSize: 1, precision: 0 }
+                        }
+                    } : {}
+                }
+            });
+        }
+
+        function switchPurchasedChart(type) {
+            purchasedCurrentType = type;
+            document.getElementById("purchasedChartTypeBar").style.background = type === "bar" ? "#f59e0b" : "white";
+            document.getElementById("purchasedChartTypeBar").style.color = type === "bar" ? "white" : "#f59e0b";
+            document.getElementById("purchasedChartTypeDoughnut").style.background = type === "doughnut" ? "#f59e0b" : "white";
+            document.getElementById("purchasedChartTypeDoughnut").style.color = type === "doughnut" ? "white" : "#f59e0b";
+            applyPurchasedFilter();
+        }
+
+        function renderPurchasedSummaryBar(rows) {
+            const bar = document.getElementById("purchasedSummaryBar");
+            if (rows.length === 0) { bar.style.display = "none"; return; }
+            bar.style.display = "flex";
+            const total = rows.reduce((s, r) => s + (r.total_purchased || 0), 0);
+            document.getElementById("purchasedSummaryTotalProducts").textContent = rows.length.toLocaleString("en-IN");
+            document.getElementById("purchasedSummaryTotalCount").textContent = total.toLocaleString("en-IN");
+            document.getElementById("purchasedSummaryTopProduct").textContent = rows[0] ? `${rows[0].product_name} (${rows[0].total_purchased})` : "—";
         }
     </script>
 
