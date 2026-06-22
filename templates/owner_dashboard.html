@@ -2148,7 +2148,44 @@
                     </div>
                 </div>
             </div>
+            <!-- 🃏 Dashboard Card Preview Modal -->
+            <div id="dashCardPreviewModal" class="modal-overlay" style="z-index:10001;">
+                <div
+                    style="background:white;border-radius:16px;padding:28px;width:300px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+                    <button onclick="closeDashCardPreview()"
+                        style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8;">✕</button>
+                    <p
+                        style="font-size:11px;color:#94a3b8;margin:0 0 14px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">
+                        📋 Customer View Preview</p>
 
+                    <!-- Card exactly as it looks on dashboard.html -->
+                    <div
+                        style="background:#ffffff;padding:14px;border-radius:10px;border:2px solid #cbd5e1;box-shadow:0 4px 10px rgba(0,0,0,0.06);">
+                        <img id="previewCardImg" src="" onerror="this.style.display='none'"
+                            style="width:100%;height:160px;object-fit:cover;border-radius:8px;">
+                        <h3 id="previewCardName"
+                            style="margin:10px 0 4px;font-size:16px;font-weight:700;color:#1e293b;"></h3>
+                        <p id="previewCardAvail" style="font-size:14px;color:#555;margin:0;"></p>
+                        <h4 id="previewCardPrice" style="margin-top:8px;font-size:16px;font-weight:700;color:#8b5cf6;">
+                        </h4>
+                        <div style="display:flex;gap:10px;margin-top:12px;">
+                            <button onclick="showOwnerBuyBlock()"
+                                style="flex:1;padding:8px;border-radius:6px;border:none;cursor:pointer;font-weight:600;background:linear-gradient(135deg,#4f46e5,#6366f1);color:white;">
+                                🛒 Add to Cart
+                            </button>
+                            <button onclick="showOwnerBuyBlock()"
+                                style="flex:1;padding:8px;border-radius:6px;border:none;cursor:pointer;font-weight:600;background:#10b981;color:white;">
+                                ℹ See Details
+                            </button>
+                        </div>
+                        <div id="ownerBuyBlock"
+                            style="display:none;margin-top:10px;background:#fef3c7;border:1px solid #f59e0b;
+                            border-radius:8px;padding:10px;font-size:12px;color:#92400e;font-weight:600;text-align:center;">
+                            ⚠️ This feature is only available for users in the dashboard screen.
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- 🗂️ All Dashboard Cards Modal -->
             <div id="allDashboardCardsModal" class="modal-overlay" style="z-index:9999;">
                 <div class="buyers-modal" style="max-width:1150px;width:96%;">
@@ -2674,7 +2711,25 @@
                     };
                 }
 
-
+                // ── Dashboard Card Preview Modal ───────────────────────────────────────────────
+                function openDashCardPreview(r) {
+                    document.getElementById("previewCardImg").src = r.image || "";
+                    document.getElementById("previewCardName").textContent = r.name || "—";
+                    const avail = Number(r.availability);
+                    const availEl = document.getElementById("previewCardAvail");
+                    availEl.innerHTML = avail > 0
+                        ? `Available: ${avail}`
+                        : `<span style="color:red">Out of Stock</span>`;
+                    document.getElementById("previewCardPrice").textContent = `₹${r.price || 0}`;
+                    document.getElementById("ownerBuyBlock").style.display = "none";
+                    document.getElementById("dashCardPreviewModal").style.display = "flex";
+                }
+                function closeDashCardPreview() {
+                    document.getElementById("dashCardPreviewModal").style.display = "none";
+                }
+                function showOwnerBuyBlock() {
+                    document.getElementById("ownerBuyBlock").style.display = "block";
+                }
 
                 // ── All Dashboard Cards Modal ──────────────────────────────────────────────────
                 let allDashboardCardsData = [];
@@ -2786,9 +2841,10 @@
                         const freqPct = Math.round((freq / maxFreq) * 100);
                         const demand = dashCategoryDemandMap[r.category] || "Cold";
                         const demandStyle = getDemandStyle(demand);
+                        const rStr = JSON.stringify(r).replace(/'/g, "&apos;");
                         const img = r.image
-                            ? `<img src="${r.image}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid #e2e8f0;" onerror="this.style.display='none'">`
-                            : `<div style="width:40px;height:40px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:18px;">📦</div>`;
+                            ? `<img src="${r.image}" onclick='openDashCardPreview(${rStr})' style="width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid #e2e8f0;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'" onerror="this.style.display='none'">`
+                            : `<div onclick='openDashCardPreview(${rStr})' style="width:40px;height:40px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;">📦</div>`;
                         return `<tr style="border-bottom:1px solid #f1f5f9;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background='white'">
                                 <td style="padding:10px 12px;color:#94a3b8;">${i + 1}</td>
                                 <td style="padding:10px 12px;">${img}</td>
