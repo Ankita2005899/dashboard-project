@@ -4344,7 +4344,12 @@ def search_analytics():
         for user in users:
             uid = user["id"]
             uname = user["username"]
-            tbl_name = f"{uname}_{uid}_product_activity"
+
+            # ✅ Sanitized username
+            safe_uname = re.sub(r'[^a-z0-9_]', '_', uname.strip().lower())
+            if safe_uname and safe_uname[0].isdigit():
+                safe_uname = "user_" + safe_uname
+            tbl_name = f"{safe_uname}_{uid}_product_activity"
 
             print(f"DEBUG: Checking table {tbl_name}", flush=True)
 
@@ -4383,6 +4388,7 @@ def search_analytics():
                 if bucket["category"] is None and row["category"]:
                     bucket["category"] = row["category"]
 
+                # ✅ ML: Growth calculation — weighted average across users
                 try:
                     raw = str(row["growth_on_search"] or "0").strip()
                     if "/" in raw:
@@ -4400,19 +4406,41 @@ def search_analytics():
                     if bucket["last_searched"] is None or ts > bucket["last_searched"]:
                         bucket["last_searched"] = ts
 
+        # ✅ ML: Popularity Score — normalize search counts (0-100)
+        all_searches = [b["total_searches"] for b in aggregated.values()]
+        max_search = max(all_searches) if all_searches else 1
+
         results = []
         for pname, bucket in aggregated.items():
             avg_growth = round(bucket["growth_sum"] / bucket["growth_count"], 2) if bucket["growth_count"] > 0 else 0.0
+
+            # ✅ ML: Popularity score normalized out of 100
+            popularity_score = round((bucket["total_searches"] / max_search) * 100, 1)
+
+            # ✅ ML: Trend label based on growth
+            if avg_growth >= 70:
+                trend = "🔥 Hot"
+            elif avg_growth >= 40:
+                trend = "📈 Rising"
+            elif avg_growth >= 10:
+                trend = "➡️ Stable"
+            else:
+                trend = "📉 Low"
+
             results.append({
                 "product_name": pname,
                 "category": bucket["category"] or "Uncategorized",
                 "total_searches": bucket["total_searches"],
                 "users_who_searched": len(bucket["users_who_searched"]),
                 "growth": avg_growth,
+                "popularity_score": popularity_score,
+                "trend": trend,
                 "last_searched": bucket["last_searched"],
             })
 
-        results.sort(key=lambda x: x["total_searches"], reverse=True)
+        # ✅ ML: Sort by popularity score (most popular first)
+        results.sort(key=lambda x: x["popularity_score"], reverse=True)
+
         print(f"DEBUG: Returning {len(results)} products", flush=True)
         return jsonify({"results": results})
 
