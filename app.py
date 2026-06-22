@@ -170,8 +170,11 @@ def ensure_user_table(username, user_id):
     db.close()
 
 def create_user_product_activity_table(username, user_id):
-    table_name = f"{username}_{user_id}_product_activity"
-
+    safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+    if safe_username and safe_username[0].isdigit():
+        safe_username = "user_" + safe_username
+    table_name = f"{safe_username}_{user_id}_product_activity"
+    
     db = get_db_connection()
     cursor = db.cursor()
 
