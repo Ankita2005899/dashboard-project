@@ -4465,6 +4465,36 @@ def owner_all_users():
         return jsonify([]), 500
 
 
+#----------------All dashboard Card ("store_detail") sathi -------------------------------        
+
+
+
+@app.route('/owner/all-dashboard-cards')
+def owner_all_dashboard_cards():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, user_id, product_id, category, name, image,
+                   price, availability, quantity, date, uploaded_at
+            FROM store_data
+            ORDER BY date DESC
+        """)
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        for r in rows:
+            for key in ['date', 'uploaded_at']:
+                if r.get(key):
+                    r[key] = str(r[key])
+            for key in ['price']:
+                if r.get(key) is not None:
+                    r[key] = float(r[key])
+        return jsonify(rows)
+    except Exception as e:
+        return jsonify([]), 500
+    
+    
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================

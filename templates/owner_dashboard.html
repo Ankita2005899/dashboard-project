@@ -1279,9 +1279,16 @@
 
                         <button onclick="openAllUserDetailsModal(); closeHeaderMenu();" style="width:100%;text-align:left;background:none;border:none;
     padding:14px 18px;font-size:14px;font-weight:600;color:#1e293b;
+    cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f1f5f9;"
+                            onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                            👥 All User Details
+                        </button>
+
+                        <button onclick="openAllDashboardCardsModal(); closeHeaderMenu();" style="width:100%;text-align:left;background:none;border:none;
+    padding:14px 18px;font-size:14px;font-weight:600;color:#1e293b;
     cursor:pointer;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f8fafc'"
                             onmouseout="this.style.background='white'">
-                            👥 All User Details
+                            🗂️ All Dashboard Cards
                         </button>
                     </div>
                 </div>
@@ -2141,6 +2148,90 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 🗂️ All Dashboard Cards Modal -->
+            <div id="allDashboardCardsModal" class="modal-overlay" style="z-index:9999;">
+                <div class="buyers-modal" style="max-width:1150px;width:96%;">
+                    <div class="buyers-header">
+                        <div>
+                            <h3 style="color:#8b5cf6;">🗂️ All Dashboard Cards</h3>
+                            <small>All products across every category — with ML Purchase Frequency & Category
+                                Demand</small>
+                        </div>
+                        <button onclick="closeAllDashboardCardsModal()" class="send-btn">Close</button>
+                    </div>
+
+                    <!-- ML Summary Cards -->
+                    <div id="dashCardMLSummary"
+                        style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;"></div>
+
+                    <!-- Filter Bar -->
+                    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+                        <input id="dashCardSearch" type="text" placeholder="🔍 Search by product name..."
+                            oninput="filterDashboardCards()"
+                            style="flex:1;min-width:200px;padding:9px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;">
+                        <select id="dashCardCategoryFilter" onchange="filterDashboardCards()"
+                            style="padding:9px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;color:#374151;">
+                            <option value="">All Categories</option>
+                            <option value="card">🍳 Kitchen Items</option>
+                            <option value="study_material">📚 Study Materials</option>
+                            <option value="food_items">🍔 Food Items</option>
+                        </select>
+                        <select id="dashCardDemandFilter" onchange="filterDashboardCards()"
+                            style="padding:9px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;color:#374151;">
+                            <option value="">All Demand Levels</option>
+                            <option value="Hot">🔥 Hot</option>
+                            <option value="Warm">🌤 Warm</option>
+                            <option value="Cold">❄️ Cold</option>
+                        </select>
+                    </div>
+
+                    <!-- Table -->
+                    <div style="overflow-x:auto;max-height:55vh;overflow-y:auto;">
+                        <table id="dashboardCardsTable" style="width:100%;border-collapse:collapse;font-size:13px;">
+                            <thead>
+                                <tr style="background:#f8fafc;position:sticky;top:0;z-index:1;">
+                                    <th
+                                        style="padding:10px 12px;text-align:left;color:#64748b;font-weight:700;border-bottom:2px solid #e2e8f0;">
+                                        Sr.no</th>
+                                    <th
+                                        style="padding:10px 12px;text-align:left;color:#64748b;font-weight:700;border-bottom:2px solid #e2e8f0;">
+                                        Image</th>
+                                    <th
+                                        style="padding:10px 12px;text-align:left;color:#64748b;font-weight:700;border-bottom:2px solid #e2e8f0;">
+                                        Name</th>
+                                    <th
+                                        style="padding:10px 12px;text-align:left;color:#64748b;font-weight:700;border-bottom:2px solid #e2e8f0;">
+                                        Category</th>
+                                    <th
+                                        style="padding:10px 12px;text-align:left;color:#64748b;font-weight:700;border-bottom:2px solid #e2e8f0;">
+                                        Price</th>
+                                    <th
+                                        style="padding:10px 12px;text-align:left;color:#64748b;font-weight:700;border-bottom:2px solid #e2e8f0;">
+                                        Availability</th>
+                                    <th
+                                        style="padding:10px 12px;text-align:left;color:#64748b;font-weight:700;border-bottom:2px solid #e2e8f0;">
+                                        Qty Sold</th>
+                                    <th
+                                        style="padding:10px 12px;text-align:center;color:#64748b;font-weight:700;border-bottom:2px solid #e2e8f0;">
+                                        🧠 Purchase Freq.</th>
+                                    <th
+                                        style="padding:10px 12px;text-align:center;color:#64748b;font-weight:700;border-bottom:2px solid #e2e8f0;">
+                                        📊 Category Demand</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboardCardsTableBody">
+                                <tr>
+                                    <td colspan="9" style="text-align:center;padding:30px;color:#94a3b8;">Loading...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
             <!-- 👥 All User Details Modal -->
             <div id="allUserDetailsModal" class="modal-overlay" style="z-index:9999;">
                 <div class="buyers-modal" style="max-width:1100px;width:95%;">
@@ -2582,6 +2673,161 @@
                         cart: 5 + (hash % 95)
                     };
                 }
+
+
+
+                // ── All Dashboard Cards Modal ──────────────────────────────────────────────────
+                let allDashboardCardsData = [];
+                let dashCardFreqMap = {};
+                let dashCategoryDemandMap = {};
+
+                function openAllDashboardCardsModal() {
+                    document.getElementById("allDashboardCardsModal").style.display = "flex";
+                    fetchAllDashboardCards();
+                }
+                function closeAllDashboardCardsModal() {
+                    document.getElementById("allDashboardCardsModal").style.display = "none";
+                }
+
+                // ML 1: Purchase Frequency Score per product_id
+                function buildFrequencyMap(rows) {
+                    const freq = {};
+                    rows.forEach(r => {
+                        freq[r.product_id] = (freq[r.product_id] || 0) + 1;
+                    });
+                    return freq;
+                }
+
+                // ML 2: Category Demand Classification
+                function buildCategoryDemandMap(rows) {
+                    const counts = {};
+                    rows.forEach(r => {
+                        counts[r.category] = (counts[r.category] || 0) + 1;
+                    });
+                    const values = Object.values(counts);
+                    const max = Math.max(...values);
+                    const demand = {};
+                    for (const [cat, cnt] of Object.entries(counts)) {
+                        const ratio = cnt / max;
+                        demand[cat] = ratio >= 0.6 ? "Hot" : ratio >= 0.3 ? "Warm" : "Cold";
+                    }
+                    return demand;
+                }
+
+                function getDemandStyle(label) {
+                    if (label === "Hot") return { icon: "🔥", color: "#ef4444", bg: "#fee2e2" };
+                    if (label === "Warm") return { icon: "🌤", color: "#f59e0b", bg: "#fef3c7" };
+                    return { icon: "❄️", color: "#3b82f6", bg: "#dbeafe" };
+                }
+
+                function getFreqStyle(freq, maxFreq) {
+                    const ratio = freq / (maxFreq || 1);
+                    if (ratio >= 0.6) return { color: "#10b981", bar: "#10b981" };
+                    if (ratio >= 0.3) return { color: "#f59e0b", bar: "#f59e0b" };
+                    return { color: "#ef4444", bar: "#ef4444" };
+                }
+
+                function categoryLabel(cat) {
+                    if (cat === "card") return "🍳 Kitchen";
+                    if (cat === "study_material") return "📚 Study";
+                    if (cat === "food_items") return "🍔 Food";
+                    return cat;
+                }
+
+                async function fetchAllDashboardCards() {
+                    const tbody = document.getElementById("dashboardCardsTableBody");
+                    const summary = document.getElementById("dashCardMLSummary");
+                    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:#94a3b8;">Loading...</td></tr>`;
+                    summary.innerHTML = "";
+                    try {
+                        const res = await fetch("/owner/all-dashboard-cards");
+                        const rows = await res.json();
+                        allDashboardCardsData = rows;
+                        dashCardFreqMap = buildFrequencyMap(rows);
+                        dashCategoryDemandMap = buildCategoryDemandMap(rows);
+                        renderDashboardCardsTable(rows);
+                        renderDashCardMLSummary(rows);
+                    } catch (e) {
+                        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:red;">Failed to load data</td></tr>`;
+                    }
+                }
+
+                function renderDashCardMLSummary(rows) {
+                    const summary = document.getElementById("dashCardMLSummary");
+                    const total = rows.length;
+                    const uniqueProducts = new Set(rows.map(r => r.product_id)).size;
+                    const hotCats = Object.values(dashCategoryDemandMap).filter(d => d === "Hot").length;
+                    const maxFreqEntry = Object.entries(dashCardFreqMap).sort((a, b) => b[1] - a[1])[0];
+                    const topProduct = rows.find(r => String(r.product_id) === String(maxFreqEntry?.[0]));
+
+                    const cards = [
+                        { label: "Total Records", value: total, color: "#8b5cf6", bg: "#ede9fe", icon: "🗂️" },
+                        { label: "Unique Products", value: uniqueProducts, color: "#3b82f6", bg: "#dbeafe", icon: "📦" },
+                        { label: "🔥 Hot Categories", value: hotCats, color: "#ef4444", bg: "#fee2e2", icon: "🔥" },
+                        { label: "Top Product", value: topProduct?.name || "—", color: "#10b981", bg: "#d1fae5", icon: "🏆" },
+                    ];
+                    summary.innerHTML = cards.map(c => `
+                            <div style="background:${c.bg};border-radius:12px;padding:16px 18px;">
+                                <p style="margin:0;font-size:12px;color:${c.color};font-weight:700;">${c.icon} ${c.label}</p>
+                                <p style="margin:6px 0 0;font-size:22px;font-weight:900;color:${c.color};word-break:break-word;">${c.value}</p>
+                            </div>`).join("");
+                }
+
+                function renderDashboardCardsTable(rows) {
+                    const tbody = document.getElementById("dashboardCardsTableBody");
+                    if (!rows.length) {
+                        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:#94a3b8;">No records found</td></tr>`;
+                        return;
+                    }
+                    const maxFreq = Math.max(...Object.values(dashCardFreqMap));
+                    tbody.innerHTML = rows.map((r, i) => {
+                        const freq = dashCardFreqMap[r.product_id] || 1;
+                        const freqStyle = getFreqStyle(freq, maxFreq);
+                        const freqPct = Math.round((freq / maxFreq) * 100);
+                        const demand = dashCategoryDemandMap[r.category] || "Cold";
+                        const demandStyle = getDemandStyle(demand);
+                        const img = r.image
+                            ? `<img src="${r.image}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid #e2e8f0;" onerror="this.style.display='none'">`
+                            : `<div style="width:40px;height:40px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:18px;">📦</div>`;
+                        return `<tr style="border-bottom:1px solid #f1f5f9;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background='white'">
+                                <td style="padding:10px 12px;color:#94a3b8;">${i + 1}</td>
+                                <td style="padding:10px 12px;">${img}</td>
+                                <td style="padding:10px 12px;font-weight:600;color:#1e293b;">${r.name || '—'}</td>
+                                <td style="padding:10px 12px;color:#475569;">${categoryLabel(r.category)}</td>
+                                <td style="padding:10px 12px;font-weight:700;color:#8b5cf6;">₹${r.price || 0}</td>
+                                <td style="padding:10px 12px;color:${Number(r.availability) > 0 ? '#10b981' : '#ef4444'};font-weight:600;">${Number(r.availability) > 0 ? r.availability : 'Out of Stock'}</td>
+                                <td style="padding:10px 12px;color:#475569;">${r.quantity || 0}</td>
+                                <td style="padding:10px 12px;">
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <div style="flex:1;height:7px;background:#e2e8f0;border-radius:99px;overflow:hidden;">
+                                            <div style="height:100%;width:${freqPct}%;background:${freqStyle.bar};border-radius:99px;"></div>
+                                        </div>
+                                        <span style="font-size:12px;font-weight:800;color:${freqStyle.color};min-width:24px;">${freq}</span>
+                                    </div>
+                                </td>
+                                <td style="padding:10px 12px;text-align:center;">
+                                    <span style="background:${demandStyle.bg};color:${demandStyle.color};padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;">${demandStyle.icon} ${demand}</span>
+                                </td>
+                            </tr>`;
+                    }).join("");
+                }
+
+                function filterDashboardCards() {
+                    const search = document.getElementById("dashCardSearch").value.toLowerCase();
+                    const cat = document.getElementById("dashCardCategoryFilter").value;
+                    const demand = document.getElementById("dashCardDemandFilter").value;
+                    const filtered = allDashboardCardsData.filter(r => {
+                        const matchText = (r.name || "").toLowerCase().includes(search);
+                        const matchCat = !cat || r.category === cat;
+                        const matchDemand = !demand || (dashCategoryDemandMap[r.category] || "Cold") === demand;
+                        return matchText && matchCat && matchDemand;
+                    });
+                    renderDashboardCardsTable(filtered);
+                }
+
+
+
+
                 // ── All User Details Modal ─────────────────────────────────────────────────────
                 let allUsersData = [];
 
