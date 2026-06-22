@@ -4324,7 +4324,7 @@ def search_analytics():
     conn = None
     cursor = None
     try:
-        conn = test_db()
+        conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
         cursor.execute("SELECT id, username FROM user_activity WHERE username IS NOT NULL")
