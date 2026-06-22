@@ -4327,10 +4327,15 @@ def search_analytics():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("SELECT id, username FROM user_activity WHERE username IS NOT NULL")
-        users = cursor.fetchall()
+        # ✅ Seedha saari product_activity tables lo — user_activity se match nahi karna
+        cursor.execute("""
+            SELECT table_name FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            AND table_name LIKE '%_product_activity'
+        """)
+        all_tables = [row["table_name"] for row in cursor.fetchall()]
 
-        print(f"DEBUG: Found {len(users)} users", flush=True)
+        print(f"DEBUG: Found {len(all_tables)} activity tables", flush=True)
 
         aggregated = defaultdict(lambda: {
             "total_searches": 0,
@@ -4341,83 +4346,64 @@ def search_analytics():
             "last_searched": None,
         })
 
-        for user in users:
-            uid = user["id"]
-            uname = user["username"]
+        for tbl_name in all_tables:
+            print(f"DEBUG: Reading table {tbl_name}", flush=True)
 
-            # ✅ Sanitized username
-            safe_uname = re.sub(r'[^a-z0-9_]', '_', uname.strip().lower())
-            if safe_uname and safe_uname[0].isdigit():
-                safe_uname = "user_" + safe_uname
-            tbl_name = f"{safe_uname}_{uid}_product_activity"
+            try:
+                cursor.execute(f"""
+                    SELECT name, category,
+                           COALESCE(today_search_count, 0) AS today_search_count,
+                           COALESCE(growth_on_search, '0') AS growth_on_search,
+                           search_time
+                    FROM `{tbl_name}`
+                    WHERE today_search_count IS NOT NULL AND today_search_count > 0
+                """)
+                rows = cursor.fetchall()
+                print(f"DEBUG: {tbl_name} has {len(rows)} search rows", flush=True)
 
-            print(f"DEBUG: Checking table {tbl_name}", flush=True)
+                for row in rows:
+                    pname = (row["name"] or "").strip()
+                    if not pname:
+                        continue
 
-            if not re.fullmatch(r"[A-Za-z0-9_]+", tbl_name):
-                print(f"DEBUG: Skipping unsafe table name: {tbl_name}", flush=True)
+                    bucket = aggregated[pname]
+                    bucket["total_searches"] += int(row["today_search_count"] or 0)
+                    bucket["users_who_searched"].add(tbl_name)  # table name as unique user identifier
+
+                    if bucket["category"] is None and row["category"]:
+                        bucket["category"] = row["category"]
+
+                    try:
+                        raw = str(row["growth_on_search"] or "0").strip()
+                        if "/" in raw:
+                            parts = raw.split("/")
+                            g = float(parts[0]) / float(parts[1]) * 100
+                        else:
+                            g = float(raw.replace("%", "") or 0)
+                        bucket["growth_sum"] += g
+                        bucket["growth_count"] += 1
+                    except (ValueError, TypeError, ZeroDivisionError):
+                        pass
+
+                    if row["search_time"]:
+                        ts = str(row["search_time"])
+                        if bucket["last_searched"] is None or ts > bucket["last_searched"]:
+                            bucket["last_searched"] = ts
+
+            except Exception as e:
+                print(f"DEBUG: Skipping {tbl_name} — {str(e)}", flush=True)
                 continue
 
-            cursor.execute(
-                "SELECT COUNT(*) AS cnt FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = %s",
-                (tbl_name,)
-            )
-            if cursor.fetchone()["cnt"] == 0:
-                print(f"DEBUG: Table {tbl_name} does not exist, skipping", flush=True)
-                continue
-
-            cursor.execute(f"""
-                SELECT name, category,
-                       COALESCE(today_search_count, 0) AS today_search_count,
-                       COALESCE(growth_on_search, '0') AS growth_on_search,
-                       search_time
-                FROM `{tbl_name}`
-                WHERE today_search_count IS NOT NULL AND today_search_count > 0
-            """)
-            rows = cursor.fetchall()
-            print(f"DEBUG: {tbl_name} has {len(rows)} search rows", flush=True)
-
-            for row in rows:
-                pname = (row["name"] or "").strip()
-                if not pname:
-                    continue
-
-                bucket = aggregated[pname]
-                bucket["total_searches"] += int(row["today_search_count"] or 0)
-                bucket["users_who_searched"].add(uid)
-
-                if bucket["category"] is None and row["category"]:
-                    bucket["category"] = row["category"]
-
-                # ✅ ML: Growth calculation — weighted average across users
-                try:
-                    raw = str(row["growth_on_search"] or "0").strip()
-                    if "/" in raw:
-                        parts = raw.split("/")
-                        g = float(parts[0]) / float(parts[1]) * 100
-                    else:
-                        g = float(raw.replace("%", "") or 0)
-                    bucket["growth_sum"] += g
-                    bucket["growth_count"] += 1
-                except (ValueError, TypeError, ZeroDivisionError):
-                    pass
-
-                if row["search_time"]:
-                    ts = str(row["search_time"])
-                    if bucket["last_searched"] is None or ts > bucket["last_searched"]:
-                        bucket["last_searched"] = ts
-
-        # ✅ ML: Popularity Score — normalize search counts (0-100)
+        # ✅ ML: Normalize popularity score 0-100
         all_searches = [b["total_searches"] for b in aggregated.values()]
         max_search = max(all_searches) if all_searches else 1
 
         results = []
         for pname, bucket in aggregated.items():
             avg_growth = round(bucket["growth_sum"] / bucket["growth_count"], 2) if bucket["growth_count"] > 0 else 0.0
-
-            # ✅ ML: Popularity score normalized out of 100
             popularity_score = round((bucket["total_searches"] / max_search) * 100, 1)
 
-            # ✅ ML: Trend label based on growth
+            # ✅ ML: Trend label
             if avg_growth >= 70:
                 trend = "🔥 Hot"
             elif avg_growth >= 40:
@@ -4438,7 +4424,6 @@ def search_analytics():
                 "last_searched": bucket["last_searched"],
             })
 
-        # ✅ ML: Sort by popularity score (most popular first)
         results.sort(key=lambda x: x["popularity_score"], reverse=True)
 
         print(f"DEBUG: Returning {len(results)} products", flush=True)
@@ -4452,7 +4437,8 @@ def search_analytics():
 
     finally:
         if cursor: cursor.close()
-        if conn: conn.close()
+        if conn: conn.close()   
+        
         
 # ============================================================
 # STATIC FILE SERVING
