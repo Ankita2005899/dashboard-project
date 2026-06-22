@@ -1597,10 +1597,7 @@ def add_to_cart():
         }
 
         client_table = get_cart_table_name(username, user_id)
-        safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
-        if safe_username and safe_username[0].isdigit():
-            safe_username = "user_" + safe_username
-        activity_table = f"{safe_username}_{user_id}_product_activity"
+        activity_table = f"{username}_{user_id}_product_activity"
 
         # IST time fallback
         ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
@@ -2473,10 +2470,7 @@ def track_add_to_cart():
 
     username = session.get("username")
     user_id = session.get("user_id")
-    safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
-    if safe_username and safe_username[0].isdigit():
-        safe_username = "user_" + safe_username
-    table_name = f"{safe_username}_{user_id}_product_activity"
+    table_name = f"{username}_{user_id}_product_activity"
 
     # ✅ Python se IST time
     ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
@@ -4511,15 +4505,24 @@ def addtocart_analytics():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # ✅ Seedha saari product_activity tables lo
+        # ✅ Actual product names fetch karo product tables se
+        cursor.execute("""
+            SELECT id, name, category FROM card
+            UNION ALL
+            SELECT id, name, category FROM study_material
+            UNION ALL
+            SELECT id, name, category FROM food_items
+        """)
+        all_products = cursor.fetchall()
+        # product_id + category → name mapping
+        product_map = {(p["id"], p["category"]): p["name"] for p in all_products}
+
         cursor.execute("""
             SELECT table_name FROM information_schema.tables
             WHERE table_schema = DATABASE()
             AND table_name LIKE '%_product_activity'
         """)
         all_tables = [list(row.values())[0] for row in cursor.fetchall()]
-
-        print(f"DEBUG: Found {len(all_tables)} activity tables", flush=True)
 
         aggregated = defaultdict(lambda: {
             "total_addtocart": 0,
@@ -4533,7 +4536,7 @@ def addtocart_analytics():
         for tbl_name in all_tables:
             try:
                 cursor.execute(f"""
-                    SELECT name, category,
+                    SELECT product_id, name, category,
                            COALESCE(today_add_to_cart_count, 0) AS today_add_to_cart_count,
                            COALESCE(growth_in_addtocart, '0') AS growth_in_addtocart,
                            add_to_cart_date_time
@@ -4543,11 +4546,12 @@ def addtocart_analytics():
                 rows = cursor.fetchall()
 
                 for row in rows:
-                    pname = (row["name"] or "").strip()
-                    if not pname:
-                        continue
+                    # ✅ product_map se sahi naam lo
+                    actual_name = product_map.get((row["product_id"], row["category"]))
+                    if not actual_name:
+                        continue  # deleted product — skip karo
 
-                    bucket = aggregated[pname]
+                    bucket = aggregated[actual_name]
                     bucket["total_addtocart"] += int(row["today_add_to_cart_count"] or 0)
                     bucket["users_who_added"].add(tbl_name)
 
