@@ -4443,7 +4443,28 @@ def search_analytics():
         if cursor: cursor.close()
         if conn: conn.close()   
         
-        
+
+#----------------all user detail ("save_detail") sathi -------------------------------        
+
+
+@app.route('/owner/all-users')
+def owner_all_users():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT id, name, age, phone1, phone2, address1, address2, email, profile_image, created_at FROM save_detail ORDER BY created_at DESC")
+        users = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        # Convert datetime to string for JSON serialisation
+        for u in users:
+            if u.get('created_at'):
+                u['created_at'] = str(u['created_at'])
+        return jsonify(users)
+    except Exception as e:
+        return jsonify([]), 500
+
+
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
