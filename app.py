@@ -4333,7 +4333,8 @@ def search_analytics():
             WHERE table_schema = DATABASE()
             AND table_name LIKE '%_product_activity'
         """)
-        all_tables = [row["table_name"] for row in cursor.fetchall()]
+        all_tables = [list(row.values())[0] for row in cursor.fetchall()]
+
 
         print(f"DEBUG: Found {len(all_tables)} activity tables", flush=True)
 
