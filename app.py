@@ -4355,7 +4355,7 @@ def search_analytics():
 
             try:
                 cursor.execute(f"""
-                    SELECT name, category,
+                    SELECT product_id, name, category,
                            COALESCE(today_search_count, 0) AS today_search_count,
                            COALESCE(growth_on_search, '0') AS growth_on_search,
                            search_time
@@ -4366,11 +4366,14 @@ def search_analytics():
                 print(f"DEBUG: {tbl_name} has {len(rows)} search rows", flush=True)
 
                 for row in rows:
-                    pname = (row["name"] or "").strip()
-                    if not pname:
+                    # ✅ product_map se actual naam lo
+                    actual_name = product_map.get((row["product_id"], row["category"]))
+                    if not actual_name:
                         continue
 
-                    bucket = aggregated[pname]
+                    # ✅ Unique label
+                    unique_key = f"{actual_name} ({row['category']}) #{row['product_id']}"
+                    bucket = aggregated[unique_key]
                     bucket["total_searches"] += int(row["today_search_count"] or 0)
                     bucket["users_who_searched"].add(tbl_name)  # table name as unique user identifier
 
@@ -4517,6 +4520,17 @@ def addtocart_analytics():
         # product_id + category → name mapping
         product_map = {(p["id"], p["category"]): p["name"] for p in all_products}
 
+        # ✅ Actual product names fetch karo
+        cursor.execute("""
+            SELECT id, name, category FROM card
+            UNION ALL
+            SELECT id, name, category FROM study_material
+            UNION ALL
+            SELECT id, name, category FROM food_items
+        """)
+        all_products = cursor.fetchall()
+        product_map = {(p["id"], p["category"]): p["name"] for p in all_products}
+
         cursor.execute("""
             SELECT table_name FROM information_schema.tables
             WHERE table_schema = DATABASE()
@@ -4549,9 +4563,11 @@ def addtocart_analytics():
                     # ✅ product_map se sahi naam lo
                     actual_name = product_map.get((row["product_id"], row["category"]))
                     if not actual_name:
-                        continue  # deleted product — skip karo
+                        continue
 
-                    bucket = aggregated[actual_name]
+                    # ✅ Unique label = name + category + product_id
+                    unique_key = f"{actual_name} ({row['category']}) #{row['product_id']}"
+                    bucket = aggregated[unique_key] 
                     bucket["total_addtocart"] += int(row["today_add_to_cart_count"] or 0)
                     bucket["users_who_added"].add(tbl_name)
 
