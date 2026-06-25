@@ -2897,7 +2897,10 @@ def verify_payment():
 
     username = session.get("username")
     user_id  = session.get("user_id")
-    table_name = f"{username}_{user_id}"
+    safe_un = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+    if safe_un and safe_un[0].isdigit():
+        safe_un = "user_" + safe_un
+    table_name = f"{safe_un}_{user_id}"
 
     # ✅ Sanitized username for activity table
     safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
@@ -2988,7 +2991,10 @@ def verify_payment_failed():
     cart_id = data.get("cart_id")
     username = session.get("username")
     user_id = session.get("user_id")
-    table_name = f"{username}_{user_id}"
+    safe_un = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+    if safe_un and safe_un[0].isdigit():
+        safe_un = "user_" + safe_un
+    table_name = f"{safe_un}_{user_id}"
 
     db = get_db_connection()
     cursor = db.cursor()
