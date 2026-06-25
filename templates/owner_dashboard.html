@@ -3153,7 +3153,7 @@
                 overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.06);
                 display:flex;flex-direction:column;flex:0 0 220px;width:220px;`;
 
-                    const stats = hashProductStats(p.name || "");
+                    const stats = getProductStats(p.id, p.category);
                     card.innerHTML = `
                 <img src="${p.image || ''}" onerror="this.style.display='none'"
                     style="width:100%;height:140px;object-fit:cover;">
