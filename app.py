@@ -4805,6 +4805,63 @@ def get_purchased_items():
 
     return jsonify(items)
 
+
+
+#----------------owner_section.html madhle ("product category") che count's -----------------------
+
+@app.route("/api/owner/product-catalog-stats", methods=["GET"])
+def product_catalog_stats():
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT table_name FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            AND table_name LIKE '%_product_activity'
+        """)
+        all_tables = [list(row.values())[0] for row in cursor.fetchall()]
+
+        stats = {}
+
+        for tbl_name in all_tables:
+            try:
+                cursor.execute(f"""
+                    SELECT product_id, category,
+                           COALESCE(today_search_count, 0) AS search_count,
+                           COALESCE(today_add_to_cart_count, 0) AS cart_count,
+                           COALESCE(today_purchase_count, 0) AS purchase_count
+                    FROM `{tbl_name}`
+                """)
+                rows = cursor.fetchall()
+
+                for row in rows:
+                    key = f"{row['product_id']}_{row['category']}"
+                    if key not in stats:
+                        stats[key] = {
+                            "product_id": row["product_id"],
+                            "category": row["category"],
+                            "search": 0,
+                            "cart": 0,
+                            "purchased": 0
+                        }
+                    stats[key]["search"] += int(row["search_count"])
+                    stats[key]["cart"] += int(row["cart_count"])
+                    stats[key]["purchased"] += int(row["purchase_count"])
+
+            except Exception as e:
+                continue
+
+        return jsonify(list(stats.values()))
+
+    except Exception as e:
+        return jsonify([]), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
