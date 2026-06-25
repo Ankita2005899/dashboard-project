@@ -5635,7 +5635,7 @@
                     padding:9px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;">
                         ⚡ Run ML Analysis
                     </button>
-                <button onclick="openSpecialOfferPopup()" style="background:#f59e0b;color:white;border:none;
+                    <button onclick="openSpecialOfferPopup()" style="background:#f59e0b;color:white;border:none;
                     padding:9px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;">
                         🎁 Special Offer
                     </button>
@@ -5654,447 +5654,520 @@
             <!-- MAIN WRAPPER: Offer Panel + Two Column Split -->
             <div style="display:flex;gap:16px;align-items:flex-start;">
 
-            <!-- ===== SPECIAL OFFER DROP PANEL ===== -->
-            <div id="specialOfferPanel" style="display:none;flex:0 0 260px;background:linear-gradient(160deg,#fef3c7,#fde68a);
+                <!-- ===== SPECIAL OFFER DROP PANEL ===== -->
+                <div id="specialOfferPanel" style="display:none;flex:0 0 260px;background:linear-gradient(160deg,#fef3c7,#fde68a);
                 border:2px dashed #f59e0b;border-radius:16px;padding:16px;min-height:500px;
                 flex-direction:column;gap:10px;transition:all 0.3s;">
-                <div style="text-align:center;margin-bottom:8px;">
-                    <div style="font-size:18px;">🎁</div>
-                    <div style="font-size:13px;font-weight:800;color:#b45309;">Special Offer Panel</div>
-                    <div style="font-size:10px;color:#92400e;margin-top:4px;">Drag & drop customers here<br>to send them a special offer</div>
-                </div>
-                <div id="offerDropZone"
-                    ondragover="event.preventDefault();this.style.background='rgba(245,158,11,0.2)'"
-                    ondragleave="this.style.background=''"
-                    ondrop="handleOfferDrop(event)"
-                    style="flex:1;min-height:300px;border:2px dashed #f59e0b;border-radius:12px;
+                    <div style="text-align:center;margin-bottom:8px;">
+                        <div style="font-size:18px;">🎁</div>
+                        <div style="font-size:13px;font-weight:800;color:#b45309;">Special Offer Panel</div>
+                        <div style="font-size:10px;color:#92400e;margin-top:4px;">Drag & drop customers here<br>to send
+                            them a special offer</div>
+                    </div>
+                    <div id="offerDropZone"
+                        ondragover="event.preventDefault();this.style.background='rgba(245,158,11,0.2)'"
+                        ondragleave="this.style.background=''" ondrop="handleOfferDrop(event)" style="flex:1;min-height:300px;border:2px dashed #f59e0b;border-radius:12px;
                     display:flex;flex-direction:column;gap:8px;padding:10px;
                     background:rgba(255,255,255,0.4);transition:background 0.2s;">
-                    <div id="offerDropHint" style="text-align:center;color:#b45309;font-size:11px;
+                        <div id="offerDropHint" style="text-align:center;color:#b45309;font-size:11px;
                         margin:auto;opacity:0.7;">⬇️ Drop customers here</div>
-                </div>
-                <div style="display:flex;gap:6px;margin-top:8px;">
-                    <button onclick="sendAllSpecialOffers()" style="flex:1;background:#f59e0b;color:white;
+                    </div>
+                    <div style="display:flex;gap:6px;margin-top:8px;">
+                        <button onclick="sendAllSpecialOffers()" style="flex:1;background:#f59e0b;color:white;
                         border:none;padding:8px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
-                        📧 Send All Offers
-                    </button>
-                    <button onclick="clearOfferPanel()" style="background:#e5e7eb;color:#374151;
+                            📧 Send All Offers
+                        </button>
+                        <button onclick="clearOfferPanel()" style="background:#e5e7eb;color:#374151;
                         border:none;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
-                        🗑️
-                    </button>
-                </div>
-                <div id="offerSentBanner" style="display:none;background:#22c55e;color:white;
+                            🗑️
+                        </button>
+                    </div>
+                    <div id="offerSentBanner" style="display:none;background:#22c55e;color:white;
                     padding:8px;border-radius:8px;font-size:11px;font-weight:700;text-align:center;">
-                    ✅ Offers sent successfully!
-                </div>
-            </div>
-
-            <!-- TWO-COLUMN SPLIT -->
-            <div style="flex:1;min-width:0;display:flex;gap:20px;align-items:flex-start;">
-
-                <!-- ===== LEFT: 3 Segment Cards ===== -->
-                <div style="flex:0 0 45%;display:flex;flex-direction:column;gap:16px;">
-
-                    <!-- Card 1: Champions -->
-                    <div style="background:linear-gradient(135deg,#dcfce7,#bbf7d0);border:2px solid #22c55e;
-                    border-radius:16px;padding:18px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;"
-                        onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'"
-                        onmouseout="this.style.transform='';this.style.boxShadow=''"
-                        onclick="loadSegmentTable('champions')">
-                        <div
-                            style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-                            <div>
-                                <div
-                                    style="font-size:11px;font-weight:700;color:#15803d;letter-spacing:1px;text-transform:uppercase;">
-                                    🏆 Champions — High Purchasers</div>
-                                <div style="font-size:26px;font-weight:800;color:#14532d;margin:4px 0;" id="champCount">
-                                    —</div>
-                                <div style="font-size:12px;color:#166534;">Purchased ≥ 5 products · RFM Score: High
-                                </div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div
-                                    style="background:#22c55e;color:white;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;">
-                                    LOW CHURN RISK</div>
-                                <div style="font-size:11px;color:#15803d;margin-top:6px;">Churn Prob: <b
-                                        id="champChurn">—</b></div>
-                            </div>
-                        </div>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-                            <div style="flex:1;min-width:80px;">
-                                <div style="font-size:10px;color:#15803d;font-weight:600;margin-bottom:3px;">Avg. Orders
-                                </div>
-                                <div style="height:6px;background:#bbf7d0;border-radius:10px;overflow:hidden;">
-                                    <div id="champOrderBar"
-                                        style="height:100%;background:#22c55e;width:0%;transition:width 1s;border-radius:10px;">
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="flex:1;min-width:80px;">
-                                <div style="font-size:10px;color:#15803d;font-weight:600;margin-bottom:3px;">Retention
-                                    Rate</div>
-                                <div style="height:6px;background:#bbf7d0;border-radius:10px;overflow:hidden;">
-                                    <div id="champRetBar"
-                                        style="height:100%;background:#22c55e;width:0%;transition:width 1.2s;border-radius:10px;">
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="flex:1;min-width:80px;">
-                                <div style="font-size:10px;color:#15803d;font-weight:600;margin-bottom:3px;">Avg. Spend
-                                    ₹</div>
-                                <div style="height:6px;background:#bbf7d0;border-radius:10px;overflow:hidden;">
-                                    <div id="champSpendBar"
-                                        style="height:100%;background:#22c55e;width:0%;transition:width 1.4s;border-radius:10px;">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="champList"></div>
-                        <div style="text-align:center;margin-top:8px;font-size:11px;color:#15803d;font-weight:600;">👆
-                            Click to see all Champions</div>
+                        ✅ Offers sent successfully!
                     </div>
-
-                    <!-- Card 2: At Risk -->
-                    <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;
-                    border-radius:16px;padding:18px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;"
-                        onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'"
-                        onmouseout="this.style.transform='';this.style.boxShadow=''"
-                        onclick="loadSegmentTable('moderate')">
-                        <div
-                            style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-                            <div>
-                                <div
-                                    style="font-size:11px;font-weight:700;color:#b45309;letter-spacing:1px;text-transform:uppercase;">
-                                    ⚠️ At Risk — Moderate Purchasers</div>
-                                <div style="font-size:26px;font-weight:800;color:#78350f;margin:4px 0;" id="modCount">—
-                                </div>
-                                <div style="font-size:12px;color:#92400e;">Purchased 1–4 products · RFM Score: Mid</div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div
-                                    style="background:#f59e0b;color:white;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;">
-                                    MEDIUM CHURN RISK</div>
-                                <div style="font-size:11px;color:#b45309;margin-top:6px;">Churn Prob: <b
-                                        id="modChurn">—</b></div>
-                            </div>
-                        </div>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-                            <div style="flex:1;min-width:80px;">
-                                <div style="font-size:10px;color:#b45309;font-weight:600;margin-bottom:3px;">Avg. Orders
-                                </div>
-                                <div style="height:6px;background:#fde68a;border-radius:10px;overflow:hidden;">
-                                    <div id="modOrderBar"
-                                        style="height:100%;background:#f59e0b;width:0%;transition:width 1s;border-radius:10px;">
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="flex:1;min-width:80px;">
-                                <div style="font-size:10px;color:#b45309;font-weight:600;margin-bottom:3px;">Retention
-                                    Rate</div>
-                                <div style="height:6px;background:#fde68a;border-radius:10px;overflow:hidden;">
-                                    <div id="modRetBar"
-                                        style="height:100%;background:#f59e0b;width:0%;transition:width 1.2s;border-radius:10px;">
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="flex:1;min-width:80px;">
-                                <div style="font-size:10px;color:#b45309;font-weight:600;margin-bottom:3px;">Avg. Spend
-                                    ₹</div>
-                                <div style="height:6px;background:#fde68a;border-radius:10px;overflow:hidden;">
-                                    <div id="modSpendBar"
-                                        style="height:100%;background:#f59e0b;width:0%;transition:width 1.4s;border-radius:10px;">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="modList"></div>
-                        <div style="text-align:center;margin-top:8px;font-size:11px;color:#b45309;font-weight:600;">👆
-                            Click to see all At-Risk Customers</div>
-                    </div>
-
-                    <!-- Card 3: Dormant -->
-                    <div style="background:linear-gradient(135deg,#fee2e2,#fecaca);border:2px solid #ef4444;
-                    border-radius:16px;padding:18px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;"
-                        onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'"
-                        onmouseout="this.style.transform='';this.style.boxShadow=''"
-                        onclick="loadSegmentTable('dormant')">
-                        <div
-                            style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-                            <div>
-                                <div
-                                    style="font-size:11px;font-weight:700;color:#b91c1c;letter-spacing:1px;text-transform:uppercase;">
-                                    💤 Dormant — No Purchases</div>
-                                <div style="font-size:26px;font-weight:800;color:#7f1d1d;margin:4px 0;" id="dormCount">—
-                                </div>
-                                <div style="font-size:12px;color:#991b1b;">0 purchases · RFM Score: Low · High Churn
-                                    Risk</div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div
-                                    style="background:#ef4444;color:white;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;">
-                                    HIGH CHURN RISK</div>
-                                <div style="font-size:11px;color:#b91c1c;margin-top:6px;">Churn Prob: <b
-                                        id="dormChurn">—</b></div>
-                            </div>
-                        </div>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-                            <div style="flex:1;min-width:80px;">
-                                <div style="font-size:10px;color:#b91c1c;font-weight:600;margin-bottom:3px;">Days
-                                    Inactive</div>
-                                <div style="height:6px;background:#fecaca;border-radius:10px;overflow:hidden;">
-                                    <div id="dormInactBar"
-                                        style="height:100%;background:#ef4444;width:0%;transition:width 1s;border-radius:10px;">
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="flex:1;min-width:80px;">
-                                <div style="font-size:10px;color:#b91c1c;font-weight:600;margin-bottom:3px;">Recovery
-                                    Chance</div>
-                                <div style="height:6px;background:#fecaca;border-radius:10px;overflow:hidden;">
-                                    <div id="dormRecBar"
-                                        style="height:100%;background:#ef4444;width:0%;transition:width 1.2s;border-radius:10px;">
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="flex:1;min-width:80px;">
-                                <div style="font-size:10px;color:#b91c1c;font-weight:600;margin-bottom:3px;">Login Freq.
-                                </div>
-                                <div style="height:6px;background:#fecaca;border-radius:10px;overflow:hidden;">
-                                    <div id="dormLoginBar"
-                                        style="height:100%;background:#ef4444;width:0%;transition:width 1.4s;border-radius:10px;">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="dormList"></div>
-                        <div style="text-align:center;margin-top:8px;font-size:11px;color:#b91c1c;font-weight:600;">👆
-                            Click to see all Dormant Customers</div>
-                    </div>
-
                 </div>
 
-                <!-- ===== RIGHT: ML Charts & Table ===== -->
-                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:16px;">
+                <!-- TWO-COLUMN SPLIT -->
+                <div style="flex:1;min-width:0;display:flex;gap:20px;align-items:flex-start;">
 
-                    <!-- Row 1: Cluster + Feature Importance -->
-                    <div style="display:flex;gap:14px;min-width:0;">
-                        <div
-                            style="flex:1;background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
-                            <div style="font-size:13px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">📊
-                                K-Means Cluster Distribution</div>
-                            <div style="font-size:11px;color:#64748b;margin-bottom:10px;">Unsupervised clustering — 3
-                                segments</div>
-                            <canvas id="churnClusterChart"
-                                style="height:160px;max-height:160px;width:100%;max-width:100%;"></canvas>
-                        </div>
-                        <div
-                            style="flex:1;background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
-                            <div style="font-size:13px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">🎯
-                                Random Forest Feature Importance</div>
-                            <div style="font-size:11px;color:#64748b;margin-bottom:10px;">Top predictors of churn</div>
-                            <canvas id="churnFeatureChart"
-                                style="height:160px;max-height:160px;width:100%;max-width:100%;"></canvas>
-                        </div>
-                    </div>
+                    <!-- ===== LEFT: 3 Segment Cards ===== -->
+                    <div style="flex:0 0 45%;display:flex;flex-direction:column;gap:16px;">
 
-                    <!-- Row 2: Logistic Regression Line Chart -->
-                    <div
-                        style="background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
-                        <div style="font-size:13px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">📈
-                            Logistic Regression — Churn Probability Over Time</div>
-                        <div style="font-size:11px;color:#64748b;margin-bottom:10px;">Sigmoid-based probability by
-                            customer segment</div>
-                        <canvas id="churnProbChart"
-                            style="height:150px;max-height:150px;width:100%;max-width:100%;"></canvas>
-                    </div>
-
-                    <!-- Row 3: RFM Summary Grid -->
-                    <div
-                        style="background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
-                        <div style="font-size:13px;font-weight:700;color:var(--card-text-h2);margin-bottom:10px;">
-                            🧮 RFM Score Summary
-                            <span style="font-size:11px;font-weight:400;color:#64748b;margin-left:8px;">Recency ·
-                                Frequency · Monetary Value</span>
-                        </div>
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;" id="rfmSummaryGrid">
-                        </div>
-                    </div>
-
-                    <!-- Row 4: Detail Table (shown on card click) -->
-                    <div id="churnDetailSection"
-                        style="display:none;background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                            <div>
-                                <div style="font-size:14px;font-weight:700;color:var(--card-text-h2);"
-                                    id="churnTableTitle">Customer Details</div>
-                                <div style="font-size:11px;color:#64748b;" id="churnTableSub"></div>
+                        <!-- Card 1: Champions -->
+                        <div style="background:linear-gradient(135deg,#dcfce7,#bbf7d0);border:2px solid #22c55e;
+                    border-radius:16px;padding:18px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;"
+                            onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'"
+                            onmouseout="this.style.transform='';this.style.boxShadow=''"
+                            onclick="loadSegmentTable('champions')">
+                            <div
+                                style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                                <div>
+                                    <div
+                                        style="font-size:11px;font-weight:700;color:#15803d;letter-spacing:1px;text-transform:uppercase;">
+                                        🏆 Champions — High Purchasers</div>
+                                    <div style="font-size:26px;font-weight:800;color:#14532d;margin:4px 0;"
+                                        id="champCount">
+                                        —</div>
+                                    <div style="font-size:12px;color:#166534;">Purchased ≥ 5 products · RFM Score: High
+                                    </div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div
+                                        style="background:#22c55e;color:white;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;">
+                                        LOW CHURN RISK</div>
+                                    <div style="font-size:11px;color:#15803d;margin-top:6px;">Churn Prob: <b
+                                            id="champChurn">—</b></div>
+                                </div>
                             </div>
-                            <input type="text" placeholder="🔍 Search customer..."
-                                oninput="filterChurnTable(this.value)" style="padding:6px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+                                <div style="flex:1;min-width:80px;">
+                                    <div style="font-size:10px;color:#15803d;font-weight:600;margin-bottom:3px;">Avg.
+                                        Orders
+                                    </div>
+                                    <div style="height:6px;background:#bbf7d0;border-radius:10px;overflow:hidden;">
+                                        <div id="champOrderBar"
+                                            style="height:100%;background:#22c55e;width:0%;transition:width 1s;border-radius:10px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="flex:1;min-width:80px;">
+                                    <div style="font-size:10px;color:#15803d;font-weight:600;margin-bottom:3px;">
+                                        Retention
+                                        Rate</div>
+                                    <div style="height:6px;background:#bbf7d0;border-radius:10px;overflow:hidden;">
+                                        <div id="champRetBar"
+                                            style="height:100%;background:#22c55e;width:0%;transition:width 1.2s;border-radius:10px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="flex:1;min-width:80px;">
+                                    <div style="font-size:10px;color:#15803d;font-weight:600;margin-bottom:3px;">Avg.
+                                        Spend
+                                        ₹</div>
+                                    <div style="height:6px;background:#bbf7d0;border-radius:10px;overflow:hidden;">
+                                        <div id="champSpendBar"
+                                            style="height:100%;background:#22c55e;width:0%;transition:width 1.4s;border-radius:10px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="champList"></div>
+                            <div style="text-align:center;margin-top:8px;font-size:11px;color:#15803d;font-weight:600;">
+                                👆
+                                Click to see all Champions</div>
+                        </div>
+
+                        <!-- Card 2: At Risk -->
+                        <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;
+                    border-radius:16px;padding:18px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;"
+                            onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'"
+                            onmouseout="this.style.transform='';this.style.boxShadow=''"
+                            onclick="loadSegmentTable('moderate')">
+                            <div
+                                style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                                <div>
+                                    <div
+                                        style="font-size:11px;font-weight:700;color:#b45309;letter-spacing:1px;text-transform:uppercase;">
+                                        ⚠️ At Risk — Moderate Purchasers</div>
+                                    <div style="font-size:26px;font-weight:800;color:#78350f;margin:4px 0;"
+                                        id="modCount">—
+                                    </div>
+                                    <div style="font-size:12px;color:#92400e;">Purchased 1–4 products · RFM Score: Mid
+                                    </div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div
+                                        style="background:#f59e0b;color:white;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;">
+                                        MEDIUM CHURN RISK</div>
+                                    <div style="font-size:11px;color:#b45309;margin-top:6px;">Churn Prob: <b
+                                            id="modChurn">—</b></div>
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+                                <div style="flex:1;min-width:80px;">
+                                    <div style="font-size:10px;color:#b45309;font-weight:600;margin-bottom:3px;">Avg.
+                                        Orders
+                                    </div>
+                                    <div style="height:6px;background:#fde68a;border-radius:10px;overflow:hidden;">
+                                        <div id="modOrderBar"
+                                            style="height:100%;background:#f59e0b;width:0%;transition:width 1s;border-radius:10px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="flex:1;min-width:80px;">
+                                    <div style="font-size:10px;color:#b45309;font-weight:600;margin-bottom:3px;">
+                                        Retention
+                                        Rate</div>
+                                    <div style="height:6px;background:#fde68a;border-radius:10px;overflow:hidden;">
+                                        <div id="modRetBar"
+                                            style="height:100%;background:#f59e0b;width:0%;transition:width 1.2s;border-radius:10px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="flex:1;min-width:80px;">
+                                    <div style="font-size:10px;color:#b45309;font-weight:600;margin-bottom:3px;">Avg.
+                                        Spend
+                                        ₹</div>
+                                    <div style="height:6px;background:#fde68a;border-radius:10px;overflow:hidden;">
+                                        <div id="modSpendBar"
+                                            style="height:100%;background:#f59e0b;width:0%;transition:width 1.4s;border-radius:10px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="modList"></div>
+                            <div style="text-align:center;margin-top:8px;font-size:11px;color:#b45309;font-weight:600;">
+                                👆
+                                Click to see all At-Risk Customers</div>
+                        </div>
+
+                        <!-- Card 3: Dormant -->
+                        <div style="background:linear-gradient(135deg,#fee2e2,#fecaca);border:2px solid #ef4444;
+                    border-radius:16px;padding:18px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;"
+                            onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'"
+                            onmouseout="this.style.transform='';this.style.boxShadow=''"
+                            onclick="loadSegmentTable('dormant')">
+                            <div
+                                style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                                <div>
+                                    <div
+                                        style="font-size:11px;font-weight:700;color:#b91c1c;letter-spacing:1px;text-transform:uppercase;">
+                                        💤 Dormant — No Purchases</div>
+                                    <div style="font-size:26px;font-weight:800;color:#7f1d1d;margin:4px 0;"
+                                        id="dormCount">—
+                                    </div>
+                                    <div style="font-size:12px;color:#991b1b;">0 purchases · RFM Score: Low · High Churn
+                                        Risk</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div
+                                        style="background:#ef4444;color:white;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;">
+                                        HIGH CHURN RISK</div>
+                                    <div style="font-size:11px;color:#b91c1c;margin-top:6px;">Churn Prob: <b
+                                            id="dormChurn">—</b></div>
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+                                <div style="flex:1;min-width:80px;">
+                                    <div style="font-size:10px;color:#b91c1c;font-weight:600;margin-bottom:3px;">Days
+                                        Inactive</div>
+                                    <div style="height:6px;background:#fecaca;border-radius:10px;overflow:hidden;">
+                                        <div id="dormInactBar"
+                                            style="height:100%;background:#ef4444;width:0%;transition:width 1s;border-radius:10px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="flex:1;min-width:80px;">
+                                    <div style="font-size:10px;color:#b91c1c;font-weight:600;margin-bottom:3px;">
+                                        Recovery
+                                        Chance</div>
+                                    <div style="height:6px;background:#fecaca;border-radius:10px;overflow:hidden;">
+                                        <div id="dormRecBar"
+                                            style="height:100%;background:#ef4444;width:0%;transition:width 1.2s;border-radius:10px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="flex:1;min-width:80px;">
+                                    <div style="font-size:10px;color:#b91c1c;font-weight:600;margin-bottom:3px;">Login
+                                        Freq.
+                                    </div>
+                                    <div style="height:6px;background:#fecaca;border-radius:10px;overflow:hidden;">
+                                        <div id="dormLoginBar"
+                                            style="height:100%;background:#ef4444;width:0%;transition:width 1.4s;border-radius:10px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="dormList"></div>
+                            <div style="text-align:center;margin-top:8px;font-size:11px;color:#b91c1c;font-weight:600;">
+                                👆
+                                Click to see all Dormant Customers</div>
+                        </div>
+
+                    </div>
+
+                    <!-- ===== RIGHT: ML Charts & Table ===== -->
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:16px;">
+
+                        <!-- Row 1: Cluster + Feature Importance -->
+                        <div style="display:flex;gap:14px;min-width:0;">
+                            <div
+                                style="flex:1;background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
+                                <div
+                                    style="font-size:13px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">
+                                    📊
+                                    K-Means Cluster Distribution</div>
+                                <div style="font-size:11px;color:#64748b;margin-bottom:10px;">Unsupervised clustering —
+                                    3
+                                    segments</div>
+                                <canvas id="churnClusterChart"
+                                    style="height:160px;max-height:160px;width:100%;max-width:100%;"></canvas>
+                            </div>
+                            <div
+                                style="flex:1;background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
+                                <div
+                                    style="font-size:13px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">
+                                    🎯
+                                    Random Forest Feature Importance</div>
+                                <div style="font-size:11px;color:#64748b;margin-bottom:10px;">Top predictors of churn
+                                </div>
+                                <canvas id="churnFeatureChart"
+                                    style="height:160px;max-height:160px;width:100%;max-width:100%;"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Logistic Regression Line Chart -->
+                        <div
+                            style="background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
+                            <div style="font-size:13px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">📈
+                                Logistic Regression — Churn Probability Over Time</div>
+                            <div style="font-size:11px;color:#64748b;margin-bottom:10px;">Sigmoid-based probability by
+                                customer segment</div>
+                            <canvas id="churnProbChart"
+                                style="height:150px;max-height:150px;width:100%;max-width:100%;"></canvas>
+                        </div>
+
+                        <!-- Row 3: RFM Summary Grid -->
+                        <div
+                            style="background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
+                            <div style="font-size:13px;font-weight:700;color:var(--card-text-h2);margin-bottom:10px;">
+                                🧮 RFM Score Summary
+                                <span style="font-size:11px;font-weight:400;color:#64748b;margin-left:8px;">Recency ·
+                                    Frequency · Monetary Value</span>
+                            </div>
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;" id="rfmSummaryGrid">
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Detail Table (shown on card click) -->
+                        <div id="churnDetailSection"
+                            style="display:none;background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
+                            <div
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                                <div>
+                                    <div style="font-size:14px;font-weight:700;color:var(--card-text-h2);"
+                                        id="churnTableTitle">Customer Details</div>
+                                    <div style="font-size:11px;color:#64748b;" id="churnTableSub"></div>
+                                </div>
+                                <input type="text" placeholder="🔍 Search customer..."
+                                    oninput="filterChurnTable(this.value)" style="padding:6px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;
                             background:var(--input-bg);color:var(--input-color);width:180px;">
+                            </div>
+                            <div style="overflow-x:auto;max-height:260px;overflow-y:auto;">
+                                <table style="width:100%;border-collapse:collapse;font-size:12px;"
+                                    id="churnDetailTable">
+                                    <thead>
+                                        <tr style="background:var(--table-th-bg);position:sticky;top:0;z-index:1;">
+                                            <th
+                                                style="padding:8px 10px;text-align:left;font-size:11px;color:#64748b;font-weight:700;">
+                                                Customer</th>
+                                            <th
+                                                style="padding:8px 10px;text-align:left;font-size:11px;color:#64748b;font-weight:700;">
+                                                Email</th>
+                                            <th
+                                                style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
+                                                Orders</th>
+                                            <th
+                                                style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
+                                                Total Spend</th>
+                                            <th
+                                                style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
+                                                RFM Score</th>
+                                            <th
+                                                style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
+                                                Churn Prob</th>
+                                            <th
+                                                style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
+                                                Cluster</th>
+                                            <th
+                                                style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
+                                                Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="churnDetailBody"></tbody>
+                                </table>
+                            </div>
                         </div>
-                        <div style="overflow-x:auto;max-height:260px;overflow-y:auto;">
-                            <table style="width:100%;border-collapse:collapse;font-size:12px;" id="churnDetailTable">
-                                <thead>
-                                    <tr style="background:var(--table-th-bg);position:sticky;top:0;z-index:1;">
-                                        <th
-                                            style="padding:8px 10px;text-align:left;font-size:11px;color:#64748b;font-weight:700;">
-                                            Customer</th>
-                                        <th
-                                            style="padding:8px 10px;text-align:left;font-size:11px;color:#64748b;font-weight:700;">
-                                            Email</th>
-                                        <th
-                                            style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
-                                            Orders</th>
-                                        <th
-                                            style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
-                                            Total Spend</th>
-                                        <th
-                                            style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
-                                            RFM Score</th>
-                                        <th
-                                            style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
-                                            Churn Prob</th>
-                                        <th
-                                            style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
-                                            Cluster</th>
-                                        <th
-                                            style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
-                                            Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="churnDetailBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
 
-       </div>
-            </div><!-- end two-column split -->
-        </div><!-- end main wrapper -->
+                    </div>
+                </div><!-- end two-column split -->
+            </div><!-- end main wrapper -->
         </div>
     </div>
-</div>
-<!-- ===== SPECIAL OFFER POPUP (opens in front of churn modal) ===== -->
-<div id="specialOfferPopup" style="display:none;position:fixed;inset:0;z-index:10500;
+    </div>
+    <!-- ===== SPECIAL OFFER POPUP (opens in front of churn modal) ===== -->
+    <div id="specialOfferPopup" style="display:none;position:fixed;inset:0;z-index:10500;
     background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);justify-content:center;align-items:center;">
-    <div style="background:var(--modal-bg);width:95%;max-width:900px;max-height:90vh;
+        <div style="background:var(--modal-bg);width:95%;max-width:900px;max-height:90vh;
         border-radius:20px;padding:24px;box-shadow:0 24px 64px rgba(0,0,0,0.3);
         display:flex;flex-direction:column;gap:16px;overflow:hidden;">
 
-        <!-- Popup Header -->
-        <div style="display:flex;justify-content:space-between;align-items:center;
+            <!-- Popup Header -->
+            <div style="display:flex;justify-content:space-between;align-items:center;
             padding-bottom:14px;border-bottom:2px solid var(--churn-hr);">
-            <div>
-                <h3 style="margin:0;font-size:18px;color:#f59e0b;">🎁 Special Offer Manager</h3>
-                <small style="color:#64748b;font-size:12px;">Drag customers from the left list → Drop onto offer cards on the right</small>
-            </div>
-            <button onclick="closeSpecialOfferPopup()" class="send-btn">✕ Close</button>
-        </div>
-
-        <!-- Two column layout inside popup -->
-        <div style="display:flex;gap:16px;flex:1;min-height:0;overflow:hidden;">
-
-            <!-- LEFT: Customer list to drag from -->
-            <div style="flex:0 0 320px;display:flex;flex-direction:column;gap:10px;">
-                <div style="font-size:12px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">
-                    👥 All Segmented Customers
+                <div>
+                    <h3 style="margin:0;font-size:18px;color:#f59e0b;">🎁 Special Offer Manager</h3>
+                    <small style="color:#64748b;font-size:12px;">Drag customers from the left list → Drop onto offer
+                        cards on the right</small>
                 </div>
-                <input type="text" placeholder="🔍 Filter customers..." oninput="filterOfferCustomers(this.value)"
-                    style="padding:7px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;
+                <button onclick="closeSpecialOfferPopup()" class="send-btn">✕ Close</button>
+            </div>
+
+            <!-- Two column layout inside popup -->
+            <div style="display:flex;gap:16px;flex:1;min-height:0;overflow:hidden;height:75vh;">
+
+                <!-- LEFT: Customer list to drag from -->
+                <div style="flex:0 0 320px;display:flex;flex-direction:column;gap:10px;">
+                    <div style="font-size:12px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">
+                        👥 All Segmented Customers
+                    </div>
+                    <input type="text" placeholder="🔍 Filter customers..." oninput="filterOfferCustomers(this.value)"
+                        style="padding:7px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;
                     background:var(--input-bg);color:var(--input-color);">
-                <div id="offerCustomerList" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:7px;
+                    <div id="offerCustomerList" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:7px;
                     max-height:450px;padding-right:4px;">
-                    <!-- filled by JS -->
-                </div>
-            </div>
-
-            <!-- RIGHT: Drop zones per offer type -->
-            <div style="flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto;">
-                <div style="font-size:12px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">
-                    🎯 Offer Buckets — Drop customers into an offer
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-
-                    <!-- Offer Bucket 1 -->
-                    <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
-                        ondragleave="this.classList.remove('drag-over')"
-                        ondrop="dropToOfferBucket(event,'discount10')"
-                        data-offer="🏷️ 10% Discount"
-                        style="border:2px dashed #6366f1;border-radius:14px;padding:12px;min-height:140px;
-                        background:#f5f3ff;transition:background 0.2s;">
-                        <div style="font-size:12px;font-weight:700;color:#6366f1;margin-bottom:8px;">🏷️ 10% Discount</div>
-                        <div class="bucket-list" id="bucket-discount10" style="display:flex;flex-direction:column;gap:5px;min-height:60px;">
-                            <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">Drop here</div>
-                        </div>
+                        <!-- filled by JS -->
                     </div>
-
-                    <!-- Offer Bucket 2 -->
-                    <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
-                        ondragleave="this.classList.remove('drag-over')"
-                        ondrop="dropToOfferBucket(event,'discount20')"
-                        data-offer="🏷️ 20% Discount"
-                        style="border:2px dashed #ef4444;border-radius:14px;padding:12px;min-height:140px;
-                        background:#fff1f2;transition:background 0.2s;">
-                        <div style="font-size:12px;font-weight:700;color:#ef4444;margin-bottom:8px;">🏷️ 20% Discount</div>
-                        <div class="bucket-list" id="bucket-discount20" style="display:flex;flex-direction:column;gap:5px;min-height:60px;">
-                            <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">Drop here</div>
-                        </div>
-                    </div>
-
-                    <!-- Offer Bucket 3 -->
-                    <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
-                        ondragleave="this.classList.remove('drag-over')"
-                        ondrop="dropToOfferBucket(event,'freeship')"
-                        data-offer="🚚 Free Shipping"
-                        style="border:2px dashed #22c55e;border-radius:14px;padding:12px;min-height:140px;
-                        background:#f0fdf4;transition:background 0.2s;">
-                        <div style="font-size:12px;font-weight:700;color:#22c55e;margin-bottom:8px;">🚚 Free Shipping</div>
-                        <div class="bucket-list" id="bucket-freeship" style="display:flex;flex-direction:column;gap:5px;min-height:60px;">
-                            <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">Drop here</div>
-                        </div>
-                    </div>
-
-                    <!-- Offer Bucket 4 -->
-                    <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
-                        ondragleave="this.classList.remove('drag-over')"
-                        ondrop="dropToOfferBucket(event,'bogo')"
-                        data-offer="🎁 Buy 1 Get 1"
-                        style="border:2px dashed #f59e0b;border-radius:14px;padding:12px;min-height:140px;
-                        background:#fffbeb;transition:background 0.2s;">
-                        <div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:8px;">🎁 Buy 1 Get 1</div>
-                        <div class="bucket-list" id="bucket-bogo" style="display:flex;flex-direction:column;gap:5px;min-height:60px;">
-                            <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">Drop here</div>
-                        </div>
-                    </div>
-
                 </div>
 
-                <!-- Send button -->
-                <button onclick="sendSpecialOffers()" style="margin-top:6px;width:100%;background:#f59e0b;color:white;
+                <!-- RIGHT: Drop zones per offer type -->
+                <div style="flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto;">
+                    <div style="font-size:12px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">
+                        🎯 Offer Buckets — Drop customers into an offer
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+
+                        <!-- Offer Bucket 1 -->
+                        <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
+                            ondragleave="this.classList.remove('drag-over')"
+                            ondrop="dropToOfferBucket(event,'discount10')" style="border:2px dashed #6366f1;border-radius:14px;padding:14px;
+                        background:#f5f3ff;transition:background 0.2s;display:flex;flex-direction:column;gap:8px;">
+                            <div style="font-size:13px;font-weight:700;color:#6366f1;">🏷️ 10% Discount</div>
+                            <div class="bucket-list" id="bucket-discount10"
+                                style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:80px;">
+                                <div class="bucket-hint"
+                                    style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop
+                                    customers here</div>
+                            </div>
+                            <textarea id="msg-discount10" placeholder="✍️ Type your offer message here..." rows="3"
+                                style="width:100%;padding:8px;border:1.5px solid #c4b5fd;border-radius:8px;font-size:11px;
+                            resize:none;background:white;color:#1e293b;box-sizing:border-box;"></textarea>
+                            <button onclick="sendBucketOffer('discount10','🏷️ 10% Discount')" style="width:100%;background:#6366f1;color:white;border:none;padding:8px;
+                            border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                                📧 Send 10% Discount
+                            </button>
+                            <div id="sent-discount10"
+                                style="display:none;font-size:11px;color:#22c55e;font-weight:700;text-align:center;">✅
+                                Sent!</div>
+                        </div>
+
+                        <!-- Offer Bucket 2 -->
+                        <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
+                            ondragleave="this.classList.remove('drag-over')"
+                            ondrop="dropToOfferBucket(event,'discount20')" style="border:2px dashed #ef4444;border-radius:14px;padding:14px;
+                        background:#fff1f2;transition:background 0.2s;display:flex;flex-direction:column;gap:8px;">
+                            <div style="font-size:13px;font-weight:700;color:#ef4444;">🏷️ 20% Discount</div>
+                            <div class="bucket-list" id="bucket-discount20"
+                                style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:80px;">
+                                <div class="bucket-hint"
+                                    style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop
+                                    customers here</div>
+                            </div>
+                            <textarea id="msg-discount20" placeholder="✍️ Type your offer message here..." rows="3"
+                                style="width:100%;padding:8px;border:1.5px solid #fca5a5;border-radius:8px;font-size:11px;
+                            resize:none;background:white;color:#1e293b;box-sizing:border-box;"></textarea>
+                            <button onclick="sendBucketOffer('discount20','🏷️ 20% Discount')" style="width:100%;background:#ef4444;color:white;border:none;padding:8px;
+                            border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                                📧 Send 20% Discount
+                            </button>
+                            <div id="sent-discount20"
+                                style="display:none;font-size:11px;color:#22c55e;font-weight:700;text-align:center;">✅
+                                Sent!</div>
+                        </div>
+
+                        <!-- Offer Bucket 3 -->
+                        <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
+                            ondragleave="this.classList.remove('drag-over')"
+                            ondrop="dropToOfferBucket(event,'freeship')" style="border:2px dashed #22c55e;border-radius:14px;padding:14px;
+                        background:#f0fdf4;transition:background 0.2s;display:flex;flex-direction:column;gap:8px;">
+                            <div style="font-size:13px;font-weight:700;color:#22c55e;">🚚 Free Shipping</div>
+                            <div class="bucket-list" id="bucket-freeship"
+                                style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:80px;">
+                                <div class="bucket-hint"
+                                    style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop
+                                    customers here</div>
+                            </div>
+                            <textarea id="msg-freeship" placeholder="✍️ Type your offer message here..." rows="3" style="width:100%;padding:8px;border:1.5px solid #86efac;border-radius:8px;font-size:11px;
+                            resize:none;background:white;color:#1e293b;box-sizing:border-box;"></textarea>
+                            <button onclick="sendBucketOffer('freeship','🚚 Free Shipping')" style="width:100%;background:#22c55e;color:white;border:none;padding:8px;
+                            border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                                📧 Send Free Shipping
+                            </button>
+                            <div id="sent-freeship"
+                                style="display:none;font-size:11px;color:#22c55e;font-weight:700;text-align:center;">✅
+                                Sent!</div>
+                        </div>
+
+                        <!-- Offer Bucket 4 -->
+                        <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
+                            ondragleave="this.classList.remove('drag-over')" ondrop="dropToOfferBucket(event,'bogo')"
+                            style="border:2px dashed #f59e0b;border-radius:14px;padding:14px;
+                        background:#fffbeb;transition:background 0.2s;display:flex;flex-direction:column;gap:8px;">
+                            <div style="font-size:13px;font-weight:700;color:#f59e0b;">🎁 Buy 1 Get 1</div>
+                            <div class="bucket-list" id="bucket-bogo"
+                                style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:80px;">
+                                <div class="bucket-hint"
+                                    style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop
+                                    customers here</div>
+                            </div>
+                            <textarea id="msg-bogo" placeholder="✍️ Type your offer message here..." rows="3" style="width:100%;padding:8px;border:1.5px solid #fcd34d;border-radius:8px;font-size:11px;
+                            resize:none;background:white;color:#1e293b;box-sizing:border-box;"></textarea>
+                            <button onclick="sendBucketOffer('bogo','🎁 Buy 1 Get 1')" style="width:100%;background:#f59e0b;color:white;border:none;padding:8px;
+                            border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                                📧 Send Buy 1 Get 1
+                            </button>
+                            <div id="sent-bogo"
+                                style="display:none;font-size:11px;color:#22c55e;font-weight:700;text-align:center;">✅
+                                Sent!</div>
+                        </div>
+
+                    </div>
+
+                    <!-- Send button -->
+                    <button onclick="sendSpecialOffers()" style="margin-top:6px;width:100%;background:#f59e0b;color:white;
                     border:none;padding:11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;
                     transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'"
-                    onmouseout="this.style.transform=''">
-                    📧 Send All Offers
-                </button>
-                <div id="offerSentBanner" style="display:none;background:#22c55e;color:white;padding:10px;
+                        onmouseout="this.style.transform=''">
+                        📧 Send All Offers
+                    </button>
+                    <div id="offerSentBanner" style="display:none;background:#22c55e;color:white;padding:10px;
                     border-radius:10px;font-size:12px;font-weight:700;text-align:center;">
-                    ✅ Offers sent!
+                        ✅ Offers sent!
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<style>
-.offer-bucket.drag-over {
-    background: rgba(99,102,241,0.08) !important;
-    border-color: #6366f1 !important;
-}
+    <style>
+        .offer-bucket.drag-over {
+            background: rgba(99, 102, 241, 0.08) !important;
+            border-color: #6366f1 !important;
+        }
 
-@keyframes fadeSlideIn {
-    from { opacity:0; transform:translateY(-6px); }
-    to   { opacity:1; transform:translateY(0); }
-}
-.churn-mini-customer {
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .churn-mini-customer {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -6304,7 +6377,7 @@
             tbody.innerHTML = churnSegmented[segment].map(c => {
                 const churnPct = (c.churnProb * 100).toFixed(1);
                 const clusterLabel = ['Champion', 'At Risk', 'Dormant'][c.cluster] || '—';
-return `<tr draggable="true" ondragstart="handleChurnDragStart(event,'${c.name}','${c.email}','${c.orders}','${(c.churnProb*100).toFixed(1)}')"
+                return `<tr draggable="true" ondragstart="handleChurnDragStart(event,'${c.name}','${c.email}','${c.orders}','${(c.churnProb * 100).toFixed(1)}')"
     style="border-bottom:1px solid var(--churn-hr);cursor:grab;transition:background 0.2s;"
     onmouseover="this.style.background='rgba(99,102,241,0.05)'" onmouseout="this.style.background=''">            <td style="padding:8px 10px;font-weight:600;color:var(--card-text-h2);">👤 ${c.name}</td>
             <td style="padding:8px 10px;color:#64748b;font-size:11px;">${c.email}</td>
@@ -6333,43 +6406,43 @@ return `<tr draggable="true" ondragstart="handleChurnDragStart(event,'${c.name}'
         </tr>`;
             }).join('');
         }
-function toggleSpecialOfferPanel() {
-    const panel = document.getElementById('specialOfferPanel');
-    const btn = document.getElementById('specialOfferBtn');
-    const isVisible = panel.style.display === 'flex';
-    panel.style.display = isVisible ? 'none' : 'flex';
-    panel.style.flexDirection = 'column';
-    btn.style.background = isVisible ? '#f59e0b' : '#d97706';
-    btn.textContent = isVisible ? '🎁 Special Offer' : '✕ Close Panel';
-}
+        function toggleSpecialOfferPanel() {
+            const panel = document.getElementById('specialOfferPanel');
+            const btn = document.getElementById('specialOfferBtn');
+            const isVisible = panel.style.display === 'flex';
+            panel.style.display = isVisible ? 'none' : 'flex';
+            panel.style.flexDirection = 'column';
+            btn.style.background = isVisible ? '#f59e0b' : '#d97706';
+            btn.textContent = isVisible ? '🎁 Special Offer' : '✕ Close Panel';
+        }
 
-function handleChurnDragStart(event, name, email, orders, churnProb) {
-    event.dataTransfer.setData('text/plain', JSON.stringify({ name, email, orders, churnProb }));
-    event.target.style.opacity = '0.5';
-    setTimeout(() => event.target.style.opacity = '1', 500);
-}
+        function handleChurnDragStart(event, name, email, orders, churnProb) {
+            event.dataTransfer.setData('text/plain', JSON.stringify({ name, email, orders, churnProb }));
+            event.target.style.opacity = '0.5';
+            setTimeout(() => event.target.style.opacity = '1', 500);
+        }
 
-function handleOfferDrop(event) {
-    event.preventDefault();
-    const zone = document.getElementById('offerDropZone');
-    zone.style.background = '';
-    const hint = document.getElementById('offerDropHint');
+        function handleOfferDrop(event) {
+            event.preventDefault();
+            const zone = document.getElementById('offerDropZone');
+            zone.style.background = '';
+            const hint = document.getElementById('offerDropHint');
 
-    let data;
-    try { data = JSON.parse(event.dataTransfer.getData('text/plain')); }
-    catch(e) { return; }
+            let data;
+            try { data = JSON.parse(event.dataTransfer.getData('text/plain')); }
+            catch (e) { return; }
 
-    // Prevent duplicates
-    if (document.getElementById('offer-card-' + data.email.replace(/[@.]/g,'_'))) return;
+            // Prevent duplicates
+            if (document.getElementById('offer-card-' + data.email.replace(/[@.]/g, '_'))) return;
 
-    if (hint) hint.style.display = 'none';
+            if (hint) hint.style.display = 'none';
 
-    const card = document.createElement('div');
-    card.id = 'offer-card-' + data.email.replace(/[@.]/g,'_');
-    card.style.cssText = `background:white;border-radius:10px;padding:10px 12px;
+            const card = document.createElement('div');
+            card.id = 'offer-card-' + data.email.replace(/[@.]/g, '_');
+            card.style.cssText = `background:white;border-radius:10px;padding:10px 12px;
         box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;flex-direction:column;gap:4px;
         border-left:4px solid #f59e0b;animation:fadeSlideIn 0.3s ease;position:relative;`;
-    card.innerHTML = `
+            card.innerHTML = `
         <button onclick="this.parentElement.remove();checkDropZoneEmpty()"
             style="position:absolute;top:6px;right:6px;background:none;border:none;
             cursor:pointer;font-size:12px;color:#94a3b8;padding:0;line-height:1;">✕</button>
@@ -6383,7 +6456,7 @@ function handleOfferDrop(event) {
                 Churn: ${data.churnProb}%
             </span>
         </div>
-        <select id="offer-type-${data.email.replace(/[@.]/g,'_')}"
+        <select id="offer-type-${data.email.replace(/[@.]/g, '_')}"
             style="margin-top:6px;font-size:10px;padding:4px 6px;border:1.5px solid #f59e0b;
             border-radius:6px;background:var(--input-bg);color:var(--input-color);cursor:pointer;">
             <option>🏷️ 10% Discount</option>
@@ -6392,52 +6465,52 @@ function handleOfferDrop(event) {
             <option>🎁 Buy 1 Get 1</option>
             <option>⭐ Loyalty Points x2</option>
         </select>`;
-    zone.appendChild(card);
-}
+            zone.appendChild(card);
+        }
 
-function checkDropZoneEmpty() {
-    const zone = document.getElementById('offerDropZone');
-    const cards = zone.querySelectorAll('div[id^="offer-card-"]');
-    if (!cards.length) {
-        document.getElementById('offerDropHint').style.display = 'block';
-    }
-}
+        function checkDropZoneEmpty() {
+            const zone = document.getElementById('offerDropZone');
+            const cards = zone.querySelectorAll('div[id^="offer-card-"]');
+            if (!cards.length) {
+                document.getElementById('offerDropHint').style.display = 'block';
+            }
+        }
 
-function sendAllSpecialOffers() {
-    const zone = document.getElementById('offerDropZone');
-    const cards = zone.querySelectorAll('div[id^="offer-card-"]');
-    if (!cards.length) { alert('⚠️ No customers in the offer panel yet.\nDrag customers from the table first.'); return; }
-    const banner = document.getElementById('offerSentBanner');
-    banner.style.display = 'block';
-    banner.textContent = `✅ ${cards.length} special offer(s) sent successfully!`;
-    setTimeout(() => banner.style.display = 'none', 3000);
-}
+        function sendAllSpecialOffers() {
+            const zone = document.getElementById('offerDropZone');
+            const cards = zone.querySelectorAll('div[id^="offer-card-"]');
+            if (!cards.length) { alert('⚠️ No customers in the offer panel yet.\nDrag customers from the table first.'); return; }
+            const banner = document.getElementById('offerSentBanner');
+            banner.style.display = 'block';
+            banner.textContent = `✅ ${cards.length} special offer(s) sent successfully!`;
+            setTimeout(() => banner.style.display = 'none', 3000);
+        }
 
-function clearOfferPanel() {
-    const zone = document.getElementById('offerDropZone');
-    zone.querySelectorAll('div[id^="offer-card-"]').forEach(c => c.remove());
-    document.getElementById('offerDropHint').style.display = 'block';
-    document.getElementById('offerSentBanner').style.display = 'none';
-}
+        function clearOfferPanel() {
+            const zone = document.getElementById('offerDropZone');
+            zone.querySelectorAll('div[id^="offer-card-"]').forEach(c => c.remove());
+            document.getElementById('offerDropHint').style.display = 'block';
+            document.getElementById('offerSentBanner').style.display = 'none';
+        }
 
-function openSpecialOfferPopup() {
-    const popup = document.getElementById('specialOfferPopup');
-    popup.style.display = 'flex';
-    renderOfferCustomerList('');
-}
+        function openSpecialOfferPopup() {
+            const popup = document.getElementById('specialOfferPopup');
+            popup.style.display = 'flex';
+            renderOfferCustomerList('');
+        }
 
-function closeSpecialOfferPopup() {
-    document.getElementById('specialOfferPopup').style.display = 'none';
-}
+        function closeSpecialOfferPopup() {
+            document.getElementById('specialOfferPopup').style.display = 'none';
+        }
 
-function renderOfferCustomerList(filter) {
-    const all = [...churnSegmented.champions, ...churnSegmented.moderate, ...churnSegmented.dormant];
-    const filtered = filter ? all.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()) || c.email.toLowerCase().includes(filter.toLowerCase())) : all;
-    const segColor = { 0:'#22c55e', 1:'#f59e0b', 2:'#ef4444' };
-    const segLabel = { 0:'Champion', 1:'At Risk', 2:'Dormant' };
-    document.getElementById('offerCustomerList').innerHTML = filtered.map(c => `
+        function renderOfferCustomerList(filter) {
+            const all = [...churnSegmented.champions, ...churnSegmented.moderate, ...churnSegmented.dormant];
+            const filtered = filter ? all.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()) || c.email.toLowerCase().includes(filter.toLowerCase())) : all;
+            const segColor = { 0: '#22c55e', 1: '#f59e0b', 2: '#ef4444' };
+            const segLabel = { 0: 'Champion', 1: 'At Risk', 2: 'Dormant' };
+            document.getElementById('offerCustomerList').innerHTML = filtered.map(c => `
         <div draggable="true"
-            ondragstart="offerDragStart(event,'${c.name}','${c.email}','${c.orders}','${(c.churnProb*100).toFixed(1)}','${c.cluster}')"
+            ondragstart="offerDragStart(event,'${c.name}','${c.email}','${c.orders}','${(c.churnProb * 100).toFixed(1)}','${c.cluster}')"
             ondragend="this.style.opacity='1'"
             style="background:var(--card-bg);border-radius:10px;padding:9px 12px;
             border-left:4px solid ${segColor[c.cluster]};cursor:grab;
@@ -6452,72 +6525,86 @@ function renderOfferCustomerList(filter) {
                 <span style="background:#f1f5f9;color:#475569;
                     padding:2px 7px;border-radius:20px;font-size:10px;">${c.orders} orders</span>
                 <span style="background:#fee2e2;color:#b91c1c;
-                    padding:2px 7px;border-radius:20px;font-size:10px;">Churn ${(c.churnProb*100).toFixed(1)}%</span>
+                    padding:2px 7px;border-radius:20px;font-size:10px;">Churn ${(c.churnProb * 100).toFixed(1)}%</span>
             </div>
         </div>`).join('');
-}
+        }
 
-function filterOfferCustomers(val) {
-    renderOfferCustomerList(val);
-}
+        function filterOfferCustomers(val) {
+            renderOfferCustomerList(val);
+        }
 
-function offerDragStart(event, name, email, orders, churnProb, cluster) {
-    event.dataTransfer.setData('text/plain', JSON.stringify({ name, email, orders, churnProb, cluster }));
-    event.target.style.opacity = '0.4';
-}
+        function offerDragStart(event, name, email, orders, churnProb, cluster) {
+            event.dataTransfer.setData('text/plain', JSON.stringify({ name, email, orders, churnProb, cluster }));
+            event.target.style.opacity = '0.4';
+        }
 
-function dropToOfferBucket(event, bucketId) {
-    event.preventDefault();
-    const bucket = document.getElementById('bucket-' + bucketId);
-    bucket.closest('.offer-bucket').classList.remove('drag-over');
+        function dropToOfferBucket(event, bucketId) {
+            event.preventDefault();
+            const bucket = document.getElementById('bucket-' + bucketId);
+            bucket.closest('.offer-bucket').classList.remove('drag-over');
 
-    let data;
-    try { data = JSON.parse(event.dataTransfer.getData('text/plain')); } catch(e) { return; }
+            let data;
+            try { data = JSON.parse(event.dataTransfer.getData('text/plain')); } catch (e) { return; }
 
-    const cardId = 'offercard-' + bucketId + '-' + data.email.replace(/[@.]/g,'_');
-    if (document.getElementById(cardId)) return; // no duplicates
+            const cardId = 'offercard-' + bucketId + '-' + data.email.replace(/[@.]/g, '_');
+            if (document.getElementById(cardId)) return; // no duplicates
 
-    // Hide hint
-    const hint = bucket.querySelector('.bucket-hint');
-    if (hint) hint.style.display = 'none';
+            // Hide hint
+            const hint = bucket.querySelector('.bucket-hint');
+            if (hint) hint.style.display = 'none';
 
-    const segColor = { 0:'#22c55e', 1:'#f59e0b', 2:'#ef4444' };
-    const card = document.createElement('div');
-    card.id = cardId;
-    card.style.cssText = `background:white;border-radius:8px;padding:7px 10px;
+            const segColor = { 0: '#22c55e', 1: '#f59e0b', 2: '#ef4444' };
+            const card = document.createElement('div');
+            card.id = cardId;
+            card.style.cssText = `background:white;border-radius:8px;padding:7px 10px;
         font-size:11px;display:flex;justify-content:space-between;align-items:center;
         box-shadow:0 1px 4px rgba(0,0,0,0.08);animation:fadeSlideIn 0.25s ease;
-        border-left:3px solid ${segColor[data.cluster]||'#64748b'};`;
-    card.innerHTML = `
+        border-left:3px solid ${segColor[data.cluster] || '#64748b'};`;
+            card.innerHTML = `
         <div>
             <div style="font-weight:700;color:#1e293b;">👤 ${data.name}</div>
             <div style="color:#64748b;font-size:10px;">${data.email}</div>
         </div>
         <button onclick="this.parentElement.remove();checkBucketEmpty('${bucketId}')"
             style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:13px;padding:0;">✕</button>`;
-    bucket.appendChild(card);
-}
+            bucket.appendChild(card);
+        }
 
-function checkBucketEmpty(bucketId) {
-    const bucket = document.getElementById('bucket-' + bucketId);
-    if (!bucket.querySelector('div[id^="offercard-"]')) {
-        const hint = bucket.querySelector('.bucket-hint');
-        if (hint) hint.style.display = 'block';
-    }
-}
+        function checkBucketEmpty(bucketId) {
+            const bucket = document.getElementById('bucket-' + bucketId);
+            if (!bucket.querySelector('div[id^="offercard-"]')) {
+                const hint = bucket.querySelector('.bucket-hint');
+                if (hint) hint.style.display = 'block';
+            }
+        }
 
-function sendSpecialOffers() {
-    const buckets = ['discount10','discount20','freeship','bogo'];
-    let total = 0;
-    buckets.forEach(b => {
-        total += document.getElementById('bucket-'+b).querySelectorAll('div[id^="offercard-"]').length;
-    });
-    if (!total) { alert('⚠️ No customers added to any offer bucket yet!'); return; }
-    const banner = document.getElementById('offerSentBanner');
-    banner.style.display = 'block';
-    banner.textContent = `✅ ${total} special offer(s) sent successfully!`;
-    setTimeout(() => banner.style.display = 'none', 3000);
-}
+
+        function sendBucketOffer(bucketId, offerLabel) {
+            const bucket = document.getElementById('bucket-' + bucketId);
+            const msg = document.getElementById('msg-' + bucketId).value.trim();
+            const customers = bucket.querySelectorAll('div[id^="offercard-"]');
+            if (!customers.length) { alert('⚠️ No customers dropped into ' + offerLabel + ' bucket yet!'); return; }
+            if (!msg) { alert('⚠️ Please type a message before sending!'); return; }
+            const sentEl = document.getElementById('sent-' + bucketId);
+            sentEl.textContent = `✅ ${offerLabel} sent to ${customers.length} customer(s)!`;
+            sentEl.style.display = 'block';
+            setTimeout(() => sentEl.style.display = 'none', 3000);
+        }
+
+
+        function sendSpecialOffers() {
+            const buckets = ['discount10', 'discount20', 'freeship', 'bogo'];
+            let total = 0;
+            buckets.forEach(b => {
+                total += document.getElementById('bucket-' + b).querySelectorAll('div[id^="offercard-"]').length;
+            });
+            if (!total) { alert('⚠️ No customers added to any offer bucket yet!'); return; }
+            const banner = document.getElementById('offerSentBanner');
+            banner.style.display = 'block';
+            banner.textContent = `✅ ${total} special offer(s) sent successfully!`;
+            setTimeout(() => banner.style.display = 'none', 3000);
+        }
 
 
         function filterChurnTable(query) {
