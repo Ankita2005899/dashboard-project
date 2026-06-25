@@ -4877,7 +4877,6 @@ def monthly_analysis():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Sabhi product names fetch karo
         cursor.execute("""
             SELECT id, name, category FROM card
             UNION ALL
@@ -4888,7 +4887,6 @@ def monthly_analysis():
         all_products = cursor.fetchall()
         product_map = {(p["id"], p["category"]): p["name"] for p in all_products}
 
-        # Sabhi activity tables
         cursor.execute("""
             SELECT table_name FROM information_schema.tables
             WHERE table_schema = DATABASE()
@@ -4897,8 +4895,7 @@ def monthly_analysis():
         all_tables = [list(row.values())[0] for row in cursor.fetchall()]
 
         aggregated = defaultdict(lambda: {
-            "search": 0, "cart": 0, "purchased": 0,
-            "category": None
+            "search": 0, "cart": 0, "purchased": 0, "category": None
         })
 
         for tbl_name in all_tables:
@@ -4917,36 +4914,21 @@ def monthly_analysis():
                     actual_name = product_map.get((row["product_id"], row["category"]))
                     if not actual_name:
                         continue
-
                     unique_key = f"{actual_name} ({row['category']}) #{row['product_id']}"
                     aggregated[unique_key]["search"] += int(row["search_count"])
                     aggregated[unique_key]["cart"] += int(row["cart_count"])
                     aggregated[unique_key]["purchased"] += int(row["purchase_count"])
                     if aggregated[unique_key]["category"] is None:
                         aggregated[unique_key]["category"] = row["category"]
-
-            except Exception as e:
+            except:
                 continue
 
-        results = []
-        for pname, bucket in aggregated.items():
-            if bucket["search"] > 0 or bucket["cart"] > 0 or bucket["purchased"] > 0:
-                results.append({
-                    "product_name": pname,
-                    "category": bucket["category"],
-                    "search": bucket["search"],
-                    "cart": bucket["cart"],
-                    "purchased": bucket["purchased"]
-                })
-
-        results.sort(key=lambda x: x["search"] + x["cart"] + x["purchased"], reverse=True)
-        return jsonify(results)
-
-    except Exception as e:
-        return jsonify([]), 500
-    finally:
-        if cursor: cursor.close()
-        if conn: conn.close()
+        # ✅ ML 1: Min-Max Normalization
+        all_search = [v["search"] for v in aggregated.values()]
+        all_cart = [v["cart"] for v in aggregated.values()]
+        all_purchase = [v["purchased"] for v in aggregated.values()]
+        max_s = max(all_search) if all_search else 1
+        max_c = max(all_cart) if all_cart
 
 
 # ============================================================
