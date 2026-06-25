@@ -5635,6 +5635,10 @@
                     padding:9px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;">
                         ⚡ Run ML Analysis
                     </button>
+                    <button onclick="toggleSpecialOfferPanel()" id="specialOfferBtn" style="background:#f59e0b;color:white;border:none;
+                    padding:9px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;">
+                        🎁 Special Offer
+                    </button>
                     <button onclick="closeChurnModal()" class="send-btn">✕ Close</button>
                 </div>
             </div>
@@ -5647,8 +5651,46 @@
                 Logistic Regression AUC: <span id="lrAUC"></span>
             </div>
 
+            <!-- MAIN WRAPPER: Offer Panel + Two Column Split -->
+            <div style="display:flex;gap:16px;align-items:flex-start;">
+
+            <!-- ===== SPECIAL OFFER DROP PANEL ===== -->
+            <div id="specialOfferPanel" style="display:none;flex:0 0 260px;background:linear-gradient(160deg,#fef3c7,#fde68a);
+                border:2px dashed #f59e0b;border-radius:16px;padding:16px;min-height:500px;
+                flex-direction:column;gap:10px;transition:all 0.3s;">
+                <div style="text-align:center;margin-bottom:8px;">
+                    <div style="font-size:18px;">🎁</div>
+                    <div style="font-size:13px;font-weight:800;color:#b45309;">Special Offer Panel</div>
+                    <div style="font-size:10px;color:#92400e;margin-top:4px;">Drag & drop customers here<br>to send them a special offer</div>
+                </div>
+                <div id="offerDropZone"
+                    ondragover="event.preventDefault();this.style.background='rgba(245,158,11,0.2)'"
+                    ondragleave="this.style.background=''"
+                    ondrop="handleOfferDrop(event)"
+                    style="flex:1;min-height:300px;border:2px dashed #f59e0b;border-radius:12px;
+                    display:flex;flex-direction:column;gap:8px;padding:10px;
+                    background:rgba(255,255,255,0.4);transition:background 0.2s;">
+                    <div id="offerDropHint" style="text-align:center;color:#b45309;font-size:11px;
+                        margin:auto;opacity:0.7;">⬇️ Drop customers here</div>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:8px;">
+                    <button onclick="sendAllSpecialOffers()" style="flex:1;background:#f59e0b;color:white;
+                        border:none;padding:8px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
+                        📧 Send All Offers
+                    </button>
+                    <button onclick="clearOfferPanel()" style="background:#e5e7eb;color:#374151;
+                        border:none;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
+                        🗑️
+                    </button>
+                </div>
+                <div id="offerSentBanner" style="display:none;background:#22c55e;color:white;
+                    padding:8px;border-radius:8px;font-size:11px;font-weight:700;text-align:center;">
+                    ✅ Offers sent successfully!
+                </div>
+            </div>
+
             <!-- TWO-COLUMN SPLIT -->
-            <div style="display:flex;gap:20px;align-items:flex-start;">
+            <div style="flex:1;min-width:0;display:flex;gap:20px;align-items:flex-start;">
 
                 <!-- ===== LEFT: 3 Segment Cards ===== -->
                 <div style="flex:0 0 45%;display:flex;flex-direction:column;gap:16px;">
@@ -5926,13 +5968,21 @@
                         </div>
                     </div>
 
-                </div>
-            </div>
+       </div>
+            </div><!-- end two-column split -->
+        </div><!-- end main wrapper -->
         </div>
     </div>
+</div>
 
-    <style>
-        .churn-mini-customer {
+<style>
+
+
+@keyframes fadeSlideIn {
+    from { opacity:0; transform:translateY(-6px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+.churn-mini-customer {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -6142,8 +6192,9 @@
             tbody.innerHTML = churnSegmented[segment].map(c => {
                 const churnPct = (c.churnProb * 100).toFixed(1);
                 const clusterLabel = ['Champion', 'At Risk', 'Dormant'][c.cluster] || '—';
-                return `<tr style="border-bottom:1px solid var(--churn-hr);">
-            <td style="padding:8px 10px;font-weight:600;color:var(--card-text-h2);">👤 ${c.name}</td>
+return `<tr draggable="true" ondragstart="handleChurnDragStart(event,'${c.name}','${c.email}','${c.orders}','${(c.churnProb*100).toFixed(1)}')"
+    style="border-bottom:1px solid var(--churn-hr);cursor:grab;transition:background 0.2s;"
+    onmouseover="this.style.background='rgba(99,102,241,0.05)'" onmouseout="this.style.background=''">            <td style="padding:8px 10px;font-weight:600;color:var(--card-text-h2);">👤 ${c.name}</td>
             <td style="padding:8px 10px;color:#64748b;font-size:11px;">${c.email}</td>
             <td style="padding:8px 10px;text-align:center;font-weight:700;color:${info.color};">${c.orders}</td>
             <td style="padding:8px 10px;text-align:center;font-weight:600;">₹${c.spend}</td>
@@ -6170,7 +6221,92 @@
         </tr>`;
             }).join('');
         }
+function toggleSpecialOfferPanel() {
+    const panel = document.getElementById('specialOfferPanel');
+    const btn = document.getElementById('specialOfferBtn');
+    const isVisible = panel.style.display === 'flex';
+    panel.style.display = isVisible ? 'none' : 'flex';
+    panel.style.flexDirection = 'column';
+    btn.style.background = isVisible ? '#f59e0b' : '#d97706';
+    btn.textContent = isVisible ? '🎁 Special Offer' : '✕ Close Panel';
+}
 
+function handleChurnDragStart(event, name, email, orders, churnProb) {
+    event.dataTransfer.setData('text/plain', JSON.stringify({ name, email, orders, churnProb }));
+    event.target.style.opacity = '0.5';
+    setTimeout(() => event.target.style.opacity = '1', 500);
+}
+
+function handleOfferDrop(event) {
+    event.preventDefault();
+    const zone = document.getElementById('offerDropZone');
+    zone.style.background = '';
+    const hint = document.getElementById('offerDropHint');
+
+    let data;
+    try { data = JSON.parse(event.dataTransfer.getData('text/plain')); }
+    catch(e) { return; }
+
+    // Prevent duplicates
+    if (document.getElementById('offer-card-' + data.email.replace(/[@.]/g,'_'))) return;
+
+    if (hint) hint.style.display = 'none';
+
+    const card = document.createElement('div');
+    card.id = 'offer-card-' + data.email.replace(/[@.]/g,'_');
+    card.style.cssText = `background:white;border-radius:10px;padding:10px 12px;
+        box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;flex-direction:column;gap:4px;
+        border-left:4px solid #f59e0b;animation:fadeSlideIn 0.3s ease;position:relative;`;
+    card.innerHTML = `
+        <button onclick="this.parentElement.remove();checkDropZoneEmpty()"
+            style="position:absolute;top:6px;right:6px;background:none;border:none;
+            cursor:pointer;font-size:12px;color:#94a3b8;padding:0;line-height:1;">✕</button>
+        <div style="font-size:12px;font-weight:700;color:#1e293b;">👤 ${data.name}</div>
+        <div style="font-size:10px;color:#64748b;">${data.email}</div>
+        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+            <span style="background:#fef3c7;color:#b45309;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;">
+                ${data.orders} orders
+            </span>
+            <span style="background:#fee2e2;color:#b91c1c;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;">
+                Churn: ${data.churnProb}%
+            </span>
+        </div>
+        <select id="offer-type-${data.email.replace(/[@.]/g,'_')}"
+            style="margin-top:6px;font-size:10px;padding:4px 6px;border:1.5px solid #f59e0b;
+            border-radius:6px;background:var(--input-bg);color:var(--input-color);cursor:pointer;">
+            <option>🏷️ 10% Discount</option>
+            <option>🏷️ 20% Discount</option>
+            <option>🚚 Free Shipping</option>
+            <option>🎁 Buy 1 Get 1</option>
+            <option>⭐ Loyalty Points x2</option>
+        </select>`;
+    zone.appendChild(card);
+}
+
+function checkDropZoneEmpty() {
+    const zone = document.getElementById('offerDropZone');
+    const cards = zone.querySelectorAll('div[id^="offer-card-"]');
+    if (!cards.length) {
+        document.getElementById('offerDropHint').style.display = 'block';
+    }
+}
+
+function sendAllSpecialOffers() {
+    const zone = document.getElementById('offerDropZone');
+    const cards = zone.querySelectorAll('div[id^="offer-card-"]');
+    if (!cards.length) { alert('⚠️ No customers in the offer panel yet.\nDrag customers from the table first.'); return; }
+    const banner = document.getElementById('offerSentBanner');
+    banner.style.display = 'block';
+    banner.textContent = `✅ ${cards.length} special offer(s) sent successfully!`;
+    setTimeout(() => banner.style.display = 'none', 3000);
+}
+
+function clearOfferPanel() {
+    const zone = document.getElementById('offerDropZone');
+    zone.querySelectorAll('div[id^="offer-card-"]').forEach(c => c.remove());
+    document.getElementById('offerDropHint').style.display = 'block';
+    document.getElementById('offerSentBanner').style.display = 'none';
+}
         function filterChurnTable(query) {
             document.querySelectorAll('#churnDetailBody tr').forEach(row => {
                 row.style.display = row.textContent.toLowerCase().includes(query.toLowerCase()) ? '' : 'none';
