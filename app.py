@@ -4862,6 +4862,93 @@ def product_catalog_stats():
         if cursor: cursor.close()
         if conn: conn.close()
 
+
+#--------------owner_section madhe monthly analysis sathi jyat month select karun it get access that month detail ----------------
+
+
+@app.route("/api/owner/monthly-analysis", methods=["GET"])
+def monthly_analysis():
+    month = request.args.get("month", "June")
+    year = request.args.get("year", "2026")
+
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Sabhi product names fetch karo
+        cursor.execute("""
+            SELECT id, name, category FROM card
+            UNION ALL
+            SELECT id, name, category FROM study_material
+            UNION ALL
+            SELECT id, name, category FROM food_items
+        """)
+        all_products = cursor.fetchall()
+        product_map = {(p["id"], p["category"]): p["name"] for p in all_products}
+
+        # Sabhi activity tables
+        cursor.execute("""
+            SELECT table_name FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            AND table_name LIKE '%_product_activity'
+        """)
+        all_tables = [list(row.values())[0] for row in cursor.fetchall()]
+
+        aggregated = defaultdict(lambda: {
+            "search": 0, "cart": 0, "purchased": 0,
+            "category": None
+        })
+
+        for tbl_name in all_tables:
+            try:
+                cursor.execute(f"""
+                    SELECT product_id, category,
+                           COALESCE(today_search_count, 0) AS search_count,
+                           COALESCE(today_add_to_cart_count, 0) AS cart_count,
+                           COALESCE(today_purchase_count, 0) AS purchase_count
+                    FROM `{tbl_name}`
+                    WHERE month = %s
+                """, (month,))
+                rows = cursor.fetchall()
+
+                for row in rows:
+                    actual_name = product_map.get((row["product_id"], row["category"]))
+                    if not actual_name:
+                        continue
+
+                    unique_key = f"{actual_name} ({row['category']}) #{row['product_id']}"
+                    aggregated[unique_key]["search"] += int(row["search_count"])
+                    aggregated[unique_key]["cart"] += int(row["cart_count"])
+                    aggregated[unique_key]["purchased"] += int(row["purchase_count"])
+                    if aggregated[unique_key]["category"] is None:
+                        aggregated[unique_key]["category"] = row["category"]
+
+            except Exception as e:
+                continue
+
+        results = []
+        for pname, bucket in aggregated.items():
+            if bucket["search"] > 0 or bucket["cart"] > 0 or bucket["purchased"] > 0:
+                results.append({
+                    "product_name": pname,
+                    "category": bucket["category"],
+                    "search": bucket["search"],
+                    "cart": bucket["cart"],
+                    "purchased": bucket["purchased"]
+                })
+
+        results.sort(key=lambda x: x["search"] + x["cart"] + x["purchased"], reverse=True)
+        return jsonify(results)
+
+    except Exception as e:
+        return jsonify([]), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================

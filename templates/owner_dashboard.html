@@ -1509,6 +1509,10 @@
                 Product Purchased Data
             </button>
 
+            <button onclick="openMonthlyAnalysisModal()">
+                📅 Monthly Product Analysis
+            </button>
+
             <button onclick="openRewardModal()">
                 Product Reward Data
             </button>
@@ -5264,7 +5268,74 @@ const stats = getProductStats(p.id, tabCategoryMap[catalogCurrentTab]);
         }
     </script>
 
-    <script>
+    <!-- ===================== MONTHLY ANALYSIS MODAL ===================== -->
+<div id="monthlyAnalysisModal" class="modal-overlay" style="display:none;">
+    <div class="buyers-modal" style="max-width:1100px;width:95%;">
+        <div class="buyers-header" style="margin-bottom:20px;">
+            <div>
+                <h3 style="margin:0;font-size:20px;color:#8b5cf6;">📅 Monthly Product Analysis</h3>
+                <small style="color:#64748b;">Search · Add to Cart · Purchase trends by month</small>
+            </div>
+            <button onclick="closeMonthlyAnalysisModal()" class="send-btn">Close</button>
+        </div>
+
+        <!-- Month Selector -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+            <select id="monthlyYearSelect" onchange="loadMonthlyAnalysis()"
+                style="padding:8px 14px;border:2px solid #e2e8f0;border-radius:8px;
+                font-size:13px;font-weight:600;background:var(--input-bg);color:var(--input-color);cursor:pointer;">
+            </select>
+            <select id="monthlyMonthSelect" onchange="loadMonthlyAnalysis()"
+                style="padding:8px 14px;border:2px solid #e2e8f0;border-radius:8px;
+                font-size:13px;font-weight:600;background:var(--input-bg);color:var(--input-color);cursor:pointer;">
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June" selected>June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+            </select>
+            <button onclick="loadMonthlyAnalysis()" style="background:#8b5cf6;color:white;border:none;
+                padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;">
+                🔄 Refresh
+            </button>
+        </div>
+
+        <!-- Chart -->
+        <div style="background:var(--user-chart-card-bg);border-radius:14px;padding:20px;
+            border:1px solid var(--user-item-border);margin-bottom:20px;">
+            <h4 style="margin:0 0 14px;font-size:16px;color:var(--graph-h3);">
+                📊 Search vs Add to Cart vs Purchase
+            </h4>
+            <div style="position:relative;height:350px;">
+                <canvas id="monthlyAnalysisChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div id="monthlySummaryBar" style="display:none;padding:14px 20px;
+            background:linear-gradient(135deg,#f5f3ff,#eff6ff);border-radius:12px;
+            display:flex;gap:30px;flex-wrap:wrap;">
+            <span style="font-size:13px;font-weight:700;color:#1e293b;">
+                🔍 Total Searches: <span id="monthlyTotalSearch" style="color:#3b82f6;">0</span>
+            </span>
+            <span style="font-size:13px;font-weight:700;color:#1e293b;">
+                🛒 Total Added: <span id="monthlyTotalCart" style="color:#10b981;">0</span>
+            </span>
+            <span style="font-size:13px;font-weight:700;color:#1e293b;">
+                🛍️ Total Purchased: <span id="monthlyTotalPurchase" style="color:#f59e0b;">0</span>
+            </span>
+        </div>
+    </div>
+</div>
+
+<script>
         let purchasedChartInstance = null;
         let purchasedAllData = [];
         let purchasedCurrentType = 'bar';
@@ -5406,7 +5477,121 @@ const stats = getProductStats(p.id, tabCategoryMap[catalogCurrentTab]);
         }
     </script>
 
-    <footer class="footer">
+<script>
+    let monthlyChartInstance = null;
+
+    function openMonthlyAnalysisModal() {
+        const modal = document.getElementById("monthlyAnalysisModal");
+        modal.style.display = "flex";
+
+        // Year dropdown populate karo
+        const yearSelect = document.getElementById("monthlyYearSelect");
+        if (yearSelect.options.length === 0) {
+            const currentYear = new Date().getFullYear();
+            for (let y = currentYear; y >= currentYear - 3; y--) {
+                const opt = document.createElement("option");
+                opt.value = y;
+                opt.textContent = y;
+                yearSelect.appendChild(opt);
+            }
+        }
+        loadMonthlyAnalysis();
+    }
+
+    function closeMonthlyAnalysisModal() {
+        document.getElementById("monthlyAnalysisModal").style.display = "none";
+    }
+
+    async function loadMonthlyAnalysis() {
+        const month = document.getElementById("monthlyMonthSelect").value;
+        const year = document.getElementById("monthlyYearSelect").value;
+
+        try {
+            const res = await fetch(`/api/owner/monthly-analysis?month=${month}&year=${year}`);
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            const data = await res.json();
+
+            const labels = data.map(d => d.product_name);
+            const searchData = data.map(d => d.search);
+            const cartData = data.map(d => d.cart);
+            const purchaseData = data.map(d => d.purchased);
+
+            if (monthlyChartInstance) {
+                monthlyChartInstance.destroy();
+                monthlyChartInstance = null;
+            }
+
+            const ctx = document.getElementById("monthlyAnalysisChart").getContext("2d");
+            monthlyChartInstance = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: "🔍 Searched",
+                            data: searchData,
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#3b82f620",
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: "🛒 Add to Cart",
+                            data: cartData,
+                            borderColor: "#10b981",
+                            backgroundColor: "#10b98120",
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: "🛍️ Purchased",
+                            data: purchaseData,
+                            borderColor: "#f59e0b",
+                            backgroundColor: "#f59e0b20",
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: "top" }
+                    },
+                    scales: {
+                        x: { ticks: { font: { size: 11 }, maxRotation: 35 } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, precision: 0 }
+                        }
+                    }
+                }
+            });
+
+            // Summary update
+            const totalSearch = searchData.reduce((a, b) => a + b, 0);
+            const totalCart = cartData.reduce((a, b) => a + b, 0);
+            const totalPurchase = purchaseData.reduce((a, b) => a + b, 0);
+
+            document.getElementById("monthlyTotalSearch").textContent = totalSearch;
+            document.getElementById("monthlyTotalCart").textContent = totalCart;
+            document.getElementById("monthlyTotalPurchase").textContent = totalPurchase;
+            document.getElementById("monthlySummaryBar").style.display = "flex";
+
+        } catch (err) {
+            console.error("Monthly analysis error:", err);
+        }
+    }
+</script>
+
+<footer class="footer">
         © 2026 Product Dashboard | All Rights Reserved
     </footer>
 </body>
