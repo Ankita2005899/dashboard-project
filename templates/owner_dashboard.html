@@ -5635,7 +5635,7 @@
                     padding:9px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;">
                         ⚡ Run ML Analysis
                     </button>
-                    <button onclick="toggleSpecialOfferPanel()" id="specialOfferBtn" style="background:#f59e0b;color:white;border:none;
+                <button onclick="openSpecialOfferPopup()" style="background:#f59e0b;color:white;border:none;
                     padding:9px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;">
                         🎁 Special Offer
                     </button>
@@ -5974,9 +5974,121 @@
         </div>
     </div>
 </div>
+<!-- ===== SPECIAL OFFER POPUP (opens in front of churn modal) ===== -->
+<div id="specialOfferPopup" style="display:none;position:fixed;inset:0;z-index:10500;
+    background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);justify-content:center;align-items:center;">
+    <div style="background:var(--modal-bg);width:95%;max-width:900px;max-height:90vh;
+        border-radius:20px;padding:24px;box-shadow:0 24px 64px rgba(0,0,0,0.3);
+        display:flex;flex-direction:column;gap:16px;overflow:hidden;">
 
+        <!-- Popup Header -->
+        <div style="display:flex;justify-content:space-between;align-items:center;
+            padding-bottom:14px;border-bottom:2px solid var(--churn-hr);">
+            <div>
+                <h3 style="margin:0;font-size:18px;color:#f59e0b;">🎁 Special Offer Manager</h3>
+                <small style="color:#64748b;font-size:12px;">Drag customers from the left list → Drop onto offer cards on the right</small>
+            </div>
+            <button onclick="closeSpecialOfferPopup()" class="send-btn">✕ Close</button>
+        </div>
+
+        <!-- Two column layout inside popup -->
+        <div style="display:flex;gap:16px;flex:1;min-height:0;overflow:hidden;">
+
+            <!-- LEFT: Customer list to drag from -->
+            <div style="flex:0 0 320px;display:flex;flex-direction:column;gap:10px;">
+                <div style="font-size:12px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">
+                    👥 All Segmented Customers
+                </div>
+                <input type="text" placeholder="🔍 Filter customers..." oninput="filterOfferCustomers(this.value)"
+                    style="padding:7px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;
+                    background:var(--input-bg);color:var(--input-color);">
+                <div id="offerCustomerList" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:7px;
+                    max-height:450px;padding-right:4px;">
+                    <!-- filled by JS -->
+                </div>
+            </div>
+
+            <!-- RIGHT: Drop zones per offer type -->
+            <div style="flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto;">
+                <div style="font-size:12px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">
+                    🎯 Offer Buckets — Drop customers into an offer
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+
+                    <!-- Offer Bucket 1 -->
+                    <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
+                        ondragleave="this.classList.remove('drag-over')"
+                        ondrop="dropToOfferBucket(event,'discount10')"
+                        data-offer="🏷️ 10% Discount"
+                        style="border:2px dashed #6366f1;border-radius:14px;padding:12px;min-height:140px;
+                        background:#f5f3ff;transition:background 0.2s;">
+                        <div style="font-size:12px;font-weight:700;color:#6366f1;margin-bottom:8px;">🏷️ 10% Discount</div>
+                        <div class="bucket-list" id="bucket-discount10" style="display:flex;flex-direction:column;gap:5px;min-height:60px;">
+                            <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">Drop here</div>
+                        </div>
+                    </div>
+
+                    <!-- Offer Bucket 2 -->
+                    <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
+                        ondragleave="this.classList.remove('drag-over')"
+                        ondrop="dropToOfferBucket(event,'discount20')"
+                        data-offer="🏷️ 20% Discount"
+                        style="border:2px dashed #ef4444;border-radius:14px;padding:12px;min-height:140px;
+                        background:#fff1f2;transition:background 0.2s;">
+                        <div style="font-size:12px;font-weight:700;color:#ef4444;margin-bottom:8px;">🏷️ 20% Discount</div>
+                        <div class="bucket-list" id="bucket-discount20" style="display:flex;flex-direction:column;gap:5px;min-height:60px;">
+                            <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">Drop here</div>
+                        </div>
+                    </div>
+
+                    <!-- Offer Bucket 3 -->
+                    <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
+                        ondragleave="this.classList.remove('drag-over')"
+                        ondrop="dropToOfferBucket(event,'freeship')"
+                        data-offer="🚚 Free Shipping"
+                        style="border:2px dashed #22c55e;border-radius:14px;padding:12px;min-height:140px;
+                        background:#f0fdf4;transition:background 0.2s;">
+                        <div style="font-size:12px;font-weight:700;color:#22c55e;margin-bottom:8px;">🚚 Free Shipping</div>
+                        <div class="bucket-list" id="bucket-freeship" style="display:flex;flex-direction:column;gap:5px;min-height:60px;">
+                            <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">Drop here</div>
+                        </div>
+                    </div>
+
+                    <!-- Offer Bucket 4 -->
+                    <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
+                        ondragleave="this.classList.remove('drag-over')"
+                        ondrop="dropToOfferBucket(event,'bogo')"
+                        data-offer="🎁 Buy 1 Get 1"
+                        style="border:2px dashed #f59e0b;border-radius:14px;padding:12px;min-height:140px;
+                        background:#fffbeb;transition:background 0.2s;">
+                        <div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:8px;">🎁 Buy 1 Get 1</div>
+                        <div class="bucket-list" id="bucket-bogo" style="display:flex;flex-direction:column;gap:5px;min-height:60px;">
+                            <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">Drop here</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Send button -->
+                <button onclick="sendSpecialOffers()" style="margin-top:6px;width:100%;background:#f59e0b;color:white;
+                    border:none;padding:11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;
+                    transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'"
+                    onmouseout="this.style.transform=''">
+                    📧 Send All Offers
+                </button>
+                <div id="offerSentBanner" style="display:none;background:#22c55e;color:white;padding:10px;
+                    border-radius:10px;font-size:12px;font-weight:700;text-align:center;">
+                    ✅ Offers sent!
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <style>
-
+.offer-bucket.drag-over {
+    background: rgba(99,102,241,0.08) !important;
+    border-color: #6366f1 !important;
+}
 
 @keyframes fadeSlideIn {
     from { opacity:0; transform:translateY(-6px); }
@@ -6307,6 +6419,107 @@ function clearOfferPanel() {
     document.getElementById('offerDropHint').style.display = 'block';
     document.getElementById('offerSentBanner').style.display = 'none';
 }
+
+function openSpecialOfferPopup() {
+    const popup = document.getElementById('specialOfferPopup');
+    popup.style.display = 'flex';
+    renderOfferCustomerList('');
+}
+
+function closeSpecialOfferPopup() {
+    document.getElementById('specialOfferPopup').style.display = 'none';
+}
+
+function renderOfferCustomerList(filter) {
+    const all = [...churnSegmented.champions, ...churnSegmented.moderate, ...churnSegmented.dormant];
+    const filtered = filter ? all.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()) || c.email.toLowerCase().includes(filter.toLowerCase())) : all;
+    const segColor = { 0:'#22c55e', 1:'#f59e0b', 2:'#ef4444' };
+    const segLabel = { 0:'Champion', 1:'At Risk', 2:'Dormant' };
+    document.getElementById('offerCustomerList').innerHTML = filtered.map(c => `
+        <div draggable="true"
+            ondragstart="offerDragStart(event,'${c.name}','${c.email}','${c.orders}','${(c.churnProb*100).toFixed(1)}','${c.cluster}')"
+            ondragend="this.style.opacity='1'"
+            style="background:var(--card-bg);border-radius:10px;padding:9px 12px;
+            border-left:4px solid ${segColor[c.cluster]};cursor:grab;
+            box-shadow:0 2px 6px rgba(0,0,0,0.06);transition:opacity 0.2s;"
+            onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)'"
+            onmouseout="this.style.boxShadow='0 2px 6px rgba(0,0,0,0.06)'">
+            <div style="font-size:12px;font-weight:700;color:var(--card-text-h2);">👤 ${c.name}</div>
+            <div style="font-size:10px;color:#64748b;">${c.email}</div>
+            <div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;">
+                <span style="background:${segColor[c.cluster]}22;color:${segColor[c.cluster]};
+                    padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;">${segLabel[c.cluster]}</span>
+                <span style="background:#f1f5f9;color:#475569;
+                    padding:2px 7px;border-radius:20px;font-size:10px;">${c.orders} orders</span>
+                <span style="background:#fee2e2;color:#b91c1c;
+                    padding:2px 7px;border-radius:20px;font-size:10px;">Churn ${(c.churnProb*100).toFixed(1)}%</span>
+            </div>
+        </div>`).join('');
+}
+
+function filterOfferCustomers(val) {
+    renderOfferCustomerList(val);
+}
+
+function offerDragStart(event, name, email, orders, churnProb, cluster) {
+    event.dataTransfer.setData('text/plain', JSON.stringify({ name, email, orders, churnProb, cluster }));
+    event.target.style.opacity = '0.4';
+}
+
+function dropToOfferBucket(event, bucketId) {
+    event.preventDefault();
+    const bucket = document.getElementById('bucket-' + bucketId);
+    bucket.closest('.offer-bucket').classList.remove('drag-over');
+
+    let data;
+    try { data = JSON.parse(event.dataTransfer.getData('text/plain')); } catch(e) { return; }
+
+    const cardId = 'offercard-' + bucketId + '-' + data.email.replace(/[@.]/g,'_');
+    if (document.getElementById(cardId)) return; // no duplicates
+
+    // Hide hint
+    const hint = bucket.querySelector('.bucket-hint');
+    if (hint) hint.style.display = 'none';
+
+    const segColor = { 0:'#22c55e', 1:'#f59e0b', 2:'#ef4444' };
+    const card = document.createElement('div');
+    card.id = cardId;
+    card.style.cssText = `background:white;border-radius:8px;padding:7px 10px;
+        font-size:11px;display:flex;justify-content:space-between;align-items:center;
+        box-shadow:0 1px 4px rgba(0,0,0,0.08);animation:fadeSlideIn 0.25s ease;
+        border-left:3px solid ${segColor[data.cluster]||'#64748b'};`;
+    card.innerHTML = `
+        <div>
+            <div style="font-weight:700;color:#1e293b;">👤 ${data.name}</div>
+            <div style="color:#64748b;font-size:10px;">${data.email}</div>
+        </div>
+        <button onclick="this.parentElement.remove();checkBucketEmpty('${bucketId}')"
+            style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:13px;padding:0;">✕</button>`;
+    bucket.appendChild(card);
+}
+
+function checkBucketEmpty(bucketId) {
+    const bucket = document.getElementById('bucket-' + bucketId);
+    if (!bucket.querySelector('div[id^="offercard-"]')) {
+        const hint = bucket.querySelector('.bucket-hint');
+        if (hint) hint.style.display = 'block';
+    }
+}
+
+function sendSpecialOffers() {
+    const buckets = ['discount10','discount20','freeship','bogo'];
+    let total = 0;
+    buckets.forEach(b => {
+        total += document.getElementById('bucket-'+b).querySelectorAll('div[id^="offercard-"]').length;
+    });
+    if (!total) { alert('⚠️ No customers added to any offer bucket yet!'); return; }
+    const banner = document.getElementById('offerSentBanner');
+    banner.style.display = 'block';
+    banner.textContent = `✅ ${total} special offer(s) sent successfully!`;
+    setTimeout(() => banner.style.display = 'none', 3000);
+}
+
+
         function filterChurnTable(query) {
             document.querySelectorAll('#churnDetailBody tr').forEach(row => {
                 row.style.display = row.textContent.toLowerCase().includes(query.toLowerCase()) ? '' : 'none';
