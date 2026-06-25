@@ -5026,8 +5026,68 @@ def churn_customers():
     
     
 
+#--------------------personal purchase analysis ( " dashboard.html madhe " )-------------------------
 
 
+@app.route("/get-purchase-data")
+def get_purchase_data():
+    if "user_id" not in session or "username" not in session:
+        return jsonify([])
+
+    user_id = session["user_id"]
+    username = session["username"]
+
+    # ✅ Sanitized username
+    safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+    if safe_username and safe_username[0].isdigit():
+        safe_username = "user_" + safe_username
+    activity_table = f"{safe_username}_{user_id}_product_activity"
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # ✅ Actual product names from product tables
+        cursor.execute("""
+            SELECT id, name, 'card' as category FROM card
+            UNION ALL
+            SELECT id, name, 'study_material' FROM study_material
+            UNION ALL
+            SELECT id, name, 'food_items' FROM food_items
+        """)
+        product_map = {(p["id"], p["category"]): p["name"] for p in cursor.fetchall()}
+
+        cursor.execute(f"""
+            SELECT product_id, category,
+                   today_purchase_count,
+                   purchased_time,
+                   month
+            FROM `{activity_table}`
+            WHERE today_purchase_count > 0
+            ORDER BY purchased_time DESC
+        """)
+        rows = cursor.fetchall()
+
+        results = []
+        for i, row in enumerate(rows):
+            actual_name = product_map.get((row["product_id"], row["category"])) or "Unknown"
+            results.append({
+                "purchase_id": i + 1,
+                "product_name": actual_name,
+                "category": row["category"],
+                "purchase_count": row["today_purchase_count"],
+                "purchase_time": str(row["purchased_time"]) if row["purchased_time"] else None,
+                "month": row["month"]
+            })
+
+        return jsonify(results)
+
+    except Exception as e:
+        print("get-purchase-data error:", e)
+        return jsonify([])
+    finally:
+        cursor.close()
+        conn.close()
 
 # ============================================================
 # STATIC FILE SERVING

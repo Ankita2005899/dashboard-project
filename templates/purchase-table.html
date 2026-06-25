@@ -280,6 +280,7 @@ tr:hover { background: var(--th-tr-hover) !important; }
                     <th>Product Name</th>
                     <th>Category</th>
                     <th>Purchase Time</th>
+                    <th>Purchase Count</th>
                 </tr>
             </thead>
 
@@ -345,6 +346,8 @@ async function loadPurchaseTableAndChart() {
         const labels = [];
         const chartData = [];
         const tooltipTimes = [];
+        const countData = [];
+
 
         data.forEach((row) => {
             const dateObj = utcToISTPlus1HourDate(row.purchase_time);
@@ -357,12 +360,14 @@ async function loadPurchaseTableAndChart() {
                     <td>${row.product_name}</td>
                     <td>${row.category}</td>
                     <td>${formattedTime}</td>
+                    <td>${row.purchase_count}</td>
                 </tr>
             `;
 
-            labels.push(row.product_name);
-            chartData.push(dateToMinutes(dateObj));
-            tooltipTimes.push(formattedTime);
+        labels.push(row.product_name);
+        chartData.push(dateToMinutes(dateObj));
+        tooltipTimes.push(formattedTime);
+        countData.push(row.purchase_count);
         });
 
         const ctx = document.getElementById('purchaseChart').getContext('2d');
@@ -371,16 +376,30 @@ async function loadPurchaseTableAndChart() {
                 type: 'line',
                 data: {
                     labels,
-                    datasets: [{
-                        label: "Purchase Time",
-                        data: chartData,
-                        borderColor: 'rgba(34,197,94,1)',
-                        backgroundColor: 'rgba(34,197,94,0.3)',
-                        borderWidth: 3,
-                        tension: 0.4,
-                        pointRadius: 6,
-                        pointHoverRadius: 8
-                    }]
+                    datasets: [
+                        {
+                            label: "Purchase Time",
+                            data: chartData,
+                            borderColor: 'rgba(34,197,94,1)',
+                            backgroundColor: 'rgba(34,197,94,0.3)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: "Purchase Count",
+                            data: countData,
+                            borderColor: 'rgba(99,102,241,1)',
+                            backgroundColor: 'rgba(99,102,241,0.2)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            yAxisID: 'y1'
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
@@ -398,6 +417,7 @@ async function loadPurchaseTableAndChart() {
                         y: {
                             beginAtZero: false,
                             title: { display:true, text:'Time (hh:mm AM/PM)' },
+                            position: 'left',
                             ticks: {
                                 callback: function(value) {
                                     const h = Math.floor(value/60);
@@ -409,6 +429,16 @@ async function loadPurchaseTableAndChart() {
                                 }
                             }
                         },
+
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            title: { display: true, text: 'Purchase Count' },
+                            ticks: { stepSize: 1, precision: 0 },
+                            grid: { drawOnChartArea: false }
+                        },
+
+
                         x: { title:{ display:true, text:'Product Name'} }
                     }
                 }
