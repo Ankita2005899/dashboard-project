@@ -2736,8 +2736,10 @@
 
         function openProductCatalogModal() {
             document.getElementById("productCatalogModal").style.display = "flex";
-            switchCatalogTab("kitchen");
+            loadCatalogStats().then(() => switchCatalogTab("kitchen"));
         }
+
+
         function closeProductCatalogModal() {
             document.getElementById("productCatalogModal").style.display = "none";
         }
@@ -2760,16 +2762,27 @@
         // 📊 Per-product Activity table — deterministic mock counts per product name
         // (no real search/purchase/cart tracking exists in the backend yet; same
         // approach as the hardcoded weekly data already used by the Trends chart)
-        function hashProductStats(name) {
-            let hash = 0;
-            for (let i = 0; i < name.length; i++) {
-                hash = (hash * 31 + name.charCodeAt(i)) % 9973;
+        let catalogStatsMap = {};
+
+        async function loadCatalogStats() {
+            try {
+                const res = await fetch("/api/owner/product-catalog-stats");
+                const data = await res.json();
+                catalogStatsMap = {};
+                data.forEach(item => {
+                    const key = `${item.product_id}_${item.category}`;
+                    catalogStatsMap[key] = item;
+                });
+            } catch (e) {
+                console.log("Stats load error:", e);
             }
-            return {
-                search: 10 + (hash % 140),
-                purchased: 2 + (hash % 55),
-                cart: 5 + (hash % 95)
-            };
+        }
+
+        function getProductStats(productId, category) {
+            const key = `${productId}_${category}`;
+            const s = catalogStatsMap[key];
+            if (s) return { search: s.search, purchased: s.purchased, cart: s.cart };
+            return { search: 0, purchased: 0, cart: 0 };
         }
 
         // ── Dashboard Card Preview Modal ───────────────────────────────────────────────
