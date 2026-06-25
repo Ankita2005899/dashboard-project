@@ -1535,7 +1535,7 @@ def get_cart_items():
     cursor = db.cursor(dictionary=True)
 
     try:
-        cursor.execute(f"SELECT * FROM `{table_name}` WHERE quantity > 0 ORDER BY uploaded_at DESC")
+        cursor.execute(f"SELECT * FROM `{table_name}` WHERE quantity > 0 AND (mode IS NULL OR mode = 'failed') ORDER BY uploaded_at DESC")
         items = cursor.fetchall()
 
         for row in items:
