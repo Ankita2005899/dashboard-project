@@ -4877,16 +4877,17 @@ def monthly_analysis():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
+        # ✅ Speed Fix 1: Ek hi query mein product map banao
         cursor.execute("""
-            SELECT id, name, category FROM card
+            SELECT id, name, 'card' as category FROM card
             UNION ALL
-            SELECT id, name, category FROM study_material
+            SELECT id, name, 'study_material' FROM study_material
             UNION ALL
-            SELECT id, name, category FROM food_items
+            SELECT id, name, 'food_items' FROM food_items
         """)
-        all_products = cursor.fetchall()
-        product_map = {(p["id"], p["category"]): p["name"] for p in all_products}
+        product_map = {(p["id"], p["category"]): p["name"] for p in cursor.fetchall()}
 
+        # ✅ Speed Fix 2: Sabhi tables ek baar fetch karo
         cursor.execute("""
             SELECT table_name FROM information_schema.tables
             WHERE table_schema = DATABASE()
@@ -4898,6 +4899,7 @@ def monthly_analysis():
             "search": 0, "cart": 0, "purchased": 0, "category": None
         })
 
+        # ✅ Speed Fix 3: Batch queries — cursor reuse
         for tbl_name in all_tables:
             try:
                 cursor.execute(f"""
@@ -4907,6 +4909,9 @@ def monthly_analysis():
                            COALESCE(today_purchase_count, 0) AS purchase_count
                     FROM `{tbl_name}`
                     WHERE month = %s
+                      AND (today_search_count > 0 
+                           OR today_add_to_cart_count > 0 
+                           OR today_purchase_count > 0)
                 """, (month,))
                 rows = cursor.fetchall()
 
@@ -4923,6 +4928,9 @@ def monthly_analysis():
             except:
                 continue
 
+        if not aggregated:
+            return jsonify([])
+
         # ✅ ML 1: Min-Max Normalization
         all_search = [v["search"] for v in aggregated.values()]
         all_cart = [v["cart"] for v in aggregated.values()]
@@ -4933,9 +4941,6 @@ def monthly_analysis():
 
         results = []
         for pname, bucket in aggregated.items():
-            if bucket["search"] == 0 and bucket["cart"] == 0 and bucket["purchased"] == 0:
-                continue
-
             # ✅ ML 2: Conversion Rate
             search_to_cart = round((bucket["cart"] / bucket["search"] * 100), 1) if bucket["search"] > 0 else 0
             cart_to_purchase = round((bucket["purchased"] / bucket["cart"] * 100), 1) if bucket["cart"] > 0 else 0
@@ -4982,7 +4987,9 @@ def monthly_analysis():
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
-
+        
+        
+        
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
