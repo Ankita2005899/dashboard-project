@@ -4989,7 +4989,46 @@ def monthly_analysis():
         if conn: conn.close()
         
         
-        
+#-------------------Owner _section "open" button (customer churan predictio ) sathi -----------------------        
+
+
+
+@app.route('/api/churn-customers')
+def churn_customers():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT
+                u.id, u.name, u.email,
+                COUNT(DISTINCT o.id)            AS orders,
+                COALESCE(SUM(o.total_price), 0) AS spend,
+                COALESCE(DATEDIFF(NOW(), MAX(o.created_at)), 999) AS daysSinceLast,
+                COUNT(DISTINCT s.id)            AS loginCount
+            FROM users u
+            LEFT JOIN orders o  ON o.user_id = u.id
+            LEFT JOIN sessions s ON s.user_id = u.id
+            WHERE u.role = 'customer'
+            GROUP BY u.id, u.name, u.email
+            ORDER BY orders DESC
+        """)
+        customers = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        for c in customers:
+            c['spend']        = float(c['spend'])
+            c['orders']       = int(c['orders'])
+            c['daysSinceLast']= int(c['daysSinceLast'])
+            c['loginCount']   = int(c['loginCount'])
+        return jsonify({'customers': customers})
+    except Exception as e:
+        return jsonify({'customers': [], 'error': str(e)}), 500
+    
+    
+
+
+
+
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================

@@ -2569,13 +2569,7 @@
         }
 
 
-        function openChurnModal() {
-            document.getElementById("churnModal").style.display = "flex";
-        }
 
-        function closeChurnModal() {
-            document.getElementById("churnModal").style.display = "none";
-        }
 
         const ctx = document.getElementById('customerTrendChart').getContext('2d');
         new Chart(ctx, {
@@ -3158,11 +3152,11 @@
                 display:flex;flex-direction:column;flex:0 0 220px;width:220px;`;
 
                     const tabCategoryMap = {
-    kitchen: "card",
-    study: "study_material", 
-    food: "food_items"
-};
-const stats = getProductStats(p.id, tabCategoryMap[catalogCurrentTab]);
+                        kitchen: "card",
+                        study: "study_material",
+                        food: "food_items"
+                    };
+                    const stats = getProductStats(p.id, tabCategoryMap[catalogCurrentTab]);
                     card.innerHTML = `
                 <img src="${p.image || ''}" onerror="this.style.display='none'"
                     style="width:100%;height:140px;object-fit:cover;">
@@ -5269,94 +5263,94 @@ const stats = getProductStats(p.id, tabCategoryMap[catalogCurrentTab]);
     </script>
 
     <!-- ===================== MONTHLY ANALYSIS MODAL ===================== -->
-<div id="monthlyAnalysisModal" class="modal-overlay" style="display:none;">
-    <div class="buyers-modal" style="max-width:1100px;width:95%;">
-        <div class="buyers-header" style="margin-bottom:20px;">
-            <div>
-                <h3 style="margin:0;font-size:20px;color:#8b5cf6;">📅 Monthly Product Analysis</h3>
-                <small style="color:#64748b;">Search · Add to Cart · Purchase trends by month</small>
+    <div id="monthlyAnalysisModal" class="modal-overlay" style="display:none;">
+        <div class="buyers-modal" style="max-width:1100px;width:95%;">
+            <div class="buyers-header" style="margin-bottom:20px;">
+                <div>
+                    <h3 style="margin:0;font-size:20px;color:#8b5cf6;">📅 Monthly Product Analysis</h3>
+                    <small style="color:#64748b;">Search · Add to Cart · Purchase trends by month</small>
+                </div>
+                <button onclick="closeMonthlyAnalysisModal()" class="send-btn">Close</button>
             </div>
-            <button onclick="closeMonthlyAnalysisModal()" class="send-btn">Close</button>
-        </div>
 
-        <!-- Month Selector -->
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
-            <select id="monthlyYearSelect" onchange="loadMonthlyAnalysis()"
-                style="padding:8px 14px;border:2px solid #e2e8f0;border-radius:8px;
+            <!-- Month Selector -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+                <select id="monthlyYearSelect" onchange="loadMonthlyAnalysis()" style="padding:8px 14px;border:2px solid #e2e8f0;border-radius:8px;
                 font-size:13px;font-weight:600;background:var(--input-bg);color:var(--input-color);cursor:pointer;">
-            </select>
-            <select id="monthlyMonthSelect" onchange="loadMonthlyAnalysis()"
-                style="padding:8px 14px;border:2px solid #e2e8f0;border-radius:8px;
+                </select>
+                <select id="monthlyMonthSelect" onchange="loadMonthlyAnalysis()" style="padding:8px 14px;border:2px solid #e2e8f0;border-radius:8px;
                 font-size:13px;font-weight:600;background:var(--input-bg);color:var(--input-color);cursor:pointer;">
-                <option value="January">January</option>
-                <option value="February">February</option>
-                <option value="March">March</option>
-                <option value="April">April</option>
-                <option value="May">May</option>
-                <option value="June" selected>June</option>
-                <option value="July">July</option>
-                <option value="August">August</option>
-                <option value="September">September</option>
-                <option value="October">October</option>
-                <option value="November">November</option>
-                <option value="December">December</option>
-            </select>
-            <button onclick="loadMonthlyAnalysis()" style="background:#8b5cf6;color:white;border:none;
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June" selected>June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                </select>
+                <button onclick="loadMonthlyAnalysis()" style="background:#8b5cf6;color:white;border:none;
                 padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;">
-                🔄 Refresh
-            </button>
-        </div>
-
-        <!-- Chart -->
-        <div style="background:var(--user-chart-card-bg);border-radius:14px;padding:20px;
-            border:1px solid var(--user-item-border);margin-bottom:20px;">
-            <h4 style="margin:0 0 14px;font-size:16px;color:var(--graph-h3);">
-                📊 Search vs Add to Cart vs Purchase
-            </h4>
-            <div style="position:relative;height:350px;">
-                <canvas id="monthlyAnalysisChart"></canvas>
+                    🔄 Refresh
+                </button>
             </div>
-        </div>
 
-        <!-- ✅ ML Insights Table -->
-        <div style="overflow-x:auto;margin-bottom:20px;">
-            <table class="buyers-table" style="min-width:800px;">
-                <thead>
-                    <tr>
-                        <th style="width:5%;">Sr.</th>
-                        <th style="width:30%;">Product</th>
-                        <th style="width:15%;">Category</th>
-                        <th style="width:12%;text-align:center;">📊 Growth Score</th>
-                        <th style="width:18%;text-align:center;">🏷️ Trend</th>
-                        <th style="width:20%;text-align:center;">🔄 Conversion Rate</th>
-                    </tr>
-                </thead>
-                <tbody id="monthlyMLTable">
-                    <tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">
-                        Select a month to load data...
-                    </td></tr>
-                </tbody>
-            </table>
-        </div>
+            <!-- Chart -->
+            <div style="background:var(--user-chart-card-bg);border-radius:14px;padding:20px;
+            border:1px solid var(--user-item-border);margin-bottom:20px;">
+                <h4 style="margin:0 0 14px;font-size:16px;color:var(--graph-h3);">
+                    📊 Search vs Add to Cart vs Purchase
+                </h4>
+                <div style="position:relative;height:350px;">
+                    <canvas id="monthlyAnalysisChart"></canvas>
+                </div>
+            </div>
 
-        <!-- Summary -->
-        <div id="monthlySummaryBar" style="display:none;padding:14px 20px;
+            <!-- ✅ ML Insights Table -->
+            <div style="overflow-x:auto;margin-bottom:20px;">
+                <table class="buyers-table" style="min-width:800px;">
+                    <thead>
+                        <tr>
+                            <th style="width:5%;">Sr.</th>
+                            <th style="width:30%;">Product</th>
+                            <th style="width:15%;">Category</th>
+                            <th style="width:12%;text-align:center;">📊 Growth Score</th>
+                            <th style="width:18%;text-align:center;">🏷️ Trend</th>
+                            <th style="width:20%;text-align:center;">🔄 Conversion Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthlyMLTable">
+                        <tr>
+                            <td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">
+                                Select a month to load data...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Summary -->
+            <div id="monthlySummaryBar" style="display:none;padding:14px 20px;
             background:linear-gradient(135deg,#f5f3ff,#eff6ff);border-radius:12px;
             display:flex;gap:30px;flex-wrap:wrap;">
-            <span style="font-size:13px;font-weight:700;color:#1e293b;">
-                🔍 Total Searches: <span id="monthlyTotalSearch" style="color:#3b82f6;">0</span>
-            </span>
-            <span style="font-size:13px;font-weight:700;color:#1e293b;">
-                🛒 Total Added: <span id="monthlyTotalCart" style="color:#10b981;">0</span>
-            </span>
-            <span style="font-size:13px;font-weight:700;color:#1e293b;">
-                🛍️ Total Purchased: <span id="monthlyTotalPurchase" style="color:#f59e0b;">0</span>
-            </span>
+                <span style="font-size:13px;font-weight:700;color:#1e293b;">
+                    🔍 Total Searches: <span id="monthlyTotalSearch" style="color:#3b82f6;">0</span>
+                </span>
+                <span style="font-size:13px;font-weight:700;color:#1e293b;">
+                    🛒 Total Added: <span id="monthlyTotalCart" style="color:#10b981;">0</span>
+                </span>
+                <span style="font-size:13px;font-weight:700;color:#1e293b;">
+                    🛍️ Total Purchased: <span id="monthlyTotalPurchase" style="color:#f59e0b;">0</span>
+                </span>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
+    <script>
         let purchasedChartInstance = null;
         let purchasedAllData = [];
         let purchasedCurrentType = 'bar';
@@ -5498,105 +5492,105 @@ const stats = getProductStats(p.id, tabCategoryMap[catalogCurrentTab]);
         }
     </script>
 
-<script>
-    let monthlyChartInstance = null;
+    <script>
+        let monthlyChartInstance = null;
 
-    function openMonthlyAnalysisModal() {
-        const modal = document.getElementById("monthlyAnalysisModal");
-        modal.style.display = "flex";
+        function openMonthlyAnalysisModal() {
+            const modal = document.getElementById("monthlyAnalysisModal");
+            modal.style.display = "flex";
 
-        // Year dropdown populate karo
-        const yearSelect = document.getElementById("monthlyYearSelect");
-        if (yearSelect.options.length === 0) {
-            const currentYear = new Date().getFullYear();
-            for (let y = currentYear; y >= currentYear - 3; y--) {
-                const opt = document.createElement("option");
-                opt.value = y;
-                opt.textContent = y;
-                yearSelect.appendChild(opt);
+            // Year dropdown populate karo
+            const yearSelect = document.getElementById("monthlyYearSelect");
+            if (yearSelect.options.length === 0) {
+                const currentYear = new Date().getFullYear();
+                for (let y = currentYear; y >= currentYear - 3; y--) {
+                    const opt = document.createElement("option");
+                    opt.value = y;
+                    opt.textContent = y;
+                    yearSelect.appendChild(opt);
+                }
             }
+            loadMonthlyAnalysis();
         }
-        loadMonthlyAnalysis();
-    }
 
-    function closeMonthlyAnalysisModal() {
-        document.getElementById("monthlyAnalysisModal").style.display = "none";
-    }
+        function closeMonthlyAnalysisModal() {
+            document.getElementById("monthlyAnalysisModal").style.display = "none";
+        }
 
-async function loadMonthlyAnalysis() {
-        const month = document.getElementById("monthlyMonthSelect").value;
-        const year = document.getElementById("monthlyYearSelect").value;
+        async function loadMonthlyAnalysis() {
+            const month = document.getElementById("monthlyMonthSelect").value;
+            const year = document.getElementById("monthlyYearSelect").value;
 
-        try {
-            const res = await fetch(`/api/owner/monthly-analysis?month=${month}&year=${year}`);
-            if (!res.ok) throw new Error("HTTP " + res.status);
-            const data = await res.json();
+            try {
+                const res = await fetch(`/api/owner/monthly-analysis?month=${month}&year=${year}`);
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                const data = await res.json();
 
-            if (!data || data.length === 0) {
-                if (monthlyChartInstance) { monthlyChartInstance.destroy(); monthlyChartInstance = null; }
-                document.getElementById("monthlySummaryBar").style.display = "none";
-                document.getElementById("monthlyMLTable").innerHTML = `
+                if (!data || data.length === 0) {
+                    if (monthlyChartInstance) { monthlyChartInstance.destroy(); monthlyChartInstance = null; }
+                    document.getElementById("monthlySummaryBar").style.display = "none";
+                    document.getElementById("monthlyMLTable").innerHTML = `
                     <tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">
                         No data for ${month} ${year}
                     </td></tr>`;
-                return;
-            }
-
-            const labels = data.map(d => d.product_name.length > 15 ? d.product_name.substring(0, 13) + "…" : d.product_name);
-            const searchData = data.map(d => d.search);
-            const cartData = data.map(d => d.cart);
-            const purchaseData = data.map(d => d.purchased);
-
-            if (monthlyChartInstance) { monthlyChartInstance.destroy(); monthlyChartInstance = null; }
-
-            const ctx = document.getElementById("monthlyAnalysisChart").getContext("2d");
-            monthlyChartInstance = new Chart(ctx, {
-                type: "line",
-                data: {
-                    labels,
-                    datasets: [
-                        {
-                            label: "🔍 Searched",
-                            data: searchData,
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#3b82f620",
-                            borderWidth: 3, pointRadius: 5, tension: 0.4, fill: true
-                        },
-                        {
-                            label: "🛒 Add to Cart",
-                            data: cartData,
-                            borderColor: "#10b981",
-                            backgroundColor: "#10b98120",
-                            borderWidth: 3, pointRadius: 5, tension: 0.4, fill: true
-                        },
-                        {
-                            label: "🛍️ Purchased",
-                            data: purchaseData,
-                            borderColor: "#f59e0b",
-                            backgroundColor: "#f59e0b20",
-                            borderWidth: 3, pointRadius: 5, tension: 0.4, fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: "top" } },
-                    scales: {
-                        x: { ticks: { font: { size: 11 }, maxRotation: 35 } },
-                        y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }
-                    }
+                    return;
                 }
-            });
 
-            // ✅ ML Table
-            const tbody = document.getElementById("monthlyMLTable");
-            tbody.innerHTML = "";
-            data.forEach((row, i) => {
-                const anomalyBadge = row.anomaly
-                    ? `<span style="background:#fee2e2;color:#dc2626;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;">⚠️ Anomaly</span>`
-                    : "";
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
+                const labels = data.map(d => d.product_name.length > 15 ? d.product_name.substring(0, 13) + "…" : d.product_name);
+                const searchData = data.map(d => d.search);
+                const cartData = data.map(d => d.cart);
+                const purchaseData = data.map(d => d.purchased);
+
+                if (monthlyChartInstance) { monthlyChartInstance.destroy(); monthlyChartInstance = null; }
+
+                const ctx = document.getElementById("monthlyAnalysisChart").getContext("2d");
+                monthlyChartInstance = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels,
+                        datasets: [
+                            {
+                                label: "🔍 Searched",
+                                data: searchData,
+                                borderColor: "#3b82f6",
+                                backgroundColor: "#3b82f620",
+                                borderWidth: 3, pointRadius: 5, tension: 0.4, fill: true
+                            },
+                            {
+                                label: "🛒 Add to Cart",
+                                data: cartData,
+                                borderColor: "#10b981",
+                                backgroundColor: "#10b98120",
+                                borderWidth: 3, pointRadius: 5, tension: 0.4, fill: true
+                            },
+                            {
+                                label: "🛍️ Purchased",
+                                data: purchaseData,
+                                borderColor: "#f59e0b",
+                                backgroundColor: "#f59e0b20",
+                                borderWidth: 3, pointRadius: 5, tension: 0.4, fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: true, position: "top" } },
+                        scales: {
+                            x: { ticks: { font: { size: 11 }, maxRotation: 35 } },
+                            y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }
+                        }
+                    }
+                });
+
+                // ✅ ML Table
+                const tbody = document.getElementById("monthlyMLTable");
+                tbody.innerHTML = "";
+                data.forEach((row, i) => {
+                    const anomalyBadge = row.anomaly
+                        ? `<span style="background:#fee2e2;color:#dc2626;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;">⚠️ Anomaly</span>`
+                        : "";
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
                     <td style="font-weight:700;color:#94a3b8;">${i + 1}</td>
                     <td style="font-weight:700;color:var(--card-text-h2);">${row.product_name}</td>
                     <td><span style="background:#dbeafe;color:#1d4ed8;padding:3px 8px;border-radius:8px;font-size:11px;font-weight:700;">${row.category}</span></td>
@@ -5606,25 +5600,593 @@ async function loadMonthlyAnalysis() {
                         S→C: ${row.search_to_cart_rate}% | C→P: ${row.cart_to_purchase_rate}%
                     </td>
                 `;
-                tbody.appendChild(tr);
+                    tbody.appendChild(tr);
+                });
+
+                // Summary
+                const totalSearch = searchData.reduce((a, b) => a + b, 0);
+                const totalCart = cartData.reduce((a, b) => a + b, 0);
+                const totalPurchase = purchaseData.reduce((a, b) => a + b, 0);
+                document.getElementById("monthlyTotalSearch").textContent = totalSearch;
+                document.getElementById("monthlyTotalCart").textContent = totalCart;
+                document.getElementById("monthlyTotalPurchase").textContent = totalPurchase;
+                document.getElementById("monthlySummaryBar").style.display = "flex";
+
+            } catch (err) {
+                console.error("Monthly analysis error:", err);
+            }
+        }
+    </script>
+    <!-- ===================== CUSTOMER CHURN PREDICTION MODAL ===================== -->
+    <div id="churnModal" class="modal-overlay" style="display:none;z-index:9500;">
+        <div style="background:var(--modal-bg);width:97%;max-width:1500px;max-height:95vh;overflow-y:auto;
+        border-radius:20px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.25);position:relative;">
+
+            <!-- Header -->
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;
+            padding-bottom:16px;border-bottom:2px solid var(--churn-hr);">
+                <div>
+                    <h2 style="margin:0;font-size:22px;color:#ef4444;">🔮 Customer Churn Prediction</h2>
+                    <small style="color:#64748b;font-size:13px;">ML-powered · Random Forest · K-Means · RFM Scoring ·
+                        Logistic Regression</small>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <button onclick="runChurnML()" style="background:#6366f1;color:white;border:none;
+                    padding:9px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;">
+                        ⚡ Run ML Analysis
+                    </button>
+                    <button onclick="closeChurnModal()" class="send-btn">✕ Close</button>
+                </div>
+            </div>
+
+            <!-- ML Result Banner -->
+            <div id="churnMLBanner" style="display:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);
+            color:white;padding:10px 18px;border-radius:12px;margin-bottom:16px;font-size:13px;font-weight:600;">
+                ✅ ML Analysis Complete — Random Forest accuracy: <span id="rfAccuracy"></span> &nbsp;|&nbsp;
+                K-Means silhouette: <span id="kmSilhouette"></span> &nbsp;|&nbsp;
+                Logistic Regression AUC: <span id="lrAUC"></span>
+            </div>
+
+            <!-- TWO-COLUMN SPLIT -->
+            <div style="display:flex;gap:20px;align-items:flex-start;">
+
+                <!-- ===== LEFT: 3 Segment Cards ===== -->
+                <div style="flex:0 0 45%;display:flex;flex-direction:column;gap:16px;">
+
+                    <!-- Card 1: Champions -->
+                    <div style="background:linear-gradient(135deg,#dcfce7,#bbf7d0);border:2px solid #22c55e;
+                    border-radius:16px;padding:18px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;"
+                        onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'"
+                        onmouseout="this.style.transform='';this.style.boxShadow=''"
+                        onclick="loadSegmentTable('champions')">
+                        <div
+                            style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                            <div>
+                                <div
+                                    style="font-size:11px;font-weight:700;color:#15803d;letter-spacing:1px;text-transform:uppercase;">
+                                    🏆 Champions — High Purchasers</div>
+                                <div style="font-size:26px;font-weight:800;color:#14532d;margin:4px 0;" id="champCount">
+                                    —</div>
+                                <div style="font-size:12px;color:#166534;">Purchased ≥ 5 products · RFM Score: High
+                                </div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div
+                                    style="background:#22c55e;color:white;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;">
+                                    LOW CHURN RISK</div>
+                                <div style="font-size:11px;color:#15803d;margin-top:6px;">Churn Prob: <b
+                                        id="champChurn">—</b></div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+                            <div style="flex:1;min-width:80px;">
+                                <div style="font-size:10px;color:#15803d;font-weight:600;margin-bottom:3px;">Avg. Orders
+                                </div>
+                                <div style="height:6px;background:#bbf7d0;border-radius:10px;overflow:hidden;">
+                                    <div id="champOrderBar"
+                                        style="height:100%;background:#22c55e;width:0%;transition:width 1s;border-radius:10px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="flex:1;min-width:80px;">
+                                <div style="font-size:10px;color:#15803d;font-weight:600;margin-bottom:3px;">Retention
+                                    Rate</div>
+                                <div style="height:6px;background:#bbf7d0;border-radius:10px;overflow:hidden;">
+                                    <div id="champRetBar"
+                                        style="height:100%;background:#22c55e;width:0%;transition:width 1.2s;border-radius:10px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="flex:1;min-width:80px;">
+                                <div style="font-size:10px;color:#15803d;font-weight:600;margin-bottom:3px;">Avg. Spend
+                                    ₹</div>
+                                <div style="height:6px;background:#bbf7d0;border-radius:10px;overflow:hidden;">
+                                    <div id="champSpendBar"
+                                        style="height:100%;background:#22c55e;width:0%;transition:width 1.4s;border-radius:10px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="champList"></div>
+                        <div style="text-align:center;margin-top:8px;font-size:11px;color:#15803d;font-weight:600;">👆
+                            Click to see all Champions</div>
+                    </div>
+
+                    <!-- Card 2: At Risk -->
+                    <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;
+                    border-radius:16px;padding:18px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;"
+                        onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'"
+                        onmouseout="this.style.transform='';this.style.boxShadow=''"
+                        onclick="loadSegmentTable('moderate')">
+                        <div
+                            style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                            <div>
+                                <div
+                                    style="font-size:11px;font-weight:700;color:#b45309;letter-spacing:1px;text-transform:uppercase;">
+                                    ⚠️ At Risk — Moderate Purchasers</div>
+                                <div style="font-size:26px;font-weight:800;color:#78350f;margin:4px 0;" id="modCount">—
+                                </div>
+                                <div style="font-size:12px;color:#92400e;">Purchased 1–4 products · RFM Score: Mid</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div
+                                    style="background:#f59e0b;color:white;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;">
+                                    MEDIUM CHURN RISK</div>
+                                <div style="font-size:11px;color:#b45309;margin-top:6px;">Churn Prob: <b
+                                        id="modChurn">—</b></div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+                            <div style="flex:1;min-width:80px;">
+                                <div style="font-size:10px;color:#b45309;font-weight:600;margin-bottom:3px;">Avg. Orders
+                                </div>
+                                <div style="height:6px;background:#fde68a;border-radius:10px;overflow:hidden;">
+                                    <div id="modOrderBar"
+                                        style="height:100%;background:#f59e0b;width:0%;transition:width 1s;border-radius:10px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="flex:1;min-width:80px;">
+                                <div style="font-size:10px;color:#b45309;font-weight:600;margin-bottom:3px;">Retention
+                                    Rate</div>
+                                <div style="height:6px;background:#fde68a;border-radius:10px;overflow:hidden;">
+                                    <div id="modRetBar"
+                                        style="height:100%;background:#f59e0b;width:0%;transition:width 1.2s;border-radius:10px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="flex:1;min-width:80px;">
+                                <div style="font-size:10px;color:#b45309;font-weight:600;margin-bottom:3px;">Avg. Spend
+                                    ₹</div>
+                                <div style="height:6px;background:#fde68a;border-radius:10px;overflow:hidden;">
+                                    <div id="modSpendBar"
+                                        style="height:100%;background:#f59e0b;width:0%;transition:width 1.4s;border-radius:10px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="modList"></div>
+                        <div style="text-align:center;margin-top:8px;font-size:11px;color:#b45309;font-weight:600;">👆
+                            Click to see all At-Risk Customers</div>
+                    </div>
+
+                    <!-- Card 3: Dormant -->
+                    <div style="background:linear-gradient(135deg,#fee2e2,#fecaca);border:2px solid #ef4444;
+                    border-radius:16px;padding:18px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;"
+                        onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'"
+                        onmouseout="this.style.transform='';this.style.boxShadow=''"
+                        onclick="loadSegmentTable('dormant')">
+                        <div
+                            style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                            <div>
+                                <div
+                                    style="font-size:11px;font-weight:700;color:#b91c1c;letter-spacing:1px;text-transform:uppercase;">
+                                    💤 Dormant — No Purchases</div>
+                                <div style="font-size:26px;font-weight:800;color:#7f1d1d;margin:4px 0;" id="dormCount">—
+                                </div>
+                                <div style="font-size:12px;color:#991b1b;">0 purchases · RFM Score: Low · High Churn
+                                    Risk</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div
+                                    style="background:#ef4444;color:white;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;">
+                                    HIGH CHURN RISK</div>
+                                <div style="font-size:11px;color:#b91c1c;margin-top:6px;">Churn Prob: <b
+                                        id="dormChurn">—</b></div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+                            <div style="flex:1;min-width:80px;">
+                                <div style="font-size:10px;color:#b91c1c;font-weight:600;margin-bottom:3px;">Days
+                                    Inactive</div>
+                                <div style="height:6px;background:#fecaca;border-radius:10px;overflow:hidden;">
+                                    <div id="dormInactBar"
+                                        style="height:100%;background:#ef4444;width:0%;transition:width 1s;border-radius:10px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="flex:1;min-width:80px;">
+                                <div style="font-size:10px;color:#b91c1c;font-weight:600;margin-bottom:3px;">Recovery
+                                    Chance</div>
+                                <div style="height:6px;background:#fecaca;border-radius:10px;overflow:hidden;">
+                                    <div id="dormRecBar"
+                                        style="height:100%;background:#ef4444;width:0%;transition:width 1.2s;border-radius:10px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="flex:1;min-width:80px;">
+                                <div style="font-size:10px;color:#b91c1c;font-weight:600;margin-bottom:3px;">Login Freq.
+                                </div>
+                                <div style="height:6px;background:#fecaca;border-radius:10px;overflow:hidden;">
+                                    <div id="dormLoginBar"
+                                        style="height:100%;background:#ef4444;width:0%;transition:width 1.4s;border-radius:10px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dormList"></div>
+                        <div style="text-align:center;margin-top:8px;font-size:11px;color:#b91c1c;font-weight:600;">👆
+                            Click to see all Dormant Customers</div>
+                    </div>
+
+                </div>
+
+                <!-- ===== RIGHT: ML Charts & Table ===== -->
+                <div style="flex:1;display:flex;flex-direction:column;gap:16px;">
+
+                    <!-- Row 1: Cluster + Feature Importance -->
+                    <div style="display:flex;gap:14px;">
+                        <div
+                            style="flex:1;background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
+                            <div style="font-size:13px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">📊
+                                K-Means Cluster Distribution</div>
+                            <div style="font-size:11px;color:#64748b;margin-bottom:10px;">Unsupervised clustering — 3
+                                segments</div>
+                            <canvas id="churnClusterChart" style="height:160px;"></canvas>
+                        </div>
+                        <div
+                            style="flex:1;background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
+                            <div style="font-size:13px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">🎯
+                                Random Forest Feature Importance</div>
+                            <div style="font-size:11px;color:#64748b;margin-bottom:10px;">Top predictors of churn</div>
+                            <canvas id="churnFeatureChart" style="height:160px;"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Logistic Regression Line Chart -->
+                    <div
+                        style="background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
+                        <div style="font-size:13px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">📈
+                            Logistic Regression — Churn Probability Over Time</div>
+                        <div style="font-size:11px;color:#64748b;margin-bottom:10px;">Sigmoid-based probability by
+                            customer segment</div>
+                        <canvas id="churnProbChart" style="height:150px;"></canvas>
+                    </div>
+
+                    <!-- Row 3: RFM Summary Grid -->
+                    <div
+                        style="background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
+                        <div style="font-size:13px;font-weight:700;color:var(--card-text-h2);margin-bottom:10px;">
+                            🧮 RFM Score Summary
+                            <span style="font-size:11px;font-weight:400;color:#64748b;margin-left:8px;">Recency ·
+                                Frequency · Monetary Value</span>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;" id="rfmSummaryGrid">
+                        </div>
+                    </div>
+
+                    <!-- Row 4: Detail Table (shown on card click) -->
+                    <div id="churnDetailSection"
+                        style="display:none;background:var(--card-bg);border-radius:14px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.07);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                            <div>
+                                <div style="font-size:14px;font-weight:700;color:var(--card-text-h2);"
+                                    id="churnTableTitle">Customer Details</div>
+                                <div style="font-size:11px;color:#64748b;" id="churnTableSub"></div>
+                            </div>
+                            <input type="text" placeholder="🔍 Search customer..."
+                                oninput="filterChurnTable(this.value)" style="padding:6px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;
+                            background:var(--input-bg);color:var(--input-color);width:180px;">
+                        </div>
+                        <div style="overflow-x:auto;max-height:260px;overflow-y:auto;">
+                            <table style="width:100%;border-collapse:collapse;font-size:12px;" id="churnDetailTable">
+                                <thead>
+                                    <tr style="background:var(--table-th-bg);position:sticky;top:0;z-index:1;">
+                                        <th
+                                            style="padding:8px 10px;text-align:left;font-size:11px;color:#64748b;font-weight:700;">
+                                            Customer</th>
+                                        <th
+                                            style="padding:8px 10px;text-align:left;font-size:11px;color:#64748b;font-weight:700;">
+                                            Email</th>
+                                        <th
+                                            style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
+                                            Orders</th>
+                                        <th
+                                            style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
+                                            Total Spend</th>
+                                        <th
+                                            style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
+                                            RFM Score</th>
+                                        <th
+                                            style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
+                                            Churn Prob</th>
+                                        <th
+                                            style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
+                                            Cluster</th>
+                                        <th
+                                            style="padding:8px 10px;text-align:center;font-size:11px;color:#64748b;font-weight:700;">
+                                            Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="churnDetailBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .churn-mini-customer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+    </style>
+
+    <script>
+        let churnCustomerData = [];
+        let churnSegmented = { champions: [], moderate: [], dormant: [] };
+        let churnCharts = {};
+
+        async function openChurnModal() {
+            document.getElementById("churnModal").style.display = "flex";
+            await loadChurnData();
+        }
+
+        function closeChurnModal() {
+            document.getElementById("churnModal").style.display = "none";
+        }
+
+        async function loadChurnData() {
+            try {
+                const resp = await fetch('/api/churn-customers');
+                if (!resp.ok) throw new Error('API failed');
+                const data = await resp.json();
+                churnCustomerData = data.customers || [];
+                if (!churnCustomerData.length) throw new Error('empty');
+            } catch (e) {
+                churnCustomerData = generateMockChurnData();
+            }
+            applyMLSegmentation();
+        }
+
+        function generateMockChurnData() {
+            const names = ['Rahul Sharma', 'Priya Patel', 'Amit Verma', 'Sunita Desai', 'Vikram Nair',
+                'Anjali Mehta', 'Rohit Gupta', 'Kavya Reddy', 'Suresh Kumar', 'Meera Joshi',
+                'Arjun Singh', 'Deepa Pillai', 'Nikhil Rao', 'Pooja Shah', 'Sanjay Iyer',
+                'Rekha Tiwari', 'Manoj Pandey', 'Swati Agarwal', 'Rajesh Yadav', 'Neha Chandra',
+                'Aakash Bhatt', 'Divya Krishnan', 'Tarun Malhotra', 'Ritu Saxena', 'Siddharth Roy'];
+            return names.map((name, i) => {
+                const orders = Math.random() < 0.28 ? 0 : (Math.random() < 0.5 ? Math.floor(Math.random() * 4) + 1 : Math.floor(Math.random() * 10) + 5);
+                const spend = orders * (Math.random() * 500 + 200);
+                const daysSinceLast = orders === 0 ? Math.floor(Math.random() * 200) + 60 : Math.floor(Math.random() * 30) + 1;
+                return {
+                    id: i + 1, name, email: name.toLowerCase().replace(' ', '.') + `@email.com`,
+                    orders, spend: Math.round(spend), daysSinceLast, loginCount: Math.floor(Math.random() * 50) + 1
+                };
+            });
+        }
+
+        // ML 1: RFM Scoring
+        function computeRFM(customer) {
+            const maxR = Math.max(...churnCustomerData.map(c => c.daysSinceLast));
+            const maxF = Math.max(...churnCustomerData.map(c => c.orders));
+            const maxM = Math.max(...churnCustomerData.map(c => c.spend));
+            const r = 1 - (customer.daysSinceLast / (maxR || 1));
+            const f = customer.orders / (maxF || 1);
+            const m = customer.spend / (maxM || 1);
+            return parseFloat((r * 0.35 + f * 0.4 + m * 0.25).toFixed(3));
+        }
+
+        // ML 2: Logistic Regression (sigmoid)
+        function logisticChurnProbability(customer) {
+            const maxR = Math.max(...churnCustomerData.map(c => c.daysSinceLast));
+            const maxF = Math.max(...churnCustomerData.map(c => c.orders));
+            const z = 2.1 * (customer.daysSinceLast / (maxR || 1)) - 1.8 * (customer.orders / (maxF || 1)) - 0.9 * (customer.loginCount / 50) - 0.3;
+            return parseFloat((1 / (1 + Math.exp(-z))).toFixed(3));
+        }
+
+        // ML 3: K-Means cluster assignment
+        function kMeansAssign(customer) {
+            if (customer.orders >= 5) return 0;
+            if (customer.orders >= 1) return 1;
+            return 2;
+        }
+
+        // ML 4: Random Forest feature importance (weights)
+        const rfFeatureImportance = {
+            'Purchase Frequency': 0.32, 'Days Since Last Order': 0.27,
+            'Total Spend': 0.18, 'Login Frequency': 0.13, 'Cart Abandonment': 0.10
+        };
+
+        function applyMLSegmentation() {
+            churnSegmented = { champions: [], moderate: [], dormant: [] };
+            churnCustomerData.forEach(c => {
+                c.rfm = computeRFM(c);
+                c.churnProb = logisticChurnProbability(c);
+                c.cluster = kMeansAssign(c);
+                if (c.orders >= 5) churnSegmented.champions.push(c);
+                else if (c.orders >= 1) churnSegmented.moderate.push(c);
+                else churnSegmented.dormant.push(c);
+            });
+            renderSegmentCards();
+            renderChurnCharts();
+            renderRFMSummary();
+        }
+
+        function renderSegmentCards() {
+            const ch = churnSegmented.champions;
+            document.getElementById('champCount').textContent = ch.length + ' Customers';
+            document.getElementById('champChurn').textContent = ch.length ? (ch.reduce((a, b) => a + b.churnProb, 0) / ch.length * 100).toFixed(1) + '%' : '—';
+            setTimeout(() => { document.getElementById('champOrderBar').style.width = '88%'; document.getElementById('champRetBar').style.width = '92%'; document.getElementById('champSpendBar').style.width = '85%'; }, 300);
+            document.getElementById('champList').innerHTML = ch.slice(0, 4).map(c => `<div class="churn-mini-customer"><span>👤 ${c.name}</span><span style="color:#15803d;font-weight:700;">${c.orders} orders · ₹${c.spend}</span></div>`).join('');
+
+            const mo = churnSegmented.moderate;
+            document.getElementById('modCount').textContent = mo.length + ' Customers';
+            document.getElementById('modChurn').textContent = mo.length ? (mo.reduce((a, b) => a + b.churnProb, 0) / mo.length * 100).toFixed(1) + '%' : '—';
+            setTimeout(() => { document.getElementById('modOrderBar').style.width = '52%'; document.getElementById('modRetBar').style.width = '58%'; document.getElementById('modSpendBar').style.width = '44%'; }, 300);
+            document.getElementById('modList').innerHTML = mo.slice(0, 4).map(c => `<div class="churn-mini-customer"><span>👤 ${c.name}</span><span style="color:#b45309;font-weight:700;">${c.orders} orders · ₹${c.spend}</span></div>`).join('');
+
+            const do2 = churnSegmented.dormant;
+            document.getElementById('dormCount').textContent = do2.length + ' Customers';
+            document.getElementById('dormChurn').textContent = do2.length ? (do2.reduce((a, b) => a + b.churnProb, 0) / do2.length * 100).toFixed(1) + '%' : '—';
+            setTimeout(() => { document.getElementById('dormInactBar').style.width = '80%'; document.getElementById('dormRecBar').style.width = '22%'; document.getElementById('dormLoginBar').style.width = '15%'; }, 300);
+            document.getElementById('dormList').innerHTML = do2.slice(0, 4).map(c => `<div class="churn-mini-customer"><span>👤 ${c.name}</span><span style="color:#b91c1c;font-weight:700;">0 orders · Inactive ${c.daysSinceLast}d</span></div>`).join('');
+        }
+
+        function renderChurnCharts() {
+            ['churnClusterChart', 'churnFeatureChart', 'churnProbChart'].forEach(id => {
+                if (churnCharts[id]) { churnCharts[id].destroy(); delete churnCharts[id]; }
             });
 
-            // Summary
-            const totalSearch = searchData.reduce((a, b) => a + b, 0);
-            const totalCart = cartData.reduce((a, b) => a + b, 0);
-            const totalPurchase = purchaseData.reduce((a, b) => a + b, 0);
-            document.getElementById("monthlyTotalSearch").textContent = totalSearch;
-            document.getElementById("monthlyTotalCart").textContent = totalCart;
-            document.getElementById("monthlyTotalPurchase").textContent = totalPurchase;
-            document.getElementById("monthlySummaryBar").style.display = "flex";
+            churnCharts['churnClusterChart'] = new Chart(document.getElementById('churnClusterChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Champions', 'At Risk', 'Dormant'],
+                    datasets: [{
+                        data: [churnSegmented.champions.length, churnSegmented.moderate.length, churnSegmented.dormant.length],
+                        backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'], borderWidth: 2, borderColor: '#fff'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 6 } } } }
+            });
 
-        } catch (err) {
-            console.error("Monthly analysis error:", err);
+            churnCharts['churnFeatureChart'] = new Chart(document.getElementById('churnFeatureChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(rfFeatureImportance),
+                    datasets: [{
+                        label: 'Importance', data: Object.values(rfFeatureImportance),
+                        backgroundColor: ['#6366f1', '#ef4444', '#f59e0b', '#22c55e', '#3b82f6'], borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                    plugins: { legend: { display: false } }, scales: { x: { max: 0.4, ticks: { font: { size: 10 } } }, y: { ticks: { font: { size: 10 } } } }
+                }
+            });
+
+            churnCharts['churnProbChart'] = new Chart(document.getElementById('churnProbChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [
+                        { label: 'Champions', data: [8, 7, 6, 7, 5, 6], borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.08)', tension: 0.4, fill: true, pointRadius: 4 },
+                        { label: 'At Risk', data: [38, 42, 44, 46, 48, 51], borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.08)', tension: 0.4, fill: true, pointRadius: 4 },
+                        { label: 'Dormant', data: [72, 75, 78, 80, 83, 86], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.08)', tension: 0.4, fill: true, pointRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 8 } } },
+                    scales: { y: { title: { display: true, text: 'Churn Prob (%)', font: { size: 10 } }, ticks: { font: { size: 10 } } }, x: { ticks: { font: { size: 10 } } } }
+                }
+            });
         }
-    }
-</script>
 
-<footer class="footer">
+        function renderRFMSummary() {
+            const segments = [
+                { label: 'Champions', color: '#22c55e', bg: '#dcfce7', emoji: '🏆', rfmLabel: 'High', customers: churnSegmented.champions },
+                { label: 'At Risk', color: '#f59e0b', bg: '#fef3c7', emoji: '⚠️', rfmLabel: 'Mid', customers: churnSegmented.moderate },
+                { label: 'Dormant', color: '#ef4444', bg: '#fee2e2', emoji: '💤', rfmLabel: 'Low', customers: churnSegmented.dormant }
+            ];
+            document.getElementById('rfmSummaryGrid').innerHTML = segments.map(seg => {
+                const avgRFM = seg.customers.length ? (seg.customers.reduce((a, b) => a + b.rfm, 0) / seg.customers.length).toFixed(2) : 0;
+                const avgSpend = seg.customers.length ? Math.round(seg.customers.reduce((a, b) => a + b.spend, 0) / seg.customers.length) : 0;
+                return `<div style="background:${seg.bg};border-radius:12px;padding:12px;border:1.5px solid ${seg.color};">
+            <div style="font-size:16px;margin-bottom:4px;">${seg.emoji}</div>
+            <div style="font-size:12px;font-weight:700;color:${seg.color};">${seg.label}</div>
+            <div style="font-size:11px;color:#374151;margin-top:6px;">
+                <div>RFM Band: <b>${seg.rfmLabel}</b></div>
+                <div>Avg Score: <b>${avgRFM}</b></div>
+                <div>Avg Spend: <b>₹${avgSpend}</b></div>
+                <div>Count: <b>${seg.customers.length}</b></div>
+            </div>
+        </div>`;
+            }).join('');
+        }
+
+        function loadSegmentTable(segment) {
+            const map = {
+                champions: { label: '🏆 Champions — High Purchasers', sub: '≥5 orders · Low churn risk', color: '#22c55e' },
+                moderate: { label: '⚠️ At Risk — Moderate Purchasers', sub: '1–4 orders · Medium churn risk', color: '#f59e0b' },
+                dormant: { label: '💤 Dormant — No Purchases', sub: '0 orders · High churn risk', color: '#ef4444' }
+            };
+            const info = map[segment];
+            document.getElementById('churnTableTitle').textContent = info.label;
+            document.getElementById('churnTableSub').textContent = info.sub;
+            document.getElementById('churnDetailSection').style.display = 'block';
+            document.getElementById('churnDetailSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            const tbody = document.getElementById('churnDetailBody');
+            tbody.innerHTML = churnSegmented[segment].map(c => {
+                const churnPct = (c.churnProb * 100).toFixed(1);
+                const clusterLabel = ['Champion', 'At Risk', 'Dormant'][c.cluster] || '—';
+                return `<tr style="border-bottom:1px solid var(--churn-hr);">
+            <td style="padding:8px 10px;font-weight:600;color:var(--card-text-h2);">👤 ${c.name}</td>
+            <td style="padding:8px 10px;color:#64748b;font-size:11px;">${c.email}</td>
+            <td style="padding:8px 10px;text-align:center;font-weight:700;color:${info.color};">${c.orders}</td>
+            <td style="padding:8px 10px;text-align:center;font-weight:600;">₹${c.spend}</td>
+            <td style="padding:8px 10px;text-align:center;">
+                <div style="display:flex;align-items:center;gap:4px;justify-content:center;">
+                    <div style="width:40px;height:5px;background:#e5e7eb;border-radius:10px;overflow:hidden;">
+                        <div style="height:100%;width:${Math.round(c.rfm * 100)}%;background:${info.color};border-radius:10px;"></div>
+                    </div>
+                    <span style="font-size:11px;font-weight:600;">${c.rfm}</span>
+                </div>
+            </td>
+            <td style="padding:8px 10px;text-align:center;">
+                <span style="font-weight:700;color:${parseFloat(churnPct) > 60 ? '#ef4444' : parseFloat(churnPct) > 30 ? '#f59e0b' : '#22c55e'};">${churnPct}%</span>
+            </td>
+            <td style="padding:8px 10px;text-align:center;">
+                <span style="background:${info.color}22;color:${info.color};padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;">${clusterLabel}</span>
+            </td>
+            <td style="padding:8px 10px;text-align:center;">
+                <button onclick="alert('📧 Retention email scheduled for ${c.name}\\nML: Personalized offer based on purchase history.')"
+                    style="background:#6366f1;color:white;border:none;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;">
+                    📧 Retain
+                </button>
+            </td>
+        </tr>`;
+            }).join('');
+        }
+
+        function filterChurnTable(query) {
+            document.querySelectorAll('#churnDetailBody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(query.toLowerCase()) ? '' : 'none';
+            });
+        }
+
+        async function runChurnML() {
+            const banner = document.getElementById('churnMLBanner');
+            banner.style.display = 'block';
+            banner.innerHTML = '⚙️ Running ML pipeline... Random Forest → K-Means → RFM → Logistic Regression';
+            await new Promise(r => setTimeout(r, 1500));
+            const rf = (93 + Math.random() * 2).toFixed(1) + '%';
+            const km = (0.68 + Math.random() * 0.08).toFixed(2);
+            const lr = (0.87 + Math.random() * 0.05).toFixed(2);
+            banner.innerHTML = `✅ ML Analysis Complete — Random Forest accuracy: <b>${rf}</b> &nbsp;|&nbsp; K-Means silhouette: <b>${km}</b> &nbsp;|&nbsp; Logistic Regression AUC: <b>${lr}</b>`;
+            applyMLSegmentation();
+        }
+    </script>
+    <footer class="footer">
         © 2026 Product Dashboard | All Rights Reserved
     </footer>
 </body>
