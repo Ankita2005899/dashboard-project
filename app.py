@@ -4763,6 +4763,48 @@ def purchased_analytics():
         if conn: conn.close()
 
 
+
+#-----------------view card madhe purchased card store rahneya sathi ------------------------
+
+
+@app.route("/get-purchased-items")
+def get_purchased_items():
+    if "user_id" not in session or "username" not in session:
+        return jsonify([])
+
+    user_id = session["user_id"]
+    username = session["username"]
+    table_name = get_cart_table_name(username, user_id)
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute(f"""
+            SELECT * FROM `{table_name}` 
+            WHERE mode = 'successful' 
+            ORDER BY date DESC
+        """)
+        items = cursor.fetchall()
+
+        for row in items:
+            img = row.get("image")
+            if img:
+                row["image"] = img if (img.startswith("http") or img.startswith("/static")) else f"/static/products/{img}"
+            else:
+                row["image"] = "/static/products/default.png"
+
+            row["date"] = row["date"].strftime("%Y-%m-%d") if row.get("date") else ""
+
+    except Exception as e:
+        print("Purchased fetch error:", e)
+        items = []
+    finally:
+        cursor.close()
+        db.close()
+
+    return jsonify(items)
+
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
