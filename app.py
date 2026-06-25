@@ -4928,8 +4928,60 @@ def monthly_analysis():
         all_cart = [v["cart"] for v in aggregated.values()]
         all_purchase = [v["purchased"] for v in aggregated.values()]
         max_s = max(all_search) if all_search else 1
-        max_c = max(all_cart) if all_cart
+        max_c = max(all_cart) if all_cart else 1
+        max_p = max(all_purchase) if all_purchase else 1
 
+        results = []
+        for pname, bucket in aggregated.items():
+            if bucket["search"] == 0 and bucket["cart"] == 0 and bucket["purchased"] == 0:
+                continue
+
+            # ✅ ML 2: Conversion Rate
+            search_to_cart = round((bucket["cart"] / bucket["search"] * 100), 1) if bucket["search"] > 0 else 0
+            cart_to_purchase = round((bucket["purchased"] / bucket["cart"] * 100), 1) if bucket["cart"] > 0 else 0
+
+            # ✅ ML 3: Weighted Growth Score
+            norm_s = bucket["search"] / max_s
+            norm_c = bucket["cart"] / max_c
+            norm_p = bucket["purchased"] / max_p
+            growth_score = round((norm_s * 0.3 + norm_c * 0.3 + norm_p * 0.4) * 100, 1)
+
+            # ✅ ML 4: Trend Classification
+            if growth_score >= 70:
+                trend = "🔥 Hot"
+            elif growth_score >= 40:
+                trend = "📈 Rising"
+            elif bucket["search"] > 0 and bucket["purchased"] == 0:
+                trend = "⚠️ No Purchase"
+            elif growth_score >= 10:
+                trend = "➡️ Stable"
+            else:
+                trend = "📉 Low"
+
+            # ✅ ML 5: Anomaly Detection
+            anomaly = bucket["search"] >= 3 and bucket["purchased"] == 0
+
+            results.append({
+                "product_name": pname,
+                "category": bucket["category"],
+                "search": bucket["search"],
+                "cart": bucket["cart"],
+                "purchased": bucket["purchased"],
+                "growth_score": growth_score,
+                "search_to_cart_rate": search_to_cart,
+                "cart_to_purchase_rate": cart_to_purchase,
+                "trend": trend,
+                "anomaly": anomaly
+            })
+
+        results.sort(key=lambda x: x["growth_score"], reverse=True)
+        return jsonify(results)
+
+    except Exception as e:
+        return jsonify([]), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 # ============================================================
 # STATIC FILE SERVING
