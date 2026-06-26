@@ -236,12 +236,11 @@
             margin-top: 2px;
         }
 
-        /* ===== MAIN CHART AREA ===== */
         .chart-wrapper {
             display: flex;
             gap: 20px;
             align-items: stretch;
-            height: 260px;
+            height: 380px;
         }
 
         .card {
@@ -285,14 +284,15 @@
             display: flex;
             flex-direction: column;
             gap: 0;
-            padding: 14px 10px;
+            padding: 20px 10px;
             align-items: center;
             background: var(--card-bg);
             border: 2px solid var(--card-border);
             border-radius: 14px;
             box-shadow: var(--card-shadow);
-            width: 100px;
+            width: 110px;
             justify-content: space-evenly;
+            flex-shrink: 0;
         }
 
         .shape-label-top {
@@ -526,266 +526,267 @@
                 <div class="chart-panel active" id="panel-0">
                     <div class="card-title">📉 Full Funnel Trend</div>
                     <div class="card-sub">Search → Add to Cart → Purchase per product</div>
-                    <canvas id="lineChart" height="150" style="max-height:150px;"></canvas>
+                    <canvas id="lineChart" height="280" style="max-height:280px;"></canvas>
+
+                    <!-- Panel 1: Doughnut -->
+                    <div class="chart-panel" id="panel-1">
+                        <div class="card-title">🎯 Conversion Funnel</div>
+                        <div class="card-sub">Search → Cart → Purchase drop-off rates</div>
+                        <canvas id="funnelDoughnut" height="280" style="max-height:280px;"></canvas>
+
+
+
+                        <div class="insight-row" id="conversionInsights"></div>
+                    </div>
+
+                    <!-- Panel 2: Horizontal Bar -->
+                    <div class="chart-panel" id="panel-2">
+                        <div class="card-title">🏆 Top Products Ranking</div>
+                        <div class="card-sub">Ranked by ML engagement score</div>
+                        <canvas id="rankBar" height="280" style="max-height:280px;"></canvas>
+
+
+
+                    </div>
+
+                    <!-- Panel 3: Radar -->
+                    <div class="chart-panel" id="panel-3">
+                        <div class="card-title">🕸️ Product Behaviour Radar</div>
+                        <div class="card-sub">Multi-axis engagement for top 5 products</div>
+                        <canvas id="radarChart" height="280" style="max-height:280px;"></canvas>
+
+                    </div>
+
                 </div>
 
-                <!-- Panel 1: Doughnut -->
-                <div class="chart-panel" id="panel-1">
-                    <div class="card-title">🎯 Conversion Funnel</div>
-                    <div class="card-sub">Search → Cart → Purchase drop-off rates</div>
-                    <canvas id="funnelDoughnut" height="150" style="max-height:150px;"></canvas>
+                <!-- Shape selector panel -->
+                <div class="shape-panel">
+                    <span class="shape-label-top">Views</span>
 
+                    <!-- Circle → Doughnut -->
+                    <button class="shape-btn" onclick="switchPanel(1, this)" title="Conversion Funnel">
+                        <svg class="shape-svg" width="52" height="52" viewBox="0 0 52 52">
+                            <circle cx="26" cy="26" r="22" fill="none" stroke="#4f46e5" stroke-width="3" />
+                            <circle cx="26" cy="26" r="12" fill="none" stroke="#10b981" stroke-width="3" />
+                            <circle cx="26" cy="26" r="4" fill="#f97316" />
+                        </svg>
+                        <span class="shape-name">Funnel</span>
+                    </button>
 
-                    <div class="insight-row" id="conversionInsights"></div>
+                    <!-- Bar shape → Rank Bar -->
+                    <button class="shape-btn" onclick="switchPanel(2, this)" title="Top Products Ranking">
+                        <svg class="shape-svg" width="52" height="52" viewBox="0 0 52 52">
+                            <rect x="6" y="30" width="10" height="16" rx="2" fill="#4f46e5" />
+                            <rect x="21" y="20" width="10" height="26" rx="2" fill="#6366f1" />
+                            <rect x="36" y="10" width="10" height="36" rx="2" fill="#818cf8" />
+                            <line x1="4" y1="46" x2="48" y2="46" stroke="#cbd5e1" stroke-width="1.5" />
+                        </svg>
+                        <span class="shape-name">Rank</span>
+                    </button>
+
+                    <!-- Hexagon → Radar -->
+                    <button class="shape-btn" onclick="switchPanel(3, this)" title="Behaviour Radar">
+                        <svg class="shape-svg" width="52" height="52" viewBox="0 0 52 52">
+                            <polygon points="26,4 46,15 46,37 26,48 6,37 6,15" fill="none" stroke="#4f46e5"
+                                stroke-width="2.5" />
+                            <polygon points="26,14 38,21 38,35 26,42 14,35 14,21" fill="none" stroke="#10b981"
+                                stroke-width="1.5" stroke-dasharray="3,2" />
+                            <polygon points="26,20 33,24 33,32 26,36 19,32 19,24" fill="#f97316" fill-opacity="0.35"
+                                stroke="#f97316" stroke-width="1" />
+                        </svg>
+                        <span class="shape-name">Radar</span>
+                    </button>
+
                 </div>
-
-                <!-- Panel 2: Horizontal Bar -->
-                <div class="chart-panel" id="panel-2">
-                    <div class="card-title">🏆 Top Products Ranking</div>
-                    <div class="card-sub">Ranked by ML engagement score</div>
-                    <canvas id="rankBar" height="150" style="max-height:150px;"></canvas>
-
-
-                </div>
-
-                <!-- Panel 3: Radar -->
-                <div class="chart-panel" id="panel-3">
-                    <div class="card-title">🕸️ Product Behaviour Radar</div>
-                    <div class="card-sub">Multi-axis engagement for top 5 products</div>
-                    <canvas id="radarChart" height="150" style="max-height:150px;"></canvas>
-
-                </div>
-
             </div>
 
-            <!-- Shape selector panel -->
-            <div class="shape-panel">
-                <span class="shape-label-top">Views</span>
-
-                <!-- Circle → Doughnut -->
-                <button class="shape-btn" onclick="switchPanel(1, this)" title="Conversion Funnel">
-                    <svg class="shape-svg" width="52" height="52" viewBox="0 0 52 52">
-                        <circle cx="26" cy="26" r="22" fill="none" stroke="#4f46e5" stroke-width="3" />
-                        <circle cx="26" cy="26" r="12" fill="none" stroke="#10b981" stroke-width="3" />
-                        <circle cx="26" cy="26" r="4" fill="#f97316" />
-                    </svg>
-                    <span class="shape-name">Funnel</span>
-                </button>
-
-                <!-- Bar shape → Rank Bar -->
-                <button class="shape-btn" onclick="switchPanel(2, this)" title="Top Products Ranking">
-                    <svg class="shape-svg" width="52" height="52" viewBox="0 0 52 52">
-                        <rect x="6" y="30" width="10" height="16" rx="2" fill="#4f46e5" />
-                        <rect x="21" y="20" width="10" height="26" rx="2" fill="#6366f1" />
-                        <rect x="36" y="10" width="10" height="36" rx="2" fill="#818cf8" />
-                        <line x1="4" y1="46" x2="48" y2="46" stroke="#cbd5e1" stroke-width="1.5" />
-                    </svg>
-                    <span class="shape-name">Rank</span>
-                </button>
-
-                <!-- Hexagon → Radar -->
-                <button class="shape-btn" onclick="switchPanel(3, this)" title="Behaviour Radar">
-                    <svg class="shape-svg" width="52" height="52" viewBox="0 0 52 52">
-                        <polygon points="26,4 46,15 46,37 26,48 6,37 6,15" fill="none" stroke="#4f46e5"
-                            stroke-width="2.5" />
-                        <polygon points="26,14 38,21 38,35 26,42 14,35 14,21" fill="none" stroke="#10b981"
-                            stroke-width="1.5" stroke-dasharray="3,2" />
-                        <polygon points="26,20 33,24 33,32 26,36 19,32 19,24" fill="#f97316" fill-opacity="0.35"
-                            stroke="#f97316" stroke-width="1" />
-                    </svg>
-                    <span class="shape-name">Radar</span>
-                </button>
-
+            <!-- Product Intelligence Table (always visible below) -->
+            <div class="card mt20">
+                <div class="card-title">📋 Product Intelligence Table</div>
+                <div class="card-sub">ML scoring: conversion rate, engagement index, Z-score anomaly detection</div>
+                <table class="product-table">
+                    <thead>
+                        <tr>
+                            <th>Sr. No</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>🔍 Searches</th>
+                            <th>🛒 Cart</th>
+                            <th>✅ Purchases</th>
+                            <th>Conversion %</th>
+                            <th>Engagement Score</th>
+                            <th>Anomaly</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <tr>
+                            <td colspan="9" style="color:var(--subtext);padding:20px;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="insight-row" id="mlInsights" style="margin-top:16px;"></div>
             </div>
+
         </div>
 
-        <!-- Product Intelligence Table (always visible below) -->
-        <div class="card mt20">
-            <div class="card-title">📋 Product Intelligence Table</div>
-            <div class="card-sub">ML scoring: conversion rate, engagement index, Z-score anomaly detection</div>
-            <table class="product-table">
-                <thead>
-                    <tr>
-                        <th>Sr. No</th>
-                        <th>Product</th>
-                        <th>Category</th>
-                        <th>🔍 Searches</th>
-                        <th>🛒 Cart</th>
-                        <th>✅ Purchases</th>
-                        <th>Conversion %</th>
-                        <th>Engagement Score</th>
-                        <th>Anomaly</th>
-                    </tr>
-                </thead>
-                <tbody id="productTableBody">
-                    <tr>
-                        <td colspan="9" style="color:var(--subtext);padding:20px;">Loading...</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="insight-row" id="mlInsights" style="margin-top:16px;"></div>
-        </div>
+        <footer class="footer">© 2026 ShopSphere Analytics | All Rights Reserved</footer>
 
-    </div>
+        <script>
+            let lineChart = null, rankBar = null, funnelDoughnut = null, radarChart = null;
+            let activePanel = 0;
 
-    <footer class="footer">© 2026 ShopSphere Analytics | All Rights Reserved</footer>
-
-    <script>
-        let lineChart = null, rankBar = null, funnelDoughnut = null, radarChart = null;
-        let activePanel = 0;
-
-        // ── Switch panel ──────────────────────────────────────────────────────────────
-        function switchPanel(index, btn) {
-            document.querySelectorAll('.chart-panel').forEach((p, i) => {
-                p.classList.toggle('active', i === index);
-            });
-            document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-            activePanel = index;
-
-            // Trigger chart resize after display change
-            setTimeout(() => {
-                [lineChart, funnelDoughnut, rankBar, radarChart].forEach(c => { if (c) c.resize(); });
-            }, 50);
-        }
-
-        // ── ML helpers ────────────────────────────────────────────────────────────────
-        function mergeByName(searchData, cartData, purchaseData) {
-            const map = {};
-            searchData.forEach(d => {
-                const k = d.name;
-                if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
-                map[k].search += d.searched_count || 0;
-            });
-            cartData.forEach(d => {
-                const k = d.name;
-                if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
-                map[k].cart += d.count || 0;
-            });
-            purchaseData.forEach(d => {
-                const k = d.product_name;
-                if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
-                map[k].purchase += d.purchase_count || 0;
-            });
-            return Object.values(map).filter(r => r.search + r.cart + r.purchase > 0);
-        }
-
-        function conversionRate(n, d) { return !d ? 0 : Math.round((n / d) * 100); }
-        function engagementScore(r) { return Math.round(r.search * 1 + r.cart * 2 + r.purchase * 4); }
-
-        function anomalyFlags(rows, key) {
-            const vals = rows.map(r => r[key]);
-            const mean = vals.reduce((a, b) => a + b, 0) / (vals.length || 1);
-            const std = Math.sqrt(vals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (vals.length || 1));
-            return rows.map(r => std > 0 ? Math.abs((r[key] - mean) / std) > 1.8 : false);
-        }
-
-        // ── Main load ─────────────────────────────────────────────────────────────────
-        async function loadAll() {
-            try {
-                const [res1, res2, res3] = await Promise.all([
-                    fetch("/products/search-user"),
-                    fetch("/user-addtocart-trend-xml"),
-                    fetch("/get-purchase-data")
-                ]);
-
-                const searchData = await res1.json();
-
-                const xmlText = await res2.text();
-                const xml = new DOMParser().parseFromString(xmlText, "text/xml");
-                const cartData = Array.from(xml.getElementsByTagName("record")).map(r => ({
-                    name: r.getElementsByTagName("name")[0]?.textContent || "",
-                    category: r.getElementsByTagName("category")[0]?.textContent || "",
-                    count: parseInt(r.getElementsByTagName("count")[0]?.textContent || "0")
-                }));
-
-                const purchaseData = await res3.json();
-
-                const merged = mergeByName(searchData, cartData, purchaseData);
-                merged.sort((a, b) => engagementScore(b) - engagementScore(a));
-
-                const totalSearch = merged.reduce((s, r) => s + r.search, 0);
-                const totalCart = merged.reduce((s, r) => s + r.cart, 0);
-                const totalPurchase = merged.reduce((s, r) => s + r.purchase, 0);
-                document.getElementById("kpi-search").textContent = totalSearch;
-                document.getElementById("kpi-cart").textContent = totalCart;
-                document.getElementById("kpi-purchase").textContent = totalPurchase;
-
-                const labels = merged.map(r => r.name);
-                const searches = merged.map(r => r.search);
-                const carts = merged.map(r => r.cart);
-                const purchases = merged.map(r => r.purchase);
-
-                // Chart 0: Full Funnel Line (default)
-                const ctx1 = document.getElementById("lineChart").getContext("2d");
-                if (lineChart) lineChart.destroy();
-                lineChart = new Chart(ctx1, {
-                    type: "line",
-                    data: {
-                        labels,
-                        datasets: [
-                            { label: "🔍 Search", data: searches, borderColor: "#f97316", backgroundColor: "rgba(249,115,22,0.12)", tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: "#f97316", borderWidth: 2 },
-                            { label: "🛒 Add to Cart", data: carts, borderColor: "#4f46e5", backgroundColor: "rgba(79,70,229,0.12)", tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: "#4f46e5", borderWidth: 2 },
-                            { label: "✅ Purchase", data: purchases, borderColor: "#10b981", backgroundColor: "rgba(16,185,129,0.12)", tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: "#10b981", borderWidth: 2 }
-                        ]
-                    },
-                    options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } }, plugins: { legend: { position: "top" } } }
+            // ── Switch panel ──────────────────────────────────────────────────────────────
+            function switchPanel(index, btn) {
+                document.querySelectorAll('.chart-panel').forEach((p, i) => {
+                    p.classList.toggle('active', i === index);
                 });
+                document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+                if (btn) btn.classList.add('active');
+                activePanel = index;
 
-                // Chart 1: Doughnut
-                const s2cRate = conversionRate(totalCart, totalSearch);
-                const c2pRate = conversionRate(totalPurchase, totalCart);
-                const dropOff = Math.max(0, 100 - s2cRate);
-                const ctx3 = document.getElementById("funnelDoughnut").getContext("2d");
-                if (funnelDoughnut) funnelDoughnut.destroy();
-                funnelDoughnut = new Chart(ctx3, {
-                    type: "doughnut",
-                    data: { labels: ["Search→Cart %", "Cart→Purchase %", "Drop-off %"], datasets: [{ data: [s2cRate, c2pRate, dropOff], backgroundColor: ["#4f46e5", "#10b981", "#f87171"], borderWidth: 2 }] },
-                    options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+                // Trigger chart resize after display change
+                setTimeout(() => {
+                    [lineChart, funnelDoughnut, rankBar, radarChart].forEach(c => { if (c) c.resize(); });
+                }, 50);
+            }
+
+            // ── ML helpers ────────────────────────────────────────────────────────────────
+            function mergeByName(searchData, cartData, purchaseData) {
+                const map = {};
+                searchData.forEach(d => {
+                    const k = d.name;
+                    if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
+                    map[k].search += d.searched_count || 0;
                 });
-                document.getElementById("conversionInsights").innerHTML = `
+                cartData.forEach(d => {
+                    const k = d.name;
+                    if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
+                    map[k].cart += d.count || 0;
+                });
+                purchaseData.forEach(d => {
+                    const k = d.product_name;
+                    if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
+                    map[k].purchase += d.purchase_count || 0;
+                });
+                return Object.values(map).filter(r => r.search + r.cart + r.purchase > 0);
+            }
+
+            function conversionRate(n, d) { return !d ? 0 : Math.round((n / d) * 100); }
+            function engagementScore(r) { return Math.round(r.search * 1 + r.cart * 2 + r.purchase * 4); }
+
+            function anomalyFlags(rows, key) {
+                const vals = rows.map(r => r[key]);
+                const mean = vals.reduce((a, b) => a + b, 0) / (vals.length || 1);
+                const std = Math.sqrt(vals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (vals.length || 1));
+                return rows.map(r => std > 0 ? Math.abs((r[key] - mean) / std) > 1.8 : false);
+            }
+
+            // ── Main load ─────────────────────────────────────────────────────────────────
+            async function loadAll() {
+                try {
+                    const [res1, res2, res3] = await Promise.all([
+                        fetch("/products/search-user"),
+                        fetch("/user-addtocart-trend-xml"),
+                        fetch("/get-purchase-data")
+                    ]);
+
+                    const searchData = await res1.json();
+
+                    const xmlText = await res2.text();
+                    const xml = new DOMParser().parseFromString(xmlText, "text/xml");
+                    const cartData = Array.from(xml.getElementsByTagName("record")).map(r => ({
+                        name: r.getElementsByTagName("name")[0]?.textContent || "",
+                        category: r.getElementsByTagName("category")[0]?.textContent || "",
+                        count: parseInt(r.getElementsByTagName("count")[0]?.textContent || "0")
+                    }));
+
+                    const purchaseData = await res3.json();
+
+                    const merged = mergeByName(searchData, cartData, purchaseData);
+                    merged.sort((a, b) => engagementScore(b) - engagementScore(a));
+
+                    const totalSearch = merged.reduce((s, r) => s + r.search, 0);
+                    const totalCart = merged.reduce((s, r) => s + r.cart, 0);
+                    const totalPurchase = merged.reduce((s, r) => s + r.purchase, 0);
+                    document.getElementById("kpi-search").textContent = totalSearch;
+                    document.getElementById("kpi-cart").textContent = totalCart;
+                    document.getElementById("kpi-purchase").textContent = totalPurchase;
+
+                    const labels = merged.map(r => r.name);
+                    const searches = merged.map(r => r.search);
+                    const carts = merged.map(r => r.cart);
+                    const purchases = merged.map(r => r.purchase);
+
+                    // Chart 0: Full Funnel Line (default)
+                    const ctx1 = document.getElementById("lineChart").getContext("2d");
+                    if (lineChart) lineChart.destroy();
+                    lineChart = new Chart(ctx1, {
+                        type: "line",
+                        data: {
+                            labels,
+                            datasets: [
+                                { label: "🔍 Search", data: searches, borderColor: "#f97316", backgroundColor: "rgba(249,115,22,0.12)", tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: "#f97316", borderWidth: 2 },
+                                { label: "🛒 Add to Cart", data: carts, borderColor: "#4f46e5", backgroundColor: "rgba(79,70,229,0.12)", tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: "#4f46e5", borderWidth: 2 },
+                                { label: "✅ Purchase", data: purchases, borderColor: "#10b981", backgroundColor: "rgba(16,185,129,0.12)", tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: "#10b981", borderWidth: 2 }
+                            ]
+                        },
+                        options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } }, plugins: { legend: { position: "top" } } }
+                    });
+
+                    // Chart 1: Doughnut
+                    const s2cRate = conversionRate(totalCart, totalSearch);
+                    const c2pRate = conversionRate(totalPurchase, totalCart);
+                    const dropOff = Math.max(0, 100 - s2cRate);
+                    const ctx3 = document.getElementById("funnelDoughnut").getContext("2d");
+                    if (funnelDoughnut) funnelDoughnut.destroy();
+                    funnelDoughnut = new Chart(ctx3, {
+                        type: "doughnut",
+                        data: { labels: ["Search→Cart %", "Cart→Purchase %", "Drop-off %"], datasets: [{ data: [s2cRate, c2pRate, dropOff], backgroundColor: ["#4f46e5", "#10b981", "#f87171"], borderWidth: 2 }] },
+                        options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+                    });
+                    document.getElementById("conversionInsights").innerHTML = `
             <span class="insight-badge badge-blue">🔍→🛒 ${s2cRate}% conversion</span>
             <span class="insight-badge ${c2pRate >= 50 ? 'badge-green' : 'badge-orange'}">🛒→✅ ${c2pRate}% conversion</span>
             <span class="insight-badge ${dropOff > 60 ? 'badge-red' : 'badge-green'}">📉 ${dropOff}% drop-off</span>`;
 
-                // Chart 2: Horizontal Rank Bar
-                const scores = merged.map(r => engagementScore(r));
-                const ctx2 = document.getElementById("rankBar").getContext("2d");
-                if (rankBar) rankBar.destroy();
-                rankBar = new Chart(ctx2, {
-                    type: "bar",
-                    data: { labels, datasets: [{ label: "Engagement Score", data: scores, backgroundColor: labels.map((_, i) => `hsl(${220 + i * 30},70%,55%)`), borderRadius: 6, borderWidth: 0 }] },
-                    options: { responsive: true, indexAxis: "y", scales: { x: { beginAtZero: true } }, plugins: { legend: { display: false } } }
-                });
+                    // Chart 2: Horizontal Rank Bar
+                    const scores = merged.map(r => engagementScore(r));
+                    const ctx2 = document.getElementById("rankBar").getContext("2d");
+                    if (rankBar) rankBar.destroy();
+                    rankBar = new Chart(ctx2, {
+                        type: "bar",
+                        data: { labels, datasets: [{ label: "Engagement Score", data: scores, backgroundColor: labels.map((_, i) => `hsl(${220 + i * 30},70%,55%)`), borderRadius: 6, borderWidth: 0 }] },
+                        options: { responsive: true, indexAxis: "y", scales: { x: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+                    });
 
-                // Chart 3: Radar top 5
-                const top5 = merged.slice(0, 5);
-                const ctx4 = document.getElementById("radarChart").getContext("2d");
-                if (radarChart) radarChart.destroy();
-                radarChart = new Chart(ctx4, {
-                    type: "radar",
-                    data: {
-                        labels: ["Search", "Add to Cart", "Purchase", "Engagement", "Conv. Rate"],
-                        datasets: top5.map((r, i) => ({
-                            label: r.name,
-                            data: [r.search, r.cart, r.purchase, engagementScore(r), conversionRate(r.purchase, r.search)],
-                            borderColor: `hsl(${i * 60},70%,55%)`,
-                            backgroundColor: `hsla(${i * 60},70%,55%,0.15)`,
-                            pointRadius: 4
-                        }))
-                    },
-                    options: { responsive: true, scales: { r: { beginAtZero: true } }, plugins: { legend: { position: "bottom" } } }
-                });
+                    // Chart 3: Radar top 5
+                    const top5 = merged.slice(0, 5);
+                    const ctx4 = document.getElementById("radarChart").getContext("2d");
+                    if (radarChart) radarChart.destroy();
+                    radarChart = new Chart(ctx4, {
+                        type: "radar",
+                        data: {
+                            labels: ["Search", "Add to Cart", "Purchase", "Engagement", "Conv. Rate"],
+                            datasets: top5.map((r, i) => ({
+                                label: r.name,
+                                data: [r.search, r.cart, r.purchase, engagementScore(r), conversionRate(r.purchase, r.search)],
+                                borderColor: `hsl(${i * 60},70%,55%)`,
+                                backgroundColor: `hsla(${i * 60},70%,55%,0.15)`,
+                                pointRadius: 4
+                            }))
+                        },
+                        options: { responsive: true, scales: { r: { beginAtZero: true } }, plugins: { legend: { position: "bottom" } } }
+                    });
 
-                // Product Intelligence Table
-                const anomalies = anomalyFlags(merged, "search");
-                const tbody = document.getElementById("productTableBody");
-                tbody.innerHTML = "";
-                merged.forEach((r, i) => {
-                    const cvr = conversionRate(r.purchase, r.search);
-                    const eng = engagementScore(r);
-                    const isAnomaly = anomalies[i];
-                    tbody.innerHTML += `
+                    // Product Intelligence Table
+                    const anomalies = anomalyFlags(merged, "search");
+                    const tbody = document.getElementById("productTableBody");
+                    tbody.innerHTML = "";
+                    merged.forEach((r, i) => {
+                        const cvr = conversionRate(r.purchase, r.search);
+                        const eng = engagementScore(r);
+                        const isAnomaly = anomalies[i];
+                        tbody.innerHTML += `
                 <tr>
                     <td>${i + 1}</td>
                     <td><strong>${r.name}</strong></td>
@@ -802,25 +803,25 @@
                     </td>
                     <td>${isAnomaly ? '<span class="insight-badge badge-red" style="font-size:11px;">⚠️ Spike</span>' : '<span class="insight-badge badge-green" style="font-size:11px;">✅ Normal</span>'}</td>
                 </tr>`;
-                });
+                    });
 
-                const topProduct = merged[0];
-                const highDrop = merged.filter(r => conversionRate(r.purchase, r.search) < 20 && r.search > 0);
-                document.getElementById("mlInsights").innerHTML = `
+                    const topProduct = merged[0];
+                    const highDrop = merged.filter(r => conversionRate(r.purchase, r.search) < 20 && r.search > 0);
+                    document.getElementById("mlInsights").innerHTML = `
             ${topProduct ? `<span class="insight-badge badge-green">🏆 Top: ${topProduct.name} (score ${engagementScore(topProduct)})</span>` : ""}
             ${highDrop.length ? `<span class="insight-badge badge-orange">⚠️ Low conversion: ${highDrop.map(r => r.name).join(", ")}</span>` : ""}
             ${totalPurchase === 0 ? `<span class="insight-badge badge-red">❌ No purchases recorded yet</span>` : ""}
             <span class="insight-badge badge-blue">🤖 Z-score anomaly detection active</span>
             <span class="insight-badge badge-blue">📊 Score = Search×1 + Cart×2 + Purchase×4</span>`;
 
-            } catch (err) {
-                console.error("Analytics load error:", err);
+                } catch (err) {
+                    console.error("Analytics load error:", err);
+                }
             }
-        }
 
-        window.onload = loadAll;
-        setInterval(loadAll, 10000);
-    </script>
+            window.onload = loadAll;
+            setInterval(loadAll, 10000);
+        </script>
 </body>
 
 </html>
