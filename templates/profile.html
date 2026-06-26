@@ -766,14 +766,14 @@
 
 
     </div>
-    <!-- YOUR ITEMS DETAIL POPUP -->
     <div id="yourItemDetailPopup" style="display:none;position:fixed;inset:0;z-index:9999;
-    background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);justify-content:center;align-items:center;">
-        <div style="background:white;width:92%;max-width:480px;border-radius:20px;padding:24px;
-        box-shadow:0 20px 60px rgba(0,0,0,0.25);position:relative;max-height:90vh;overflow-y:auto;">
+    background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);justify-content:center;align-items:center;">
+        <div style="background:white;width:95%;max-width:720px;border-radius:20px;padding:30px;
+        box-shadow:0 24px 70px rgba(0,0,0,0.3);position:relative;max-height:90vh;overflow-y:auto;
+        border:2px solid #e0e7ff;">
             <button onclick="document.getElementById('yourItemDetailPopup').style.display='none'" style="position:absolute;top:14px;right:14px;background:#f1f5f9;border:none;
-            border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;
-            display:flex;align-items:center;justify-content:center;">✕</button>
+            border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;z-index:10;">✕</button>
             <div id="yourItemDetailContent"></div>
         </div>
     </div>
@@ -1026,25 +1026,37 @@
             const p = JSON.parse(decodeURIComponent(escape(atob(safeP))));
             const addedDate = p.uploaded_at ? new Date(p.uploaded_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
             document.getElementById('yourItemDetailContent').innerHTML = `
-                <div style="text-align:center;margin-bottom:16px;">
-                    ${p.image_url
-                    ? `<img src="${p.image_url}" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;">`
-                    : '<div style="font-size:60px;margin:20px 0;">🛍️</div>'}
+                <div style="display:flex;gap:20px;margin-bottom:16px;align-items:flex-start;">
+                    <!-- Left: image -->
+                    <div style="flex-shrink:0;width:180px;height:180px;border-radius:14px;overflow:hidden;background:#f8fafc;border:1.5px solid #e0e7ff;">
+                        ${p.image_url
+                    ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">`
+                    : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:52px;">🛍️</div>'}
+                    </div>
+                    <!-- Right: info -->
+                    <div style="flex:1;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+                            <span style="background:#6366f1;color:white;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">${p.category || 'Item'}</span>
+                            <span style="font-size:11px;color:#94a3b8;">📅 Added: <b>${addedDate}</b></span>
+                        </div>
+                        <h2 style="margin:0 0 6px;font-size:20px;color:#0f172a;font-weight:800;">${p.name}</h2>
+                        <div style="font-size:26px;font-weight:800;color:#6366f1;margin-bottom:10px;">₹${p.price}</div>
+                        <span style="background:${p.quantity > 0 ? '#dcfce7' : '#fee2e2'};color:${p.quantity > 0 ? '#15803d' : '#b91c1c'};
+                            padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;">
+                            ${p.quantity > 0 ? '✅ Available: ' + p.quantity : '❌ Out of Stock'}
+                        </span>
+                        ${p.address ? `<p style="font-size:12px;color:#94a3b8;margin-top:8px;">📍 ${p.address}</p>` : ''}
+                    </div>
                 </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-                    <span style="background:#6366f1;color:white;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">
-                        ${p.category || 'Item'}
-                    </span>
-                    <span style="font-size:11px;color:#94a3b8;">📅 Added: <b>${addedDate}</b></span>
-                </div>
-                <h2 style="margin:8px 0 4px;font-size:20px;color:#0f172a;">${p.name}</h2>
-                <div style="font-size:24px;font-weight:800;color:#6366f1;margin-bottom:8px;">₹${p.price}</div>
-                <span style="background:${p.quantity > 0 ? '#dcfce7' : '#fee2e2'};color:${p.quantity > 0 ? '#15803d' : '#b91c1c'};
-                    padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;">
-                    ${p.quantity > 0 ? '✅ Available: ' + p.quantity : '❌ Out of Stock'}
-                </span>
-                ${p.description ? `<p style="color:#64748b;font-size:13px;line-height:1.6;margin:12px 0;">${p.description}</p>` : ''}
-                ${p.address ? `<p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">📍 ${p.address}</p>` : ''}
+${p.description ? `
+                <div style="margin:12px 0;">
+                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:6px;">Description</div>
+                    <p style="color:#475569;font-size:13px;line-height:1.7;background:#f8fafc;
+                    border-radius:10px;padding:12px 14px;border-left:3px solid #6366f1;
+                    max-height:120px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;">
+                    ${p.description.replace(/Made of:.*?Title:/s, '').replace(/Description \(SEO Optimized\)/g, '').trim()}
+                    </p>
+                </div>` : ''}              
 
                 <!-- Activity Analytics -->
                 <div style="background:#f8fafc;border-radius:12px;padding:14px;margin-top:12px;">
