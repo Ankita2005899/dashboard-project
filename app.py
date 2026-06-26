@@ -5135,6 +5135,26 @@ def all_products():
         your_item_table = f"{uname}_{uid}_your_item"
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
+
+        # Auto-create table if it doesn't exist (for users created before this feature)
+        cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS `{your_item_table}` (
+                id            INT AUTO_INCREMENT PRIMARY KEY,
+                store_data_id INT,
+                category      VARCHAR(20),
+                name          VARCHAR(255),
+                image         VARCHAR(255),
+                video         VARCHAR(255),
+                price         DECIMAL(10,2),
+                availability  INT,
+                detail        TEXT,
+                address       VARCHAR(255),
+                quantity      INT DEFAULT 1,
+                uploaded_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+
         cursor.execute(f"""
             SELECT id, category, name, image, price,
                    availability, detail, address, quantity
