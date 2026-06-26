@@ -5052,27 +5052,19 @@ def api_churn_customers():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Step 1: Get ALL tables from DB
     cursor.execute("""
         SELECT TABLE_NAME FROM information_schema.tables
         WHERE TABLE_SCHEMA = DATABASE()
     """)
     all_tables = [row['TABLE_NAME'] for row in cursor.fetchall()]
 
-    # Step 2: Separate activity tables and customer tables
     activity_tables = [t for t in all_tables if t.endswith('_product_activity')]
-    
-    # Step 3: Build a smart map — strip '_product_activity' to find base name
-    # e.g. "Ankita Bandal_1_product_activity" → base = "Ankita Bandal_1"
+
     activity_base_map = {}
     for at in activity_tables:
         base = at.replace('_product_activity', '')
         activity_base_map[base.lower().replace(' ', '_')] = at
-    # activity_base_map now looks like:
-    # { "ankita_bandal_1": "ankita_bandal_1_product_activity",
-    #   "ankita_bandal_1": "Ankita Bandal_1_product_activity", ... }
 
-    # Step 4: Get customer tables (has digit at end, not activity table)
     skip_tables = {
         'user', 'user_activity', 'user_signout_logs', 'user_survey',
         'user_template', 'deleted_users', 'deleted_customers',
@@ -5081,7 +5073,8 @@ def api_churn_customers():
         'strong_password', 'StrongPassword', 'sample', 'save_detail',
         'category_requests', 'support_sd', 'product_availability',
         'product_availability_sql', 'vc_product_availability',
-        'yourusername_1_product_activity', 'BANDAl_7_product_activity'
+        'yourusername_1_product_activity', 'BANDAl_7_product_activity',
+        'special_offers'
     }
 
     customer_tables = []
@@ -5092,10 +5085,18 @@ def api_churn_customers():
             continue
         if t.endswith('_your_item'):
             continue
-        # Must end with _<number>
         parts = t.rsplit('_', 1)
         if len(parts) == 2 and parts[1].isdigit():
             customer_tables.append(t)
+
+    # ── Pre-fetch which activity tables have add_to_cart_date_time ──
+    cursor.execute("""
+        SELECT TABLE_NAME FROM information_schema.columns
+        WHERE TABLE_SCHEMA = DATABASE()
+        AND COLUMN_NAME = 'add_to_cart_date_time'
+        AND TABLE_NAME LIKE '%_product_activity'
+    """)
+    tables_with_datetime = {row['TABLE_NAME'] for row in cursor.fetchall()}
 
     customers = []
 
@@ -5104,11 +5105,9 @@ def api_churn_customers():
         uid           = int(parts[1])
         username_part = parts[0]
 
-        # Step 5: Find matching activity table using normalized key
         normalized_key = table.lower().replace(' ', '_')
         activity_table = activity_base_map.get(normalized_key)
 
-        # Step 6: Get one row from customer table for email/name
         try:
             cursor.execute(f"SELECT * FROM `{table}` LIMIT 1")
             user_row = cursor.fetchone()
@@ -5119,7 +5118,6 @@ def api_churn_customers():
 
         email = user_row.get('email', '')
 
-        # Step 7: Pull activity data
         total_orders    = 0
         total_cart      = 0
         total_search    = 0
@@ -5129,13 +5127,19 @@ def api_churn_customers():
 
         if activity_table:
             try:
+                # ── Smart datetime column check ──
+                if activity_table in tables_with_datetime:
+                    datetime_col = 'MAX(add_to_cart_date_time) AS last_activity'
+                else:
+                    datetime_col = 'NULL AS last_activity'
+
                 cursor.execute(f"""
                     SELECT
                         COALESCE(SUM(today_purchase_count), 0)    AS total_orders,
                         COALESCE(SUM(today_add_to_cart_count), 0) AS total_cart,
                         COALESCE(SUM(today_search_count), 0)      AS total_search,
                         COUNT(DISTINCT product_id)                 AS unique_products,
-                        MAX(add_to_cart_date_time)                 AS last_activity
+                        {datetime_col}
                     FROM `{activity_table}`
                 """)
                 act = cursor.fetchone()
@@ -5148,7 +5152,7 @@ def api_churn_customers():
                 if act['last_activity']:
                     days_since = (datetime.utcnow() - act['last_activity']).days
 
-                # Step 8: Spend calculation
+                # Spend calculation
                 cursor.execute(f"""
                     SELECT name,
                            COALESCE(SUM(today_purchase_count), 0) AS purchased
@@ -5192,6 +5196,7 @@ def api_churn_customers():
     cursor.close()
     conn.close()
     return jsonify({'customers': customers})
+
 
 # ── Send Special OR Common offer ───────────────────────────
 @app.route('/api/send-special-offer', methods=['POST'])
