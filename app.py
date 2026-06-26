@@ -5090,11 +5090,11 @@ def get_purchase_data():
 
         # ✅ Successful purchases fetch karo cart table se
         cursor.execute(f"""
-            SELECT product_id, category, date, COUNT(*) as purchase_count
+            SELECT product_id, category, MAX(date) as date, COUNT(*) as purchase_count
             FROM `{cart_table}`
             WHERE mode = 'successful'
             GROUP BY product_id, category
-            ORDER BY date DESC
+            ORDER BY MAX(date) DESC
         """)
         rows = cursor.fetchall()
 
