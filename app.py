@@ -5203,6 +5203,50 @@ def create_user_your_item_table(username, user_id):
     finally:
         cursor.close()
         db.close()
+        
+        
+        
+#-------------------logout process from profile.html page ({sign out")button sathi-------------------- 
+
+
+@app.route('/api/signout-log', methods=['POST'])
+def signout_log():
+    data = request.get_json()
+
+    # Pull server-side values (more trustworthy than client-side)
+    user_id       = session.get('user_id')
+    user_name     = session.get('user_name', '')
+    user_email    = session.get('user_email', '')
+    ip_address    = request.remote_addr
+    session_id    = session.get('session_id') or request.cookies.get('session')
+
+    cursor = db.cursor()
+    cursor.execute("""
+        INSERT INTO user_signout_logs
+            (user_id, user_name, user_email, profile_image,
+             signout_reason, custom_reason,
+             ip_address, user_agent, session_id, signout_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (
+        user_id,
+        user_name,
+        user_email,
+        data.get('profile_image'),
+        data.get('signout_reason'),
+        data.get('custom_reason'),
+        ip_address,
+        data.get('user_agent'),
+        session_id,
+        datetime.datetime.utcnow()
+    ))
+    db.commit()
+
+    return jsonify({'success': True})
+
+
+
+
+       
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================

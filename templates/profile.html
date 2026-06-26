@@ -803,7 +803,7 @@
             </div>
 
             <button class="switch-btn">Switch Account</button>
-            <div class="sign-out">Sign out</div>
+            <div class="sign-out" onclick="openSignoutModal()">Sign out</div>
         </div>
     </div>
 
@@ -1067,7 +1067,204 @@
                 .catch(() => alert('⚠️ Failed to add to cart.'));
         }
     </script>
+<!-- ===== SIGN-OUT REASON MODAL ===== -->
+<div id="signoutOverlay" style="
+    display:none; position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,0.55); backdrop-filter:blur(4px);
+    align-items:center; justify-content:center;">
 
+  <div style="
+      background:#fff; border-radius:18px; padding:28px 28px 22px;
+      width:92%; max-width:440px;
+      box-shadow:0 24px 60px rgba(0,0,0,0.3);
+      border:2px solid #10b981; position:relative;">
+
+    <!-- Header row -->
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+      <div id="soProfilePic" style="
+          width:52px;height:52px;border-radius:50%;
+          background:#e5e7eb;overflow:hidden;flex-shrink:0;
+          border:2px solid #10b981;display:flex;align-items:center;justify-content:center;font-size:26px;">
+        👤
+      </div>
+      <div>
+        <div id="soUserName" style="font-size:16px;font-weight:700;color:#0f172a;">User</div>
+        <div id="soUserEmail" style="font-size:12px;color:#64748b;"></div>
+      </div>
+      <button onclick="closeSignoutModal()" style="
+          margin-left:auto;background:#f1f5f9;border:none;
+          border-radius:50%;width:32px;height:32px;
+          font-size:16px;cursor:pointer;display:flex;
+          align-items:center;justify-content:center;">✕</button>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:#0f172a;margin-bottom:6px;">
+      Why are you signing out?
+    </h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:16px;">
+      Your feedback helps us improve the experience.
+    </p>
+
+    <!-- Reason chips -->
+    <div id="reasonChips" style="display:flex;flex-direction:column;gap:9px;margin-bottom:14px;">
+    </div>
+
+    <!-- Custom reason (shown only for "Other") -->
+    <textarea id="customReasonBox" placeholder="Tell us more…" style="
+        display:none; width:100%; padding:10px 12px;
+        border:1.5px solid #cbd5e1; border-radius:10px;
+        font-size:13px; resize:none; height:76px;
+        margin-bottom:14px; font-family:inherit; color:#0f172a;
+        box-sizing:border-box;"></textarea>
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button onclick="closeSignoutModal()" style="
+          flex:1;padding:11px;border-radius:10px;
+          border:2px solid #e2e8f0;background:#f8fafc;
+          font-size:14px;font-weight:600;cursor:pointer;
+          color:#475569;">Cancel</button>
+
+      <button onclick="confirmSignout()" id="confirmSignoutBtn" style="
+          flex:1;padding:11px;border-radius:10px;
+          border:none;background:linear-gradient(135deg,#ef4444,#dc2626);
+          color:white;font-size:14px;font-weight:700;cursor:pointer;
+          opacity:0.45;pointer-events:none;transition:opacity 0.2s;">
+        Sign out
+      </button>
+    </div>
+
+  </div>
+</div>
+<script>
+// ───────────────────────────────────────────────────────────
+// SIGN-OUT REASON MODAL
+// ───────────────────────────────────────────────────────────
+const SIGNOUT_REASONS = [
+  "I'm done for now",
+  "Switching to another account",
+  "Privacy / Security concern",
+  "Not my device",
+  "App is slow or has a bug",
+  "Other"
+];
+
+let _selectedReason = null;
+
+function openSignoutModal() {
+  // Close popup1 first
+  document.getElementById('popup1').style.display = 'none';
+
+  // Populate user info into modal header
+  const nameEl  = document.getElementById('profileName');
+  const emailEl = document.getElementById('profileEmail');
+  const imgEl   = document.getElementById('mainProfileImg');
+
+  document.getElementById('soUserName').innerText  = nameEl  ? nameEl.innerText  : '';
+  document.getElementById('soUserEmail').innerText = emailEl ? emailEl.innerText : '';
+
+  const pic = document.getElementById('soProfilePic');
+  if (imgEl && imgEl.src && !imgEl.src.endsWith('undefined')) {
+    pic.innerHTML = `<img src="${imgEl.src}" style="width:100%;height:100%;object-fit:cover;">`;
+  }
+
+  // Build reason chips
+  _selectedReason = null;
+  const confirmBtn = document.getElementById('confirmSignoutBtn');
+  confirmBtn.style.opacity = '0.45';
+  confirmBtn.style.pointerEvents = 'none';
+  document.getElementById('customReasonBox').style.display = 'none';
+  document.getElementById('customReasonBox').value = '';
+
+  const chips = document.getElementById('reasonChips');
+  chips.innerHTML = SIGNOUT_REASONS.map(r => `
+    <label onclick="selectReason('${r.replace(/'/g,"\\'")}', this)" style="
+        display:flex;align-items:center;gap:10px;padding:10px 14px;
+        border-radius:10px;border:2px solid #e2e8f0;cursor:pointer;
+        font-size:13px;font-weight:600;color:#334155;
+        background:#f8fafc;transition:all 0.18s;">
+      <span class="chip-dot" style="
+          width:18px;height:18px;border-radius:50%;
+          border:2px solid #cbd5e1;flex-shrink:0;
+          display:flex;align-items:center;justify-content:center;
+          font-size:10px;"></span>
+      ${r}
+    </label>`).join('');
+
+  document.getElementById('signoutOverlay').style.display = 'flex';
+}
+
+function selectReason(reason, labelEl) {
+  _selectedReason = reason;
+
+  // Reset all chips
+  document.querySelectorAll('#reasonChips label').forEach(l => {
+    l.style.background      = '#f8fafc';
+    l.style.borderColor     = '#e2e8f0';
+    l.style.color           = '#334155';
+    l.querySelector('.chip-dot').innerHTML  = '';
+    l.querySelector('.chip-dot').style.borderColor = '#cbd5e1';
+  });
+
+  // Highlight selected
+  labelEl.style.background  = '#ecfdf5';
+  labelEl.style.borderColor = '#10b981';
+  labelEl.style.color       = '#065f46';
+  const dot = labelEl.querySelector('.chip-dot');
+  dot.innerHTML = '✓';
+  dot.style.borderColor = '#10b981';
+
+  // Toggle custom text area
+  const box = document.getElementById('customReasonBox');
+  box.style.display = (reason === 'Other') ? 'block' : 'none';
+  if (reason !== 'Other') box.value = '';
+
+  // Enable confirm button
+  const confirmBtn = document.getElementById('confirmSignoutBtn');
+  confirmBtn.style.opacity = '1';
+  confirmBtn.style.pointerEvents = 'auto';
+}
+
+function closeSignoutModal() {
+  document.getElementById('signoutOverlay').style.display = 'none';
+  _selectedReason = null;
+}
+
+async function confirmSignout() {
+  if (!_selectedReason) return;
+
+  const customText = document.getElementById('customReasonBox').value.trim();
+  if (_selectedReason === 'Other' && !customText) {
+    document.getElementById('customReasonBox').style.borderColor = '#ef4444';
+    document.getElementById('customReasonBox').focus();
+    return;
+  }
+
+  const payload = {
+    signout_reason : _selectedReason,
+    custom_reason  : customText || null,
+    profile_image  : document.getElementById('mainProfileImg')?.src || null,
+    user_agent     : navigator.userAgent,
+    // session_id is read server-side; pass it here only if stored in JS
+  };
+
+  try {
+    // Call your backend to log the sign-out BEFORE redirecting
+    await fetch('/api/signout-log', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify(payload)
+    });
+  } catch (e) {
+    console.warn('Sign-out log failed (non-blocking):', e);
+  }
+
+  // Now perform the actual sign-out (adjust URL to match your route)
+  window.location.href = '/logout';
+}
+</script>
+
+<!-- ===== END SIGN-OUT MODAL ===== -->
     <footer class="footer">
         © 2026 Product Dashboard | All Rights Reserved
     </footer>
