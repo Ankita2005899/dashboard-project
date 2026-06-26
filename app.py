@@ -5673,7 +5673,7 @@ def update_keywords():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
     
-    @app.route("/api/product-activity-detail")
+@app.route("/api/product-activity-detail")
 def product_activity_detail():
     if "user_id" not in session or "username" not in session:
         return jsonify({})
