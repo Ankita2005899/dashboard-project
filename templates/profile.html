@@ -968,7 +968,7 @@
                     return;
                 }
                 grid.innerHTML = filtered.map(p => {
-                    const safeP = encodeURIComponent(JSON.stringify(p));
+                    const safeP = btoa(unescape(encodeURIComponent(JSON.stringify(p))));
                     const addedDate = p.uploaded_at ? new Date(p.uploaded_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
                     return `
                     <div style="background:white;border-radius:16px;overflow:hidden;
@@ -1023,7 +1023,7 @@
         }
 
         async function openYourItemDetail(safeP) {
-            const p = JSON.parse(decodeURIComponent(safeP));
+            const p = JSON.parse(decodeURIComponent(escape(atob(safeP))));
             const addedDate = p.uploaded_at ? new Date(p.uploaded_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
             document.getElementById('yourItemDetailContent').innerHTML = `
                 <div style="text-align:center;margin-bottom:16px;">
