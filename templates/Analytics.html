@@ -90,9 +90,8 @@
         .kpi-sub { font-size: 12px; color: var(--subtext); margin-top: 2px; }
 
         /* CHART ROW: chart card + shape panel side by side */
-        .chart-row { display: flex; gap: 16px; margin-bottom: 24px; align-items: stretch; }
-
-        .chart-card { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 14px; padding: 20px; box-shadow: var(--card-shadow); flex: 1; min-height: 360px; }
+        .chart-row { display: flex; gap: 16px; margin-bottom: 24px; align-items: stretch; max-height: 380px; }
+        .chart-card { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 14px; padding: 20px; box-shadow: var(--card-shadow); flex: 1; max-height: 380px; overflow: hidden; }
         .card-title { font-weight: 700; font-size: 15px; color: var(--title-color); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
         .card-title::after { content: ""; display: block; flex: 1; height: 2px; background: #10b981; border-radius: 2px; margin-left: 8px; }
         .card-sub { font-size: 12px; color: var(--subtext); margin-bottom: 14px; }
@@ -173,26 +172,30 @@
             <div class="chart-panel active" id="panel-0">
                 <div class="card-title">📉 Full Funnel Trend</div>
                 <div class="card-sub">Search → Add to Cart → Purchase per product</div>
-                <canvas id="lineChart"></canvas>
+                <canvas id="lineChart" style="max-height:280px;"></canvas>
             </div>
 
             <div class="chart-panel" id="panel-1">
                 <div class="card-title">🎯 Conversion Funnel</div>
                 <div class="card-sub">Search → Cart → Purchase drop-off rates</div>
-                <canvas id="funnelDoughnut"></canvas>
+                <canvas id="funnelDoughnut" style="max-height:280px;"></canvas>
+
                 <div class="insight-row" id="conversionInsights" style="margin-top:12px;"></div>
             </div>
 
             <div class="chart-panel" id="panel-2">
                 <div class="card-title">🏆 Top Products Ranking</div>
                 <div class="card-sub">Ranked by ML engagement score</div>
-                <canvas id="rankBar"></canvas>
+                <canvas id="rankBar" style="max-height:280px;"></canvas>
+
+
             </div>
 
             <div class="chart-panel" id="panel-3">
                 <div class="card-title">🕸️ Product Behaviour Radar</div>
                 <div class="card-sub">Multi-axis engagement for top 5 products</div>
-                <canvas id="radarChart"></canvas>
+                <canvas id="radarChart" style="max-height:280px;"></canvas>
+
             </div>
 
         </div>
