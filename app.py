@@ -632,6 +632,7 @@ def signup():
             # Create personal tables
             ensure_user_table(username, user_id)
             create_user_product_activity_table(username, user_id)
+            create_user_your_item_table(username, user_id)
 
             # Mark pre-approved password as used
             if auto_pwd:
@@ -1507,6 +1508,35 @@ def add_product():
         insert_product_and_availability("study_material", "study_material")
     if "Food" in product_types:
         insert_product_and_availability("food_items", "food_items")
+
+    # ── Insert into store_data (all users' products) ──
+    category_label = product_types[0] if product_types else "other"
+    cursor.execute("""
+        INSERT INTO store_data
+        (user_id, category, name, image, video, price, availability, detail, address, quantity)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (
+        session.get("user_id"), category_label, name, image_name, video_name,
+        price, availability, detail, address, availability
+    ))
+    store_data_id = cursor.lastrowid
+
+    # ── Insert into user's personal your_item table ──
+    try:
+        uname = session.get("username")
+        uid   = session.get("user_id")
+        your_item_table = f"{uname}_{uid}_your_item"
+        cursor.execute(f"""
+            INSERT INTO `{your_item_table}`
+            (store_data_id, category, name, image, video, price, availability, detail, address, quantity)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            store_data_id, category_label, name, image_name, video_name,
+            price, availability, detail, address, availability
+        ))
+        print(f"✅ Inserted into {your_item_table}")
+    except Exception as e:
+        print(f"⚠️ Could not insert into your_item table: {e}")
 
     db.commit()
     cursor.close()
@@ -5097,12 +5127,18 @@ def get_purchase_data():
 @app.route('/api/all-products')
 def all_products():
     try:
+        uname = session.get("username")
+        uid   = session.get("user_id")
+        if not uname or not uid:
+            return jsonify({'products': [], 'error': 'Not logged in'}), 401
+
+        your_item_table = f"{uname}_{uid}_your_item"
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
-            SELECT id, user_id, product_id, category, name, image, price,
+        cursor.execute(f"""
+            SELECT id, category, name, image, price,
                    availability, detail, address, quantity
-            FROM store_data
+            FROM `{your_item_table}`
             WHERE availability > 0
             ORDER BY category, name
         """)
@@ -5119,7 +5155,34 @@ def all_products():
         print(f"[all_products] error: {e}")
         return jsonify({'products': [], 'error': str(e)}), 500
 
-
+def create_user_your_item_table(username, user_id):
+    table_name = f"{username}_{user_id}_your_item"
+    db = get_db_connection()
+    cursor = db.cursor()
+    try:
+        cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS `{table_name}` (
+                id            INT AUTO_INCREMENT PRIMARY KEY,
+                store_data_id INT,
+                category      VARCHAR(20),
+                name          VARCHAR(255),
+                image         VARCHAR(255),
+                video         VARCHAR(255),
+                price         DECIMAL(10,2),
+                availability  INT,
+                detail        TEXT,
+                address       VARCHAR(255),
+                quantity      INT DEFAULT 1,
+                uploaded_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        db.commit()
+        print(f"✅ Created table: {table_name}")
+    except Exception as e:
+        print(f"❌ Error creating {table_name}: {e}")
+    finally:
+        cursor.close()
+        db.close()
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
