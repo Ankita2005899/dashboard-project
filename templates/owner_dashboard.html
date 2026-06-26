@@ -6765,27 +6765,52 @@
         }
 
 
-        // ── Load products into combo dropdowns ─────────────────────
         async function loadComboProducts() {
-            try {
-                const res = await fetch('/api/owner/product-catalog-stats');
-                const data = await res.json();
-                const products = data.products || data || [];
+    try {
+        const res  = await fetch('/api/owner/all-products-for-offer');
+        const data = await res.json();
+        const products = data.products || [];
 
-                ['commonProduct1', 'commonProduct2'].forEach(selId => {
-                    const sel = document.getElementById(selId);
-                    if (!sel) return;
-                    products.forEach(p => {
-                        const opt = document.createElement('option');
-                        opt.value = JSON.stringify({ name: p.name, image: p.image || '' });
-                        opt.textContent = p.name;
-                        sel.appendChild(opt);
-                    });
+        ['commonProduct1', 'commonProduct2'].forEach(selId => {
+            const sel = document.getElementById(selId);
+            if (!sel) return;
+            // Clear existing options except first
+            sel.innerHTML = `<option value="">— Select Product —</option>`;
+            products.forEach(p => {
+                const opt       = document.createElement('option');
+                opt.value       = JSON.stringify({
+                    name : p.name,
+                    image: p.image || '',
+                    price: p.price || 0
                 });
-            } catch (e) {
-                console.error('Failed to load products for combo:', e);
-            }
-        }
+                opt.textContent = `${p.name} — ₹${p.price}`;
+                sel.appendChild(opt);
+            });
+        });
+
+        // Also populate bucket combo selects
+        ['discount10','discount20','freeship','bogo'].forEach(bid => {
+            ['p1','p2'].forEach(pn => {
+                const sel = document.getElementById(`bucket-combo-${bid}-${pn}`);
+                if (!sel) return;
+                sel.innerHTML = `<option value="">— Select Product —</option>`;
+                products.forEach(p => {
+                    const opt       = document.createElement('option');
+                    opt.value       = JSON.stringify({
+                        name : p.name,
+                        image: p.image || '',
+                        price: p.price || 0
+                    });
+                    opt.textContent = `${p.name} — ₹${p.price}`;
+                    sel.appendChild(opt);
+                });
+            });
+        });
+
+    } catch(e) {
+        console.error('Failed to load products:', e);
+    }
+}
 
         function previewCommonProduct(num) {
             const sel = document.getElementById(`commonProduct${num}`);

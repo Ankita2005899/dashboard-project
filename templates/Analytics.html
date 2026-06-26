@@ -4,377 +4,687 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sidebar Buttons</title>
-
+    <title>Analytics – ShopSphere</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* ================= RESET ================= */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            
-
             font-family: "Segoe UI", sans-serif;
         }
 
-        /* ================= BODY ================= */
-        body {
-            background: linear-gradient(135deg, #072a4d, #08293f, #f0fdfa);
-            min-height: 100vh;
+        :root {
+            --body-bg: #d4f4f8;
+            --sidebar-bg: linear-gradient(180deg, #a8bcee, #bcc2c3, #81f5e8);
+            --header-bg: linear-gradient(135deg, #e0f2fe, #f0fdfa);
+            --header-border: #1e293b;
+            --header-text: #1e293b;
+            --btn-bg: rgba(255, 255, 255, 0.9);
+            --btn-color: #1e293b;
+            --btn-border: #cbd5e1;
+            --hdr-btn-bg: white;
+            --hdr-btn-color: #1e293b;
+            --card-bg: #ffffff;
+            --card-border: #cbd5e1;
+            --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+            --text: #111827;
+            --subtext: #6b7280;
+            --grid-lines: rgba(0, 0, 0, 0.05);
+            --title-bg: linear-gradient(135deg, #e0e7ff, #f3f4f6);
+            --title-color: #4f46e5;
+            --th-bg: #4f46e5;
+            --tr-hover: #f1f5ff;
+            --td-border: #e5e7eb;
         }
 
-        /* ================= SIDEBAR ================= */
-        .sidebar {
+        [data-theme="dark"] {
+            --body-bg: #0a0a0f;
+            --sidebar-bg: linear-gradient(180deg, #12121a, #1a1a26, #0f1f1a);
+            --header-bg: linear-gradient(135deg, #12121a, #1a1a26);
+            --header-border: rgba(255, 255, 255, 0.12);
+            --header-text: #f0eee8;
+            --btn-bg: rgba(255, 255, 255, 0.06);
+            --btn-color: #f0eee8;
+            --btn-border: rgba(255, 255, 255, 0.12);
+            --hdr-btn-bg: #1a1a26;
+            --hdr-btn-color: #f0eee8;
+            --card-bg: #12121a;
+            --card-border: rgba(255, 255, 255, 0.10);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --text: #f0eee8;
+            --subtext: #9ca3af;
+            --grid-lines: rgba(255, 255, 255, 0.04);
+            --title-bg: linear-gradient(135deg, #1a1a2e, #12121a);
+            --title-color: #FF6B2B;
+            --th-bg: #1e1e3a;
+            --tr-hover: #1a1a2e;
+            --td-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background: var(--body-bg) !important;
+            background-image: linear-gradient(var(--grid-lines) 1px, transparent 1px), linear-gradient(90deg, var(--grid-lines) 1px, transparent 1px) !important;
+            background-size: 60px 60px !important;
+            color: var(--text);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .header {
             position: fixed;
             top: 0;
             left: 0;
-            width: 260px;
-            height: 100vh;
-            background: linear-gradient(180deg, #a8bcee, #bcc2c3, #81f5e8);
+            width: 100%;
+            height: 70px;
+            background: var(--header-bg) !important;
+            border-bottom: 3px solid var(--header-border);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
             display: flex;
-            flex-direction: column;
-            padding: 20px;
-            gap: 20px;
-             padding: 20px 20px 20px 10px; /* top, right, bottom, left */
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            justify-content: center;
+            z-index: 3000;
+            transition: background 0.3s;
         }
 
-        /* ================= SIDEBAR BUTTON ================= */
+        .header-container {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .header-left h2 {
+            font-weight: 700;
+            color: var(--header-text) !important;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 2px solid var(--btn-border);
+            background: var(--hdr-btn-bg) !important;
+            color: var(--hdr-btn-color) !important;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+
+        .header-btn:hover {
+            background: linear-gradient(135deg, #f97316, #f59e0b) !important;
+            color: white !important;
+            border-color: #f97316;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 220px;
+            height: calc(100vh - 70px);
+            background: var(--sidebar-bg) !important;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 12px;
+            gap: 10px;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 2000;
+            transition: background 0.3s;
+        }
+
+        .sidebar-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--subtext);
+            padding: 4px 8px;
+            margin-top: 8px;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+        }
+
         .sidebar button {
-            padding: 12px 14px;
-            margin-bottom: -8px;
+            width: 100%;
+            padding: 11px 14px;
             border-radius: 10px;
-            margin-left: 0; /* ensure buttons are flush with sidebar */
-            border: 2px solid #cbd5e1;
-            background: rgba(255, 255, 255, 0.9);
-            color: #1e293b;
+            border: 2px solid var(--btn-border);
+            background: var(--btn-bg) !important;
+            color: var(--btn-color) !important;
             text-align: left;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.25s ease;
-
-             width: 100%; /* optional: makes buttons full width */
-    text-align: left; /* keep text aligned left */
-    padding-left: 14px; /* internal padding inside button */
         }
 
         .sidebar button:hover {
-            background: linear-gradient(135deg, #f97316, #f59e0b);
-            color: white;
+            background: linear-gradient(135deg, #f97316, #f59e0b) !important;
+            color: white !important;
             border-color: #f97316;
-            transform: translateX(6px);
+            transform: translateX(4px);
         }
 
         .sidebar button.active {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            color: white;
+            background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+            color: white !important;
             border-color: #4f46e5;
         }
 
-        /* ================= CONTENT ================= */
         .content {
-            margin-left: 260px;
-            padding: 40px;
-            background: #d4f4f8;
+            margin-left: 220px;
+            padding: 90px 30px 80px 30px;
             min-height: 100vh;
         }
 
-        /* ================= FOOTER ================= */
+        .kpi-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .kpi-icon {
+            font-size: 28px;
+        }
+
+        .kpi-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--subtext);
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .kpi-sub {
+            font-size: 12px;
+            color: var(--subtext);
+            margin-top: 2px;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        .chart-full {
+            margin-bottom: 22px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            color: var(--title-color);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title::after {
+            content: "";
+            display: block;
+            flex: 1;
+            height: 2px;
+            background: #10b981;
+            border-radius: 2px;
+            margin-left: 8px;
+        }
+
+        .card-sub {
+            font-size: 12px;
+            color: var(--subtext);
+            margin-bottom: 16px;
+        }
+
+        .insight-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .insight-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-orange {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+        .badge-blue {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        [data-theme="dark"] .badge-green {
+            background: #064e3b;
+            color: #6ee7b7;
+        }
+
+        [data-theme="dark"] .badge-orange {
+            background: #431407;
+            color: #fdba74;
+        }
+
+        [data-theme="dark"] .badge-blue {
+            background: #1e1b4b;
+            color: #a5b4fc;
+        }
+
+        [data-theme="dark"] .badge-red {
+            background: #450a0a;
+            color: #fca5a5;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        .product-table th {
+            background: var(--th-bg);
+            color: white;
+            padding: 10px 14px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .product-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--td-border);
+            font-size: 13px;
+            text-align: center;
+            color: var(--text);
+        }
+
+        .product-table tr:hover td {
+            background: var(--tr-hover);
+        }
+
         .footer {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 60px;
+            height: 56px;
             background: linear-gradient(90deg, #111827, #1f2937, #0f766e);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 13px;
             z-index: 1000;
         }
 
-        
-.header-btn{
-    padding:8px 16px;
-
-    border-radius:8px;
-    border:2px solid #cbd5e1;
-
-    background:white;
-    color:#1e293b;
-
-    text-decoration:none;
-    font-weight:600;
-
-    transition:all 0.25s ease;
-}
-
-.header-btn:hover{
-    background:linear-gradient(135deg,#f97316,#f59e0b);
-    color:white;
-    border-color:#f97316;
-}
-
-.container{
-    margin-top:100px;
-}
-/* ================= HEADER ================= */
-
-.header{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:70px;
-
-    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
-
-    border-bottom:3px solid #1e293b;
-
-    box-shadow:0 4px 10px rgba(0,0,0,0.08);
-
-    display:flex;
-    justify-content:center;
-
-    z-index:3000;
-}
-
-/* header inner container */
-.header-container{
-    width:100%;
-    max-width:1200px;
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    padding:0 20px;
-}
-
-.header-left h2{
-    font-weight:700;
-    color:#1e293b;
-}
-
-.header-right{
-    display:flex;
-    gap:10px;
-}
-.main-content{
-    max-width:1200px;
-    margin:auto;
-    padding-top:100px;
-}
-
-/* ================= THEME SYNC (matches index.html toggle) ================= */
-:root {
-    --th-body-bg:      linear-gradient(135deg,#072a4d,#08293f,#f0fdfa);
-    --th-content-bg:   #d4f4f8;
-    --th-header-bg:    linear-gradient(135deg,#e0f2fe,#f0fdfa);
-    --th-sidebar-bg:   linear-gradient(180deg,#a8bcee,#bcc2c3,#81f5e8);
-    --th-border:       #cbd5e1;
-    --th-header-text:  #1e293b;
-    --th-btn-bg:       rgba(255,255,255,0.9);
-    --th-btn-color:    #1e293b;
-    --th-hdr-btn-bg:   white;
-    --th-hdr-btn-color:#1e293b;
-    --th-grid-lines:   rgba(0,0,0,0.06);
-}
-
-[data-theme="dark"] {
-    --th-body-bg:      #0a0a0f;
-    --th-content-bg:   #0a0a0f;
-    --th-header-bg:    linear-gradient(135deg,#12121a,#1a1a26);
-    --th-sidebar-bg:   linear-gradient(180deg,#12121a,#1a1a26,#0f1f1a);
-    --th-border:       rgba(255,255,255,0.12);
-    --th-header-text:  #f0eee8;
-    --th-btn-bg:       rgba(255,255,255,0.06);
-    --th-btn-color:    #f0eee8;
-    --th-hdr-btn-bg:   #1a1a26;
-    --th-hdr-btn-color:#f0eee8;
-    --th-grid-lines:   rgba(255,255,255,0.04);
-}
-
-body { background: var(--th-body-bg) !important; transition: background 0.3s; }
-.header { background: var(--th-header-bg) !important; border-bottom-color: var(--th-border) !important; transition: background 0.3s; }
-.header-left h2 { color: var(--th-header-text) !important; }
-.header-btn { background: var(--th-hdr-btn-bg) !important; color: var(--th-hdr-btn-color) !important; border-color: var(--th-border) !important; transition: background 0.3s, color 0.3s; }
-.sidebar { background: var(--th-sidebar-bg) !important; transition: background 0.3s; }
-.sidebar button { background: var(--th-btn-bg) !important; color: var(--th-btn-color) !important; border-color: var(--th-border) !important; transition: background 0.3s, color 0.3s; }
-.content { background: var(--th-content-bg) !important; background-image: linear-gradient(var(--th-grid-lines) 1px, transparent 1px), linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important; background-size: 60px 60px !important; transition: background 0.3s; }
-</style>
+        canvas {
+            max-width: 100%;
+        }
+    </style>
 </head>
 
 <body>
-<!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
-<script>
-  (function(){
-    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-  })();
-</script>
+    <script>
+        (function () {
+            var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 
-       <header class="header">
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <h2>📈 Analytics</h2>
+            </div>
+            <div class="header-right">
+                <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+            </div>
+        </div>
+    </header>
 
-    <div class="header-container">
+    <div class="sidebar">
+        <span class="sidebar-label">Tables</span>
+        <a href="/search-table"><button>🔍 Search</button></a>
+        <a href="/purchased-table"><button>🛒 Purchased</button></a>
+        <a href="/addtocart-table"><button>➕ Add to Cart</button></a>
+        <span class="sidebar-label">Analytics</span>
+        <a href="/analytics"><button class="active">📈 Overview</button></a>
+    </div>
 
-        <div class="header-left">
-            <h2>📈 Analytics</h2>
+    <div class="content">
+
+        <div class="kpi-strip">
+            <div class="kpi-card">
+                <div class="kpi-icon">🔍</div>
+                <div>
+                    <div class="kpi-label">Total Searches</div>
+                    <div class="kpi-value" id="kpi-search">—</div>
+                    <div class="kpi-sub">Today across all products</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">🛒</div>
+                <div>
+                    <div class="kpi-label">Add to Cart</div>
+                    <div class="kpi-value" id="kpi-cart">—</div>
+                    <div class="kpi-sub">Items added today</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">✅</div>
+                <div>
+                    <div class="kpi-label">Purchases</div>
+                    <div class="kpi-value" id="kpi-purchase">—</div>
+                    <div class="kpi-sub">Completed orders</div>
+                </div>
+            </div>
         </div>
 
-        <div class="header-right">
-            <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+        <div class="chart-grid">
+            <div class="card">
+                <div class="card-title">📉 Full Funnel Trend</div>
+                <div class="card-sub">Search → Add to Cart → Purchase per product</div>
+                <canvas id="lineChart" height="220"></canvas>
+            </div>
+            <div class="card">
+                <div class="card-title">🏆 Top Products Ranking</div>
+                <div class="card-sub">Ranked by combined engagement score (ML weighted)</div>
+                <canvas id="rankBar" height="220"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="card">
+                <div class="card-title">🎯 Conversion Funnel</div>
+                <div class="card-sub">Search → Cart → Purchase drop-off rates</div>
+                <canvas id="funnelDoughnut" height="220"></canvas>
+                <div class="insight-row" id="conversionInsights"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">🕸️ Product Behaviour Radar</div>
+                <div class="card-sub">ML: multi-axis engagement for top 5 products</div>
+                <canvas id="radarChart" height="220"></canvas>
+            </div>
+        </div>
+
+        <div class="card chart-full">
+            <div class="card-title">📋 Product Intelligence Table</div>
+            <div class="card-sub">ML scoring: conversion rate, engagement index, Z-score anomaly detection</div>
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>🔍 Searches</th>
+                        <th>🛒 Cart</th>
+                        <th>✅ Purchases</th>
+                        <th>Conversion %</th>
+                        <th>Engagement Score</th>
+                        <th>Anomaly</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody">
+                    <tr>
+                        <td colspan="9" style="color:var(--subtext);padding:20px;">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="insight-row" id="mlInsights" style="margin-top:16px;"></div>
         </div>
 
     </div>
 
-</header>
-<br>
-<br>
+    <footer class="footer">© 2026 ShopSphere Analytics | All Rights Reserved</footer>
 
+    <script>
+        let lineChart = null, rankBar = null, funnelDoughnut = null, radarChart = null;
 
-    <!-- LEFT SIDEBAR -->
-    <div class="sidebar">
-       
-        <br>
-        <br>
+        function mergeByName(searchData, cartData, purchaseData) {
+            const map = {};
+            searchData.forEach(d => {
+                const k = d.name;
+                if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
+                map[k].search += d.searched_count || 0;
+            });
+            cartData.forEach(d => {
+                const k = d.name;
+                if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
+                map[k].cart += d.count || 0;
+            });
+            purchaseData.forEach(d => {
+                const k = d.product_name;
+                if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
+                map[k].purchase += d.purchase_count || 0;
+            });
+            return Object.values(map).filter(r => r.search + r.cart + r.purchase > 0);
+        }
 
-        <a href="/search-table">
-            <button>🔍 Search</button>
-        </a>
-        <a href="/purchased-table">
-            <button>🛒 Purchased</button>
-        </a>
-<a href="/addtocart-table">
-    <button>➕ Add to Cart</button>
-</a>    </div>
+        function conversionRate(numerator, denominator) {
+            if (!denominator) return 0;
+            return Math.round((numerator / denominator) * 100);
+        }
 
-    <!-- RIGHT CONTENT -->
-    <div class="content">
-       <!-- ADD THIS -->
-    <canvas id="analyticsChart" style="max-width:900px;margin-top:30px;"></canvas>
-   </div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-let chart = null;
+        function engagementScore(row) {
+            return Math.round(row.search * 1 + row.cart * 2 + row.purchase * 4);
+        }
 
-async function loadAddToCartGraph() {
-    try {
-        // ✅ FETCH ADD TO CART DATA
-        const res1 = await fetch("/user-addtocart-trend-xml");
-        const xmlText = await res1.text();
+        function anomalyFlags(rows, key) {
+            const vals = rows.map(r => r[key]);
+            const mean = vals.reduce((a, b) => a + b, 0) / (vals.length || 1);
+            const std = Math.sqrt(vals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (vals.length || 1));
+            return rows.map(r => std > 0 ? Math.abs((r[key] - mean) / std) > 1.8 : false);
+        }
 
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(xmlText, "text/xml");
-        const records = Array.from(xml.getElementsByTagName("record"));
+        async function loadAll() {
+            try {
+                const [res1, res2, res3] = await Promise.all([
+                    fetch("/products/search-user"),
+                    fetch("/user-addtocart-trend-xml"),
+                    fetch("/get-purchase-data")
+                ]);
 
-        const labels = [];
-        const addToCartCounts = [];
+                const searchData = await res1.json();
 
-        records.forEach(rec => {
-            const name = rec.getElementsByTagName("name")[0]?.textContent || "";
-            const count = parseInt(rec.getElementsByTagName("count")[0]?.textContent || "0");
+                const xmlText = await res2.text();
+                const xml = new DOMParser().parseFromString(xmlText, "text/xml");
+                const cartData = Array.from(xml.getElementsByTagName("record")).map(r => ({
+                    name: r.getElementsByTagName("name")[0]?.textContent || "",
+                    category: r.getElementsByTagName("category")[0]?.textContent || "",
+                    count: parseInt(r.getElementsByTagName("count")[0]?.textContent || "0")
+                }));
 
-            if (count > 0) {
-                labels.push(name);
-                addToCartCounts.push(count);
-            }
-        });
+                const purchaseData = await res3.json();
 
-        // ✅ FETCH SEARCH DATA (NEW)
-        const res2 = await fetch("/products/search-user");
-        const searchData = await res2.json();
+                const merged = mergeByName(searchData, cartData, purchaseData);
+                merged.sort((a, b) => engagementScore(b) - engagementScore(a));
 
-        const searchCounts = [];
+                const totalSearch = merged.reduce((s, r) => s + r.search, 0);
+                const totalCart = merged.reduce((s, r) => s + r.cart, 0);
+                const totalPurchase = merged.reduce((s, r) => s + r.purchase, 0);
+                document.getElementById("kpi-search").textContent = totalSearch;
+                document.getElementById("kpi-cart").textContent = totalCart;
+                document.getElementById("kpi-purchase").textContent = totalPurchase;
 
-        searchData.forEach(item => {
-            searchCounts.push(item.searched_count || 0);
-        });
+                const labels = merged.map(r => r.name);
+                const searches = merged.map(r => r.search);
+                const carts = merged.map(r => r.cart);
+                const purchases = merged.map(r => r.purchase);
 
-        const ctx = document.getElementById("analyticsChart").getContext("2d");
-
-        if (chart) chart.destroy();
-
-        chart = new Chart(ctx, {
-            type: "line",
-            data: {
-                labels: labels,
-
-                datasets: [
-
-                    // 🔵 EXISTING LINE (Add to Cart)
-                    {
-                        label: "Add to Cart Trend",
-                        data: addToCartCounts,
-                        borderColor: "#4f46e5",
-                        backgroundColor: "rgba(79,70,229,0.2)",
-                        tension: 0.4,
-                        fill: true,
-                        pointRadius: 5,
-                        pointBackgroundColor: "#4f46e5"
+                // Chart 1: Line
+                const ctx1 = document.getElementById("lineChart").getContext("2d");
+                if (lineChart) lineChart.destroy();
+                lineChart = new Chart(ctx1, {
+                    type: "line",
+                    data: {
+                        labels,
+                        datasets: [
+                            { label: "🔍 Search", data: searches, borderColor: "#f97316", backgroundColor: "rgba(249,115,22,0.12)", tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: "#f97316", borderWidth: 2 },
+                            { label: "🛒 Add to Cart", data: carts, borderColor: "#4f46e5", backgroundColor: "rgba(79,70,229,0.12)", tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: "#4f46e5", borderWidth: 2 },
+                            { label: "✅ Purchase", data: purchases, borderColor: "#10b981", backgroundColor: "rgba(16,185,129,0.12)", tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: "#10b981", borderWidth: 2 }
+                        ]
                     },
+                    options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } }, plugins: { legend: { position: "top" } } }
+                });
 
-{
-    label: "Search Trend",
-    data: searchCounts,
-
-    // 🟠 SAME STYLE AS ADD TO CART (SMOOTH CURVE)
-    borderColor: "#f97316",
-    backgroundColor: "rgba(249,115,22,0.2)",
-
-    tension: 0.4,          // ✅ smooth curve
-    fill: true,            // light area fill
-    pointRadius: 5,
-    pointBackgroundColor: "#f97316"
-}
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: "Count" }
+                // Chart 2: Horizontal Bar (engagement score)
+                const scores = merged.map(r => engagementScore(r));
+                const ctx2 = document.getElementById("rankBar").getContext("2d");
+                if (rankBar) rankBar.destroy();
+                rankBar = new Chart(ctx2, {
+                    type: "bar",
+                    data: {
+                        labels,
+                        datasets: [{ label: "Engagement Score", data: scores, backgroundColor: labels.map((_, i) => `hsl(${220 + i * 30},70%,55%)`), borderRadius: 6, borderWidth: 0 }]
                     },
-                    x: {
-                        title: { display: true, text: "Product Name" }
-                    }
-                }
+                    options: { responsive: true, indexAxis: "y", scales: { x: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+                });
+
+                // Chart 3: Doughnut conversion
+                const s2cRate = conversionRate(totalCart, totalSearch);
+                const c2pRate = conversionRate(totalPurchase, totalCart);
+                const dropOff = Math.max(0, 100 - s2cRate);
+                const ctx3 = document.getElementById("funnelDoughnut").getContext("2d");
+                if (funnelDoughnut) funnelDoughnut.destroy();
+                funnelDoughnut = new Chart(ctx3, {
+                    type: "doughnut",
+                    data: {
+                        labels: ["Search→Cart %", "Cart→Purchase %", "Drop-off %"],
+                        datasets: [{ data: [s2cRate, c2pRate, dropOff], backgroundColor: ["#4f46e5", "#10b981", "#f87171"], borderWidth: 2 }]
+                    },
+                    options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+                });
+                document.getElementById("conversionInsights").innerHTML = `
+            <span class="insight-badge badge-blue">🔍→🛒 ${s2cRate}% conversion</span>
+            <span class="insight-badge ${c2pRate >= 50 ? 'badge-green' : 'badge-orange'}">🛒→✅ ${c2pRate}% conversion</span>
+            <span class="insight-badge ${dropOff > 60 ? 'badge-red' : 'badge-green'}">📉 ${dropOff}% drop-off</span>
+        `;
+
+                // Chart 4: Radar top 5
+                const top5 = merged.slice(0, 5);
+                const ctx4 = document.getElementById("radarChart").getContext("2d");
+                if (radarChart) radarChart.destroy();
+                radarChart = new Chart(ctx4, {
+                    type: "radar",
+                    data: {
+                        labels: ["Search", "Add to Cart", "Purchase", "Engagement", "Conv. Rate"],
+                        datasets: top5.map((r, i) => ({
+                            label: r.name,
+                            data: [r.search, r.cart, r.purchase, engagementScore(r), conversionRate(r.purchase, r.search)],
+                            borderColor: `hsl(${i * 60},70%,55%)`,
+                            backgroundColor: `hsla(${i * 60},70%,55%,0.15)`,
+                            pointRadius: 4
+                        }))
+                    },
+                    options: { responsive: true, scales: { r: { beginAtZero: true } }, plugins: { legend: { position: "bottom" } } }
+                });
+
+                // Intelligence Table
+                const anomalies = anomalyFlags(merged, "search");
+                const tbody = document.getElementById("productTableBody");
+                tbody.innerHTML = "";
+                merged.forEach((r, i) => {
+                    const cvr = conversionRate(r.purchase, r.search);
+                    const eng = engagementScore(r);
+                    const isAnomaly = anomalies[i];
+                    tbody.innerHTML += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td><strong>${r.name}</strong></td>
+                    <td><span style="font-size:11px;background:var(--title-bg);color:var(--title-color);padding:2px 8px;border-radius:10px;">${r.category}</span></td>
+                    <td><span style="color:#f97316;font-weight:700;">${r.search}</span></td>
+                    <td><span style="color:#4f46e5;font-weight:700;">${r.cart}</span></td>
+                    <td><span style="color:#10b981;font-weight:700;">${r.purchase}</span></td>
+                    <td>${cvr}%</td>
+                    <td>
+                        <div style="background:#e0e7ff;border-radius:4px;height:8px;width:100px;margin:auto;">
+                            <div style="background:#4f46e5;width:${Math.min(eng, 100)}%;height:100%;border-radius:4px;"></div>
+                        </div>
+                        <span style="font-size:11px;color:var(--subtext);">${eng}</span>
+                    </td>
+                    <td>${isAnomaly ? '<span class="insight-badge badge-red" style="font-size:11px;">⚠️ Spike</span>' : '<span class="insight-badge badge-green" style="font-size:11px;">✅ Normal</span>'}</td>
+                </tr>`;
+                });
+
+                const topProduct = merged[0];
+                const highDrop = merged.filter(r => conversionRate(r.purchase, r.search) < 20 && r.search > 0);
+                document.getElementById("mlInsights").innerHTML = `
+            ${topProduct ? `<span class="insight-badge badge-green">🏆 Top: ${topProduct.name} (score ${engagementScore(topProduct)})</span>` : ""}
+            ${highDrop.length ? `<span class="insight-badge badge-orange">⚠️ Low conversion: ${highDrop.map(r => r.name).join(", ")}</span>` : ""}
+            ${totalPurchase === 0 ? `<span class="insight-badge badge-red">❌ No purchases recorded yet</span>` : ""}
+            <span class="insight-badge badge-blue">🤖 Z-score anomaly detection active</span>
+            <span class="insight-badge badge-blue">📊 Score = Search×1 + Cart×2 + Purchase×4</span>
+        `;
+
+            } catch (err) {
+                console.error("Analytics load error:", err);
             }
+        }
+
+        document.querySelectorAll(".sidebar button").forEach(btn => {
+            btn.addEventListener("click", function () {
+                document.querySelectorAll(".sidebar button").forEach(b => b.classList.remove("active"));
+                this.classList.add("active");
+            });
         });
 
-    } catch (err) {
-        console.error("Error loading graph:", err);
-    }
-}
-
-// ACTIVE BUTTON STYLE
-const sidebarButtons = document.querySelectorAll(".sidebar button");
-sidebarButtons.forEach(btn => {
-    btn.addEventListener("click", function () {
-        sidebarButtons.forEach(b => b.classList.remove("active"));
-        this.classList.add("active");
-    });
-});
-
-window.onload = function () {
-    loadAddToCartGraph();
-};
-
-</script>
-
-    <footer class="footer">
-        © 2026 Product Dashboard | All Rights Reserved
-    </footer>
-
+        window.onload = loadAll;
+        setInterval(loadAll, 10000);
+    </script>
 </body>
 
 </html>
