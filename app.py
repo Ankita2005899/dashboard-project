@@ -5089,6 +5089,37 @@ def get_purchase_data():
         cursor.close()
         conn.close()
 
+
+
+#--------------profile page ('your item option button ")--------------------
+
+
+@app.route('/api/all-products')
+def all_products():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, user_id, product_id, category, name, image, price,
+                   availability, detail, address, quantity
+            FROM store_data
+            WHERE availability > 0
+            ORDER BY category, name
+        """)
+        products = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        for p in products:
+            p['price']       = float(p['price']) if p['price'] else 0
+            p['quantity']    = int(p['quantity']) if p['quantity'] else 0
+            p['image_url']   = p.get('image', '')
+            p['description'] = p.get('detail', '')
+        return jsonify({'products': products})
+    except Exception as e:
+        print(f"[all_products] error: {e}")
+        return jsonify({'products': [], 'error': str(e)}), 500
+
+
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
