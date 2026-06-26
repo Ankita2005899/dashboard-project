@@ -10,7 +10,7 @@
         body {
             font-family: "Segoe UI", sans-serif;
             padding: 30px;
-   background:#d4f4f8; 
+            background: #d4f4f8;
             min-height: 100vh;
             color: #111827;
         }
@@ -19,7 +19,8 @@
             padding: 20px 30px;
             border-radius: 12px;
             background: transparent;
-            padding-bottom: 80px; /* space for footer */
+            padding-bottom: 80px;
+            /* space for footer */
         }
 
         /* ================= CARD STYLES ================= */
@@ -93,210 +94,224 @@
         }
 
         /* ================= FOOTER ================= */
-    .footer{
-    position:fixed;
+        .footer {
+            position: fixed;
 
-    bottom:0;
-    left:0;
+            bottom: 0;
+            left: 0;
 
-    width:100%;
-    height:60px;
+            width: 100%;
+            height: 60px;
 
-    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+            background: linear-gradient(90deg, #111827, #1f2937, #0f766e);
 
-    color:white;
+            color: white;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-    font-size:14px;
+            font-size: 14px;
 
-    z-index:1000;
-}
+            z-index: 1000;
+        }
 
 
-.header-btn{
-    padding:8px 16px;
+        .header-btn {
+            padding: 8px 16px;
 
-    border-radius:8px;
-    border:2px solid #cbd5e1;
+            border-radius: 8px;
+            border: 2px solid #cbd5e1;
 
-    background:white;
-    color:#1e293b;
+            background: white;
+            color: #1e293b;
 
-    text-decoration:none;
-    font-weight:600;
+            text-decoration: none;
+            font-weight: 600;
 
-    transition:all 0.25s ease;
-}
+            transition: all 0.25s ease;
+        }
 
-.header-btn:hover{
-    background:linear-gradient(135deg,#f97316,#f59e0b);
-    color:white;
-    border-color:#f97316;
-}
+        .header-btn:hover {
+            background: linear-gradient(135deg, #f97316, #f59e0b);
+            color: white;
+            border-color: #f97316;
+        }
 
-.container{
-    margin-top:100px;
-}
-/* ================= HEADER ================= */
+        .container {
+            margin-top: 100px;
+        }
 
-.header{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:70px;
+        /* ================= HEADER ================= */
 
-    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
 
-    border-bottom:3px solid #1e293b;
+            background: linear-gradient(135deg, #e0f2fe, #f0fdfa);
 
-    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+            border-bottom: 3px solid #1e293b;
 
-    display:flex;
-    justify-content:center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 
-    z-index:3000;
-}
+            display: flex;
+            justify-content: center;
 
-/* header inner container */
-.header-container{
-    width:100%;
-    max-width:1200px;
+            z-index: 3000;
+        }
 
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+        /* header inner container */
+        .header-container {
+            width: 100%;
+            max-width: 1200px;
 
-    padding:0 20px;
-}
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
 
-.header-left h2{
-    font-weight:700;
-    color:#1e293b;
-}
+            padding: 0 20px;
+        }
 
-.header-right{
-    display:flex;
-    gap:10px;
-}
-.main-content{
-    max-width:1200px;
-    margin:auto;
-    padding-top:100px;
-}
+        .header-left h2 {
+            font-weight: 700;
+            color: #1e293b;
+        }
 
-/* ================= THEME SYNC (matches index.html toggle) ================= */
-:root {
-    --th-body-bg:      #d4f4f8;
-    --th-header-bg:    linear-gradient(135deg,#e0f2fe,#f0fdfa);
-    --th-card-bg:      #ffffff;
-    --th-border:       #cbd5e1;
-    --th-text:         #111827;
-    --th-header-text:  #1e293b;
-    --th-btn-bg:       #ffffff;
-    --th-btn-color:    #1e293b;
-    --th-title-bg:     linear-gradient(135deg,#e0e7ff,#f3f4f6);
-    --th-title-color:  #4f46e5;
-    --th-th-bg:        #4f46e5;
-    --th-tr-hover:     #f1f5ff;
-    --th-td-border:    #ddd;
-    --th-date-color:   #374151;
-    --th-grid-lines:   rgba(0,0,0,0.06);
-}
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
 
-[data-theme="dark"] {
-    --th-body-bg:      #0a0a0f;
-    --th-header-bg:    linear-gradient(135deg,#12121a,#1a1a26);
-    --th-card-bg:      #12121a;
-    --th-border:       rgba(255,255,255,0.12);
-    --th-text:         #f0eee8;
-    --th-header-text:  #f0eee8;
-    --th-btn-bg:       #1a1a26;
-    --th-btn-color:    #f0eee8;
-    --th-title-bg:     linear-gradient(135deg,#1a1a2e,#12121a);
-    --th-title-color:  #FF6B2B;
-    --th-th-bg:        #1e1e3a;
-    --th-tr-hover:     #1a1a2e;
-    --th-td-border:    rgba(255,255,255,0.08);
-    --th-date-color:   #a0a0b0;
-    --th-grid-lines:   rgba(255,255,255,0.04);
-}
+        .main-content {
+            max-width: 1200px;
+            margin: auto;
+            padding-top: 100px;
+        }
 
-body {
-    background-color: var(--th-body-bg) !important;
-    background-image:
-        linear-gradient(var(--th-grid-lines) 1px, transparent 1px),
-        linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important;
-    background-size: 60px 60px !important;
-    color: var(--th-text) !important;
-    transition: background 0.3s, color 0.3s;
-}
-.header {
-    background: var(--th-header-bg) !important;
-    border-bottom-color: var(--th-border) !important;
-    transition: background 0.3s;
-}
-.header-left h2 { color: var(--th-header-text) !important; }
-.header-btn {
-    background: var(--th-btn-bg) !important;
-    color: var(--th-btn-color) !important;
-    border-color: var(--th-border) !important;
-    transition: background 0.3s, color 0.3s;
-}
-.card-table, .card-chart {
-    background: var(--th-card-bg) !important;
-    border-color: var(--th-border) !important;
-    transition: background 0.3s;
-}
-.form-title {
-    background: var(--th-title-bg) !important;
-    color: var(--th-title-color) !important;
-    border-bottom-color: var(--th-border) !important;
-    transition: background 0.3s, color 0.3s;
-}
-th {
-    background: var(--th-th-bg) !important;
-}
-td {
-    border-bottom-color: var(--th-td-border) !important;
-    color: var(--th-text) !important;
-}
-tr:hover {
-    background: var(--th-tr-hover) !important;
-}
-#currentDate {
-    color: var(--th-date-color) !important;
-}
+        /* ================= THEME SYNC (matches index.html toggle) ================= */
+        :root {
+            --th-body-bg: #d4f4f8;
+            --th-header-bg: linear-gradient(135deg, #e0f2fe, #f0fdfa);
+            --th-card-bg: #ffffff;
+            --th-border: #cbd5e1;
+            --th-text: #111827;
+            --th-header-text: #1e293b;
+            --th-btn-bg: #ffffff;
+            --th-btn-color: #1e293b;
+            --th-title-bg: linear-gradient(135deg, #e0e7ff, #f3f4f6);
+            --th-title-color: #4f46e5;
+            --th-th-bg: #4f46e5;
+            --th-tr-hover: #f1f5ff;
+            --th-td-border: #ddd;
+            --th-date-color: #374151;
+            --th-grid-lines: rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="dark"] {
+            --th-body-bg: #0a0a0f;
+            --th-header-bg: linear-gradient(135deg, #12121a, #1a1a26);
+            --th-card-bg: #12121a;
+            --th-border: rgba(255, 255, 255, 0.12);
+            --th-text: #f0eee8;
+            --th-header-text: #f0eee8;
+            --th-btn-bg: #1a1a26;
+            --th-btn-color: #f0eee8;
+            --th-title-bg: linear-gradient(135deg, #1a1a2e, #12121a);
+            --th-title-color: #FF6B2B;
+            --th-th-bg: #1e1e3a;
+            --th-tr-hover: #1a1a2e;
+            --th-td-border: rgba(255, 255, 255, 0.08);
+            --th-date-color: #a0a0b0;
+            --th-grid-lines: rgba(255, 255, 255, 0.04);
+        }
+
+        body {
+            background-color: var(--th-body-bg) !important;
+            background-image:
+                linear-gradient(var(--th-grid-lines) 1px, transparent 1px),
+                linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important;
+            background-size: 60px 60px !important;
+            color: var(--th-text) !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .header {
+            background: var(--th-header-bg) !important;
+            border-bottom-color: var(--th-border) !important;
+            transition: background 0.3s;
+        }
+
+        .header-left h2 {
+            color: var(--th-header-text) !important;
+        }
+
+        .header-btn {
+            background: var(--th-btn-bg) !important;
+            color: var(--th-btn-color) !important;
+            border-color: var(--th-border) !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .card-table,
+        .card-chart {
+            background: var(--th-card-bg) !important;
+            border-color: var(--th-border) !important;
+            transition: background 0.3s;
+        }
+
+        .form-title {
+            background: var(--th-title-bg) !important;
+            color: var(--th-title-color) !important;
+            border-bottom-color: var(--th-border) !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        th {
+            background: var(--th-th-bg) !important;
+        }
+
+        td {
+            border-bottom-color: var(--th-td-border) !important;
+            color: var(--th-text) !important;
+        }
+
+        tr:hover {
+            background: var(--th-tr-hover) !important;
+        }
+
+        #currentDate {
+            color: var(--th-date-color) !important;
+        }
     </style>
 </head>
 
 <body>
-<!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
-<script>
-  (function(){
-    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-  })();
-</script>
+    <!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
+    <script>
+        (function () {
+            var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 
-<header class="header">
+    <header class="header">
 
-    <div class="header-container">
+        <div class="header-container">
 
-        <div class="header-left">
-            <h2>📦 Add to Cart Table</h2>
+            <div class="header-left">
+                <h2>📦 Add to Cart Table</h2>
+            </div>
+
+            <div class="header-right">
+                <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+            </div>
+
         </div>
 
-        <div class="header-right">
-            <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
-        </div>
-
-    </div>
-
-</header>
+    </header>
     <div class="main-content">
 
         <!-- Add-to-Cart Table Card -->
@@ -347,12 +362,8 @@ tr:hover {
 
         async function loadAddtocartTableAndChart() {
             try {
-                const xmlRes = await fetch("/user-addtocart-trend-xml");
-                const xmlText = await xmlRes.text();
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(xmlText, "text/xml");
-                const records = Array.from(xml.getElementsByTagName("record"));
-
+                const res = await fetch("/get-addtocart-user-data");
+                const records = await res.json();
                 const body = document.getElementById("tableBody");
                 body.innerHTML = "";
 
@@ -366,11 +377,11 @@ tr:hover {
                 }
 
                 for (let rec of records) {
-                    const pid = rec.getElementsByTagName("product_id")[0]?.textContent || "";
-                    const name = rec.getElementsByTagName("name")[0]?.textContent || "";
-                    const category = rec.getElementsByTagName("category")[0]?.textContent || "";
-                    const addVC = rec.getElementsByTagName("count")[0]?.textContent || "0";
-                    const lastTimeUTC = rec.getElementsByTagName("time")[0]?.textContent || "";
+                    const pid = rec.product_id || "";
+                    const name = rec.product_name || "";
+                    const category = rec.category || "";
+                    const addVC = rec.add_to_cart_count || 0;
+                    const lastTimeUTC = rec.add_to_cart_time || "";
                     let formattedTime = lastTimes[pid] || utcToISTPlus1Hour(lastTimeUTC);
 
                     const prevCount = previousCounts[pid] || 0;
