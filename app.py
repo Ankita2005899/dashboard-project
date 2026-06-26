@@ -5047,39 +5047,90 @@ def monthly_analysis():
         
 #-------------------Owner _section "open" button (customer churan predictio ) sathi -----------------------        
 
-
-
 @app.route('/api/churn-customers')
-def churn_customers():
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
-            SELECT
-                u.id, u.name, u.email,
-                COUNT(DISTINCT o.id)            AS orders,
-                COALESCE(SUM(o.total_price), 0) AS spend,
-                COALESCE(DATEDIFF(NOW(), MAX(o.created_at)), 999) AS daysSinceLast,
-                COUNT(DISTINCT s.id)            AS loginCount
-            FROM users u
-            LEFT JOIN orders o  ON o.user_id = u.id
-            LEFT JOIN sessions s ON s.user_id = u.id
-            WHERE u.role = 'customer'
-            GROUP BY u.id, u.name, u.email
-            ORDER BY orders DESC
-        """)
-        customers = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        for c in customers:
-            c['spend']        = float(c['spend'])
-            c['orders']       = int(c['orders'])
-            c['daysSinceLast']= int(c['daysSinceLast'])
-            c['loginCount']   = int(c['loginCount'])
-        return jsonify({'customers': customers})
-    except Exception as e:
-        return jsonify({'customers': [], 'error': str(e)}), 500
+def api_churn_customers():
+    import re
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
 
+    cursor.execute("SELECT id, username, email FROM user")
+    all_users = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT TABLE_NAME FROM information_schema.tables
+        WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME LIKE '%_product_activity'
+    """)
+    existing_activity_tables = {row['TABLE_NAME'] for row in cursor.fetchall()}
+
+    cursor.execute("""
+        SELECT username, COUNT(*) as login_count
+        FROM user_activity
+        GROUP BY username
+    """)
+    login_map = {row['username']: row['login_count'] for row in cursor.fetchall()}
+
+    customers = []
+
+    for u in all_users:
+        uid   = u['id']
+        uname = u['username']
+        email = u['email']
+
+        sanitized      = re.sub(r'[^a-z0-9_]', '_', uname.lower())
+        activity_table = f"{sanitized}_{uid}_product_activity"
+
+        total_orders    = 0
+        total_cart      = 0
+        total_search    = 0
+        total_spend     = 0.0
+        unique_products = 0
+        days_since      = 999
+
+        if activity_table in existing_activity_tables:
+            try:
+                cursor.execute(f"""
+                    SELECT
+                        COALESCE(SUM(today_purchase_count), 0)    AS total_orders,
+                        COALESCE(SUM(today_add_to_cart_count), 0) AS total_cart,
+                        COALESCE(SUM(today_search_count), 0)      AS total_search,
+                        COUNT(DISTINCT product_id)                 AS unique_products,
+                        MAX(add_to_cart_date_time)                 AS last_activity
+                    FROM `{activity_table}`
+                """)
+                act = cursor.fetchone()
+
+                total_orders    = int(act['total_orders']    or 0)
+                total_cart      = int(act['total_cart']      or 0)
+                total_search    = int(act['total_search']    or 0)
+                unique_products = int(act['unique_products'] or 0)
+
+                if act['last_activity']:
+                    days_since = (datetime.utcnow() - act['last_activity']).days
+
+            except Exception as e:
+                print(f"Activity fetch error for {activity_table}: {e}")
+
+        login_count = login_map.get(uname, 0)
+        engagement  = total_search + total_cart + login_count
+
+        customers.append({
+            'id'             : uid,
+            'name'           : uname,
+            'email'          : email,
+            'orders'         : total_orders,
+            'spend'          : round(total_spend, 2),
+            'daysSinceLast'  : days_since,
+            'loginCount'     : engagement,
+            'total_cart'     : total_cart,
+            'total_search'   : total_search,
+            'unique_products': unique_products,
+            'has_activity'   : activity_table in existing_activity_tables
+        })
+
+    cursor.close()
+    conn.close()
+    return jsonify({'customers': customers})
 
 #--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
 
