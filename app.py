@@ -5046,40 +5046,80 @@ def monthly_analysis():
         
         
 #-------------------Owner _section "open" button (customer churan predictio ) sathi -----------------------        
-
 @app.route('/api/churn-customers')
 def api_churn_customers():
     import re
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT id, username, email FROM user")
-    all_users = cursor.fetchall()
-
+    # Step 1: Get ALL tables from DB
     cursor.execute("""
         SELECT TABLE_NAME FROM information_schema.tables
         WHERE TABLE_SCHEMA = DATABASE()
-        AND TABLE_NAME LIKE '%_product_activity'
     """)
-    existing_activity_tables = {row['TABLE_NAME'] for row in cursor.fetchall()}
+    all_tables = [row['TABLE_NAME'] for row in cursor.fetchall()]
 
-    cursor.execute("""
-        SELECT username, COUNT(*) as login_count
-        FROM user_activity
-        GROUP BY username
-    """)
-    login_map = {row['username']: row['login_count'] for row in cursor.fetchall()}
+    # Step 2: Separate activity tables and customer tables
+    activity_tables = [t for t in all_tables if t.endswith('_product_activity')]
+    
+    # Step 3: Build a smart map — strip '_product_activity' to find base name
+    # e.g. "Ankita Bandal_1_product_activity" → base = "Ankita Bandal_1"
+    activity_base_map = {}
+    for at in activity_tables:
+        base = at.replace('_product_activity', '')
+        activity_base_map[base.lower().replace(' ', '_')] = at
+    # activity_base_map now looks like:
+    # { "ankita_bandal_1": "ankita_bandal_1_product_activity",
+    #   "ankita_bandal_1": "Ankita Bandal_1_product_activity", ... }
+
+    # Step 4: Get customer tables (has digit at end, not activity table)
+    skip_tables = {
+        'user', 'user_activity', 'user_signout_logs', 'user_survey',
+        'user_template', 'deleted_users', 'deleted_customers',
+        'addtocart_logs', 'search_logs', 'cart', 'cart_summary',
+        'card', 'food_items', 'study_material', 'store_data',
+        'strong_password', 'StrongPassword', 'sample', 'save_detail',
+        'category_requests', 'support_sd', 'product_availability',
+        'product_availability_sql', 'vc_product_availability',
+        'yourusername_1_product_activity', 'BANDAl_7_product_activity'
+    }
+
+    customer_tables = []
+    for t in all_tables:
+        if t in skip_tables:
+            continue
+        if t.endswith('_product_activity'):
+            continue
+        if t.endswith('_your_item'):
+            continue
+        # Must end with _<number>
+        parts = t.rsplit('_', 1)
+        if len(parts) == 2 and parts[1].isdigit():
+            customer_tables.append(t)
 
     customers = []
 
-    for u in all_users:
-        uid   = u['id']
-        uname = u['username']
-        email = u['email']
+    for table in customer_tables:
+        parts = table.rsplit('_', 1)
+        uid           = int(parts[1])
+        username_part = parts[0]
 
-        sanitized      = re.sub(r'[^a-z0-9_]', '_', uname.lower())
-        activity_table = f"{sanitized}_{uid}_product_activity"
+        # Step 5: Find matching activity table using normalized key
+        normalized_key = table.lower().replace(' ', '_')
+        activity_table = activity_base_map.get(normalized_key)
 
+        # Step 6: Get one row from customer table for email/name
+        try:
+            cursor.execute(f"SELECT * FROM `{table}` LIMIT 1")
+            user_row = cursor.fetchone()
+            if not user_row:
+                continue
+        except:
+            continue
+
+        email = user_row.get('email', '')
+
+        # Step 7: Pull activity data
         total_orders    = 0
         total_cart      = 0
         total_search    = 0
@@ -5087,7 +5127,7 @@ def api_churn_customers():
         unique_products = 0
         days_since      = 999
 
-        if activity_table in existing_activity_tables:
+        if activity_table:
             try:
                 cursor.execute(f"""
                     SELECT
@@ -5108,15 +5148,36 @@ def api_churn_customers():
                 if act['last_activity']:
                     days_since = (datetime.utcnow() - act['last_activity']).days
 
-            except Exception as e:
-                print(f"Activity fetch error for {activity_table}: {e}")
+                # Step 8: Spend calculation
+                cursor.execute(f"""
+                    SELECT name,
+                           COALESCE(SUM(today_purchase_count), 0) AS purchased
+                    FROM `{activity_table}`
+                    WHERE today_purchase_count > 0
+                    GROUP BY name
+                """)
+                purchased_rows = cursor.fetchall()
 
-        login_count = login_map.get(uname, 0)
-        engagement  = total_search + total_cart + login_count
+                for pr in purchased_rows:
+                    try:
+                        cursor.execute(f"""
+                            SELECT price FROM `{table}`
+                            WHERE name = %s LIMIT 1
+                        """, (pr['name'],))
+                        price_row = cursor.fetchone()
+                        if price_row and price_row['price']:
+                            total_spend += float(price_row['price']) * int(pr['purchased'])
+                    except:
+                        continue
+
+            except Exception as e:
+                print(f"Error {activity_table}: {e}")
+
+        engagement = total_search + total_cart + unique_products
 
         customers.append({
             'id'             : uid,
-            'name'           : uname,
+            'name'           : username_part.replace('_', ' ').title(),
             'email'          : email,
             'orders'         : total_orders,
             'spend'          : round(total_spend, 2),
@@ -5125,7 +5186,7 @@ def api_churn_customers():
             'total_cart'     : total_cart,
             'total_search'   : total_search,
             'unique_products': unique_products,
-            'has_activity'   : activity_table in existing_activity_tables
+            'has_activity'   : activity_table is not None
         })
 
     cursor.close()
