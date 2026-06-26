@@ -418,27 +418,34 @@
                 }
 
                 const ctx = document.getElementById('addtocartChart').getContext('2d');
-                if (addtocartChart) addtocartChart.destroy();
-                addtocartChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: "Today's Addtocart Count",
-                            data: counts,
-                            borderWidth: 2,
-                            backgroundColor: 'rgba(79,70,229,0.6)',
-                            borderColor: 'rgba(79,70,229,1)'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: { beginAtZero: true, title: { display: true, text: "Count" } },
-                            x: { title: { display: true, text: "Product Name" } }
+                if (!addtocartChart) {
+                    addtocartChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: "Today's Addtocart Count",
+                                data: counts,
+                                borderWidth: 2,
+                                backgroundColor: 'rgba(79,70,229,0.6)',
+                                borderColor: 'rgba(79,70,229,1)',
+                                hoverBackgroundColor: 'rgba(79,70,229,0.8)',
+                                hoverBorderColor: 'rgba(79,70,229,1)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, title: { display: true, text: "Count" } },
+                                x: { title: { display: true, text: "Product Name" } }
+                            }
                         }
-                    }
-                });
+                    });
+                } else {
+                    addtocartChart.data.labels = labels;
+                    addtocartChart.data.datasets[0].data = counts;
+                    addtocartChart.update();
+                }
 
             } catch (err) {
                 console.error("Error loading Add-to-Cart data:", err);
