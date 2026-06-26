@@ -1822,6 +1822,68 @@
             else { badge.style.display = "inline"; badge.textContent = count; }
         }
 
+
+
+        // ── Load special offers for this customer ──────────────────
+async function loadSpecialOffers() {
+    try {
+        const res  = await fetch('/api/my-special-offers');
+        const data = await res.json();
+        const offers = data.offers || [];
+
+        const container = document.getElementById('specialNotifs');
+        
+        if (!offers.length) {
+            container.innerHTML = `
+                <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
+                    <div style="font-size:32px;margin-bottom:10px;">🎁</div>
+                    <div style="font-size:13px;">No special offers yet!</div>
+                </div>`;
+            return;
+        }
+
+        // Update badge count
+        const unread = offers.filter(o => !o.is_read).length;
+        const badge  = document.getElementById('notifBadge');
+        if (badge) badge.textContent = unread;
+
+        container.innerHTML = offers.map(o => `
+            <div class="notif-item-dash ${!o.is_read ? 'unread-notif' : ''}"
+                 onclick="markOfferRead(${o.id}, this)"
+                 style="cursor:pointer;">
+                <div class="notif-icon-dash" style="background:#fce7f3;color:#be185d;">🎁</div>
+                <div style="flex:1;">
+                    <div class="notif-title-dash">${o.offer_type}</div>
+                    <div class="notif-desc-dash">${o.message}</div>
+                    <div class="notif-time-dash">${new Date(o.created_at).toLocaleString('en-IN')}</div>
+                </div>
+                ${!o.is_read ? '<div class="unread-dot"></div>' : ''}
+            </div>
+        `).join('');
+
+    } catch(e) {
+        console.error('Failed to load offers:', e);
+    }
+}
+
+async function markOfferRead(offerId, el) {
+    await fetch(`/api/mark-offer-read/${offerId}`, { method: 'POST' });
+    el.classList.remove('unread-notif');
+    const dot = el.querySelector('.unread-dot');
+    if (dot) dot.remove();
+}
+
+// ── openOffers — open notification panel on Special tab ────
+function openOffers() {
+    openNotifications();
+    switchNotifTab('special');
+    loadSpecialOffers();
+}
+
+// Auto-load on page open
+window.addEventListener('load', loadSpecialOffers);
+
+
     </script>
 
     <!-- SUCCESS POPUP -->

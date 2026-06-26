@@ -6580,16 +6580,93 @@
         }
 
 
-        function sendBucketOffer(bucketId, offerLabel) {
+        async function sendBucketOffer(bucketId, offerLabel) {
             const bucket = document.getElementById('bucket-' + bucketId);
             const msg = document.getElementById('msg-' + bucketId).value.trim();
             const customers = bucket.querySelectorAll('div[id^="offercard-"]');
-            if (!customers.length) { alert('⚠️ No customers dropped into ' + offerLabel + ' bucket yet!'); return; }
-            if (!msg) { alert('⚠️ Please type a message before sending!'); return; }
+
+            if (!customers.length) {
+                alert('⚠️ No customers dropped into ' + offerLabel + ' bucket yet!');
+                return;
+            }
+            if (!msg) {
+                alert('⚠️ Please type a message before sending!');
+                return;
+            }
+
             const sentEl = document.getElementById('sent-' + bucketId);
-            sentEl.textContent = `✅ ${offerLabel} sent to ${customers.length} customer(s)!`;
+            sentEl.textContent = '⏳ Sending...';
             sentEl.style.display = 'block';
-            setTimeout(() => sentEl.style.display = 'none', 3000);
+
+            let successCount = 0;
+            let failCount = 0;
+
+            for (const card of customers) {
+                // name and uid dono card ke data se nikalte hain
+                // card id format: offercard-discount10-paisa_paisa_com
+                // name card ke inner text se
+                const nameEl = card.querySelector('div[style*="font-weight:700"]');
+                const emailEl = card.querySelector('div[style*="font-size:10px"]');
+
+                const rawName = nameEl ? nameEl.textContent.replace('👤', '').trim() : '';
+                const email = emailEl ? emailEl.textContent.trim() : '';
+
+                // uid nikalna — churnCustomerData se match karke
+                const allCustomers = [
+                    ...churnSegmented.champions,
+                    ...churnSegmented.moderate,
+                    ...churnSegmented.dormant
+                ];
+                const matched = allCustomers.find(c =>
+                    c.name.toLowerCase() === rawName.toLowerCase() ||
+                    c.email === email
+                );
+
+                if (!matched) {
+                    console.warn('Customer not found in churn data:', rawName);
+                    failCount++;
+                    continue;
+                }
+
+                try {
+                    const res = await fetch('/api/send-special-offer', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            username: matched.name,
+                            uid: matched.id,
+                            offer_type: offerLabel,
+                            message: msg
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        successCount++;
+                        // Visual feedback on card
+                        card.style.borderLeft = '3px solid #22c55e';
+                    } else {
+                        failCount++;
+                        console.error('Send failed:', data.error);
+                    }
+                } catch (e) {
+                    failCount++;
+                    console.error('Network error:', e);
+                }
+            }
+
+            // Show result
+            if (successCount > 0) {
+                sentEl.textContent = `✅ ${offerLabel} sent to ${successCount} customer(s)!`;
+                sentEl.style.color = '#15803d';
+            }
+            if (failCount > 0) {
+                sentEl.textContent += ` ⚠️ ${failCount} failed.`;
+                sentEl.style.color = '#b91c1c';
+            }
+            setTimeout(() => {
+                sentEl.style.display = 'none';
+                sentEl.style.color = '';
+            }, 4000);
         }
 
 
