@@ -887,21 +887,7 @@
             })
             .catch(err => console.error("Error fetching profile:", err));
 
-    // Toggle section visibility
-    const section = document.getElementById('yourItemsSection');
-    const isVisible = section.style.display !== 'none';
-    // Hide all shop-sections first
-    document.querySelectorAll('.shop-section').forEach(s => s.style.display = '');
-    if (isVisible) {
-        section.style.display = 'none';
-        document.getElementById('yourItemsBtn').classList.remove('active');
-        return;
-    }
-    // Hide other sections, show this one
-    document.querySelectorAll('.shop-section').forEach(s => s.style.display = 'none');
-    section.style.display = 'block';
-    document.getElementById('yourItemsBtn').classList.add('active');
-    loadYourItems('all');
+
 
 
 function showYourItems() {
