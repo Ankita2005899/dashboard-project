@@ -5155,13 +5155,24 @@ def get_addtocart_user_data():
     cursor = conn.cursor(dictionary=True)
 
     try:
+        # ✅ Check which time column exists
+        cursor.execute(f"""
+            SELECT COUNT(*) as cnt FROM information_schema.columns
+            WHERE table_schema = DATABASE()
+            AND table_name = %s
+            AND column_name = 'add_to_cart_date_time'
+        """, (activity_table,))
+        has_new_col = cursor.fetchone()["cnt"]
+
+        time_col = "add_to_cart_date_time" if has_new_col else "add_to_cart_time"
+
         cursor.execute(f"""
             SELECT id, product_id, name, category,
                    today_add_to_cart_count AS add_to_cart_count,
-                   add_to_cart_time
+                   `{time_col}` AS add_to_cart_time
             FROM `{activity_table}`
             WHERE today_add_to_cart_count > 0
-            ORDER BY add_to_cart_date_time DESC
+            ORDER BY `{time_col}` DESC
         """)
         rows = cursor.fetchall()
 
@@ -5185,8 +5196,6 @@ def get_addtocart_user_data():
     finally:
         cursor.close()
         conn.close()
-        
-        
 #--------------------personal purchase analysis ( " dashboard.html madhe " )-------------------------
 @app.route("/get-purchase-data")
 def get_purchase_data():
