@@ -6558,6 +6558,7 @@
             const popup = document.getElementById('specialOfferPopup');
             popup.style.display = 'flex';
             renderOfferCustomerList('');
+            loadComboProducts();  // combo products bhi load karo
         }
 
         function closeSpecialOfferPopup() {
@@ -6858,14 +6859,6 @@
                 btnEl.textContent = '📢 Send to All Customers';
             }
         }
-
-        // Load products when special offer popup opens
-        const _origOpenSpecialOfferPopup = openSpecialOfferPopup;
-        function openSpecialOfferPopup() {
-            _origOpenSpecialOfferPopup();
-            loadComboProducts();
-        }
-
 
     </script>
     <footer class="footer">
