@@ -769,7 +769,7 @@
     <div id="yourItemDetailPopup" style="display:none;position:fixed;inset:0;z-index:9999;
     background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);justify-content:center;align-items:center;">
         <div style="background:white;width:95%;max-width:720px;border-radius:20px;padding:30px;
-        box-shadow:0 24px 70px rgba(0,0,0,0.3);position:relative;max-height:90vh;overflow-y:auto;
+        box-shadow:0 24px 70px rgba(0,0,0,0.3);position:relative;max-height:85vh;overflow-y:auto;
         border:2px solid #e0e7ff;">
             <button onclick="document.getElementById('yourItemDetailPopup').style.display='none'" style="position:absolute;top:14px;right:14px;background:#f1f5f9;border:none;
             border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;
@@ -1054,7 +1054,7 @@ ${p.description ? `
                     <p style="color:#475569;font-size:13px;line-height:1.7;background:#f8fafc;
                     border-radius:10px;padding:12px 14px;border-left:3px solid #6366f1;
                     max-height:120px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;">
-                    ${p.description.replace(/Made of:.*?Title:/s, '').replace(/Description \(SEO Optimized\)/g, '').trim()}
+                    ${(p.description || '').split('#')[0].trim() || p.description}
                     </p>
                 </div>` : ''}              
 
@@ -1079,7 +1079,9 @@ ${p.description ? `
                         </div>
                     </div>
                     <!-- Bar chart -->
-                    <canvas id="itemPurchaseChart" style="height:140px;width:100%;"></canvas>
+                    <div id="itemChartWrap" style="height:120px;position:relative;">
+                        <canvas id="itemPurchaseChart" style="max-height:120px;"></canvas>
+                    </div>
                 </div>
 
                 <!-- Keyword Editor trigger -->
@@ -1123,10 +1125,11 @@ ${p.description ? `
                             }]
                         },
                         options: {
-                            responsive: true, maintainAspectRatio: false,
+                            responsive: true,
+                            maintainAspectRatio: false,
                             plugins: { legend: { display: false } },
                             scales: {
-                                y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0, font: { size: 10 } } },
+                                y: { beginAtZero: true, min: 0, max: Math.max(s, c, pu, 1) + 1, ticks: { stepSize: 1, precision: 0, font: { size: 10 } } },
                                 x: { ticks: { font: { size: 11 } } }
                             }
                         }
