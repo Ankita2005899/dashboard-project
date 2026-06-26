@@ -5138,7 +5138,6 @@ def search_user():
 
     
 #--------------------personal Add to card  analysis ( " dashboard.html madhe " )-------------------------
-
 @app.route("/get-addtocart-user-data")
 def get_addtocart_user_data():
     if "user_id" not in session or "username" not in session:
@@ -5156,20 +5155,10 @@ def get_addtocart_user_data():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # ✅ Actual product names
-        cursor.execute("""
-            SELECT id, name, 'card' as category FROM card
-            UNION ALL
-            SELECT id, name, 'study_material' FROM study_material
-            UNION ALL
-            SELECT id, name, 'food_items' FROM food_items
-        """)
-        product_map = {(p["id"], p["category"]): p["name"] for p in cursor.fetchall()}
-
         cursor.execute(f"""
-            SELECT product_id, category,
-                   today_add_to_cart_count,
-                   add_to_cart_date_time
+            SELECT id, product_id, name, category,
+                   today_add_to_cart_count AS add_to_cart_count,
+                   add_to_cart_date_time AS add_to_cart_time
             FROM `{activity_table}`
             WHERE today_add_to_cart_count > 0
             ORDER BY add_to_cart_date_time DESC
@@ -5178,14 +5167,14 @@ def get_addtocart_user_data():
 
         results = []
         for i, row in enumerate(rows):
-            actual_name = product_map.get((row["product_id"], row["category"])) or "Unknown"
+            t = row["add_to_cart_time"]
             results.append({
                 "id": i + 1,
                 "product_id": row["product_id"],
-                "product_name": actual_name,
+                "product_name": row["name"] or "Unknown",
                 "category": row["category"],
-                "add_to_cart_count": row["today_add_to_cart_count"],
-                "add_to_cart_time": str(row["add_to_cart_date_time"]) if row["add_to_cart_date_time"] else None
+                "add_to_cart_count": row["add_to_cart_count"],
+                "add_to_cart_time": t.strftime("%I:%M %p") if t else None
             })
 
         return jsonify(results)
@@ -5196,6 +5185,8 @@ def get_addtocart_user_data():
     finally:
         cursor.close()
         conn.close()
+        
+        
 #--------------------personal purchase analysis ( " dashboard.html madhe " )-------------------------
 @app.route("/get-purchase-data")
 def get_purchase_data():
