@@ -5125,22 +5125,20 @@ def get_purchase_data():
 
 
 #--------------profile page ('your item option button ")--------------------
-
-uname = session.get("username")
-        uid   = session.get("user_id")
+@app.route('/api/all-products')
+def all_products():
+    try:
+        uname = session.get("username")
+        uid = session.get("user_id")
         if not uname or not uid:
             return jsonify({'products': [], 'error': 'Not logged in'}), 401
 
-        # Debug: print what session contains
         print(f"[all_products] session username='{uname}' uid='{uid}'")
-
         your_item_table = f"{uname}_{uid}_your_item"
         print(f"[all_products] looking for table: {your_item_table}")
-        your_item_table = f"{uname}_{uid}_your_item"
-        conn = get_db_connection()
-        cursor = conn.cursoradd-produc(dictionary=True)
 
-        # Auto-create table if it doesn't exist (for users created before this feature)
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
         cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS `{your_item_table}` (
                 id            INT AUTO_INCREMENT PRIMARY KEY,
@@ -5158,7 +5156,6 @@ uname = session.get("username")
             )
         """)
         conn.commit()
-
         cursor.execute(f"""
             SELECT id, category, name, image, price,
                    availability, detail, address, quantity
@@ -5178,7 +5175,6 @@ uname = session.get("username")
     except Exception as e:
         print(f"[all_products] error: {e}")
         return jsonify({'products': [], 'error': str(e)}), 500
-
 def create_user_your_item_table(username, user_id):
     table_name = f"{username}_{user_id}_your_item"
     db = get_db_connection()
