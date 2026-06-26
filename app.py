@@ -5158,7 +5158,7 @@ def get_addtocart_user_data():
         cursor.execute(f"""
             SELECT id, product_id, name, category,
                    today_add_to_cart_count AS add_to_cart_count,
-                   add_to_cart_date_time AS add_to_cart_time
+                   add_to_cart_time
             FROM `{activity_table}`
             WHERE today_add_to_cart_count > 0
             ORDER BY add_to_cart_date_time DESC
@@ -5174,7 +5174,7 @@ def get_addtocart_user_data():
                 "product_name": row["name"] or "Unknown",
                 "category": row["category"],
                 "add_to_cart_count": row["add_to_cart_count"],
-                "add_to_cart_time": t.strftime("%I:%M %p") if t else None
+                "add_to_cart_time": str(t) if t else None
             })
 
         return jsonify(results)
