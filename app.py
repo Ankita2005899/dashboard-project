@@ -5204,7 +5204,36 @@ def create_user_your_item_table(username, user_id):
         cursor.close()
         db.close()
         
-        
+#subpoint-----------profile.html madhle your_item chya aatle card cha view-----------       
+
+
+@app.route('/api/update-keywords', methods=['POST'])
+def update_keywords():
+    try:
+        data = request.get_json()
+        pid  = data.get('product_id')
+        kw   = data.get('keywords', '')
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE store_data SET keywords=%s WHERE id=%s", (kw, pid))
+        # Also update in user's your_item table
+        uname = session.get("username")
+        uid   = session.get("user_id")
+        if uname and uid:
+            your_item_table = f"{uname}_{uid}_your_item"
+            try:
+                cursor.execute(f"UPDATE `{your_item_table}` SET keywords=%s WHERE store_data_id=%s", (kw, pid))
+            except:
+                pass
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
+    
         
 #-------------------logout process from profile.html page ({sign out")button sathi-------------------- 
 

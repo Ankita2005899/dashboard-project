@@ -967,54 +967,51 @@
                 </div>`;
                     return;
                 }
-                grid.innerHTML = filtered.map(p => `
-            <div onclick="openYourItemDetail(${JSON.stringify(p).replace(/"/g, '&quot;')})"
-                style="background:white;border-radius:16px;padding:0;box-shadow:0 4px 16px rgba(0,0,0,0.08);
-                cursor:pointer;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;border:1.5px solid #f1f5f9;"
-                onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 10px 28px rgba(0,0,0,0.13)'"
-                onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'">
-                <!-- Image -->
-                <div style="width:100%;height:160px;overflow:hidden;background:#f8fafc;position:relative;">
-                    ${p.image_url
-                        ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;"
-                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-                        : ''}
-                    <div style="width:100%;height:100%;display:${p.image_url ? 'none' : 'flex'};
-                        align-items:center;justify-content:center;font-size:36px;background:#f1f5f9;">🛍️</div>
-                    <!-- Category badge -->
-                    <span style="position:absolute;top:8px;left:8px;background:#6366f1;color:white;
-                        padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">
-                        ${p.category || 'Item'}
-                    </span>
-                    <!-- Availability badge -->
-                    <span style="position:absolute;top:8px;right:8px;
-                        background:${p.quantity > 0 ? '#dcfce7' : '#fee2e2'};
-                        color:${p.quantity > 0 ? '#15803d' : '#b91c1c'};
-                        padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">
-                        ${p.quantity > 0 ? 'Available: ' + p.quantity : 'Out of Stock'}
-                    </span>
-                </div>
-                <!-- Info -->
-                <div style="padding:14px;">
-                    <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:4px;
-                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
-                    <div style="font-size:18px;font-weight:800;color:#6366f1;margin-bottom:12px;">₹${p.price}</div>
-                    <div style="display:flex;gap:8px;">
-                        <button onclick="event.stopPropagation();addToCartFromItems(${p.id},'${p.name}')"
-                            style="flex:1;background:#6366f1;color:white;border:none;padding:9px;
-                            border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity 0.2s;"
-                            onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-                            🛒 Add to Cart
-                        </button>
-                        <button onclick="event.stopPropagation();openYourItemDetail(${JSON.stringify(p).replace(/"/g, '&quot;')})"
-                            style="flex:1;background:#10b981;color:white;border:none;padding:9px;
-                            border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity 0.2s;"
-                            onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-                            i See Details
-                        </button>
-                    </div>
-                </div>
-            </div>`).join('');
+                grid.innerHTML = filtered.map(p => {
+                    const safeP = encodeURIComponent(JSON.stringify(p));
+                    const addedDate = p.uploaded_at ? new Date(p.uploaded_at).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'}) : 'N/A';
+                    return `
+                    <div style="background:white;border-radius:16px;overflow:hidden;
+                        box-shadow:0 4px 16px rgba(0,0,0,0.08);border:1.5px solid #f1f5f9;
+                        transition:transform 0.2s,box-shadow 0.2s;display:flex;flex-direction:column;"
+                        onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 10px 28px rgba(0,0,0,0.13)'"
+                        onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'">
+                        <!-- Image -->
+                        <div style="width:100%;height:160px;background:#f8fafc;position:relative;overflow:hidden;">
+                            ${p.image_url
+                                ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">`
+                                : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;">🛍️</div>'}
+                            <span style="position:absolute;top:8px;left:8px;background:#6366f1;color:white;
+                                padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">
+                                ${p.category || 'Item'}
+                            </span>
+                            <span style="position:absolute;top:8px;right:8px;
+                                background:${p.quantity > 0 ? '#dcfce7' : '#fee2e2'};
+                                color:${p.quantity > 0 ? '#15803d' : '#b91c1c'};
+                                padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">
+                                ${p.quantity > 0 ? 'Avl: ' + p.quantity : 'Out of Stock'}
+                            </span>
+                        </div>
+                        <!-- Info -->
+                        <div style="padding:14px;flex:1;display:flex;flex-direction:column;gap:6px;">
+                            <div style="font-size:14px;font-weight:700;color:#0f172a;
+                                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+                            <div style="font-size:18px;font-weight:800;color:#6366f1;">₹${p.price}</div>
+                            <!-- Date added -->
+                            <div style="font-size:11px;color:#94a3b8;">
+                                📅 Added: <b style="color:#64748b;">${addedDate}</b>
+                            </div>
+                            <!-- View button only -->
+                            <button onclick="openYourItemDetail('${safeP}')"
+                                style="width:100%;margin-top:6px;background:#6366f1;color:white;border:none;
+                                padding:10px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;
+                                transition:opacity 0.2s;"
+                                onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                                👁️ View Details
+                            </button>
+                        </div>
+                    </div>`;
+                }).join('');
             } catch (e) {
                 grid.innerHTML = '<div style="color:#ef4444;font-size:13px;padding:20px;">Failed to load items. Please try again.</div>';
                 console.error(e);
@@ -1025,33 +1022,105 @@
             loadYourItems(cat);
         }
 
-        function openYourItemDetail(p) {
+        function openYourItemDetail(safeP) {
+            const p = JSON.parse(decodeURIComponent(safeP));
+            const addedDate = p.uploaded_at ? new Date(p.uploaded_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : 'N/A';
             document.getElementById('yourItemDetailContent').innerHTML = `
-        <div style="text-align:center;margin-bottom:16px;">
-            ${p.image_url
-                    ? `<img src="${p.image_url}" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;"
-                    onerror="this.style.display='none'">`
-                    : '<div style="font-size:60px;margin:20px 0;">🛍️</div>'}
-        </div>
-        <span style="background:#6366f1;color:white;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">
-            ${p.category || 'Item'}
-        </span>
-        <h2 style="margin:12px 0 6px;font-size:20px;color:#0f172a;">${p.name}</h2>
-        <div style="font-size:26px;font-weight:800;color:#6366f1;margin-bottom:10px;">₹${p.price}</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
-            <span style="background:${p.quantity > 0 ? '#dcfce7' : '#fee2e2'};color:${p.quantity > 0 ? '#15803d' : '#b91c1c'};
-                padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;">
-                ${p.quantity > 0 ? '✅ Available: ' + p.quantity : '❌ Out of Stock'}
-            </span>
-        </div>
-        ${p.description ? `<p style="color:#64748b;font-size:13px;line-height:1.6;margin-bottom:16px;">${p.description}</p>` : ''}
-        ${p.address ? `<p style="font-size:12px;color:#94a3b8;">📍 ${p.address}</p>` : ''}
-        <button onclick="addToCartFromItems(${p.id},'${p.name}');document.getElementById('yourItemDetailPopup').style.display='none'"
-            style="width:100%;margin-top:16px;background:#6366f1;color:white;border:none;
-            padding:13px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">
-            🛒 Add to Cart
-        </button>`;
+                <div style="text-align:center;margin-bottom:16px;">
+                    ${p.image_url
+                        ? `<img src="${p.image_url}" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;">`
+                        : '<div style="font-size:60px;margin:20px 0;">🛍️</div>'}
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                    <span style="background:#6366f1;color:white;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">
+                        ${p.category || 'Item'}
+                    </span>
+                    <span style="font-size:11px;color:#94a3b8;">📅 Added: <b>${addedDate}</b></span>
+                </div>
+                <h2 style="margin:8px 0 4px;font-size:20px;color:#0f172a;">${p.name}</h2>
+                <div style="font-size:24px;font-weight:800;color:#6366f1;margin-bottom:8px;">₹${p.price}</div>
+                <span style="background:${p.quantity>0?'#dcfce7':'#fee2e2'};color:${p.quantity>0?'#15803d':'#b91c1c'};
+                    padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;">
+                    ${p.quantity > 0 ? '✅ Available: '+p.quantity : '❌ Out of Stock'}
+                </span>
+                ${p.description ? `<p style="color:#64748b;font-size:13px;line-height:1.6;margin:12px 0;">${p.description}</p>` : ''}
+                ${p.address ? `<p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">📍 ${p.address}</p>` : ''}
+
+                <!-- Monthly Purchase Chart -->
+                <div style="background:#f8fafc;border-radius:12px;padding:14px;margin-top:12px;">
+                    <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">
+                        📊 Monthly Purchases
+                    </div>
+                    <canvas id="itemPurchaseChart" style="height:150px;width:100%;"></canvas>
+                </div>
+
+                <!-- Keyword Editor trigger -->
+                <button onclick="openKeywordEditor(${p.id},'${(p.name||'').replace(/'/g,'')}')"
+                    style="width:100%;margin-top:14px;background:#f59e0b;color:white;border:none;
+                    padding:11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
+                    🏷️ Edit Keywords
+                </button>`;
+
             document.getElementById('yourItemDetailPopup').style.display = 'flex';
+
+            // Draw monthly chart using mock data (replace with real API if available)
+            setTimeout(() => {
+                const ctx = document.getElementById('itemPurchaseChart');
+                if (!ctx) return;
+                if (window._itemChart) window._itemChart.destroy();
+                window._itemChart = new Chart(ctx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                        datasets: [{
+                            label: 'Purchases',
+                            data: [2,4,3,6,5,8,4,7,3,5,6,4],
+                            backgroundColor: '#6366f1',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+                            x: { ticks: { font: { size: 10 } } }
+                        }
+                    }
+                });
+            }, 100);
+        }
+
+
+        function openKeywordEditor(productId, productName) {
+            document.getElementById('keywordEditorPanel').style.display = 'flex';
+            document.getElementById('keywordProductName').textContent = productName;
+            document.getElementById('keywordProductId').value = productId;
+            document.getElementById('keywordInput').value = '';
+            document.getElementById('keywordSaveMsg').style.display = 'none';
+        }
+
+        function closeKeywordEditor() {
+            document.getElementById('keywordEditorPanel').style.display = 'none';
+        }
+
+        function saveKeywords() {
+            const pid = document.getElementById('keywordProductId').value;
+            const kw  = document.getElementById('keywordInput').value.trim();
+            if (!kw) { alert('⚠️ Please enter keywords first.'); return; }
+            fetch('/api/update-keywords', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: pid, keywords: kw })
+            })
+            .then(r => r.json())
+            .then(d => {
+                const msg = document.getElementById('keywordSaveMsg');
+                msg.style.display = 'block';
+                msg.textContent = d.success ? '✅ Keywords updated!' : '⚠️ ' + (d.error || 'Failed');
+                setTimeout(() => msg.style.display = 'none', 3000);
+            })
+            .catch(() => alert('⚠️ Failed to save keywords.'));
         }
 
         function addToCartFromItems(productId, productName) {
@@ -1067,6 +1136,35 @@
                 .catch(() => alert('⚠️ Failed to add to cart.'));
         }
     </script>
+
+    <!-- ===== KEYWORD EDITOR FLOATING PANEL (bottom right) ===== -->
+<div id="keywordEditorPanel" style="display:none;position:fixed;bottom:24px;right:24px;z-index:10000;
+    background:white;border-radius:16px;padding:20px;width:320px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.18);border:2px solid #f59e0b;flex-direction:column;gap:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:14px;font-weight:700;color:#0f172a;">🏷️ Edit Keywords</div>
+        <button onclick="closeKeywordEditor()"
+            style="background:#f1f5f9;border:none;border-radius:50%;width:28px;height:28px;
+            cursor:pointer;font-size:14px;">✕</button>
+    </div>
+    <div style="font-size:12px;color:#64748b;" id="keywordProductName"></div>
+    <input type="hidden" id="keywordProductId">
+    <textarea id="keywordInput" rows="3" placeholder="Enter keywords separated by commas e.g. apple, fruit, fresh..."
+        style="width:100%;padding:10px;border:1.5px solid #fcd34d;border-radius:10px;
+        font-size:12px;resize:none;box-sizing:border-box;color:#0f172a;"></textarea>
+    <button onclick="saveKeywords()"
+        style="width:100%;background:#f59e0b;color:white;border:none;padding:10px;
+        border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
+        💾 Save Keywords
+    </button>
+    <div id="keywordSaveMsg" style="display:none;font-size:12px;font-weight:600;
+        color:#22c55e;text-align:center;"></div>
+</div>
+
+<!-- Chart.js for item popup chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
     <!-- ===== SIGN-OUT REASON MODAL ===== -->
     <div id="signoutOverlay" style="
     display:none; position:fixed; inset:0; z-index:9999;
