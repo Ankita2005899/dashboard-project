@@ -5158,7 +5158,8 @@ def all_products():
         conn.commit()
         cursor.execute(f"""
             SELECT id, category, name, image, price,
-                   availability, detail, address, quantity
+                   availability, detail, address, quantity,
+                   uploaded_at
             FROM `{your_item_table}`
             WHERE availability > 0
             ORDER BY category, name
@@ -5171,6 +5172,7 @@ def all_products():
             p['quantity']    = int(p['quantity']) if p['quantity'] else 0
             p['image_url']   = p.get('image', '')
             p['description'] = p.get('detail', '')
+            p['uploaded_at'] = str(p['uploaded_at']) if p.get('uploaded_at') else ''
         return jsonify({'products': products})
     except Exception as e:
         print(f"[all_products] error: {e}")
