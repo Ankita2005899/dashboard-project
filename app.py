@@ -1511,12 +1511,15 @@ def add_product():
 
     # ── Insert into store_data (all users' products) ──
     category_label = product_types[0] if product_types else "other"
+    # Get a valid product_id from the last inserted category table
+    last_pid = cursor.lastrowid if cursor.lastrowid else 0
+
     cursor.execute("""
         INSERT INTO store_data
-        (user_id, category, name, image, video, price, availability, detail, address, quantity)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        (user_id, product_id, category, name, image, video, price, availability, detail, address, quantity)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, (
-        session.get("user_id"), category_label, name, image_name, video_name,
+        session.get("user_id"), last_pid, category_label, name, image_name, video_name,
         price, availability, detail, address, availability
     ))
     store_data_id = cursor.lastrowid
@@ -5134,7 +5137,7 @@ def all_products():
 
         your_item_table = f"{uname}_{uid}_your_item"
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursoradd-produc(dictionary=True)
 
         # Auto-create table if it doesn't exist (for users created before this feature)
         cursor.execute(f"""
