@@ -1,31 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics – ShopSphere</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", sans-serif; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", sans-serif;
+        }
 
         :root {
             --body-bg: #d4f4f8;
-            --sidebar-bg: linear-gradient(180deg,#a8bcee,#bcc2c3,#81f5e8);
-            --header-bg: linear-gradient(135deg,#e0f2fe,#f0fdfa);
+            --sidebar-bg: linear-gradient(180deg, #a8bcee, #bcc2c3, #81f5e8);
+            --header-bg: linear-gradient(135deg, #e0f2fe, #f0fdfa);
             --header-border: #1e293b;
             --header-text: #1e293b;
-            --btn-bg: rgba(255,255,255,0.9);
+            --btn-bg: rgba(255, 255, 255, 0.9);
             --btn-color: #1e293b;
             --btn-border: #cbd5e1;
             --hdr-btn-bg: white;
             --hdr-btn-color: #1e293b;
             --card-bg: #ffffff;
             --card-border: #cbd5e1;
-            --card-shadow: 0 4px 16px rgba(0,0,0,0.07);
+            --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
             --text: #111827;
             --subtext: #6b7280;
-            --grid-lines: rgba(0,0,0,0.05);
-            --title-bg: linear-gradient(135deg,#e0e7ff,#f3f4f6);
+            --grid-lines: rgba(0, 0, 0, 0.05);
+            --title-bg: linear-gradient(135deg, #e0e7ff, #f3f4f6);
             --title-color: #4f46e5;
             --th-bg: #4f46e5;
             --tr-hover: #f1f5ff;
@@ -35,37 +41,38 @@
             --shape-active-bg: #4f46e5;
             --shape-active-color: white;
         }
+
         [data-theme="dark"] {
             --body-bg: #0a0a0f;
-            --sidebar-bg: linear-gradient(180deg,#12121a,#1a1a26,#0f1f1a);
-            --header-bg: linear-gradient(135deg,#12121a,#1a1a26);
-            --header-border: rgba(255,255,255,0.12);
+            --sidebar-bg: linear-gradient(180deg, #12121a, #1a1a26, #0f1f1a);
+            --header-bg: linear-gradient(135deg, #12121a, #1a1a26);
+            --header-border: rgba(255, 255, 255, 0.12);
             --header-text: #f0eee8;
-            --btn-bg: rgba(255,255,255,0.06);
+            --btn-bg: rgba(255, 255, 255, 0.06);
             --btn-color: #f0eee8;
-            --btn-border: rgba(255,255,255,0.12);
+            --btn-border: rgba(255, 255, 255, 0.12);
             --hdr-btn-bg: #1a1a26;
             --hdr-btn-color: #f0eee8;
             --card-bg: #12121a;
-            --card-border: rgba(255,255,255,0.10);
-            --card-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            --card-border: rgba(255, 255, 255, 0.10);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
             --text: #f0eee8;
             --subtext: #9ca3af;
-            --grid-lines: rgba(255,255,255,0.04);
-            --title-bg: linear-gradient(135deg,#1a1a2e,#12121a);
+            --grid-lines: rgba(255, 255, 255, 0.04);
+            --title-bg: linear-gradient(135deg, #1a1a2e, #12121a);
             --title-color: #FF6B2B;
             --th-bg: #1e1e3a;
             --tr-hover: #1a1a2e;
-            --td-border: rgba(255,255,255,0.08);
+            --td-border: rgba(255, 255, 255, 0.08);
             --shape-bg: #1a1a26;
-            --shape-border: rgba(255,255,255,0.15);
+            --shape-border: rgba(255, 255, 255, 0.15);
             --shape-active-bg: #4f46e5;
             --shape-active-color: white;
         }
 
         body {
             background: var(--body-bg) !important;
-            background-image: linear-gradient(var(--grid-lines) 1px,transparent 1px),linear-gradient(90deg,var(--grid-lines) 1px,transparent 1px) !important;
+            background-image: linear-gradient(var(--grid-lines) 1px, transparent 1px), linear-gradient(90deg, var(--grid-lines) 1px, transparent 1px) !important;
             background-size: 60px 60px !important;
             color: var(--text);
             min-height: 100vh;
@@ -73,449 +80,714 @@
         }
 
         .header {
-            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
             background: var(--header-bg) !important;
             border-bottom: 3px solid var(--header-border);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-            display: flex; justify-content: center; z-index: 3000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: center;
+            z-index: 3000;
             transition: background 0.3s;
         }
-        .header-container { width: 100%; max-width: 1400px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
-        .header-left h2 { font-weight: 700; color: var(--header-text) !important; }
-        .header-right { display: flex; gap: 10px; }
-        .header-btn {
-            padding: 8px 16px; border-radius: 8px; border: 2px solid var(--btn-border);
-            background: var(--hdr-btn-bg) !important; color: var(--hdr-btn-color) !important;
-            text-decoration: none; font-weight: 600; transition: all 0.25s ease;
-        }
-        .header-btn:hover { background: linear-gradient(135deg,#f97316,#f59e0b) !important; color: white !important; border-color: #f97316; }
 
-        .sidebar {
-            position: fixed; top: 70px; left: 0; width: 220px; height: calc(100vh - 70px);
-            background: var(--sidebar-bg) !important;
-            display: flex; flex-direction: column; padding: 24px 12px; gap: 10px;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.1); z-index: 2000; transition: background 0.3s;
+        .header-container {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
         }
-        .sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--subtext); padding: 4px 8px; margin-top: 8px; }
-        .sidebar a { text-decoration: none; }
-        .sidebar button {
-            width: 100%; padding: 11px 14px; border-radius: 10px;
+
+        .header-left h2 {
+            font-weight: 700;
+            color: var(--header-text) !important;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
             border: 2px solid var(--btn-border);
-            background: var(--btn-bg) !important; color: var(--btn-color) !important;
-            text-align: left; font-size: 13px; font-weight: 600; cursor: pointer;
+            background: var(--hdr-btn-bg) !important;
+            color: var(--hdr-btn-color) !important;
+            text-decoration: none;
+            font-weight: 600;
             transition: all 0.25s ease;
         }
-        .sidebar button:hover { background: linear-gradient(135deg,#f97316,#f59e0b) !important; color: white !important; border-color: #f97316; transform: translateX(4px); }
-        .sidebar button.active { background: linear-gradient(135deg,#6366f1,#4f46e5) !important; color: white !important; border-color: #4f46e5; }
 
-        .content { margin-left: 220px; padding: 90px 30px 80px 30px; min-height: 100vh; }
+        .header-btn:hover {
+            background: linear-gradient(135deg, #f97316, #f59e0b) !important;
+            color: white !important;
+            border-color: #f97316;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 220px;
+            height: calc(100vh - 70px);
+            background: var(--sidebar-bg) !important;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 12px;
+            gap: 10px;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 2000;
+            transition: background 0.3s;
+        }
+
+        .sidebar-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--subtext);
+            padding: 4px 8px;
+            margin-top: 8px;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+        }
+
+        .sidebar button {
+            width: 100%;
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 2px solid var(--btn-border);
+            background: var(--btn-bg) !important;
+            color: var(--btn-color) !important;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .sidebar button:hover {
+            background: linear-gradient(135deg, #f97316, #f59e0b) !important;
+            color: white !important;
+            border-color: #f97316;
+            transform: translateX(4px);
+        }
+
+        .sidebar button.active {
+            background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+            color: white !important;
+            border-color: #4f46e5;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 90px 30px 80px 30px;
+            min-height: 100vh;
+        }
 
         /* ===== KPI ===== */
-        .kpi-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 28px; }
-        .kpi-card {
-            background: var(--card-bg); border: 2px solid var(--card-border);
-            border-radius: 14px; padding: 18px 20px;
-            box-shadow: var(--card-shadow); display: flex; align-items: center; gap: 16px;
+        .kpi-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
         }
-        .kpi-icon { font-size: 28px; }
-        .kpi-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--subtext); }
-        .kpi-value { font-size: 28px; font-weight: 800; color: var(--text); }
-        .kpi-sub { font-size: 12px; color: var(--subtext); margin-top: 2px; }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .kpi-icon {
+            font-size: 28px;
+        }
+
+        .kpi-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--subtext);
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .kpi-sub {
+            font-size: 12px;
+            color: var(--subtext);
+            margin-top: 2px;
+        }
 
         /* ===== MAIN CHART AREA ===== */
         .chart-wrapper {
-            display: flex; gap: 20px; align-items: flex-start;
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+            height: 260px;
         }
 
         .card {
-            background: var(--card-bg); border: 2px solid var(--card-border);
-            border-radius: 14px; padding: 22px;
-            box-shadow: var(--card-shadow); flex: 1;
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 14px;
+            padding: 16px 22px;
+            box-shadow: var(--card-shadow);
+            flex: 1;
+            overflow: hidden;
         }
+
         .card-title {
-            font-weight: 700; font-size: 15px; color: var(--title-color);
-            margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--title-color);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .card-title::after { content: ""; display: block; flex: 1; height: 2px; background: #10b981; border-radius: 2px; margin-left: 8px; }
-        .card-sub { font-size: 12px; color: var(--subtext); margin-bottom: 16px; }
+
+        .card-title::after {
+            content: "";
+            display: block;
+            flex: 1;
+            height: 2px;
+            background: #10b981;
+            border-radius: 2px;
+            margin-left: 8px;
+        }
+
+        .card-sub {
+            font-size: 12px;
+            color: var(--subtext);
+            margin-bottom: 16px;
+        }
 
         /* ===== SHAPE SELECTOR PANEL ===== */
         .shape-panel {
-            display: flex; flex-direction: column; gap: 18px;
-            padding: 16px 12px; align-items: center;
-            background: var(--card-bg); border: 2px solid var(--card-border);
-            border-radius: 14px; box-shadow: var(--card-shadow);
-            min-width: 90px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            padding: 14px 10px;
+            align-items: center;
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 14px;
+            box-shadow: var(--card-shadow);
+            width: 100px;
+            justify-content: space-evenly;
         }
+
         .shape-label-top {
-            font-size: 10px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 1.5px; color: var(--subtext); text-align: center;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--subtext);
+            text-align: center;
         }
 
         .shape-btn {
-            display: flex; flex-direction: column; align-items: center;
-            gap: 6px; cursor: pointer; background: none; border: none; padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
         }
-        .shape-btn:hover .shape-svg { transform: scale(1.1); }
-        .shape-btn:hover .shape-name { color: #4f46e5; }
-        .shape-btn.active .shape-name { color: #4f46e5; font-weight: 700; }
+
+        .shape-btn:hover .shape-svg {
+            transform: scale(1.1);
+        }
+
+        .shape-btn:hover .shape-name {
+            color: #4f46e5;
+        }
+
+        .shape-btn.active .shape-name {
+            color: #4f46e5;
+            font-weight: 700;
+        }
 
         .shape-svg {
             transition: transform 0.2s ease;
         }
+
         .shape-name {
-            font-size: 11px; color: var(--subtext); font-weight: 600;
-            text-align: center; transition: color 0.2s;
+            font-size: 11px;
+            color: var(--subtext);
+            font-weight: 600;
+            text-align: center;
+            transition: color 0.2s;
         }
 
         /* ===== CHART PANELS ===== */
-        .chart-panel { display: none; }
-        .chart-panel.active { display: block; }
+        .chart-panel {
+            display: none;
+        }
+
+        .chart-panel.active {
+            display: block;
+        }
 
         /* ===== PRODUCT TABLE ===== */
-        .product-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-        .product-table th { background: var(--th-bg); color: white; padding: 10px 14px; font-size: 13px; text-align: center; }
-        .product-table td { padding: 10px 14px; border-bottom: 1px solid var(--td-border); font-size: 13px; text-align: center; color: var(--text); }
-        .product-table tr:hover td { background: var(--tr-hover); }
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
 
-        .insight-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
-        .insight-badge { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-        .badge-green { background: #d1fae5; color: #065f46; }
-        .badge-orange { background: #ffedd5; color: #9a3412; }
-        .badge-blue { background: #e0e7ff; color: #3730a3; }
-        .badge-red { background: #fee2e2; color: #991b1b; }
-        [data-theme="dark"] .badge-green { background: #064e3b; color: #6ee7b7; }
-        [data-theme="dark"] .badge-orange { background: #431407; color: #fdba74; }
-        [data-theme="dark"] .badge-blue { background: #1e1b4b; color: #a5b4fc; }
-        [data-theme="dark"] .badge-red { background: #450a0a; color: #fca5a5; }
+        .product-table th {
+            background: var(--th-bg);
+            color: white;
+            padding: 10px 14px;
+            font-size: 13px;
+            text-align: center;
+        }
 
-        .footer { position: fixed; bottom: 0; left: 0; width: 100%; height: 56px; background: linear-gradient(90deg,#111827,#1f2937,#0f766e); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; z-index: 1000; }
-        canvas { max-width: 100%; }
+        .product-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--td-border);
+            font-size: 13px;
+            text-align: center;
+            color: var(--text);
+        }
 
-        .mt20 { margin-top: 20px; }
+        .product-table tr:hover td {
+            background: var(--tr-hover);
+        }
+
+        .insight-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .insight-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-orange {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+        .badge-blue {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        [data-theme="dark"] .badge-green {
+            background: #064e3b;
+            color: #6ee7b7;
+        }
+
+        [data-theme="dark"] .badge-orange {
+            background: #431407;
+            color: #fdba74;
+        }
+
+        [data-theme="dark"] .badge-blue {
+            background: #1e1b4b;
+            color: #a5b4fc;
+        }
+
+        [data-theme="dark"] .badge-red {
+            background: #450a0a;
+            color: #fca5a5;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 56px;
+            background: linear-gradient(90deg, #111827, #1f2937, #0f766e);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            z-index: 1000;
+        }
+
+        canvas {
+            max-width: 100%;
+        }
+
+        .mt20 {
+            margin-top: 20px;
+        }
     </style>
 </head>
+
 <body>
-<script>
-  (function(){
-    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-  })();
-</script>
+    <script>
+        (function () {
+            var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 
-<header class="header">
-    <div class="header-container">
-        <div class="header-left"><h2>📈 Analytics</h2></div>
-        <div class="header-right">
-            <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
-        </div>
-    </div>
-</header>
-
-<div class="sidebar">
-    <span class="sidebar-label">Tables</span>
-    <a href="/search-table"><button>🔍 Search</button></a>
-    <a href="/purchased-table"><button>🛒 Purchased</button></a>
-    <a href="/addtocart-table"><button>➕ Add to Cart</button></a>
-    <span class="sidebar-label">Analytics</span>
-    <a href="/analytics"><button class="active">📈 Overview</button></a>
-</div>
-
-<div class="content">
-
-    <!-- KPI Strip -->
-    <div class="kpi-strip">
-        <div class="kpi-card">
-            <div class="kpi-icon">🔍</div>
-            <div>
-                <div class="kpi-label">Total Searches</div>
-                <div class="kpi-value" id="kpi-search">—</div>
-                <div class="kpi-sub">Today across all products</div>
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <h2>📈 Analytics</h2>
+            </div>
+            <div class="header-right">
+                <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
             </div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-icon">🛒</div>
-            <div>
-                <div class="kpi-label">Add to Cart</div>
-                <div class="kpi-value" id="kpi-cart">—</div>
-                <div class="kpi-sub">Items added today</div>
-            </div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-icon">✅</div>
-            <div>
-                <div class="kpi-label">Purchases</div>
-                <div class="kpi-value" id="kpi-purchase">—</div>
-                <div class="kpi-sub">Completed orders</div>
-            </div>
-        </div>
+    </header>
+
+    <div class="sidebar">
+        <span class="sidebar-label">Tables</span>
+        <a href="/search-table"><button>🔍 Search</button></a>
+        <a href="/purchased-table"><button>🛒 Purchased</button></a>
+        <a href="/addtocart-table"><button>➕ Add to Cart</button></a>
+        <span class="sidebar-label">Analytics</span>
+        <a href="/analytics"><button class="active">📈 Overview</button></a>
     </div>
 
-    <!-- Main chart area: chart + shape selector -->
-    <div class="chart-wrapper">
+    <div class="content">
 
-        <!-- Chart card -->
-        <div class="card">
-
-            <!-- Panel 0: Full Funnel Line (default) -->
-            <div class="chart-panel active" id="panel-0">
-                <div class="card-title">📉 Full Funnel Trend</div>
-                <div class="card-sub">Search → Add to Cart → Purchase per product</div>
-                <canvas id="lineChart" height="200"></canvas>
+        <!-- KPI Strip -->
+        <div class="kpi-strip">
+            <div class="kpi-card">
+                <div class="kpi-icon">🔍</div>
+                <div>
+                    <div class="kpi-label">Total Searches</div>
+                    <div class="kpi-value" id="kpi-search">—</div>
+                    <div class="kpi-sub">Today across all products</div>
+                </div>
             </div>
-
-            <!-- Panel 1: Doughnut -->
-            <div class="chart-panel" id="panel-1">
-                <div class="card-title">🎯 Conversion Funnel</div>
-                <div class="card-sub">Search → Cart → Purchase drop-off rates</div>
-                <canvas id="funnelDoughnut" height="200"></canvas>
-
-                <div class="insight-row" id="conversionInsights"></div>
+            <div class="kpi-card">
+                <div class="kpi-icon">🛒</div>
+                <div>
+                    <div class="kpi-label">Add to Cart</div>
+                    <div class="kpi-value" id="kpi-cart">—</div>
+                    <div class="kpi-sub">Items added today</div>
+                </div>
             </div>
-
-            <!-- Panel 2: Horizontal Bar -->
-            <div class="chart-panel" id="panel-2">
-                <div class="card-title">🏆 Top Products Ranking</div>
-                <div class="card-sub">Ranked by ML engagement score</div>
-                <canvas id="rankBar" height="200"></canvas>
-
+            <div class="kpi-card">
+                <div class="kpi-icon">✅</div>
+                <div>
+                    <div class="kpi-label">Purchases</div>
+                    <div class="kpi-value" id="kpi-purchase">—</div>
+                    <div class="kpi-sub">Completed orders</div>
+                </div>
             </div>
-
-            <!-- Panel 3: Radar -->
-            <div class="chart-panel" id="panel-3">
-                <div class="card-title">🕸️ Product Behaviour Radar</div>
-                <div class="card-sub">Multi-axis engagement for top 5 products</div>
-                <canvas id="radarChart" height="200"></canvas>
-
-            </div>
-
         </div>
 
-        <!-- Shape selector panel -->
-        <div class="shape-panel">
-            <span class="shape-label-top">Views</span>
+        <!-- Main chart area: chart + shape selector -->
+        <div class="chart-wrapper">
 
-            <!-- Circle → Doughnut -->
-            <button class="shape-btn" onclick="switchPanel(1, this)" title="Conversion Funnel">
-                <svg class="shape-svg" width="52" height="52" viewBox="0 0 52 52">
-                    <circle cx="26" cy="26" r="22" fill="none" stroke="#4f46e5" stroke-width="3"/>
-                    <circle cx="26" cy="26" r="12" fill="none" stroke="#10b981" stroke-width="3"/>
-                    <circle cx="26" cy="26" r="4" fill="#f97316"/>
-                </svg>
-                <span class="shape-name">Funnel</span>
-            </button>
+            <!-- Chart card -->
+            <div class="card">
 
-            <!-- Bar shape → Rank Bar -->
-            <button class="shape-btn" onclick="switchPanel(2, this)" title="Top Products Ranking">
-                <svg class="shape-svg" width="52" height="52" viewBox="0 0 52 52">
-                    <rect x="6"  y="30" width="10" height="16" rx="2" fill="#4f46e5"/>
-                    <rect x="21" y="20" width="10" height="26" rx="2" fill="#6366f1"/>
-                    <rect x="36" y="10" width="10" height="36" rx="2" fill="#818cf8"/>
-                    <line x1="4" y1="46" x2="48" y2="46" stroke="#cbd5e1" stroke-width="1.5"/>
-                </svg>
-                <span class="shape-name">Rank</span>
-            </button>
+                <!-- Panel 0: Full Funnel Line (default) -->
+                <div class="chart-panel active" id="panel-0">
+                    <div class="card-title">📉 Full Funnel Trend</div>
+                    <div class="card-sub">Search → Add to Cart → Purchase per product</div>
+                    <canvas id="lineChart" height="150" style="max-height:150px;"></canvas>
+                </div>
 
-            <!-- Hexagon → Radar -->
-            <button class="shape-btn" onclick="switchPanel(3, this)" title="Behaviour Radar">
-                <svg class="shape-svg" width="52" height="52" viewBox="0 0 52 52">
-                    <polygon points="26,4 46,15 46,37 26,48 6,37 6,15" fill="none" stroke="#4f46e5" stroke-width="2.5"/>
-                    <polygon points="26,14 38,21 38,35 26,42 14,35 14,21" fill="none" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3,2"/>
-                    <polygon points="26,20 33,24 33,32 26,36 19,32 19,24" fill="#f97316" fill-opacity="0.35" stroke="#f97316" stroke-width="1"/>
-                </svg>
-                <span class="shape-name">Radar</span>
-            </button>
+                <!-- Panel 1: Doughnut -->
+                <div class="chart-panel" id="panel-1">
+                    <div class="card-title">🎯 Conversion Funnel</div>
+                    <div class="card-sub">Search → Cart → Purchase drop-off rates</div>
+                    <canvas id="funnelDoughnut" height="150" style="max-height:150px;"></canvas>
 
+
+                    <div class="insight-row" id="conversionInsights"></div>
+                </div>
+
+                <!-- Panel 2: Horizontal Bar -->
+                <div class="chart-panel" id="panel-2">
+                    <div class="card-title">🏆 Top Products Ranking</div>
+                    <div class="card-sub">Ranked by ML engagement score</div>
+                    <canvas id="rankBar" height="150" style="max-height:150px;"></canvas>
+
+
+                </div>
+
+                <!-- Panel 3: Radar -->
+                <div class="chart-panel" id="panel-3">
+                    <div class="card-title">🕸️ Product Behaviour Radar</div>
+                    <div class="card-sub">Multi-axis engagement for top 5 products</div>
+                    <canvas id="radarChart" height="150" style="max-height:150px;"></canvas>
+
+                </div>
+
+            </div>
+
+            <!-- Shape selector panel -->
+            <div class="shape-panel">
+                <span class="shape-label-top">Views</span>
+
+                <!-- Circle → Doughnut -->
+                <button class="shape-btn" onclick="switchPanel(1, this)" title="Conversion Funnel">
+                    <svg class="shape-svg" width="52" height="52" viewBox="0 0 52 52">
+                        <circle cx="26" cy="26" r="22" fill="none" stroke="#4f46e5" stroke-width="3" />
+                        <circle cx="26" cy="26" r="12" fill="none" stroke="#10b981" stroke-width="3" />
+                        <circle cx="26" cy="26" r="4" fill="#f97316" />
+                    </svg>
+                    <span class="shape-name">Funnel</span>
+                </button>
+
+                <!-- Bar shape → Rank Bar -->
+                <button class="shape-btn" onclick="switchPanel(2, this)" title="Top Products Ranking">
+                    <svg class="shape-svg" width="52" height="52" viewBox="0 0 52 52">
+                        <rect x="6" y="30" width="10" height="16" rx="2" fill="#4f46e5" />
+                        <rect x="21" y="20" width="10" height="26" rx="2" fill="#6366f1" />
+                        <rect x="36" y="10" width="10" height="36" rx="2" fill="#818cf8" />
+                        <line x1="4" y1="46" x2="48" y2="46" stroke="#cbd5e1" stroke-width="1.5" />
+                    </svg>
+                    <span class="shape-name">Rank</span>
+                </button>
+
+                <!-- Hexagon → Radar -->
+                <button class="shape-btn" onclick="switchPanel(3, this)" title="Behaviour Radar">
+                    <svg class="shape-svg" width="52" height="52" viewBox="0 0 52 52">
+                        <polygon points="26,4 46,15 46,37 26,48 6,37 6,15" fill="none" stroke="#4f46e5"
+                            stroke-width="2.5" />
+                        <polygon points="26,14 38,21 38,35 26,42 14,35 14,21" fill="none" stroke="#10b981"
+                            stroke-width="1.5" stroke-dasharray="3,2" />
+                        <polygon points="26,20 33,24 33,32 26,36 19,32 19,24" fill="#f97316" fill-opacity="0.35"
+                            stroke="#f97316" stroke-width="1" />
+                    </svg>
+                    <span class="shape-name">Radar</span>
+                </button>
+
+            </div>
         </div>
+
+        <!-- Product Intelligence Table (always visible below) -->
+        <div class="card mt20">
+            <div class="card-title">📋 Product Intelligence Table</div>
+            <div class="card-sub">ML scoring: conversion rate, engagement index, Z-score anomaly detection</div>
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>Sr. No</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>🔍 Searches</th>
+                        <th>🛒 Cart</th>
+                        <th>✅ Purchases</th>
+                        <th>Conversion %</th>
+                        <th>Engagement Score</th>
+                        <th>Anomaly</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody">
+                    <tr>
+                        <td colspan="9" style="color:var(--subtext);padding:20px;">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="insight-row" id="mlInsights" style="margin-top:16px;"></div>
+        </div>
+
     </div>
 
-    <!-- Product Intelligence Table (always visible below) -->
-    <div class="card mt20">
-        <div class="card-title">📋 Product Intelligence Table</div>
-        <div class="card-sub">ML scoring: conversion rate, engagement index, Z-score anomaly detection</div>
-        <table class="product-table">
-            <thead>
-                <tr>
-                    <th>Sr. No</th>
-                    <th>Product</th>
-                    <th>Category</th>
-                    <th>🔍 Searches</th>
-                    <th>🛒 Cart</th>
-                    <th>✅ Purchases</th>
-                    <th>Conversion %</th>
-                    <th>Engagement Score</th>
-                    <th>Anomaly</th>
-                </tr>
-            </thead>
-            <tbody id="productTableBody">
-                <tr><td colspan="9" style="color:var(--subtext);padding:20px;">Loading...</td></tr>
-            </tbody>
-        </table>
-        <div class="insight-row" id="mlInsights" style="margin-top:16px;"></div>
-    </div>
+    <footer class="footer">© 2026 ShopSphere Analytics | All Rights Reserved</footer>
 
-</div>
+    <script>
+        let lineChart = null, rankBar = null, funnelDoughnut = null, radarChart = null;
+        let activePanel = 0;
 
-<footer class="footer">© 2026 ShopSphere Analytics | All Rights Reserved</footer>
+        // ── Switch panel ──────────────────────────────────────────────────────────────
+        function switchPanel(index, btn) {
+            document.querySelectorAll('.chart-panel').forEach((p, i) => {
+                p.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            activePanel = index;
 
-<script>
-let lineChart=null, rankBar=null, funnelDoughnut=null, radarChart=null;
-let activePanel = 0;
+            // Trigger chart resize after display change
+            setTimeout(() => {
+                [lineChart, funnelDoughnut, rankBar, radarChart].forEach(c => { if (c) c.resize(); });
+            }, 50);
+        }
 
-// ── Switch panel ──────────────────────────────────────────────────────────────
-function switchPanel(index, btn) {
-    document.querySelectorAll('.chart-panel').forEach((p,i) => {
-        p.classList.toggle('active', i === index);
-    });
-    document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-    activePanel = index;
+        // ── ML helpers ────────────────────────────────────────────────────────────────
+        function mergeByName(searchData, cartData, purchaseData) {
+            const map = {};
+            searchData.forEach(d => {
+                const k = d.name;
+                if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
+                map[k].search += d.searched_count || 0;
+            });
+            cartData.forEach(d => {
+                const k = d.name;
+                if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
+                map[k].cart += d.count || 0;
+            });
+            purchaseData.forEach(d => {
+                const k = d.product_name;
+                if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
+                map[k].purchase += d.purchase_count || 0;
+            });
+            return Object.values(map).filter(r => r.search + r.cart + r.purchase > 0);
+        }
 
-    // Trigger chart resize after display change
-    setTimeout(() => {
-        [lineChart, funnelDoughnut, rankBar, radarChart].forEach(c => { if(c) c.resize(); });
-    }, 50);
-}
+        function conversionRate(n, d) { return !d ? 0 : Math.round((n / d) * 100); }
+        function engagementScore(r) { return Math.round(r.search * 1 + r.cart * 2 + r.purchase * 4); }
 
-// ── ML helpers ────────────────────────────────────────────────────────────────
-function mergeByName(searchData, cartData, purchaseData) {
-    const map = {};
-    searchData.forEach(d => {
-        const k = d.name;
-        if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
-        map[k].search += d.searched_count || 0;
-    });
-    cartData.forEach(d => {
-        const k = d.name;
-        if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
-        map[k].cart += d.count || 0;
-    });
-    purchaseData.forEach(d => {
-        const k = d.product_name;
-        if (!map[k]) map[k] = { name: k, category: d.category, search: 0, cart: 0, purchase: 0 };
-        map[k].purchase += d.purchase_count || 0;
-    });
-    return Object.values(map).filter(r => r.search + r.cart + r.purchase > 0);
-}
+        function anomalyFlags(rows, key) {
+            const vals = rows.map(r => r[key]);
+            const mean = vals.reduce((a, b) => a + b, 0) / (vals.length || 1);
+            const std = Math.sqrt(vals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (vals.length || 1));
+            return rows.map(r => std > 0 ? Math.abs((r[key] - mean) / std) > 1.8 : false);
+        }
 
-function conversionRate(n, d) { return !d ? 0 : Math.round((n/d)*100); }
-function engagementScore(r)    { return Math.round(r.search*1 + r.cart*2 + r.purchase*4); }
+        // ── Main load ─────────────────────────────────────────────────────────────────
+        async function loadAll() {
+            try {
+                const [res1, res2, res3] = await Promise.all([
+                    fetch("/products/search-user"),
+                    fetch("/user-addtocart-trend-xml"),
+                    fetch("/get-purchase-data")
+                ]);
 
-function anomalyFlags(rows, key) {
-    const vals = rows.map(r => r[key]);
-    const mean = vals.reduce((a,b) => a+b, 0) / (vals.length||1);
-    const std  = Math.sqrt(vals.reduce((a,b) => a+Math.pow(b-mean,2), 0) / (vals.length||1));
-    return rows.map(r => std > 0 ? Math.abs((r[key]-mean)/std) > 1.8 : false);
-}
+                const searchData = await res1.json();
 
-// ── Main load ─────────────────────────────────────────────────────────────────
-async function loadAll() {
-    try {
-        const [res1, res2, res3] = await Promise.all([
-            fetch("/products/search-user"),
-            fetch("/user-addtocart-trend-xml"),
-            fetch("/get-purchase-data")
-        ]);
+                const xmlText = await res2.text();
+                const xml = new DOMParser().parseFromString(xmlText, "text/xml");
+                const cartData = Array.from(xml.getElementsByTagName("record")).map(r => ({
+                    name: r.getElementsByTagName("name")[0]?.textContent || "",
+                    category: r.getElementsByTagName("category")[0]?.textContent || "",
+                    count: parseInt(r.getElementsByTagName("count")[0]?.textContent || "0")
+                }));
 
-        const searchData = await res1.json();
+                const purchaseData = await res3.json();
 
-        const xmlText = await res2.text();
-        const xml = new DOMParser().parseFromString(xmlText, "text/xml");
-        const cartData = Array.from(xml.getElementsByTagName("record")).map(r => ({
-            name:  r.getElementsByTagName("name")[0]?.textContent || "",
-            category: r.getElementsByTagName("category")[0]?.textContent || "",
-            count: parseInt(r.getElementsByTagName("count")[0]?.textContent || "0")
-        }));
+                const merged = mergeByName(searchData, cartData, purchaseData);
+                merged.sort((a, b) => engagementScore(b) - engagementScore(a));
 
-        const purchaseData = await res3.json();
+                const totalSearch = merged.reduce((s, r) => s + r.search, 0);
+                const totalCart = merged.reduce((s, r) => s + r.cart, 0);
+                const totalPurchase = merged.reduce((s, r) => s + r.purchase, 0);
+                document.getElementById("kpi-search").textContent = totalSearch;
+                document.getElementById("kpi-cart").textContent = totalCart;
+                document.getElementById("kpi-purchase").textContent = totalPurchase;
 
-        const merged = mergeByName(searchData, cartData, purchaseData);
-        merged.sort((a,b) => engagementScore(b) - engagementScore(a));
+                const labels = merged.map(r => r.name);
+                const searches = merged.map(r => r.search);
+                const carts = merged.map(r => r.cart);
+                const purchases = merged.map(r => r.purchase);
 
-        const totalSearch   = merged.reduce((s,r) => s+r.search,   0);
-        const totalCart     = merged.reduce((s,r) => s+r.cart,     0);
-        const totalPurchase = merged.reduce((s,r) => s+r.purchase, 0);
-        document.getElementById("kpi-search").textContent   = totalSearch;
-        document.getElementById("kpi-cart").textContent     = totalCart;
-        document.getElementById("kpi-purchase").textContent = totalPurchase;
+                // Chart 0: Full Funnel Line (default)
+                const ctx1 = document.getElementById("lineChart").getContext("2d");
+                if (lineChart) lineChart.destroy();
+                lineChart = new Chart(ctx1, {
+                    type: "line",
+                    data: {
+                        labels,
+                        datasets: [
+                            { label: "🔍 Search", data: searches, borderColor: "#f97316", backgroundColor: "rgba(249,115,22,0.12)", tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: "#f97316", borderWidth: 2 },
+                            { label: "🛒 Add to Cart", data: carts, borderColor: "#4f46e5", backgroundColor: "rgba(79,70,229,0.12)", tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: "#4f46e5", borderWidth: 2 },
+                            { label: "✅ Purchase", data: purchases, borderColor: "#10b981", backgroundColor: "rgba(16,185,129,0.12)", tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: "#10b981", borderWidth: 2 }
+                        ]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } }, plugins: { legend: { position: "top" } } }
+                });
 
-        const labels    = merged.map(r => r.name);
-        const searches  = merged.map(r => r.search);
-        const carts     = merged.map(r => r.cart);
-        const purchases = merged.map(r => r.purchase);
-
-        // Chart 0: Full Funnel Line (default)
-        const ctx1 = document.getElementById("lineChart").getContext("2d");
-        if (lineChart) lineChart.destroy();
-        lineChart = new Chart(ctx1, {
-            type: "line",
-            data: {
-                labels,
-                datasets: [
-                    { label:"🔍 Search",      data:searches,  borderColor:"#f97316", backgroundColor:"rgba(249,115,22,0.12)", tension:0.4, fill:true, pointRadius:5, pointBackgroundColor:"#f97316", borderWidth:2 },
-                    { label:"🛒 Add to Cart", data:carts,     borderColor:"#4f46e5", backgroundColor:"rgba(79,70,229,0.12)",  tension:0.4, fill:true, pointRadius:5, pointBackgroundColor:"#4f46e5", borderWidth:2 },
-                    { label:"✅ Purchase",    data:purchases, borderColor:"#10b981", backgroundColor:"rgba(16,185,129,0.12)", tension:0.4, fill:true, pointRadius:5, pointBackgroundColor:"#10b981", borderWidth:2 }
-                ]
-            },
-            options: { responsive:true, scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1, precision:0 } } }, plugins:{ legend:{ position:"top" } } }
-        });
-
-        // Chart 1: Doughnut
-        const s2cRate = conversionRate(totalCart, totalSearch);
-        const c2pRate = conversionRate(totalPurchase, totalCart);
-        const dropOff = Math.max(0, 100 - s2cRate);
-        const ctx3 = document.getElementById("funnelDoughnut").getContext("2d");
-        if (funnelDoughnut) funnelDoughnut.destroy();
-        funnelDoughnut = new Chart(ctx3, {
-            type:"doughnut",
-            data:{ labels:["Search→Cart %","Cart→Purchase %","Drop-off %"], datasets:[{ data:[s2cRate,c2pRate,dropOff], backgroundColor:["#4f46e5","#10b981","#f87171"], borderWidth:2 }] },
-            options:{ responsive:true, plugins:{ legend:{ position:"bottom" } } }
-        });
-        document.getElementById("conversionInsights").innerHTML = `
+                // Chart 1: Doughnut
+                const s2cRate = conversionRate(totalCart, totalSearch);
+                const c2pRate = conversionRate(totalPurchase, totalCart);
+                const dropOff = Math.max(0, 100 - s2cRate);
+                const ctx3 = document.getElementById("funnelDoughnut").getContext("2d");
+                if (funnelDoughnut) funnelDoughnut.destroy();
+                funnelDoughnut = new Chart(ctx3, {
+                    type: "doughnut",
+                    data: { labels: ["Search→Cart %", "Cart→Purchase %", "Drop-off %"], datasets: [{ data: [s2cRate, c2pRate, dropOff], backgroundColor: ["#4f46e5", "#10b981", "#f87171"], borderWidth: 2 }] },
+                    options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+                });
+                document.getElementById("conversionInsights").innerHTML = `
             <span class="insight-badge badge-blue">🔍→🛒 ${s2cRate}% conversion</span>
-            <span class="insight-badge ${c2pRate>=50?'badge-green':'badge-orange'}">🛒→✅ ${c2pRate}% conversion</span>
-            <span class="insight-badge ${dropOff>60?'badge-red':'badge-green'}">📉 ${dropOff}% drop-off</span>`;
+            <span class="insight-badge ${c2pRate >= 50 ? 'badge-green' : 'badge-orange'}">🛒→✅ ${c2pRate}% conversion</span>
+            <span class="insight-badge ${dropOff > 60 ? 'badge-red' : 'badge-green'}">📉 ${dropOff}% drop-off</span>`;
 
-        // Chart 2: Horizontal Rank Bar
-        const scores = merged.map(r => engagementScore(r));
-        const ctx2 = document.getElementById("rankBar").getContext("2d");
-        if (rankBar) rankBar.destroy();
-        rankBar = new Chart(ctx2, {
-            type:"bar",
-            data:{ labels, datasets:[{ label:"Engagement Score", data:scores, backgroundColor:labels.map((_,i)=>`hsl(${220+i*30},70%,55%)`), borderRadius:6, borderWidth:0 }] },
-            options:{ responsive:true, indexAxis:"y", scales:{ x:{ beginAtZero:true } }, plugins:{ legend:{ display:false } } }
-        });
+                // Chart 2: Horizontal Rank Bar
+                const scores = merged.map(r => engagementScore(r));
+                const ctx2 = document.getElementById("rankBar").getContext("2d");
+                if (rankBar) rankBar.destroy();
+                rankBar = new Chart(ctx2, {
+                    type: "bar",
+                    data: { labels, datasets: [{ label: "Engagement Score", data: scores, backgroundColor: labels.map((_, i) => `hsl(${220 + i * 30},70%,55%)`), borderRadius: 6, borderWidth: 0 }] },
+                    options: { responsive: true, indexAxis: "y", scales: { x: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+                });
 
-        // Chart 3: Radar top 5
-        const top5 = merged.slice(0,5);
-        const ctx4 = document.getElementById("radarChart").getContext("2d");
-        if (radarChart) radarChart.destroy();
-        radarChart = new Chart(ctx4, {
-            type:"radar",
-            data:{
-                labels:["Search","Add to Cart","Purchase","Engagement","Conv. Rate"],
-                datasets:top5.map((r,i)=>({
-                    label:r.name,
-                    data:[r.search, r.cart, r.purchase, engagementScore(r), conversionRate(r.purchase,r.search)],
-                    borderColor:`hsl(${i*60},70%,55%)`,
-                    backgroundColor:`hsla(${i*60},70%,55%,0.15)`,
-                    pointRadius:4
-                }))
-            },
-            options:{ responsive:true, scales:{ r:{ beginAtZero:true } }, plugins:{ legend:{ position:"bottom" } } }
-        });
+                // Chart 3: Radar top 5
+                const top5 = merged.slice(0, 5);
+                const ctx4 = document.getElementById("radarChart").getContext("2d");
+                if (radarChart) radarChart.destroy();
+                radarChart = new Chart(ctx4, {
+                    type: "radar",
+                    data: {
+                        labels: ["Search", "Add to Cart", "Purchase", "Engagement", "Conv. Rate"],
+                        datasets: top5.map((r, i) => ({
+                            label: r.name,
+                            data: [r.search, r.cart, r.purchase, engagementScore(r), conversionRate(r.purchase, r.search)],
+                            borderColor: `hsl(${i * 60},70%,55%)`,
+                            backgroundColor: `hsla(${i * 60},70%,55%,0.15)`,
+                            pointRadius: 4
+                        }))
+                    },
+                    options: { responsive: true, scales: { r: { beginAtZero: true } }, plugins: { legend: { position: "bottom" } } }
+                });
 
-        // Product Intelligence Table
-        const anomalies = anomalyFlags(merged,"search");
-        const tbody = document.getElementById("productTableBody");
-        tbody.innerHTML="";
-        merged.forEach((r,i)=>{
-            const cvr=conversionRate(r.purchase,r.search);
-            const eng=engagementScore(r);
-            const isAnomaly=anomalies[i];
-            tbody.innerHTML+=`
+                // Product Intelligence Table
+                const anomalies = anomalyFlags(merged, "search");
+                const tbody = document.getElementById("productTableBody");
+                tbody.innerHTML = "";
+                merged.forEach((r, i) => {
+                    const cvr = conversionRate(r.purchase, r.search);
+                    const eng = engagementScore(r);
+                    const isAnomaly = anomalies[i];
+                    tbody.innerHTML += `
                 <tr>
-                    <td>${i+1}</td>
+                    <td>${i + 1}</td>
                     <td><strong>${r.name}</strong></td>
                     <td><span style="font-size:11px;background:var(--title-bg);color:var(--title-color);padding:2px 8px;border-radius:10px;">${r.category}</span></td>
                     <td><span style="color:#f97316;font-weight:700;">${r.search}</span></td>
@@ -524,30 +796,31 @@ async function loadAll() {
                     <td>${cvr}%</td>
                     <td>
                         <div style="background:#e0e7ff;border-radius:4px;height:8px;width:100px;margin:auto;">
-                            <div style="background:#4f46e5;width:${Math.min(eng,100)}%;height:100%;border-radius:4px;"></div>
+                            <div style="background:#4f46e5;width:${Math.min(eng, 100)}%;height:100%;border-radius:4px;"></div>
                         </div>
                         <span style="font-size:11px;color:var(--subtext);">${eng}</span>
                     </td>
-                    <td>${isAnomaly?'<span class="insight-badge badge-red" style="font-size:11px;">⚠️ Spike</span>':'<span class="insight-badge badge-green" style="font-size:11px;">✅ Normal</span>'}</td>
+                    <td>${isAnomaly ? '<span class="insight-badge badge-red" style="font-size:11px;">⚠️ Spike</span>' : '<span class="insight-badge badge-green" style="font-size:11px;">✅ Normal</span>'}</td>
                 </tr>`;
-        });
+                });
 
-        const topProduct=merged[0];
-        const highDrop=merged.filter(r=>conversionRate(r.purchase,r.search)<20 && r.search>0);
-        document.getElementById("mlInsights").innerHTML=`
-            ${topProduct?`<span class="insight-badge badge-green">🏆 Top: ${topProduct.name} (score ${engagementScore(topProduct)})</span>`:""}
-            ${highDrop.length?`<span class="insight-badge badge-orange">⚠️ Low conversion: ${highDrop.map(r=>r.name).join(", ")}</span>`:""}
-            ${totalPurchase===0?`<span class="insight-badge badge-red">❌ No purchases recorded yet</span>`:""}
+                const topProduct = merged[0];
+                const highDrop = merged.filter(r => conversionRate(r.purchase, r.search) < 20 && r.search > 0);
+                document.getElementById("mlInsights").innerHTML = `
+            ${topProduct ? `<span class="insight-badge badge-green">🏆 Top: ${topProduct.name} (score ${engagementScore(topProduct)})</span>` : ""}
+            ${highDrop.length ? `<span class="insight-badge badge-orange">⚠️ Low conversion: ${highDrop.map(r => r.name).join(", ")}</span>` : ""}
+            ${totalPurchase === 0 ? `<span class="insight-badge badge-red">❌ No purchases recorded yet</span>` : ""}
             <span class="insight-badge badge-blue">🤖 Z-score anomaly detection active</span>
             <span class="insight-badge badge-blue">📊 Score = Search×1 + Cart×2 + Purchase×4</span>`;
 
-    } catch(err) {
-        console.error("Analytics load error:", err);
-    }
-}
+            } catch (err) {
+                console.error("Analytics load error:", err);
+            }
+        }
 
-window.onload = loadAll;
-setInterval(loadAll, 10000);
-</script>
+        window.onload = loadAll;
+        setInterval(loadAll, 10000);
+    </script>
 </body>
+
 </html>
