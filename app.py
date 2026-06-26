@@ -5674,7 +5674,42 @@ def update_keywords():
         return jsonify({'success': False, 'error': str(e)}), 500
     
     
-    
+@app.route("/api/product-activity-detail")
+def product_activity_detail():
+    if "user_id" not in session or "username" not in session:
+        return jsonify({})
+
+    user_id  = session["user_id"]
+    username = session["username"]
+    product_id = request.args.get("product_id")
+    category   = request.args.get("category", "")
+
+    safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+    if safe_username and safe_username[0].isdigit():
+        safe_username = "user_" + safe_username
+    activity_table = f"{safe_username}_{user_id}_product_activity"
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute(f"""
+            SELECT today_search_count, today_add_to_cart_count, today_purchase_count
+            FROM `{activity_table}`
+            WHERE product_id = %s AND category = %s
+            LIMIT 1
+        """, (product_id, category))
+        row = cursor.fetchone()
+        return jsonify(row if row else {
+            "today_search_count": 0,
+            "today_add_to_cart_count": 0,
+            "today_purchase_count": 0
+        })
+    except Exception as e:
+        print("product-activity-detail error:", e)
+        return jsonify({"today_search_count":0,"today_add_to_cart_count":0,"today_purchase_count":0})
+    finally:
+        cursor.close()
+        conn.close()    
         
 #-------------------logout process from profile.html page ({sign out")button sathi-------------------- 
 

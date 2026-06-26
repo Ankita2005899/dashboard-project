@@ -969,7 +969,7 @@
                 }
                 grid.innerHTML = filtered.map(p => {
                     const safeP = encodeURIComponent(JSON.stringify(p));
-                    const addedDate = p.uploaded_at ? new Date(p.uploaded_at).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'}) : 'N/A';
+                    const addedDate = p.uploaded_at ? new Date(p.uploaded_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
                     return `
                     <div style="background:white;border-radius:16px;overflow:hidden;
                         box-shadow:0 4px 16px rgba(0,0,0,0.08);border:1.5px solid #f1f5f9;
@@ -979,8 +979,8 @@
                         <!-- Image -->
                         <div style="width:100%;height:160px;background:#f8fafc;position:relative;overflow:hidden;">
                             ${p.image_url
-                                ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">`
-                                : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;">🛍️</div>'}
+                            ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">`
+                            : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;">🛍️</div>'}
                             <span style="position:absolute;top:8px;left:8px;background:#6366f1;color:white;
                                 padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">
                                 ${p.category || 'Item'}
@@ -1022,14 +1022,14 @@
             loadYourItems(cat);
         }
 
-        function openYourItemDetail(safeP) {
+        async function openYourItemDetail(safeP) {
             const p = JSON.parse(decodeURIComponent(safeP));
-            const addedDate = p.uploaded_at ? new Date(p.uploaded_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : 'N/A';
+            const addedDate = p.uploaded_at ? new Date(p.uploaded_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
             document.getElementById('yourItemDetailContent').innerHTML = `
                 <div style="text-align:center;margin-bottom:16px;">
                     ${p.image_url
-                        ? `<img src="${p.image_url}" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;">`
-                        : '<div style="font-size:60px;margin:20px 0;">🛍️</div>'}
+                    ? `<img src="${p.image_url}" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;">`
+                    : '<div style="font-size:60px;margin:20px 0;">🛍️</div>'}
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
                     <span style="background:#6366f1;color:white;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">
@@ -1039,23 +1039,39 @@
                 </div>
                 <h2 style="margin:8px 0 4px;font-size:20px;color:#0f172a;">${p.name}</h2>
                 <div style="font-size:24px;font-weight:800;color:#6366f1;margin-bottom:8px;">₹${p.price}</div>
-                <span style="background:${p.quantity>0?'#dcfce7':'#fee2e2'};color:${p.quantity>0?'#15803d':'#b91c1c'};
+                <span style="background:${p.quantity > 0 ? '#dcfce7' : '#fee2e2'};color:${p.quantity > 0 ? '#15803d' : '#b91c1c'};
                     padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;">
-                    ${p.quantity > 0 ? '✅ Available: '+p.quantity : '❌ Out of Stock'}
+                    ${p.quantity > 0 ? '✅ Available: ' + p.quantity : '❌ Out of Stock'}
                 </span>
                 ${p.description ? `<p style="color:#64748b;font-size:13px;line-height:1.6;margin:12px 0;">${p.description}</p>` : ''}
                 ${p.address ? `<p style="font-size:12px;color:#94a3b8;margin-bottom:10px;">📍 ${p.address}</p>` : ''}
 
-                <!-- Monthly Purchase Chart -->
+                <!-- Activity Analytics -->
                 <div style="background:#f8fafc;border-radius:12px;padding:14px;margin-top:12px;">
-                    <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">
-                        📊 Monthly Purchases
+                    <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:12px;">
+                        📊 Product Activity
                     </div>
-                    <canvas id="itemPurchaseChart" style="height:150px;width:100%;"></canvas>
+                    <!-- KPI row -->
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
+                        <div style="background:white;border-radius:10px;padding:10px;text-align:center;border:1.5px solid #e0e7ff;">
+                            <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Searches</div>
+                            <div id="kpi_search" style="font-size:22px;font-weight:800;color:#f97316;">—</div>
+                        </div>
+                        <div style="background:white;border-radius:10px;padding:10px;text-align:center;border:1.5px solid #e0e7ff;">
+                            <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Add to Cart</div>
+                            <div id="kpi_cart" style="font-size:22px;font-weight:800;color:#4f46e5;">—</div>
+                        </div>
+                        <div style="background:white;border-radius:10px;padding:10px;text-align:center;border:1.5px solid #e0e7ff;">
+                            <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Purchases</div>
+                            <div id="kpi_purchase" style="font-size:22px;font-weight:800;color:#10b981;">—</div>
+                        </div>
+                    </div>
+                    <!-- Bar chart -->
+                    <canvas id="itemPurchaseChart" style="height:140px;width:100%;"></canvas>
                 </div>
 
                 <!-- Keyword Editor trigger -->
-                <button onclick="openKeywordEditor(${p.id},'${(p.name||'').replace(/'/g,'')}')"
+                <button onclick="openKeywordEditor(${p.id},'${(p.name || '').replace(/'/g, '')}')"
                     style="width:100%;margin-top:14px;background:#f59e0b;color:white;border:none;
                     padding:11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
                     🏷️ Edit Keywords
@@ -1063,31 +1079,52 @@
 
             document.getElementById('yourItemDetailPopup').style.display = 'flex';
 
-            // Draw monthly chart using mock data (replace with real API if available)
-            setTimeout(() => {
+            // Fetch real activity data for this product
+            setTimeout(async () => {
                 const ctx = document.getElementById('itemPurchaseChart');
                 if (!ctx) return;
                 if (window._itemChart) window._itemChart.destroy();
-                window._itemChart = new Chart(ctx.getContext('2d'), {
-                    type: 'bar',
-                    data: {
-                        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-                        datasets: [{
-                            label: 'Purchases',
-                            data: [2,4,3,6,5,8,4,7,3,5,6,4],
-                            backgroundColor: '#6366f1',
-                            borderRadius: 6
-                        }]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { beginAtZero: true, ticks: { font: { size: 10 } } },
-                            x: { ticks: { font: { size: 10 } } }
+
+                try {
+                    const res = await fetch(`/api/product-activity-detail?product_id=${p.id}&category=${encodeURIComponent(p.category)}`);
+                    const actData = await res.json();
+
+                    document.getElementById('kpi_search').textContent = actData.today_search_count || 0;
+                    document.getElementById('kpi_cart').textContent = actData.today_add_to_cart_count || 0;
+                    document.getElementById('kpi_purchase').textContent = actData.today_purchase_count || 0;
+
+                    const s = actData.today_search_count || 0;
+                    const c = actData.today_add_to_cart_count || 0;
+                    const pu = actData.today_purchase_count || 0;
+
+                    window._itemChart = new Chart(ctx.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: ['🔍 Search', '🛒 Add to Cart', '✅ Purchase'],
+                            datasets: [{
+                                label: 'Today\'s Activity',
+                                data: [s, c, pu],
+                                backgroundColor: ['rgba(249,115,22,0.7)', 'rgba(79,70,229,0.7)', 'rgba(16,185,129,0.7)'],
+                                borderColor: ['#f97316', '#4f46e5', '#10b981'],
+                                borderWidth: 2,
+                                borderRadius: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0, font: { size: 10 } } },
+                                x: { ticks: { font: { size: 11 } } }
+                            }
                         }
-                    }
-                });
+                    });
+                } catch (e) {
+                    console.error('Activity fetch error:', e);
+                    document.getElementById('kpi_search').textContent = '—';
+                    document.getElementById('kpi_cart').textContent = '—';
+                    document.getElementById('kpi_purchase').textContent = '—';
+                }
             }, 100);
         }
 
@@ -1106,21 +1143,21 @@
 
         function saveKeywords() {
             const pid = document.getElementById('keywordProductId').value;
-            const kw  = document.getElementById('keywordInput').value.trim();
+            const kw = document.getElementById('keywordInput').value.trim();
             if (!kw) { alert('⚠️ Please enter keywords first.'); return; }
             fetch('/api/update-keywords', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ product_id: pid, keywords: kw })
             })
-            .then(r => r.json())
-            .then(d => {
-                const msg = document.getElementById('keywordSaveMsg');
-                msg.style.display = 'block';
-                msg.textContent = d.success ? '✅ Keywords updated!' : '⚠️ ' + (d.error || 'Failed');
-                setTimeout(() => msg.style.display = 'none', 3000);
-            })
-            .catch(() => alert('⚠️ Failed to save keywords.'));
+                .then(r => r.json())
+                .then(d => {
+                    const msg = document.getElementById('keywordSaveMsg');
+                    msg.style.display = 'block';
+                    msg.textContent = d.success ? '✅ Keywords updated!' : '⚠️ ' + (d.error || 'Failed');
+                    setTimeout(() => msg.style.display = 'none', 3000);
+                })
+                .catch(() => alert('⚠️ Failed to save keywords.'));
         }
 
         function addToCartFromItems(productId, productName) {
@@ -1138,31 +1175,29 @@
     </script>
 
     <!-- ===== KEYWORD EDITOR FLOATING PANEL (bottom right) ===== -->
-<div id="keywordEditorPanel" style="display:none;position:fixed;bottom:24px;right:24px;z-index:10000;
+    <div id="keywordEditorPanel" style="display:none;position:fixed;bottom:24px;right:24px;z-index:10000;
     background:white;border-radius:16px;padding:20px;width:320px;
     box-shadow:0 8px 32px rgba(0,0,0,0.18);border:2px solid #f59e0b;flex-direction:column;gap:12px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:14px;font-weight:700;color:#0f172a;">🏷️ Edit Keywords</div>
-        <button onclick="closeKeywordEditor()"
-            style="background:#f1f5f9;border:none;border-radius:50%;width:28px;height:28px;
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:14px;font-weight:700;color:#0f172a;">🏷️ Edit Keywords</div>
+            <button onclick="closeKeywordEditor()" style="background:#f1f5f9;border:none;border-radius:50%;width:28px;height:28px;
             cursor:pointer;font-size:14px;">✕</button>
-    </div>
-    <div style="font-size:12px;color:#64748b;" id="keywordProductName"></div>
-    <input type="hidden" id="keywordProductId">
-    <textarea id="keywordInput" rows="3" placeholder="Enter keywords separated by commas e.g. apple, fruit, fresh..."
-        style="width:100%;padding:10px;border:1.5px solid #fcd34d;border-radius:10px;
+        </div>
+        <div style="font-size:12px;color:#64748b;" id="keywordProductName"></div>
+        <input type="hidden" id="keywordProductId">
+        <textarea id="keywordInput" rows="3"
+            placeholder="Enter keywords separated by commas e.g. apple, fruit, fresh..." style="width:100%;padding:10px;border:1.5px solid #fcd34d;border-radius:10px;
         font-size:12px;resize:none;box-sizing:border-box;color:#0f172a;"></textarea>
-    <button onclick="saveKeywords()"
-        style="width:100%;background:#f59e0b;color:white;border:none;padding:10px;
+        <button onclick="saveKeywords()" style="width:100%;background:#f59e0b;color:white;border:none;padding:10px;
         border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
-        💾 Save Keywords
-    </button>
-    <div id="keywordSaveMsg" style="display:none;font-size:12px;font-weight:600;
+            💾 Save Keywords
+        </button>
+        <div id="keywordSaveMsg" style="display:none;font-size:12px;font-weight:600;
         color:#22c55e;text-align:center;"></div>
-</div>
+    </div>
 
-<!-- Chart.js for item popup chart -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js for item popup chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
     <!-- ===== SIGN-OUT REASON MODAL ===== -->
