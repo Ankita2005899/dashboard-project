@@ -5126,15 +5126,16 @@ def get_purchase_data():
 
 #--------------profile page ('your item option button ")--------------------
 
-
-@app.route('/api/all-products')
-def all_products():
-    try:
-        uname = session.get("username")
+uname = session.get("username")
         uid   = session.get("user_id")
         if not uname or not uid:
             return jsonify({'products': [], 'error': 'Not logged in'}), 401
 
+        # Debug: print what session contains
+        print(f"[all_products] session username='{uname}' uid='{uid}'")
+
+        your_item_table = f"{uname}_{uid}_your_item"
+        print(f"[all_products] looking for table: {your_item_table}")
         your_item_table = f"{uname}_{uid}_your_item"
         conn = get_db_connection()
         cursor = conn.cursoradd-produc(dictionary=True)
