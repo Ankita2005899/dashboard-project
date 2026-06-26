@@ -5193,53 +5193,57 @@ def api_churn_customers():
     conn.close()
     return jsonify({'customers': customers})
 
-# ── Save special offer for a customer ─────────────────────
+# ── Send Special OR Common offer ───────────────────────────
 @app.route('/api/send-special-offer', methods=['POST'])
 def send_special_offer():
     import re
-    data       = request.get_json()
-    username   = data.get('username', '').strip()   # e.g. "Paisa"
-    offer_type = data.get('offer_type', '').strip() # e.g. "10% Discount"
-    message    = data.get('message', '').strip()
-    uid        = data.get('uid')                    # numeric id
-
-    if not username or not offer_type or not message:
-        return jsonify({'success': False, 'error': 'Missing fields'}), 400
+    data             = request.get_json()
+    username         = data.get('username', '').strip()
+    offer_type       = data.get('offer_type', '').strip()
+    message          = data.get('message', '').strip()
+    uid              = data.get('uid')
+    offer_category   = data.get('offer_category', 'special')  # 'special' or 'common'
+    product1_name    = data.get('product1_name', '')
+    product1_image   = data.get('product1_image', '')
+    product2_name    = data.get('product2_name', '')
+    product2_image   = data.get('product2_image', '')
+    discount         = data.get('discount', 0)
 
     conn   = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # Find the customer's table using sanitized username + id
-        sanitized = re.sub(r'[^a-z0-9_]', '_', username.lower())
-        table_name = f"{sanitized}_{uid}"
-
-        # Check table exists
-        cursor.execute("""
-            SELECT COUNT(*) as cnt FROM information_schema.tables
-            WHERE TABLE_SCHEMA = DATABASE()
-            AND TABLE_NAME = %s
-        """, (table_name,))
-        if cursor.fetchone()['cnt'] == 0:
-            return jsonify({'success': False, 'error': f'Customer table {table_name} not found'}), 404
-
-        # Save offer into special_offers table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS special_offers (
-                id           INT AUTO_INCREMENT PRIMARY KEY,
-                customer_table VARCHAR(100),
-                username     VARCHAR(100),
-                offer_type   VARCHAR(100),
-                message      TEXT,
-                is_read      TINYINT DEFAULT 0,
-                created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+                id               INT AUTO_INCREMENT PRIMARY KEY,
+                customer_table   VARCHAR(150),
+                username         VARCHAR(100),
+                offer_type       VARCHAR(100),
+                offer_category   VARCHAR(20) DEFAULT 'special',
+                message          TEXT,
+                product1_name    VARCHAR(255),
+                product1_image   VARCHAR(500),
+                product2_name    VARCHAR(255),
+                product2_image   VARCHAR(500),
+                discount         DECIMAL(5,2) DEFAULT 0,
+                is_read          TINYINT DEFAULT 0,
+                created_at       DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
 
+        import re as _re
+        sanitized      = _re.sub(r'[^a-z0-9_]', '_', username.lower())
+        table_name     = f"{sanitized}_{uid}"
+
         cursor.execute("""
-            INSERT INTO special_offers (customer_table, username, offer_type, message)
-            VALUES (%s, %s, %s, %s)
-        """, (table_name, username, offer_type, message))
+            INSERT INTO special_offers 
+            (customer_table, username, offer_type, offer_category,
+             message, product1_name, product1_image,
+             product2_name, product2_image, discount)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (table_name, username, offer_type, offer_category,
+              message, product1_name, product1_image,
+              product2_name, product2_image, discount))
 
         conn.commit()
         return jsonify({'success': True})
@@ -5251,38 +5255,111 @@ def send_special_offer():
         conn.close()
 
 
-# ── Customer fetches their own special offers ──────────────
-@app.route('/api/my-special-offers')
-def my_special_offers():
-    import re
+# ── Send Common offer to ALL customers ─────────────────────
+@app.route('/api/send-common-offer', methods=['POST'])
+def send_common_offer():
+    import re as _re
+    data           = request.get_json()
+    offer_type     = data.get('offer_type', '').strip()
+    message        = data.get('message', '').strip()
+    product1_name  = data.get('product1_name', '')
+    product1_image = data.get('product1_image', '')
+    product2_name  = data.get('product2_name', '')
+    product2_image = data.get('product2_image', '')
+    discount       = data.get('discount', 0)
+
+    if not offer_type or not message:
+        return jsonify({'success': False, 'error': 'Missing fields'}), 400
+
     conn   = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
+        # Get all customer tables
+        cursor.execute("""
+            SELECT TABLE_NAME FROM information_schema.tables
+            WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME NOT LIKE '%_product_activity'
+            AND TABLE_NAME NOT LIKE '%_your_item'
+            AND TABLE_NAME REGEXP '^[a-z0-9_]+_[0-9]+$'
+        """)
+        customer_tables = [row['TABLE_NAME'] for row in cursor.fetchall()]
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS special_offers (
+                id               INT AUTO_INCREMENT PRIMARY KEY,
+                customer_table   VARCHAR(150),
+                username         VARCHAR(100),
+                offer_type       VARCHAR(100),
+                offer_category   VARCHAR(20) DEFAULT 'common',
+                message          TEXT,
+                product1_name    VARCHAR(255),
+                product1_image   VARCHAR(500),
+                product2_name    VARCHAR(255),
+                product2_image   VARCHAR(500),
+                discount         DECIMAL(5,2) DEFAULT 0,
+                is_read          TINYINT DEFAULT 0,
+                created_at       DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        count = 0
+        for table in customer_tables:
+            parts = table.rsplit('_', 1)
+            if len(parts) != 2 or not parts[1].isdigit():
+                continue
+            username = parts[0]
+            cursor.execute("""
+                INSERT INTO special_offers
+                (customer_table, username, offer_type, offer_category,
+                 message, product1_name, product1_image,
+                 product2_name, product2_image, discount)
+                VALUES (%s,%s,%s,'common',%s,%s,%s,%s,%s,%s)
+            """, (table, username, offer_type, message,
+                  product1_name, product1_image,
+                  product2_name, product2_image, discount))
+            count += 1
+
+        conn.commit()
+        return jsonify({'success': True, 'sent_to': count})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ── Customer fetches their offers ──────────────────────────
+@app.route('/api/my-special-offers')
+def my_special_offers():
+    import re as _re
+    conn   = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
         username = session.get('username', '')
         uid      = session.get('user_id') or session.get('id')
-
         if not username or not uid:
             return jsonify({'offers': []})
 
-        sanitized  = re.sub(r'[^a-z0-9_]', '_', username.lower())
+        sanitized  = _re.sub(r'[^a-z0-9_]', '_', username.lower())
         table_name = f"{sanitized}_{uid}"
 
         cursor.execute("""
-            SELECT id, offer_type, message, is_read, created_at
+            SELECT id, offer_type, offer_category, message,
+                   product1_name, product1_image,
+                   product2_name, product2_image,
+                   discount, is_read, created_at
             FROM special_offers
             WHERE customer_table = %s
             ORDER BY created_at DESC
-            LIMIT 20
+            LIMIT 30
         """, (table_name,))
         offers = cursor.fetchall()
-
-        # Convert datetime to string
         for o in offers:
             o['created_at'] = str(o['created_at'])
-
+            o['discount']   = float(o['discount'] or 0)
         return jsonify({'offers': offers})
-
     except Exception as e:
         return jsonify({'offers': [], 'error': str(e)})
     finally:
