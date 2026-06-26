@@ -2167,6 +2167,64 @@ def get_addtocart_data_from_db():
     db.close()
     return jsonify(rows)
 
+@app.route("/user-addtocart-trend-xml")
+def user_addtocart_trend_xml():
+    username = session.get("username")
+    user_id = session.get("user_id")
+
+    if not username or not user_id:
+        return Response("<records></records>", mimetype="text/xml")
+
+    # ✅ Sanitized activity table
+    safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+    if safe_username and safe_username[0].isdigit():
+        safe_username = "user_" + safe_username
+    activity_table = f"{safe_username}_{user_id}_product_activity"
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        # ✅ Actual product names
+        cursor.execute("""
+            SELECT id, name, 'card' as category FROM card
+            UNION ALL
+            SELECT id, name, 'study_material' FROM study_material
+            UNION ALL
+            SELECT id, name, 'food_items' FROM food_items
+        """)
+        product_map = {(p["id"], p["category"]): p["name"] for p in cursor.fetchall()}
+
+        cursor.execute(f"""
+            SELECT product_id, category,
+                   today_add_to_cart_count,
+                   add_to_cart_date_time
+            FROM `{activity_table}`
+            WHERE today_add_to_cart_count > 0
+            ORDER BY add_to_cart_date_time DESC
+        """)
+        rows = cursor.fetchall()
+
+        root = ET.Element("records")
+        for i, row in enumerate(rows, 1):
+            actual_name = product_map.get((row["product_id"], row["category"])) or "Unknown"
+            record = ET.SubElement(root, "record")
+            ET.SubElement(record, "id").text = str(i)
+            ET.SubElement(record, "product_id").text = str(row["product_id"])
+            ET.SubElement(record, "name").text = actual_name
+            ET.SubElement(record, "category").text = row["category"]
+            ET.SubElement(record, "count").text = str(row["today_add_to_cart_count"])
+            ET.SubElement(record, "time").text = str(row["add_to_cart_date_time"]) if row["add_to_cart_date_time"] else "N/A"
+
+        xml_data = ET.tostring(root)
+        return Response(xml_data, mimetype="text/xml")
+
+    except Exception as e:
+        print("user-addtocart-trend-xml error:", e)
+        return Response("<records></records>", mimetype="text/xml")
+    finally:
+        cursor.close()
+        db.close()
 
 # ============================================================
 # ROUTES — SEARCH
@@ -5024,22 +5082,21 @@ def churn_customers():
     
 #--------------------personal Add to card  analysis ( " dashboard.html madhe " )-------------------------
 
-@app.route("/user-addtocart-trend-xml")
-def user_addtocart_trend_xml():
-    username = session.get("username")
-    user_id = session.get("user_id")
+@app.route("/get-addtocart-user-data")
+def get_addtocart_user_data():
+    if "user_id" not in session or "username" not in session:
+        return jsonify([])
 
-    if not username or not user_id:
-        return Response("<records></records>", mimetype="text/xml")
+    user_id = session["user_id"]
+    username = session["username"]
 
-    # ✅ Sanitized activity table
     safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
     if safe_username and safe_username[0].isdigit():
         safe_username = "user_" + safe_username
     activity_table = f"{safe_username}_{user_id}_product_activity"
 
-    db = get_db_connection()
-    cursor = db.cursor(dictionary=True)
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
 
     try:
         # ✅ Actual product names
@@ -5062,27 +5119,26 @@ def user_addtocart_trend_xml():
         """)
         rows = cursor.fetchall()
 
-        root = ET.Element("records")
-        for i, row in enumerate(rows, 1):
+        results = []
+        for i, row in enumerate(rows):
             actual_name = product_map.get((row["product_id"], row["category"])) or "Unknown"
-            record = ET.SubElement(root, "record")
-            ET.SubElement(record, "id").text = str(i)
-            ET.SubElement(record, "product_id").text = str(row["product_id"])
-            ET.SubElement(record, "name").text = actual_name
-            ET.SubElement(record, "category").text = row["category"]
-            ET.SubElement(record, "count").text = str(row["today_add_to_cart_count"])
-            ET.SubElement(record, "time").text = str(row["add_to_cart_date_time"]) if row["add_to_cart_date_time"] else "N/A"
+            results.append({
+                "id": i + 1,
+                "product_id": row["product_id"],
+                "product_name": actual_name,
+                "category": row["category"],
+                "add_to_cart_count": row["today_add_to_cart_count"],
+                "add_to_cart_time": str(row["add_to_cart_date_time"]) if row["add_to_cart_date_time"] else None
+            })
 
-        xml_data = ET.tostring(root)
-        return Response(xml_data, mimetype="text/xml")
+        return jsonify(results)
 
     except Exception as e:
-        print("user-addtocart-trend-xml error:", e)
-        return Response("<records></records>", mimetype="text/xml")
+        print("get-addtocart-user-data error:", e)
+        return jsonify([])
     finally:
         cursor.close()
-        db.close()
-
+        conn.close()
 #--------------------personal purchase analysis ( " dashboard.html madhe " )-------------------------
 @app.route("/get-purchase-data")
 def get_purchase_data():
