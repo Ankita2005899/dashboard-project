@@ -355,9 +355,11 @@
         let previousCounts = {};
         let lastTimes = {};
 
-        function utcToISTPlus1Hour(timeString) {
-            if (!timeString || timeString === "N/A") return "N/A";
-            return timeString; // backend already sends correct IST time
+        function formatISTTime(timeString) {
+            if (!timeString || timeString === "N/A") return "-";
+            // GMT string ko IST mein convert karo
+            const date = new Date(timeString);
+            return date.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
         }
 
         async function loadAddtocartTableAndChart() {

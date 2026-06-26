@@ -2483,7 +2483,7 @@ def track_search():
     conn.close()
     return jsonify({"status": "updated"})
 
-
+'''
 
 @app.route('/products/search-user')
 def search_user_products():
@@ -2508,7 +2508,7 @@ def search_user_products():
     cursor.close()
     conn.close()
     return jsonify(results)
-
+'''
 
 # ============================================================
 # ROUTES — ADD TO CART TRACKING
@@ -5079,6 +5079,63 @@ def churn_customers():
         return jsonify({'customers': customers})
     except Exception as e:
         return jsonify({'customers': [], 'error': str(e)}), 500
+
+
+#--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
+
+
+@app.route("/products/search-user")
+def search_user():
+    if "user_id" not in session or "username" not in session:
+        return jsonify([])
+
+    user_id = session["user_id"]
+    username = session["username"]
+
+    safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+    if safe_username and safe_username[0].isdigit():
+        safe_username = "user_" + safe_username
+    activity_table = f"{safe_username}_{user_id}_product_activity"
+
+    q = request.args.get("q", "").strip()
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        if q:
+            cursor.execute(f"""
+                SELECT id, product_id, name, category,
+                       today_search_count AS searched_count,
+                       search_time AS last_searched_time
+                FROM `{activity_table}`
+                WHERE name LIKE %s
+                ORDER BY today_search_count DESC
+            """, (f"%{q}%",))
+        else:
+            cursor.execute(f"""
+                SELECT id, product_id, name, category,
+                       today_search_count AS searched_count,
+                       search_time AS last_searched_time
+                FROM `{activity_table}`
+                ORDER BY today_search_count DESC
+            """)
+
+        results = cursor.fetchall()
+
+        for row in results:
+            if row["last_searched_time"]:
+                row["last_searched_time"] = row["last_searched_time"].strftime("%I:%M %p")
+
+        return jsonify(results)
+
+    except Exception as e:
+        print("search-user error:", e)
+        return jsonify([])
+    finally:
+        cursor.close()
+        conn.close()
+
     
 #--------------------personal Add to card  analysis ( " dashboard.html madhe " )-------------------------
 
