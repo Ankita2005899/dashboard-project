@@ -1,359 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Purchase Table & Chart</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
-<style>
-body {
-    font-family: "Segoe UI", sans-serif;
-    background:#d4f4f8;  /* main body color consistent */
-    min-height: 100vh;
-    margin:0;
-    padding-bottom:80px; /* for footer */
-    color: #111827;
-}
-
-.main-content {
-    padding:30px;
-}
-
-/* ================= CARD STYLES ================= */
-.card-table,
-.card-chart {
-    background: #fff;
-    border: 2px solid #cbd5e1;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    margin-bottom: 40px;
-    position: relative;
-}
-
-.section-title {
-    font-weight: 700;
-    font-size: 24px;
-    letter-spacing: 1px;
-    color: #4f46e5;
-    text-align: center;
-    padding: 12px 0;
-    border-bottom: 3px solid #cbd5e1;
-    margin-bottom: 25px;
-    border-radius: 8px 8px 0 0;
-    background: linear-gradient(135deg,#e0e7ff,#f3f4f6);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-}
-
-.section-title::after {
-    content: "";
-    display: block;
-    width: 60px;
-    height: 4px;
-    margin: 8px auto 0 auto;
-    background: #10b981;
-    border-radius: 2px;
-}
-
-table {
-    width:100%;
-    border-collapse:collapse;
-    border-radius:10px;
-    overflow:hidden;
-}
-
-th, td {
-    padding:12px;
-    border-bottom:1px solid #ddd;
-    text-align:center;
-}
-
-th {
-    background:#4f46e5;
-    color:white;
-}
-
-tr:hover {
-    background:#f1f5ff;
-}
-
-.placeholder {
-    text-align:center;
-    color:#888;
-    font-style:italic;
-}
-
-/* ================= DATE ================= */
-#currentDate {
-    position: absolute;
-    right: 20px;
-    top:0;
-    font-weight:bold;
-    color:#374151;
-    font-size:16px;
-}
-
-/* ================= FOOTER ================= */
-.footer {
-    position: fixed;
-    bottom:0;
-    left:0;
-    width:100%;
-    height:60px;
-    background: linear-gradient(90deg,#111827,#1f2937,#0f766e);
-    color:white;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:14px;
-    z-index:1000;
-}
-
-.header-btn{
-    padding:8px 16px;
-
-    border-radius:8px;
-    border:2px solid #cbd5e1;
-
-    background:white;
-    color:#1e293b;
-
-    text-decoration:none;
-    font-weight:600;
-
-    transition:all 0.25s ease;
-}
-
-.header-btn:hover{
-    background:linear-gradient(135deg,#f97316,#f59e0b);
-    color:white;
-    border-color:#f97316;
-}
-
-.container{
-    margin-top:100px;
-}
-/* ================= HEADER ================= */
-
-.header{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:70px;
-
-    background:linear-gradient(135deg,#e0f2fe,#f0fdfa);
-
-    border-bottom:3px solid #1e293b;
-
-    box-shadow:0 4px 10px rgba(0,0,0,0.08);
-
-    display:flex;
-    justify-content:center;
-
-    z-index:3000;
-}
-
-/* header inner container */
-.header-container{
-    width:100%;
-    max-width:1200px;
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    padding:0 20px;
-}
-
-.header-left h2{
-    font-weight:700;
-    color:#1e293b;
-}
-
-.header-right{
-    display:flex;
-    gap:10px;
-}
-.main-content{
-    max-width:1200px;
-    margin:auto;
-    padding-top:100px;
-}
-
-/* ================= THEME SYNC (matches index.html toggle) ================= */
-:root {
-    --th-body-bg:     #d4f4f8;
-    --th-header-bg:   linear-gradient(135deg,#e0f2fe,#f0fdfa);
-    --th-border:      #cbd5e1;
-    --th-header-text: #1e293b;
-    --th-btn-bg:      white;
-    --th-btn-color:   #1e293b;
-    --th-text:        #111827;
-    --th-card-bg:     #ffffff;
-    --th-title-bg:    linear-gradient(135deg,#e0e7ff,#f3f4f6);
-    --th-title-color: #4f46e5;
-    --th-th-bg:       #4f46e5;
-    --th-td-border:   #ddd;
-    --th-tr-hover:    #f1f5ff;
-    --th-date-color:  #374151;
-    --th-grid-lines:  rgba(0,0,0,0.06);
-}
-
-[data-theme="dark"] {
-    --th-body-bg:     #0a0a0f;
-    --th-header-bg:   linear-gradient(135deg,#12121a,#1a1a26);
-    --th-border:      rgba(255,255,255,0.12);
-    --th-header-text: #f0eee8;
-    --th-btn-bg:      #1a1a26;
-    --th-btn-color:   #f0eee8;
-    --th-text:        #f0eee8;
-    --th-card-bg:     #12121a;
-    --th-title-bg:    linear-gradient(135deg,#1a1a2e,#12121a);
-    --th-title-color: #FF6B2B;
-    --th-th-bg:       #1e1e3a;
-    --th-td-border:   rgba(255,255,255,0.08);
-    --th-tr-hover:    #1a1a2e;
-    --th-date-color:  #a0a0b0;
-    --th-grid-lines:  rgba(255,255,255,0.04);
-}
-
-body {
-    background-color: var(--th-body-bg) !important;
-    background-image:
-        linear-gradient(var(--th-grid-lines) 1px, transparent 1px),
-        linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important;
-    background-size: 60px 60px !important;
-    color: var(--th-text) !important;
-    transition: background 0.3s, color 0.3s;
-}
-.header { background: var(--th-header-bg) !important; border-bottom-color: var(--th-border) !important; transition: background 0.3s; }
-.header-left h2 { color: var(--th-header-text) !important; }
-.header-btn { background: var(--th-btn-bg) !important; color: var(--th-btn-color) !important; border-color: var(--th-border) !important; transition: background 0.3s, color 0.3s; }
-.card-table, .card-chart { background: var(--th-card-bg) !important; border-color: var(--th-border) !important; transition: background 0.3s; }
-.section-title { background: var(--th-title-bg) !important; color: var(--th-title-color) !important; border-bottom-color: var(--th-border) !important; transition: background 0.3s, color 0.3s; }
-th { background: var(--th-th-bg) !important; }
-td { border-bottom-color: var(--th-td-border) !important; color: var(--th-text) !important; }
-tr:hover { background: var(--th-tr-hover) !important; }
-#currentDate { color: var(--th-date-color) !important; }
-</style>
-</head>
-<body>
-<!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
-<script>
-  (function(){
-    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-  })();
-</script>
-
-<!-- ================= HEADER ================= -->
-<header class="header">
-
-    <div class="header-container">
-
-        <div class="header-left">
-            <h2>📦 Purchased Table </h2>
-        </div>
-
-        <div class="header-right">
-            <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
-        </div>
-
-    </div>
-
-</header>
-
-
-<!-- ================= MAIN CONTENT ================= -->
-<div class="main-content">
-
-    <!-- Purchase Table Card -->
-    <div class="card-table">
-        <h2 class="section-title">Purchase Table</h2>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Purchase ID</th>
-                    <th>Product Name</th>
-                    <th>Category</th>
-                    <th>Purchase Time</th>
-                    <th>Purchase Count</th>
-                </tr>
-            </thead>
-
-            <tbody id="tableBody">
-                <tr>
-                    <td colspan="5" class="placeholder">Loading...</td>
-                </tr>
-            </tbody>
-
-        </table>
-    </div>
-
-    <!-- Current Date -->
-    <div style="position: relative; height: 30px; margin-bottom: 20px;">
-        <span id="currentDate"></span>
-    </div>
-
-    <!-- Chart Card -->
-    <div class="card-chart">
-        <h2 class="section-title">📈 Purchase Trend</h2>
-        <canvas id="purchaseChart" width="800" height="400"></canvas>
-    </div>
-
-</div>
-
-<script>
-let purchaseChart = null;
-
-function utcToISTPlus1HourDate(utcString) {
-    if (!utcString) return null;
-    const utcDate = new Date(utcString + " UTC");
-    const totalOffsetMs = (5*60 + 30 + 60) * 60 * 1000; // 5:30 + 1 hour
-    return new Date(utcDate.getTime() + totalOffsetMs);
-}
-
-function formatTime(date) {
-    if (!date) return "N/A";
-    let hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    const hh = hours.toString().padStart(2, '0');
-    const mm = minutes.toString().padStart(2, '0');
-    return `${hh}:${mm} ${ampm}`;
-}
-
-function dateToMinutes(date) {
-    return date.getHours() * 60 + date.getMinutes();
-}
-
-async function loadPurchaseTableAndChart() {
-    try {
-        const res = await fetch("/get-purchase-data");
-        const data = await res.json();
-        const body = document.getElementById("tableBody");
-
-        if (!data || data.length === 0) {
-            body.innerHTML = '<tr><td colspan="5" class="placeholder">No data available</td></tr>';
-            return;
+    <meta charset="UTF-8">
+    <title>Purchase Table & Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: #d4f4f8;
+            /* main body color consistent */
+            min-height: 100vh;
+            margin: 0;
+            padding-bottom: 80px;
+            /* for footer */
+            color: #111827;
         }
 
-        body.innerHTML = "";
-        const labels = [];
-        const chartData = [];
-        const tooltipTimes = [];
-        const countData = [];
+        .main-content {
+            padding: 30px;
+        }
+
+        /* ================= CARD STYLES ================= */
+        .card-table,
+        .card-chart {
+            background: #fff;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .section-title {
+            font-weight: 700;
+            font-size: 24px;
+            letter-spacing: 1px;
+            color: #4f46e5;
+            text-align: center;
+            padding: 12px 0;
+            border-bottom: 3px solid #cbd5e1;
+            margin-bottom: 25px;
+            border-radius: 8px 8px 0 0;
+            background: linear-gradient(135deg, #e0e7ff, #f3f4f6);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .section-title::after {
+            content: "";
+            display: block;
+            width: 60px;
+            height: 4px;
+            margin: 8px auto 0 auto;
+            background: #10b981;
+            border-radius: 2px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #4f46e5;
+            color: white;
+        }
+
+        tr:hover {
+            background: #f1f5ff;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+        }
+
+        /* ================= DATE ================= */
+        #currentDate {
+            position: absolute;
+            right: 20px;
+            top: 0;
+            font-weight: bold;
+            color: #374151;
+            font-size: 16px;
+        }
+
+        /* ================= FOOTER ================= */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(90deg, #111827, #1f2937, #0f766e);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+
+            border-radius: 8px;
+            border: 2px solid #cbd5e1;
+
+            background: white;
+            color: #1e293b;
+
+            text-decoration: none;
+            font-weight: 600;
+
+            transition: all 0.25s ease;
+        }
+
+        .header-btn:hover {
+            background: linear-gradient(135deg, #f97316, #f59e0b);
+            color: white;
+            border-color: #f97316;
+        }
+
+        .container {
+            margin-top: 100px;
+        }
+
+        /* ================= HEADER ================= */
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+
+            background: linear-gradient(135deg, #e0f2fe, #f0fdfa);
+
+            border-bottom: 3px solid #1e293b;
+
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+            display: flex;
+            justify-content: center;
+
+            z-index: 3000;
+        }
+
+        /* header inner container */
+        .header-container {
+            width: 100%;
+            max-width: 1200px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 0 20px;
+        }
+
+        .header-left h2 {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: auto;
+            padding-top: 100px;
+        }
+
+        /* ================= THEME SYNC (matches index.html toggle) ================= */
+        :root {
+            --th-body-bg: #d4f4f8;
+            --th-header-bg: linear-gradient(135deg, #e0f2fe, #f0fdfa);
+            --th-border: #cbd5e1;
+            --th-header-text: #1e293b;
+            --th-btn-bg: white;
+            --th-btn-color: #1e293b;
+            --th-text: #111827;
+            --th-card-bg: #ffffff;
+            --th-title-bg: linear-gradient(135deg, #e0e7ff, #f3f4f6);
+            --th-title-color: #4f46e5;
+            --th-th-bg: #4f46e5;
+            --th-td-border: #ddd;
+            --th-tr-hover: #f1f5ff;
+            --th-date-color: #374151;
+            --th-grid-lines: rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="dark"] {
+            --th-body-bg: #0a0a0f;
+            --th-header-bg: linear-gradient(135deg, #12121a, #1a1a26);
+            --th-border: rgba(255, 255, 255, 0.12);
+            --th-header-text: #f0eee8;
+            --th-btn-bg: #1a1a26;
+            --th-btn-color: #f0eee8;
+            --th-text: #f0eee8;
+            --th-card-bg: #12121a;
+            --th-title-bg: linear-gradient(135deg, #1a1a2e, #12121a);
+            --th-title-color: #FF6B2B;
+            --th-th-bg: #1e1e3a;
+            --th-td-border: rgba(255, 255, 255, 0.08);
+            --th-tr-hover: #1a1a2e;
+            --th-date-color: #a0a0b0;
+            --th-grid-lines: rgba(255, 255, 255, 0.04);
+        }
+
+        body {
+            background-color: var(--th-body-bg) !important;
+            background-image:
+                linear-gradient(var(--th-grid-lines) 1px, transparent 1px),
+                linear-gradient(90deg, var(--th-grid-lines) 1px, transparent 1px) !important;
+            background-size: 60px 60px !important;
+            color: var(--th-text) !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .header {
+            background: var(--th-header-bg) !important;
+            border-bottom-color: var(--th-border) !important;
+            transition: background 0.3s;
+        }
+
+        .header-left h2 {
+            color: var(--th-header-text) !important;
+        }
+
+        .header-btn {
+            background: var(--th-btn-bg) !important;
+            color: var(--th-btn-color) !important;
+            border-color: var(--th-border) !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .card-table,
+        .card-chart {
+            background: var(--th-card-bg) !important;
+            border-color: var(--th-border) !important;
+            transition: background 0.3s;
+        }
+
+        .section-title {
+            background: var(--th-title-bg) !important;
+            color: var(--th-title-color) !important;
+            border-bottom-color: var(--th-border) !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        th {
+            background: var(--th-th-bg) !important;
+        }
+
+        td {
+            border-bottom-color: var(--th-td-border) !important;
+            color: var(--th-text) !important;
+        }
+
+        tr:hover {
+            background: var(--th-tr-hover) !important;
+        }
+
+        #currentDate {
+            color: var(--th-date-color) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ================= THEME SYNC (reads index.html toggle from localStorage) ================= -->
+    <script>
+        (function () {
+            var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+
+    <!-- ================= HEADER ================= -->
+    <header class="header">
+
+        <div class="header-container">
+
+            <div class="header-left">
+                <h2>📦 Purchased Table </h2>
+            </div>
+
+            <div class="header-right">
+                <a href="dashboard.html" class="header-btn">🏠 Dashboard</a>
+            </div>
+
+        </div>
+
+    </header>
 
 
-        data.forEach((row) => {
-            const dateObj = utcToISTPlus1HourDate(row.purchase_time);
-            const formattedTime = formatTime(dateObj);
+    <!-- ================= MAIN CONTENT ================= -->
+    <div class="main-content">
 
-            body.innerHTML += `
+        <!-- Purchase Table Card -->
+        <div class="card-table">
+            <h2 class="section-title">Purchase Table</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Purchase ID</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Purchase Time</th>
+                        <th>Purchase Count</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="5" class="placeholder">Loading...</td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+
+        <!-- Current Date -->
+        <div style="position: relative; height: 30px; margin-bottom: 20px;">
+            <span id="currentDate"></span>
+        </div>
+
+        <!-- Chart Card -->
+        <div class="card-chart">
+            <h2 class="section-title">📈 Purchase Trend</h2>
+            <canvas id="purchaseChart" width="800" height="400"></canvas>
+        </div>
+
+    </div>
+
+    <script>
+        let purchaseChart = null;
+
+        function utcToISTPlus1HourDate(utcString) {
+            if (!utcString) return null;
+            const utcDate = new Date(utcString + " UTC");
+            const totalOffsetMs = (5 * 60 + 30 + 60) * 60 * 1000; // 5:30 + 1 hour
+            return new Date(utcDate.getTime() + totalOffsetMs);
+        }
+
+        function formatTime(date) {
+            if (!date) return "N/A";
+            let hours = date.getHours();
+            const minutes = date.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            const hh = hours.toString().padStart(2, '0');
+            const mm = minutes.toString().padStart(2, '0');
+            return `${hh}:${mm} ${ampm}`;
+        }
+
+        function dateToMinutes(date) {
+            return date.getHours() * 60 + date.getMinutes();
+        }
+
+        async function loadPurchaseTableAndChart() {
+            try {
+                const res = await fetch("/get-purchase-data");
+                const data = await res.json();
+                const body = document.getElementById("tableBody");
+
+                if (!data || data.length === 0) {
+                    body.innerHTML = '<tr><td colspan="5" class="placeholder">No data available</td></tr>';
+                    return;
+                }
+
+                body.innerHTML = "";
+                const labels = [];
+
+                const tooltipTimes = [];
+                const countData = [];
+
+
+                data.forEach((row) => {
+                    const dateObj = utcToISTPlus1HourDate(row.purchase_time);
+                    const formattedTime = formatTime(dateObj);
+
+                    body.innerHTML += `
                 <tr>
                     <td>${row.purchase_id}</td>
                     <td>${row.purchase_id}</td>
@@ -364,111 +410,68 @@ async function loadPurchaseTableAndChart() {
                 </tr>
             `;
 
-        labels.push(row.product_name);
-        chartData.push(dateToMinutes(dateObj));
-        tooltipTimes.push(formattedTime);
-        countData.push(row.purchase_count);
-        });
+                    labels.push(row.product_name);
+                    countData.push(row.purchase_count);
 
-        const ctx = document.getElementById('purchaseChart').getContext('2d');
-        if (!purchaseChart) {
-            purchaseChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets: [
-                        {
-                            label: "Purchase Time",
-                            data: chartData,
-                            borderColor: 'rgba(34,197,94,1)',
-                            backgroundColor: 'rgba(34,197,94,0.3)',
-                            borderWidth: 3,
-                            tension: 0.4,
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            yAxisID: 'y'
+                    tooltipTimes.push(formattedTime);
+                });
+
+                const ctx = document.getElementById('purchaseChart').getContext('2d');
+                if (!purchaseChart) {
+                    purchaseChart = new Chart(ctx, {
+                        type: 'bar',
+
+                        data: {
+                            labels,
+                            // Replace:
+                            datasets: [{
+                                label: "Purchase Count",
+                                data: countData,
+                                borderWidth: 2,
+                                backgroundColor: 'rgba(16,185,129,0.6)',
+                                borderColor: 'rgba(16,185,129,1)',
+                                hoverBackgroundColor: 'rgba(16,185,129,0.8)',
+                                hoverBorderColor: 'rgba(16,185,129,1)'
+                            }]
                         },
-                        {
-                            label: "Purchase Count",
-                            data: countData,
-                            borderColor: 'rgba(99,102,241,1)',
-                            backgroundColor: 'rgba(99,102,241,0.2)',
-                            borderWidth: 3,
-                            tension: 0.4,
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            yAxisID: 'y1'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const idx = context.dataIndex;
-                                    return `Product: ${labels[idx]} | Time: ${tooltipTimes[idx]}`;
-                                }
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { stepSize: 1, precision: 0 },
+                                    title: { display: true, text: 'Purchase Count' }
+                                },
+                                x: { title: { display: true, text: 'Product Name' } }
                             }
                         }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            title: { display:true, text:'Time (hh:mm AM/PM)' },
-                            position: 'left',
-                            ticks: {
-                                callback: function(value) {
-                                    const h = Math.floor(value/60);
-                                    const m = Math.floor(value % 60);
-                                    let hh = h % 12 || 12;
-                                    const mm = m.toString().padStart(2,'0');
-                                    const ampm = h >=12 ? 'PM':'AM';
-                                    return `${hh}:${mm} ${ampm}`;
-                                }
-                            }
-                        },
-
-                        y1: {
-                            beginAtZero: true,
-                            position: 'right',
-                            title: { display: true, text: 'Purchase Count' },
-                            ticks: { stepSize: 1, precision: 0 },
-                            grid: { drawOnChartArea: false }
-                        },
-
-
-                        x: { title:{ display:true, text:'Product Name'} }
-                    }
+                    });
+                } else {
+                    purchaseChart.data.labels = labels;
+                    purchaseChart.data.datasets[0].data = countData;
+                    purchaseChart.update();
                 }
-            });
-        } else {
-            purchaseChart.data.labels = labels;
-            purchaseChart.data.datasets[0].data = chartData;
-            purchaseChart.update();
+            } catch (err) {
+                console.error("Error loading purchase data:", err);
+                document.getElementById("tableBody").innerHTML = '<tr><td colspan="5" class="placeholder">Error loading data</td></tr>';
+            }
         }
 
-    } catch (err) {
-        console.error("Error loading purchase data:", err);
-        document.getElementById("tableBody").innerHTML = '<tr><td colspan="5" class="placeholder">Error loading data</td></tr>';
-    }
-}
+        loadPurchaseTableAndChart();
+        setInterval(loadPurchaseTableAndChart, 2000);
 
-loadPurchaseTableAndChart();
-setInterval(loadPurchaseTableAndChart, 2000);
+        // Current date display
+        const today = new Date();
+        document.getElementById("currentDate").textContent = today.toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    </script>
 
-// Current date display
-const today = new Date();
-document.getElementById("currentDate").textContent = today.toLocaleDateString('en-IN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-});
-</script>
-
-<footer class="footer">
-    © 2026 Product Dashboard | All Rights Reserved
-</footer>
+    <footer class="footer">
+        © 2026 Product Dashboard | All Rights Reserved
+    </footer>
 </body>
+
 </html>
