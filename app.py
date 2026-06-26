@@ -5109,7 +5109,7 @@ def search_user():
                        today_search_count AS searched_count,
                        search_time AS last_searched_time
                 FROM `{activity_table}`
-                WHERE name LIKE %s
+                WHERE today_search_count > 0 AND name LIKE %s
                 ORDER BY today_search_count DESC
             """, (f"%{q}%",))
         else:
@@ -5118,6 +5118,7 @@ def search_user():
                        today_search_count AS searched_count,
                        search_time AS last_searched_time
                 FROM `{activity_table}`
+                WHERE today_search_count > 0
                 ORDER BY today_search_count DESC
             """)
 
