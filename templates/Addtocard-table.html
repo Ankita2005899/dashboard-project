@@ -355,6 +355,13 @@
         let previousCounts = {};
         let lastTimes = {};
 
+        function utcToISTPlus1Hour(timeString) {
+            if (!timeString || timeString === "N/A") return "-";
+            const date = new Date(timeString);
+            if (isNaN(date.getTime())) return timeString;
+            return date.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+        }
+
         function formatISTTime(timeString) {
             if (!timeString || timeString === "N/A") return "-";
             // GMT string ko IST mein convert karo
