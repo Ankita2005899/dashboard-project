@@ -5060,8 +5060,6 @@ def churn_customers():
     
 
 #--------------------personal purchase analysis ( " dashboard.html madhe " )-------------------------
-
-
 @app.route("/get-purchase-data")
 def get_purchase_data():
     if "user_id" not in session or "username" not in session:
@@ -5070,17 +5068,17 @@ def get_purchase_data():
     user_id = session["user_id"]
     username = session["username"]
 
-    # ✅ Sanitized username
+    # ✅ Sanitized cart table name
     safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
     if safe_username and safe_username[0].isdigit():
         safe_username = "user_" + safe_username
-    activity_table = f"{safe_username}_{user_id}_product_activity"
+    cart_table = f"{safe_username}_{user_id}"
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # ✅ Actual product names from product tables
+        # ✅ Product names fetch karo
         cursor.execute("""
             SELECT id, name, 'card' as category FROM card
             UNION ALL
@@ -5090,14 +5088,13 @@ def get_purchase_data():
         """)
         product_map = {(p["id"], p["category"]): p["name"] for p in cursor.fetchall()}
 
+        # ✅ Successful purchases fetch karo cart table se
         cursor.execute(f"""
-            SELECT product_id, category,
-                   today_purchase_count,
-                   purchased_time,
-                   month
-            FROM `{activity_table}`
-            WHERE today_purchase_count > 0
-            ORDER BY purchased_time DESC
+            SELECT product_id, category, date, COUNT(*) as purchase_count
+            FROM `{cart_table}`
+            WHERE mode = 'successful'
+            GROUP BY product_id, category
+            ORDER BY date DESC
         """)
         rows = cursor.fetchall()
 
@@ -5108,9 +5105,9 @@ def get_purchase_data():
                 "purchase_id": i + 1,
                 "product_name": actual_name,
                 "category": row["category"],
-                "purchase_count": row["today_purchase_count"],
-                "purchase_time": str(row["purchased_time"]) if row["purchased_time"] else None,
-                "month": row["month"]
+                "purchase_count": row["purchase_count"],
+                "purchase_time": str(row["date"]) if row["date"] else None,
+                "month": row["date"].strftime("%B") if row["date"] else None
             })
 
         return jsonify(results)
@@ -5121,8 +5118,6 @@ def get_purchase_data():
     finally:
         cursor.close()
         conn.close()
-
-
 
 #--------------profile page ('your item option button ")--------------------
 @app.route('/api/all-products')
