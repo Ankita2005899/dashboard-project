@@ -5916,7 +5916,71 @@ def get_keywords():
         return jsonify({'keywords': '', 'error': str(e)}), 500
 
 
-    
+#----------------profile page ("your Order " and ""Buy Again"") section sathi -----------------
+
+
+@app.route('/api/my-cart-items')
+def my_cart_items():
+    if "user_id" not in session or "username" not in session:
+        return jsonify([])
+    try:
+        username = session["username"]
+        user_id  = session["user_id"]
+        safe_un  = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+        if safe_un and safe_un[0].isdigit():
+            safe_un = "user_" + safe_un
+        cart_table = f"{safe_un}_{user_id}"
+
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(f"""
+            SELECT id, product_id, category, name, image, price, quantity, mode
+            FROM `{cart_table}`
+            WHERE mode != 'successful'
+            ORDER BY id DESC LIMIT 10
+        """)
+        items = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        for item in items:
+            item['price'] = float(item['price']) if item['price'] else 0
+        return jsonify(items)
+    except Exception as e:
+        print("my-cart-items error:", e)
+        return jsonify([])
+
+
+@app.route('/api/my-purchased-items')
+def my_purchased_items():
+    if "user_id" not in session or "username" not in session:
+        return jsonify([])
+    try:
+        username = session["username"]
+        user_id  = session["user_id"]
+        safe_un  = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+        if safe_un and safe_un[0].isdigit():
+            safe_un = "user_" + safe_un
+        cart_table = f"{safe_un}_{user_id}"
+
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(f"""
+            SELECT id, product_id, category, name, image, price, quantity
+            FROM `{cart_table}`
+            WHERE mode = 'successful'
+            ORDER BY id DESC LIMIT 10
+        """)
+        items = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        for item in items:
+            item['price'] = float(item['price']) if item['price'] else 0
+        return jsonify(items)
+    except Exception as e:
+        print("my-purchased-items error:", e)
+        return jsonify([])
+
+   
               
 #-------------------logout process from profile.html page ({sign out")button sathi-------------------- 
 

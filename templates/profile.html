@@ -683,47 +683,26 @@
 
         <!-- YOUR ORDERS -->
         <div class="shop-section">
-
             <div class="shop-header">
-                <h3>Your Orders</h3>
-                <span>See all</span>
+                <h3>🛒 Your Orders</h3>
+                <a href="/view-cart" style="color:#10b981;font-weight:600;text-decoration:none;font-size:13px;">See
+                    all</a>
             </div>
-
-            <div class="shop-items">
-
-                <div class="shop-card">
-                    <img src="https://m.media-amazon.com/images/I/81WZOm6hC0L.jpg">
-                </div>
-
-                <div class="shop-card">
-                    <img src="https://m.media-amazon.com/images/I/61Nn1jN8K0L.jpg">
-                </div>
-
+            <div id="yourOrdersGrid" class="shop-items">
+                <div style="color:#94a3b8;font-size:13px;padding:10px;">Loading...</div>
             </div>
-
         </div>
-
 
         <!-- BUY AGAIN -->
         <div class="shop-section">
-
             <div class="shop-header">
-                <h3>Buy Again</h3>
-                <span>See all</span>
+                <h3>🔁 Buy Again</h3>
+                <a href="/view-cart" style="color:#10b981;font-weight:600;text-decoration:none;font-size:13px;">See
+                    all</a>
             </div>
-
-            <div class="shop-items">
-
-                <div class="shop-card">
-                    <img src="https://m.media-amazon.com/images/I/61p15B2FqDL.jpg">
-                </div>
-
-                <div class="shop-card">
-                    <img src="https://m.media-amazon.com/images/I/61Nn1jN8K0L.jpg">
-                </div>
-
+            <div id="buyAgainGrid" class="shop-items">
+                <div style="color:#94a3b8;font-size:13px;padding:10px;">Loading...</div>
             </div>
-
         </div>
 
         <!-- YOUR ITEMS SECTION -->
@@ -829,7 +808,57 @@
     <script>
         const mainImg = document.getElementById("mainProfileImg");
         let currentProductDetail = {};
+        // ── Load Your Orders (cart items) ──
+        async function loadYourOrders() {
+            const grid = document.getElementById('yourOrdersGrid');
+            try {
+                const res = await fetch('/api/my-cart-items');
+                const items = await res.json();
+                if (!items.length) {
+                    grid.innerHTML = '<div style="color:#94a3b8;font-size:13px;padding:10px;">No items in cart yet.</div>';
+                    return;
+                }
+                grid.innerHTML = items.map(p => `
+                    <div class="shop-card" style="position:relative;">
+                        <img src="${p.image || ''}" onerror="this.src='';this.parentElement.querySelector('.fallback-icon').style.display='flex'">
+                        <div class="fallback-icon" style="display:none;width:100%;height:140px;align-items:center;justify-content:center;font-size:36px;">🛍️</div>
+                        <p style="font-weight:700;font-size:13px;margin-top:6px;color:var(--card-text);">${p.name || 'Product'}</p>
+                        <p style="font-size:12px;color:#6366f1;font-weight:700;">₹${p.price}</p>
+                        <span style="position:absolute;top:8px;left:8px;background:#6366f1;color:white;
+                            padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;">${p.category || ''}</span>
+                    </div>`).join('');
+            } catch (e) {
+                grid.innerHTML = '<div style="color:#ef4444;font-size:13px;padding:10px;">Failed to load orders.</div>';
+            }
+        }
 
+        // ── Load Buy Again (purchased items) ──
+        async function loadBuyAgain() {
+            const grid = document.getElementById('buyAgainGrid');
+            try {
+                const res = await fetch('/api/my-purchased-items');
+                const items = await res.json();
+                if (!items.length) {
+                    grid.innerHTML = '<div style="color:#94a3b8;font-size:13px;padding:10px;">No purchases yet.</div>';
+                    return;
+                }
+                grid.innerHTML = items.map(p => `
+                    <div class="shop-card" style="position:relative;">
+                        <img src="${p.image || ''}" onerror="this.src='';this.parentElement.querySelector('.fallback-icon').style.display='flex'">
+                        <div class="fallback-icon" style="display:none;width:100%;height:140px;align-items:center;justify-content:center;font-size:36px;">✅</div>
+                        <p style="font-weight:700;font-size:13px;margin-top:6px;color:var(--card-text);">${p.name || 'Product'}</p>
+                        <p style="font-size:12px;color:#10b981;font-weight:700;">₹${p.price}</p>
+                        <span style="position:absolute;top:8px;left:8px;background:#10b981;color:white;
+                            padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;">✅ Purchased</span>
+                    </div>`).join('');
+            } catch (e) {
+                grid.innerHTML = '<div style="color:#ef4444;font-size:13px;padding:10px;">Failed to load purchases.</div>';
+            }
+        }
+
+        // Run on page load
+        loadYourOrders();
+        loadBuyAgain();
         const popup1 = document.getElementById("popup1");
         const popup2 = document.getElementById("popup2");
         const addProfileBtn = document.getElementById("addProfileBtn");
@@ -1185,7 +1214,7 @@
                 const data = await res.json();
                 _currentKeywords = (data.keywords || '').split(',').map(k => k.trim()).filter(k => k);
                 renderKeywordTags();
-            } catch(e) {
+            } catch (e) {
                 document.getElementById('keywordTagsContainer').innerHTML =
                     '<span style="font-size:11px;color:#ef4444;">Failed to load keywords.</span>';
             }
@@ -1235,14 +1264,14 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ product_id: storeDataId, keywords: kw })
             })
-            .then(r => r.json())
-            .then(d => {
-                const msg = document.getElementById('keywordSaveMsg');
-                msg.style.display = 'block';
-                msg.textContent = d.success ? '✅ Keywords saved!' : '⚠️ ' + (d.error || 'Failed');
-                setTimeout(() => msg.style.display = 'none', 3000);
-            })
-            .catch(() => alert('⚠️ Failed to save keywords.'));
+                .then(r => r.json())
+                .then(d => {
+                    const msg = document.getElementById('keywordSaveMsg');
+                    msg.style.display = 'block';
+                    msg.textContent = d.success ? '✅ Keywords saved!' : '⚠️ ' + (d.error || 'Failed');
+                    setTimeout(() => msg.style.display = 'none', 3000);
+                })
+                .catch(() => alert('⚠️ Failed to save keywords.'));
         }
 
         function addToCartFromItems(productId, productName) {
@@ -1286,27 +1315,23 @@
             Add New Keyword
         </div>
         <div style="display:flex;gap:8px;">
-            <input id="keywordNewInput" type="text" placeholder="e.g. fresh, organic..."
-                style="flex:1;padding:8px 10px;border:1.5px solid #fcd34d;border-radius:8px;
-                       font-size:12px;color:#0f172a;outline:none;"
-                onkeydown="if(event.key==='Enter') addKeywordTag()">
-            <button onclick="addKeywordTag()"
-                style="background:#f59e0b;color:white;border:none;padding:8px 12px;
+            <input id="keywordNewInput" type="text" placeholder="e.g. fresh, organic..." style="flex:1;padding:8px 10px;border:1.5px solid #fcd34d;border-radius:8px;
+                       font-size:12px;color:#0f172a;outline:none;" onkeydown="if(event.key==='Enter') addKeywordTag()">
+            <button onclick="addKeywordTag()" style="background:#f59e0b;color:white;border:none;padding:8px 12px;
                        border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">
                 ＋
             </button>
         </div>
 
-        <button onclick="saveKeywords()"
-            style="width:100%;background:#f59e0b;color:white;border:none;padding:10px;
+        <button onclick="saveKeywords()" style="width:100%;background:#f59e0b;color:white;border:none;padding:10px;
             border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
             💾 Save Keywords
         </button>
         <div id="keywordSaveMsg" style="display:none;font-size:12px;font-weight:600;
         color:#22c55e;text-align:center;"></div>
     </div>
-    
-    
+
+
     <!-- Chart.js for item popup chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
