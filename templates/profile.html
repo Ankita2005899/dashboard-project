@@ -1024,6 +1024,7 @@
 
         async function openYourItemDetail(safeP) {
             const p = JSON.parse(decodeURIComponent(escape(atob(safeP))));
+            console.log("ID:", p.id, "Category:", p.category);
             const addedDate = p.uploaded_at ? new Date(p.uploaded_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
             document.getElementById('yourItemDetailContent').innerHTML = `
                 <div style="display:flex;gap:20px;margin-bottom:16px;align-items:flex-start;">
@@ -1142,7 +1143,6 @@ ${p.description ? `
                 }
             }, 100);
         }
-
 
         function openKeywordEditor(productId, productName) {
             document.getElementById('keywordEditorPanel').style.display = 'flex';
