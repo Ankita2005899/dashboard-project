@@ -5290,6 +5290,7 @@ def send_common_offer():
         """)
         customer_tables = [row['TABLE_NAME'] for row in cursor.fetchall()]
 
+        # Create table if not exists
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS special_offers (
                 id               INT AUTO_INCREMENT PRIMARY KEY,
@@ -5307,6 +5308,23 @@ def send_common_offer():
                 created_at       DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        conn.commit()
+
+        # Add missing columns if table already existed without them
+        alter_columns = [
+            "ALTER TABLE special_offers ADD COLUMN offer_category VARCHAR(20) DEFAULT 'common'",
+            "ALTER TABLE special_offers ADD COLUMN product1_name VARCHAR(255)",
+            "ALTER TABLE special_offers ADD COLUMN product1_image VARCHAR(500)",
+            "ALTER TABLE special_offers ADD COLUMN product2_name VARCHAR(255)",
+            "ALTER TABLE special_offers ADD COLUMN product2_image VARCHAR(500)",
+            "ALTER TABLE special_offers ADD COLUMN discount DECIMAL(5,2) DEFAULT 0",
+        ]
+        for sql in alter_columns:
+            try:
+                cursor.execute(sql)
+                conn.commit()
+            except:
+                pass  # column already exists - ignore duplicate
 
         count = 0
         for table in customer_tables:
@@ -5333,7 +5351,6 @@ def send_common_offer():
     finally:
         cursor.close()
         conn.close()
-
 
 # ── Customer fetches their offers ──────────────────────────
 @app.route('/api/my-special-offers')
