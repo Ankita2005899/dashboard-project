@@ -960,6 +960,17 @@
         }
 
         function addToCartFromProfile(productId, category, name, price, image) {
+            // Step 1: track add-to-cart in product_activity
+            fetch("/track-add-to-cart", {
+                method: "POST",
+                body: new URLSearchParams({
+                    product_id: productId,
+                    category: category,
+                    name: name
+                })
+            }).catch(e => console.warn("track-add-to-cart failed:", e));
+
+            // Step 2: add to cart table
             fetch("/final-add", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -969,7 +980,6 @@
                 .then(d => alert(d.success ? `✅ "${name}" added to cart!` : '⚠️ ' + (d.error || 'Failed')))
                 .catch(() => alert('⚠️ Failed to add to cart.'));
         }
-
         async function viewDetailsFromProfile(productId, category) {
             const modal = document.getElementById('productDetailModal');
             modal.style.display = 'flex';
