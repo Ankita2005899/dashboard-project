@@ -3082,17 +3082,16 @@ def verify_payment_failed():
     return jsonify({"status": "updated"})
 
     
-
 @app.route("/get-buynow-item/<int:id>")
 def get_buynow_item(id):
     if "user_id" not in session or "username" not in session:
         return jsonify({"error": "Not logged in"}), 401
 
-    user_id = session["user_id"]
-    username = session["username"]
+    user_id   = session["user_id"]
+    username  = session["username"]
     table_name = get_cart_table_name(username, user_id)
 
-    db = get_db_connection()
+    db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
 
     try:
@@ -3102,11 +3101,14 @@ def get_buynow_item(id):
             return jsonify({"error": "Item not found"}), 404
 
         return jsonify({
-            "id": item["id"],
-            "name": item["name"],
-            "price": float(item["price"]),
-            "image": item["image"],
-            "availability": item["availability"]
+            "id"          : item["id"],
+            "name"        : item["name"],
+            "price"       : float(item["price"]),
+            "image"       : item["image"],
+            "availability": item["availability"],
+            "detail"      : item.get("detail") or "",
+            "mode"        : item.get("mode")   or "",
+            "image2"      : item.get("image2") or ""
         })
     except Exception as e:
         print("BuyNow fetch error:", e)
@@ -3114,8 +3116,8 @@ def get_buynow_item(id):
     finally:
         cursor.close()
         db.close()
-
-
+        
+        
 # ============================================================
 # ROUTES â€” EXCEL / MISC
 # ============================================================
@@ -5406,8 +5408,7 @@ def my_special_offers():
         conn.close()
 
 
-
-# â”€â”€ Buy Combo Offer â†’ save to cart â†’ redirect to buynow â”€â”€â”€
+# ── Buy Combo Offer → save to cart → redirect to buynow ───
 @app.route('/api/buy-combo-offer', methods=['POST'])
 def buy_combo_offer():
     import re as _re
@@ -5432,51 +5433,54 @@ def buy_combo_offer():
         sanitized  = _re.sub(r'[^a-z0-9_]', '_', username.lower())
         user_table = f"{sanitized}_{uid}"
 
-        # Get prices from store_data
+        # ── Get real prices + images from store_data ──
         cursor.execute("""
             SELECT name, price, image FROM store_data
             WHERE name IN (%s, %s)
         """, (product1_name, product2_name))
         products = {p['name']: p for p in cursor.fetchall()}
 
-        p1 = products.get(product1_name, {})
-        p2 = products.get(product2_name, {})
-
+        p1       = products.get(product1_name, {})
+        p2       = products.get(product2_name, {})
         p1_price = float(p1.get('price') or 0)
         p2_price = float(p2.get('price') or 0)
+        p1_image = p1.get('image') or product1_image
+        p2_image = p2.get('image') or product2_image
 
-        # Apply discount
-        total = (p1_price + p2_price)
-        if discount > 0:
-            total = total * (1 - discount / 100)
-        total = round(total, 2)
+        # ── Calculate discounted total ──
+        total_original = p1_price + p2_price
+        final_price    = round(total_original * (1 - discount / 100), 2) if discount > 0 else round(total_original, 2)
 
-        combo_name  = f"{product1_name} + {product2_name}"
-        combo_image = p1.get('image') or product1_image
+        combo_name = f"{product1_name} + {product2_name}"
+        detail     = (f"Combo Offer | {product1_name} ₹{p1_price} + "
+                      f"{product2_name} ₹{p2_price} = ₹{total_original} "
+                      f"| {discount}% OFF | Final: ₹{final_price}")
 
-        # Insert into user's cart table as combo purchase
         cursor.execute(f"""
             INSERT INTO `{user_table}`
             (name, price, image, category, detail, quantity, mode)
             VALUES (%s, %s, %s, %s, %s, 1, 'combo_offer')
-        """, (
-            combo_name,
-            total,
-            combo_image,
-            'Combo Offer',
-            f"Combo: {product1_name} + {product2_name} | {discount}% OFF"
-        ))
+        """, (combo_name, final_price, p1_image, 'Combo Offer', detail))
+
         conn.commit()
         cart_id = cursor.lastrowid
 
-        return jsonify({'success': True, 'cart_id': cart_id})
+        return jsonify({
+            'success'       : True,
+            'cart_id'       : cart_id,
+            'original_price': total_original,
+            'discount_pct'  : discount,
+            'final_price'   : final_price,
+            'image2'        : p2_image
+        })
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
     finally:
         cursor.close()
         conn.close()
-
+        
+        
 # â”€â”€ Mark offer as read â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route('/api/mark-offer-read/<int:offer_id>', methods=['POST'])
 def mark_offer_read(offer_id):
