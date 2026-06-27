@@ -5741,21 +5741,37 @@ def product_activity_detail():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # ✅ Get store_data_id from seller's your_item table
+# ✅ Get product name and category from your_item table
         safe_username = re.sub(r'[^a-z0-9_]', '_', session["username"].strip().lower())
         if safe_username and safe_username[0].isdigit():
             safe_username = "user_" + safe_username
         your_item_table = f"{safe_username}_{session['user_id']}_your_item"
 
         cursor.execute(f"""
-            SELECT store_data_id FROM `{your_item_table}`
+            SELECT name, category FROM `{your_item_table}`
             WHERE id = %s LIMIT 1
         """, (product_id,))
         item_row = cursor.fetchone()
         if not item_row:
             return jsonify({"today_search_count":0,"today_add_to_cart_count":0,"today_purchase_count":0})
 
-        real_pid = item_row["store_data_id"]
+        product_name = item_row["name"]
+        product_category = item_row["category"]
+
+        # ✅ Map category to actual product table
+        cat_map = {"Food":"food_items","food_items":"food_items","card":"card","Card":"card","study_material":"study_material","Study Material":"study_material"}
+        prod_table = cat_map.get(product_category, "food_items")
+
+        # ✅ Get real product_id from actual product table by name
+        cursor.execute(f"""
+            SELECT id FROM `{prod_table}` WHERE name = %s LIMIT 1
+        """, (product_name,))
+        prod_row = cursor.fetchone()
+        if not prod_row:
+            return jsonify({"today_search_count":0,"today_add_to_cart_count":0,"today_purchase_count":0})
+
+        real_pid = prod_row["id"]
+        real_category = prod_table  # e.g. food_items
 
         # ✅ Find all cart tables and activity tables across all users
         cursor.execute("""
@@ -5782,6 +5798,7 @@ def product_activity_detail():
         total_search   = 0
 
         # Count from all cart tables
+# Count from all cart tables
         for tbl in cart_tables:
             try:
                 cursor.execute(f"""
@@ -5789,8 +5806,8 @@ def product_activity_detail():
                         SUM(CASE WHEN mode='successful' THEN 1 ELSE 0 END) as purchases,
                         COUNT(*) as carts
                     FROM `{tbl}`
-                    WHERE product_id = %s
-                """, (real_pid,))
+                    WHERE product_id = %s AND category = %s
+                """, (real_pid, real_category))
                 row = cursor.fetchone()
                 if row:
                     total_purchase += int(row["purchases"] or 0)
@@ -5799,13 +5816,14 @@ def product_activity_detail():
                 pass
 
         # Count from all activity tables
+# Count from all activity tables
         for tbl in activity_tables:
             try:
                 cursor.execute(f"""
                     SELECT SUM(today_search_count) as searches
                     FROM `{tbl}`
-                    WHERE product_id = %s
-                """, (real_pid,))
+                    WHERE product_id = %s AND category = %s
+                """, (real_pid, real_category))
                 row = cursor.fetchone()
                 if row:
                     total_search += int(row["searches"] or 0)
