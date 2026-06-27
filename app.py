@@ -6024,7 +6024,35 @@ def api_product_detail():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
    
-              
+#__________card availability derease kari la after it get add to the card to view_card.html ____________
+
+
+
+@app.route('/decrement-availability', methods=['POST'])
+def decrement_availability():
+    try:
+        data       = request.get_json()
+        product_id = data.get('product_id')
+        category   = data.get('category')
+
+        prod_table = get_product_table(category)
+
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(f"""
+            UPDATE `{prod_table}`
+            SET availability = GREATEST(availability - 1, 0)
+            WHERE id = %s
+        """, (product_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
+                  
 #-------------------logout process from profile.html page ({sign out")button sathi-------------------- 
 
 
