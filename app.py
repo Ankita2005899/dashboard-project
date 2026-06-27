@@ -5456,11 +5456,19 @@ def buy_combo_offer():
                       f"{product2_name} ₹{p2_price} = ₹{total_original} "
                       f"| {discount}% OFF | Final: ₹{final_price}")
 
+        # ── Auto-add image2 column if not exists ──
+        try:
+            cursor.execute(f"ALTER TABLE `{user_table}` ADD COLUMN image2 VARCHAR(255)")
+            conn.commit()
+        except:
+            pass  # already exists
+
+        # ── Insert combo into user table ──
         cursor.execute(f"""
             INSERT INTO `{user_table}`
-            (name, price, image, category, detail, quantity, mode)
-            VALUES (%s, %s, %s, %s, %s, 1, 'combo_offer')
-        """, (combo_name, final_price, p1_image, 'Combo Offer', detail))
+            (name, price, image, image2, category, detail, quantity, mode)
+            VALUES (%s, %s, %s, %s, %s, %s, 1, 'combo_offer')
+        """, (combo_name, final_price, p1_image, p2_image, 'Combo Offer', detail))
 
         conn.commit()
         cart_id = cursor.lastrowid
