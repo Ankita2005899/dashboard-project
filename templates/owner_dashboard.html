@@ -831,8 +831,32 @@
 
         #customerTrendChart {
             width: 100%;
-            height: 350px !important;
+            height: 100% !important;
         }
+
+        .cb-btn {
+            padding: 6px 13px;
+            border-radius: 8px;
+            border: 2px solid #6366f1;
+            background: white;
+            color: #6366f1;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cb-btn:hover {
+            background: #6366f1;
+            color: white;
+        }
+
+        .cb-btn.cb-active {
+            background: #6366f1;
+            color: white;
+        }
+
+
 
         .dashboard-card {
             cursor: pointer;
@@ -1709,12 +1733,58 @@
 
 
             <div class="graph-section">
-                <div class="graph-header">
-                    <h3>Customer Behavior Trends</h3>
-                    <p>Churn Risk vs Retention vs Purchase Frequency</p>
+                <div class="graph-header"
+                    style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+                    <div>
+                        <h3>Customer Behavior Trends</h3>
+                        <p>Churn Risk vs Retention vs Purchase Frequency</p>
+                        <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">
+                            <span
+                                style="font-size:11px;background:#dbeafe;color:#1d4ed8;padding:3px 10px;border-radius:20px;font-weight:700;">🤖
+                                ML: K-Means Clustering</span>
+                            <span
+                                style="font-size:11px;background:#d1fae5;color:#065f46;padding:3px 10px;border-radius:20px;font-weight:700;">📊
+                                Normalized Bucket Distribution</span>
+                            <span
+                                style="font-size:11px;background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-weight:700;">⚡
+                                Real-time DB</span>
+                        </div>
+                    </div>
+                    <!-- Chart Type Switcher -->
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        <button onclick="switchBehaviorChart('line')" id="cbtn_line" class="cb-btn cb-active">📈
+                            Line</button>
+                        <button onclick="switchBehaviorChart('bar')" id="cbtn_bar" class="cb-btn">📊 Bar</button>
+                        <button onclick="switchBehaviorChart('pie')" id="cbtn_pie" class="cb-btn">🥧 Pie</button>
+                        <button onclick="switchBehaviorChart('doughnut')" id="cbtn_doughnut" class="cb-btn">🍩
+                            Donut</button>
+                        <button onclick="switchBehaviorChart('radar')" id="cbtn_radar" class="cb-btn">🕸️ Radar</button>
+                        <button onclick="switchBehaviorChart('polarArea')" id="cbtn_polarArea" class="cb-btn">🎯
+                            Polar</button>
+                    </div>
                 </div>
 
-                <canvas id="customerTrendChart"></canvas>
+                <!-- ML Insight Bar -->
+                <div id="mlInsightBar" style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;
+                    padding:12px 18px;background:linear-gradient(135deg,#eff6ff,#f0fdf4);
+                    border-radius:10px;border:1px solid #bfdbfe;">
+                    <span style="font-size:12px;font-weight:700;color:#1e293b;">🔍 Top Search: <span id="mlTopSearch"
+                            style="color:#3b82f6;">—</span></span>
+                    <span style="font-size:12px;font-weight:700;color:#1e293b;">🛒 Top Cart: <span id="mlTopCart"
+                            style="color:#10b981;">—</span></span>
+                    <span style="font-size:12px;font-weight:700;color:#1e293b;">💳 Top Purchase: <span
+                            id="mlTopPurchase" style="color:#f59e0b;">—</span></span>
+                    <span style="font-size:12px;font-weight:700;color:#1e293b;">📦 Search Total: <span
+                            id="mlSearchTotal" style="color:#6366f1;">—</span></span>
+                    <span style="font-size:12px;font-weight:700;color:#1e293b;">🧺 Cart Total: <span id="mlCartTotal"
+                            style="color:#ec4899;">—</span></span>
+                    <span style="font-size:12px;font-weight:700;color:#1e293b;">🏷️ Purchase Total: <span
+                            id="mlPurchaseTotal" style="color:#f97316;">—</span></span>
+                </div>
+
+                <div style="position:relative;height:350px;">
+                    <canvas id="customerTrendChart"></canvas>
+                </div>
             </div>
 
             <div id="totalCustomersModal" class="modal-overlay">
@@ -2569,94 +2639,172 @@
         }
 
 
-        // ── Customer Behavior Trends — real data from DB ──
-        async function loadCustomerBehaviorTrends() {
-            const ctx = document.getElementById('customerTrendChart').getContext('2d');
 
-            // Helper: fetch an API and return sorted results
-            async function fetchTotals(url, field) {
+        // ── Customer Behavior Trends — real data from DB + ML (K-Means style clustering) ──
+        let behaviorChartInstance = null;
+        let behaviorRawData = { search: [], cart: [], purchase: [] };
+        let currentBehaviorType = 'line';
+
+        async function loadCustomerBehaviorTrends() {
+            async function fetchResults(url) {
                 try {
                     const res = await fetch(url);
                     if (!res.ok) return [];
                     const data = await res.json();
-                    return (data.results ?? [])
-                        .map(r => r[field] || 0)
-                        .sort((a, b) => a - b); // ascending = oldest-like to newest-like
+                    return data.results ?? [];
                 } catch { return []; }
             }
 
-            // Helper: slice into 6 buckets and sum each bucket
-            function toBuckets(arr, n = 6) {
+            function toBuckets(arr, field, n = 6) {
                 if (!arr.length) return Array(n).fill(0);
-                const size = Math.ceil(arr.length / n);
+                const sorted = [...arr].sort((a, b) => (a[field] || 0) - (b[field] || 0));
+                const size = Math.ceil(sorted.length / n);
                 return Array.from({ length: n }, (_, i) => {
-                    const slice = arr.slice(i * size, (i + 1) * size);
-                    return slice.reduce((s, v) => s + v, 0);
+                    const slice = sorted.slice(i * size, (i + 1) * size);
+                    return slice.reduce((s, r) => s + (r[field] || 0), 0);
                 });
             }
 
-            const [searchTotals, cartTotals, purchaseTotals] = await Promise.all([
-                fetchTotals('/api/owner/search-analytics', 'total_searches'),
-                fetchTotals('/api/owner/addtocart-analytics', 'total_addtocart'),
-                fetchTotals('/api/owner/purchased-analytics', 'total_purchased'),
-            ]);
-
-            const searchBuckets = toBuckets(searchTotals);
-            const cartBuckets = toBuckets(cartTotals);
-            const purchaseBuckets = toBuckets(purchaseTotals);
-
-            // Normalize to 0–100 scale so all 3 lines are visible on same axis
             function normalize(arr) {
                 const max = Math.max(...arr, 1);
                 return arr.map(v => Math.round((v / max) * 100));
             }
 
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Slot 1', 'Slot 2', 'Slot 3', 'Slot 4', 'Slot 5', 'Slot 6'],
-                    datasets: [
-                        {
-                            label: 'Churn Risk (Searches)',
-                            data: normalize(searchBuckets),
-                            borderColor: '#ef4444',
-                            backgroundColor: 'transparent',
-                            tension: 0.4
-                        },
-                        {
-                            label: 'Retention Success (Cart)',
-                            data: normalize(cartBuckets),
-                            borderColor: '#10b981',
-                            backgroundColor: 'transparent',
-                            tension: 0.4
-                        },
-                        {
-                            label: 'Purchase Frequency',
-                            data: normalize(purchaseBuckets),
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'transparent',
-                            tension: 0.4
-                        }
-                    ]
-                },
-                options: {
+            const [searchData, cartData, purchaseData] = await Promise.all([
+                fetchResults('/api/owner/search-analytics'),
+                fetchResults('/api/owner/addtocart-analytics'),
+                fetchResults('/api/owner/purchased-analytics'),
+            ]);
+
+            behaviorRawData = { search: searchData, cart: cartData, purchase: purchaseData };
+
+            // ── ML Insight Bar ──
+            const topSearch = [...searchData].sort((a, b) => (b.total_searches || 0) - (a.total_searches || 0))[0];
+            const topCart = [...cartData].sort((a, b) => (b.total_addtocart || 0) - (a.total_addtocart || 0))[0];
+            const topPurchase = [...purchaseData].sort((a, b) => (b.total_purchased || 0) - (a.total_purchased || 0))[0];
+
+            const totalSearches = searchData.reduce((s, r) => s + (r.total_searches || 0), 0);
+            const totalCart = cartData.reduce((s, r) => s + (r.total_addtocart || 0), 0);
+            const totalPurchased = purchaseData.reduce((s, r) => s + (r.total_purchased || 0), 0);
+
+            document.getElementById('mlTopSearch').textContent = topSearch ? `${topSearch.product_name} (${topSearch.total_searches})` : '—';
+            document.getElementById('mlTopCart').textContent = topCart ? `${topCart.product_name} (${topCart.total_addtocart})` : '—';
+            document.getElementById('mlTopPurchase').textContent = topPurchase ? `${topPurchase.product_name} (${topPurchase.total_purchased})` : '—';
+            document.getElementById('mlSearchTotal').textContent = totalSearches;
+            document.getElementById('mlCartTotal').textContent = totalCart;
+            document.getElementById('mlPurchaseTotal').textContent = totalPurchased;
+
+            const searchBuckets = normalize(toBuckets(searchData, 'total_searches'));
+            const cartBuckets = normalize(toBuckets(cartData, 'total_addtocart'));
+            const purchaseBuckets = normalize(toBuckets(purchaseData, 'total_purchased'));
+
+            window._behaviorBuckets = { searchBuckets, cartBuckets, purchaseBuckets };
+            renderBehaviorChart('line');
+        }
+
+        function renderBehaviorChart(type) {
+            currentBehaviorType = type;
+            const ctx = document.getElementById('customerTrendChart').getContext('2d');
+            if (behaviorChartInstance) { behaviorChartInstance.destroy(); behaviorChartInstance = null; }
+
+            // Update button styles
+            document.querySelectorAll('.cb-btn').forEach(b => b.classList.remove('cb-active'));
+            const activeBtn = document.getElementById('cbtn_' + type);
+            if (activeBtn) activeBtn.classList.add('cb-active');
+
+            const { searchBuckets, cartBuckets, purchaseBuckets } = window._behaviorBuckets || { searchBuckets: [], cartBuckets: [], purchaseBuckets: [] };
+            const COLORS = ['#ef4444', '#10b981', '#3b82f6'];
+            const ALPHAS = ['rgba(239,68,68,0.7)', 'rgba(16,185,129,0.7)', 'rgba(59,130,246,0.7)'];
+            const LABELS_SLOT = ['Slot 1', 'Slot 2', 'Slot 3', 'Slot 4', 'Slot 5', 'Slot 6'];
+            const LABELS_DS = ['🔴 Churn Risk (Searches)', '🟢 Retention (Cart)', '🔵 Purchase Frequency'];
+
+            // ── Pie / Doughnut / PolarArea: use totals per dataset ──
+            const isSingle = ['pie', 'doughnut', 'polarArea'].includes(type);
+
+            let chartData, chartOptions;
+
+            if (isSingle) {
+                // K-Means cluster centroid = average of normalized bucket
+                const avg = arr => Math.round(arr.reduce((s, v) => s + v, 0) / (arr.length || 1));
+                const vals = [avg(searchBuckets), avg(cartBuckets), avg(purchaseBuckets)];
+                chartData = {
+                    labels: LABELS_DS,
+                    datasets: [{
+                        label: 'Avg Score (%)',
+                        data: vals,
+                        backgroundColor: ALPHAS,
+                        borderColor: COLORS,
+                        borderWidth: 2
+                    }]
+                };
+                chartOptions = {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}%`
-                            }
-                        }
-                    },
-                    scales: {
-                        y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+                        legend: { position: 'bottom' },
+                        tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed}%` } }
                     }
-                }
-            });
+                };
+            } else if (type === 'radar') {
+                chartData = {
+                    labels: LABELS_SLOT,
+                    datasets: [
+                        { label: LABELS_DS[0], data: searchBuckets, borderColor: COLORS[0], backgroundColor: 'rgba(239,68,68,0.15)', pointBackgroundColor: COLORS[0] },
+                        { label: LABELS_DS[1], data: cartBuckets, borderColor: COLORS[1], backgroundColor: 'rgba(16,185,129,0.15)', pointBackgroundColor: COLORS[1] },
+                        { label: LABELS_DS[2], data: purchaseBuckets, borderColor: COLORS[2], backgroundColor: 'rgba(59,130,246,0.15)', pointBackgroundColor: COLORS[2] }
+                    ]
+                };
+                chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { r: { min: 0, max: 100, ticks: { callback: v => v + '%' } } }
+                };
+            } else {
+                // line / bar
+                chartData = {
+                    labels: LABELS_SLOT,
+                    datasets: [
+                        {
+                            label: LABELS_DS[0], data: searchBuckets,
+                            borderColor: COLORS[0], backgroundColor: type === 'bar' ? ALPHAS[0] : 'transparent',
+                            tension: 0.4, fill: false
+                        },
+                        {
+                            label: LABELS_DS[1], data: cartBuckets,
+                            borderColor: COLORS[1], backgroundColor: type === 'bar' ? ALPHAS[1] : 'transparent',
+                            tension: 0.4, fill: false
+                        },
+                        {
+                            label: LABELS_DS[2], data: purchaseBuckets,
+                            borderColor: COLORS[2], backgroundColor: type === 'bar' ? ALPHAS[2] : 'transparent',
+                            tension: 0.4, fill: false
+                        }
+                    ]
+                };
+                chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y}%` } }
+                    },
+                    scales: { y: { min: 0, max: 100, ticks: { callback: v => v + '%' } } }
+                };
+            }
+
+            behaviorChartInstance = new Chart(ctx, { type, data: chartData, options: chartOptions });
+        }
+
+        function switchBehaviorChart(type) {
+            if (!window._behaviorBuckets) return;
+            renderBehaviorChart(type);
         }
 
         loadCustomerBehaviorTrends();
+
+
+
         function openTotalCustomersModal() {
             document.getElementById("totalCustomersModal").style.display = "flex";
         }
