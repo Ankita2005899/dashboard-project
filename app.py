@@ -1,4 +1,4 @@
-print("🔥 app.py LOADED FROM:", __file__)
+﻿print("ðŸ”¥ app.py LOADED FROM:", __file__)
 
 import os
 import hmac
@@ -32,7 +32,7 @@ from openpyxl.styles import Alignment, Font
 from dotenv import load_dotenv
 #firebase database sathi
 import mysql.connector
-# app.py ke top pe — flask, mysql ke imports ke saath
+# app.py ke top pe â€” flask, mysql ke imports ke saath
 from fuzzywuzzy import fuzz
 import random
 import string
@@ -68,7 +68,7 @@ cloudinary.config(
     api_key = os.getenv("CLOUDINARY_API_KEY"),
     api_secret = os.getenv("CLOUDINARY_API_SECRET")
 )
-# ── Create database and tables ────────────────────────────────────────────────
+# â”€â”€ Create database and tables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 # ================= EMAIL CONFIGURATION =================
 
@@ -85,7 +85,7 @@ KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET")
 
 client = razorpay.Client(auth=(KEY_ID, KEY_SECRET))
 
-print("🔥 Flask looking for templates in:", app.template_folder)
+print("ðŸ”¥ Flask looking for templates in:", app.template_folder)
 
 
 # ============================================================
@@ -197,7 +197,7 @@ def create_user_product_activity_table(username, user_id):
         )
     """)
 
-    # ✅ Purani tables fix karo — add_to_cart_time → add_to_cart_date_time
+    # âœ… Purani tables fix karo â€” add_to_cart_time â†’ add_to_cart_date_time
     cursor.execute(f"""
         SELECT COUNT(*) FROM information_schema.columns 
         WHERE table_schema = DATABASE() 
@@ -212,7 +212,7 @@ def create_user_product_activity_table(username, user_id):
             CHANGE COLUMN `add_to_cart_time` `add_to_cart_date_time` DATETIME
         """)
 
-    # ✅ search_time aur purchased_time DATETIME karo
+    # âœ… search_time aur purchased_time DATETIME karo
     cursor.execute(f"""
         ALTER TABLE `{table_name}`
         MODIFY COLUMN search_time DATETIME,
@@ -449,7 +449,7 @@ def update_xml_with_sub_vc(xml_file_path, output_xml_path=None):
     tree.write(output_xml_path or xml_file_path, encoding="utf-8", xml_declaration=True)
     cursor.close()
     db.close()
-    print("✅ XML updated with Sub from VC (negative) successfully!")
+    print("âœ… XML updated with Sub from VC (negative) successfully!")
 
 
 # ============================================================
@@ -561,7 +561,7 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
 # ============================================================
-# ROUTES — AUTH
+# ROUTES â€” AUTH
 # ============================================================
 @app.route("/")
 def index():
@@ -570,7 +570,7 @@ def index():
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
 
     if request.method == "POST":
         username = request.form.get("username", "").strip()
@@ -579,13 +579,13 @@ def signup():
         confirm  = request.form.get("confirm_password", "").strip()
 
         if not username or not email or not password:
-            return render_template("signup.html", error="❌ All fields are required")
+            return render_template("signup.html", error="âŒ All fields are required")
 
         if password != confirm:
-            return render_template("signup.html", error="❌ Passwords do not match")
+            return render_template("signup.html", error="âŒ Passwords do not match")
 
         if "@" not in email or "." not in email:
-            return render_template("signup.html", error="❌ Invalid email format")
+            return render_template("signup.html", error="âŒ Invalid email format")
 
         db     = get_db_connection()
         cursor = db.cursor()
@@ -618,7 +618,7 @@ def signup():
                 cursor.close()
                 db.close()
                 return render_template("signup.html",
-                    error="❌ Weak password. Need 8+ chars, 1 uppercase, 1 lowercase, 1 digit, 3 special chars")
+                    error="âŒ Weak password. Need 8+ chars, 1 uppercase, 1 lowercase, 1 digit, 3 special chars")
 
             # Save to user_activity table only
             cursor.execute("""
@@ -627,7 +627,7 @@ def signup():
                 VALUES (%s, %s, %s, 'signup', %s, CURDATE(), CURTIME())
             """, (username, email, password, "manual"))
             user_id = cursor.lastrowid
-            print(f"✅ user_activity inserted: id={user_id}, username={username}, email={email}")
+            print(f"âœ… user_activity inserted: id={user_id}, username={username}, email={email}")
 
             # Create personal tables
             ensure_user_table(username, user_id)
@@ -650,12 +650,12 @@ def signup():
             session["user_obj_id"]   = user_id
             session["username"]      = username
             session["user_email"]    = email
-            session["flash_message"] = f"🎉 Welcome {username}! Account created 😊"
+            session["flash_message"] = f"ðŸŽ‰ Welcome {username}! Account created ðŸ˜Š"
 
             return redirect(url_for("survey"))
 
         except Exception as e:
-            print("❌ SIGNUP ERROR:", e)
+            print("âŒ SIGNUP ERROR:", e)
             try:
                 db.rollback()
                 cursor.close()
@@ -663,14 +663,14 @@ def signup():
             except:
                 pass
             return render_template("signup.html",
-                error=f"❌ Something went wrong: {str(e)}")
+                error=f"âŒ Something went wrong: {str(e)}")
 
     return render_template("signup.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
 
     if request.method == "POST":
         email    = request.form["email"].strip()
@@ -691,12 +691,12 @@ def login():
         if not user:
             cursor.close()
             db.close()
-            return render_template("login.html", error="❌ Email not registered or not signed up manually")
+            return render_template("login.html", error="âŒ Email not registered or not signed up manually")
 
         if password != user[2]:
             cursor.close()
             db.close()
-            return render_template("login.html", error="❌ Incorrect password")
+            return render_template("login.html", error="âŒ Incorrect password")
 
         # Save login to user table
         try:
@@ -718,7 +718,7 @@ def login():
         session["user_id"]     = user[0]
         session["username"]    = user[1]
         session["user_obj_id"] = user[0]
-        session["flash_message"] = f"🎉 Login Successful, {user[1]} 😊"
+        session["flash_message"] = f"ðŸŽ‰ Login Successful, {user[1]} ðŸ˜Š"
         return redirect(url_for("home"))
 
     return render_template("login.html")
@@ -770,7 +770,7 @@ def firebase_login():
             session["user_obj_id"]   = user_id
             session["username"]      = username
             session["user_email"]    = email
-            session["flash_message"] = f"🎉 Welcome {username}! Account created 😊"
+            session["flash_message"] = f"ðŸŽ‰ Welcome {username}! Account created ðŸ˜Š"
 
             return jsonify({"success": True})
 
@@ -810,7 +810,7 @@ def firebase_login():
             session["user_obj_id"]   = user_id
             session["username"]      = username
             session["user_email"]    = email
-            session["flash_message"] = f"🎉 Login Successful, {username} 😊"
+            session["flash_message"] = f"ðŸŽ‰ Login Successful, {username} ðŸ˜Š"
 
             return jsonify({"success": True})
 
@@ -818,7 +818,7 @@ def firebase_login():
             return jsonify({"success": False, "message": "Invalid source"})
 
     except Exception as e:
-        print("❌ firebase_login error:", e)
+        print("âŒ firebase_login error:", e)
         try:
             db.rollback()
             cursor.close()
@@ -859,9 +859,9 @@ def verify_otp():
             VALUES (%s, %s, %s, %s)
         """, (user[1], email, "", "github"))
         db.commit()
-        print(f"✅ user table insert success: {email}")
+        print(f"âœ… user table insert success: {email}")
     except Exception as e:
-        print(f"❌ user table insert error: {e}")
+        print(f"âŒ user table insert error: {e}")
 
     cursor.close()
     db.close()
@@ -871,7 +871,7 @@ def verify_otp():
     session["user_obj_id"]   = user[0]
     session["username"]      = user[1]
     session["user_email"]    = email
-    session["flash_message"] = f"🎉 Login Successful, {user[1]} 😊"
+    session["flash_message"] = f"ðŸŽ‰ Login Successful, {user[1]} ðŸ˜Š"
 
     return jsonify({"success": True})
 
@@ -897,12 +897,12 @@ def flask_login():
     if not user:
         cursor.close()
         db.close()
-        return jsonify({"success": False, "message": "❌ Email not registered or not signed up manually"})
+        return jsonify({"success": False, "message": "âŒ Email not registered or not signed up manually"})
 
     if password != user[2]:
         cursor.close()
         db.close()
-        return jsonify({"success": False, "message": "❌ Incorrect password"})
+        return jsonify({"success": False, "message": "âŒ Incorrect password"})
 
     # Save login to user table
     try:
@@ -925,12 +925,12 @@ def flask_login():
     session["user_obj_id"]   = user[0]
     session["username"]      = user[1]
     session["user_email"]    = email
-    session["flash_message"] = f"🎉 Login Successful, {user[1]} 😊"
+    session["flash_message"] = f"ðŸŽ‰ Login Successful, {user[1]} ðŸ˜Š"
 
     return jsonify({"success": True})
 
 
-# ── Send OTP ──
+# â”€â”€ Send OTP â”€â”€
 @app.route("/auth/send-otp", methods=["POST"])
 def send_otp():
     data  = request.get_json()
@@ -976,7 +976,7 @@ def send_otp():
         sg.send(message)
         return jsonify({"success": True})
     except Exception as e:
-        print("❌ OTP send error:", e)
+        print("âŒ OTP send error:", e)
         return jsonify({"success": False, "message": "Failed to send OTP"})
 
 
@@ -1070,16 +1070,16 @@ def security_login():
     session["user_obj_id"]   = user_id
     session["username"]      = username
     session["user_email"]    = email
-    session["flash_message"] = f"🎉 Login Successful, {username} 😊"
+    session["flash_message"] = f"ðŸŽ‰ Login Successful, {username} ðŸ˜Š"
 
     return jsonify({"success": True})
      
 # ============================================================
-# ROUTES — PAGES
+# ROUTES â€” PAGES
 # ============================================================
 @app.route("/home")
 def home():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
     if "user_id" not in session:
         return redirect(url_for("login"))
 
@@ -1278,13 +1278,13 @@ def buynow():
 
 
 # ============================================================
-# ROUTES — OWNER OTP
+# ROUTES â€” OWNER OTP
 # ============================================================
 @app.route("/send-owner-otp")
 def send_owner_otp():
     otp = random.randint(100000000, 999999999)
     session["owner_otp"] = str(otp)
-    print(f"🔑 OWNER OTP: {otp}")
+    print(f"ðŸ”‘ OWNER OTP: {otp}")
     
     try:
         import urllib.request
@@ -1307,9 +1307,9 @@ def send_owner_otp():
             }
         )
         urllib.request.urlopen(req)
-        print("✅ OTP sent successfully")
+        print("âœ… OTP sent successfully")
     except Exception as e:
-        print("❌ Email error:", e)
+        print("âŒ Email error:", e)
     
     return jsonify({"success": True})
 
@@ -1323,16 +1323,16 @@ def verify_owner_otp():
     if session.get("owner_otp") == user_otp:
         session["owner_verified"] = True
         session.pop("owner_otp", None)
-        return jsonify({"success": True, "message": "✅ Owner verified successfully!"})
-    return jsonify({"success": False, "message": "❌ Invalid OTP"})
+        return jsonify({"success": True, "message": "âœ… Owner verified successfully!"})
+    return jsonify({"success": False, "message": "âŒ Invalid OTP"})
 
 
 # ============================================================
-# ROUTES — PRODUCTS
+# ROUTES â€” PRODUCTS
 # ============================================================
 @app.route("/get-products")
 def get_products():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
     cursor.execute("SELECT * FROM card")
@@ -1365,7 +1365,7 @@ def get_products():
 
 @app.route("/get-study-materials")
 def get_study_materials():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
     cursor.execute("SELECT * FROM study_material")
@@ -1395,7 +1395,7 @@ def get_study_materials():
 
 @app.route("/get-food-items")
 def get_food_items():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
     cursor.execute("SELECT * FROM food_items")
@@ -1449,7 +1449,7 @@ def get_product_search_table():
 
 @app.route("/add-product", methods=["GET", "POST"])
 def add_product():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
 
     if request.method == "GET":
         return render_template("add_product.html")
@@ -1509,7 +1509,7 @@ def add_product():
     if "Food" in product_types:
         insert_product_and_availability("food_items", "food_items")
 
-    # ── Insert into store_data (all users' products) ──
+    # â”€â”€ Insert into store_data (all users' products) â”€â”€
     category_label = product_types[0] if product_types else "other"
     # Get a valid product_id from the last inserted category table
     last_pid = cursor.lastrowid if cursor.lastrowid else 0
@@ -1524,7 +1524,7 @@ def add_product():
     ))
     store_data_id = cursor.lastrowid
 
-    # ── Insert into user's personal your_item table ──
+    # â”€â”€ Insert into user's personal your_item table â”€â”€
     try:
         uname = session.get("username")
         uid   = session.get("user_id")
@@ -1539,9 +1539,9 @@ def add_product():
             price, availability, detail, address, availability,
             made_of, used_for, harmful, precautions
         ))
-        print(f"✅ Inserted into {your_item_table}")
+        print(f"âœ… Inserted into {your_item_table}")
     except Exception as e:
-        print(f"⚠️ Could not insert into your_item table: {e}")
+        print(f"âš ï¸ Could not insert into your_item table: {e}")
 
     db.commit()
     cursor.close()
@@ -1551,11 +1551,11 @@ def add_product():
 
 
 # ============================================================
-# ROUTES — CART
+# ROUTES â€” CART
 # ============================================================
 @app.route("/get-cart-items")
 def get_cart_items():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
 
     if "user_id" not in session or "username" not in session:
         return jsonify([])
@@ -1601,7 +1601,7 @@ def get_cart_items():
 
 @app.route("/add-to-cart", methods=["POST"])
 def add_to_cart():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
 
     if "cart" not in session:
         session["cart"] = []
@@ -1704,7 +1704,7 @@ def add_to_cart():
                 item.get("address", ""), item["id"], 0
             ))
 
-            # ✅ client_table se actual date fetch karo (jo sahi time hai)
+            # âœ… client_table se actual date fetch karo (jo sahi time hai)
             cursor.execute(f"""
                 SELECT date FROM `{client_table}`
                 ORDER BY id DESC LIMIT 1
@@ -1712,7 +1712,7 @@ def add_to_cart():
             cart_date = cursor.fetchone()
             actual_datetime = cart_date[0] if cart_date else ist_now_str
 
-            # ✅ Product activity update
+            # âœ… Product activity update
             cursor.execute(f"""
                 SELECT id, today_add_to_cart_count FROM `{activity_table}`
                 WHERE product_id = %s AND category = %s
@@ -1735,14 +1735,14 @@ def add_to_cart():
                     VALUES (%s, %s, %s, 1, %s, %s, '1/100')
                 """, (item["id"], item["name"], item["category"], actual_datetime, ist_month))
 
-        # ✅ Loop ke BAAD commit
+        # âœ… Loop ke BAAD commit
         db.commit()
         cursor.close()
         db.close()
         return jsonify({"success": True})
 
     except Exception as e:
-        print("❌ ADD ERROR:", e)
+        print("âŒ ADD ERROR:", e)
         try:
             db.rollback()
             cursor.close()
@@ -1756,7 +1756,7 @@ def add_to_cart():
     
 @app.route("/remove-from-cart", methods=["POST"])
 def remove_from_cart():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
 
     if "user_id" not in session or "username" not in session:
         return jsonify({"success": False})
@@ -1818,7 +1818,7 @@ def remove_from_cart():
         return jsonify({"success": True, "action": action})
 
     except Exception as e:
-        print("❌ REMOVE ERROR:", e)
+        print("âŒ REMOVE ERROR:", e)
         db.rollback()
         return jsonify({"success": False})
     finally:
@@ -1828,7 +1828,7 @@ def remove_from_cart():
 
 @app.route("/final-add", methods=["POST"])
 def final_add():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
 
     if "user_id" not in session:
         return jsonify({"success": False, "error": "Login required"}), 401
@@ -1953,7 +1953,7 @@ def final_add():
 
 @app.route("/remove-from-store", methods=["POST"])
 def remove_from_store():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
 
     try:
         data = request.get_json(force=True)
@@ -1993,13 +1993,13 @@ def remove_from_store():
         return jsonify({"success": True})
 
     except Exception as e:
-        print("❌ REMOVE ERROR:", e)
+        print("âŒ REMOVE ERROR:", e)
         return jsonify({"success": False, "error": str(e)}), 500
 
 
 @app.route("/finalize-cart", methods=["POST"])
 def finalize_cart():
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
 
     cart = request.json.get("cart", [])
     if not cart:
@@ -2024,7 +2024,7 @@ def finalize_cart():
 
 
 # ============================================================
-# ROUTES — XML / DATA FEEDS
+# ROUTES â€” XML / DATA FEEDS
 # ============================================================
 @app.route("/availabilities-xml")
 def availabilities_xml():
@@ -2180,7 +2180,7 @@ def user_addtocart_trend_xml():
     if not username or not user_id:
         return Response("<records></records>", mimetype="text/xml")
 
-    # ✅ Sanitized activity table
+    # âœ… Sanitized activity table
     safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
     if safe_username and safe_username[0].isdigit():
         safe_username = "user_" + safe_username
@@ -2190,7 +2190,7 @@ def user_addtocart_trend_xml():
     cursor = db.cursor(dictionary=True)
 
     try:
-        # ✅ Actual product names
+        # âœ… Actual product names
         cursor.execute("""
             SELECT id, name, 'card' as category FROM card
             UNION ALL
@@ -2232,7 +2232,7 @@ def user_addtocart_trend_xml():
         db.close()
 
 # ============================================================
-# ROUTES — SEARCH
+# ROUTES â€” SEARCH
 # ============================================================
 @app.route("/search-product", methods=["POST"])
 def search_product():
@@ -2303,13 +2303,13 @@ def search_products():
     username = session.get("username")
     user_id = session.get("user_id")
 
-    # ✅ Sanitized username use karo
+    # âœ… Sanitized username use karo
     safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
     if safe_username[0].isdigit():
         safe_username = "user_" + safe_username
     table_name = f"{safe_username}_{user_id}_product_activity"
 
-    # ✅ IST time Python se
+    # âœ… IST time Python se
     ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
     ist_now_str = ist_now.strftime('%Y-%m-%d %H:%M:%S')
     ist_month = ist_now.strftime('%B')
@@ -2320,20 +2320,20 @@ def search_products():
             continue
         processed.add(key)
 
-        # ✅ Global searched_count update
+        # âœ… Global searched_count update
         cursor.execute(f"""
             UPDATE {item['category']} SET searched_count = COALESCE(searched_count,0) + 1,
             last_searched_time = %s
             WHERE id = %s
         """, (ist_now_str, item["id"],))
 
-        # ✅ search_logs mein INSERT
+        # âœ… search_logs mein INSERT
         cursor.execute("""
             INSERT INTO search_logs (user_id, product_id, category, search_time)
             VALUES (%s, %s, %s, %s)
         """, (user_id, item["id"], item["category"], ist_now_str))
 
-        # ✅ product_activity update
+        # âœ… product_activity update
         cursor.execute(f"""
             SELECT today_search_count FROM `{table_name}`
             WHERE product_id = %s AND category = %s
@@ -2428,13 +2428,13 @@ def track_search():
     username = session.get("username")
     user_id = session.get("user_id")
 
-    # ✅ Sanitized username
+    # âœ… Sanitized username
     safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
     if safe_username[0].isdigit():
         safe_username = "user_" + safe_username
     activity_table = f"{safe_username}_{user_id}_product_activity"
 
-    # ✅ IST time
+    # âœ… IST time
     ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
     ist_now_str = ist_now.strftime('%Y-%m-%d %H:%M:%S')
     ist_month = ist_now.strftime('%B')
@@ -2454,15 +2454,15 @@ def track_search():
         matched = cursor.fetchall()
 
         for product in matched:
-            # ✅ search_logs INSERT
-            print(f"✅ track-search matched: {product['id']} {product['name']} {product['category']} table={table}")
+            # âœ… search_logs INSERT
+            print(f"âœ… track-search matched: {product['id']} {product['name']} {product['category']} table={table}")
             
             cursor.execute("""
                 INSERT INTO search_logs (user_id, product_id, category, search_time)
                 VALUES (%s, %s, %s, %s)
             """, (user_id, product["id"], product["category"], ist_now_str))
 
-            # ✅ product_activity UPDATE/INSERT
+            # âœ… product_activity UPDATE/INSERT
             cursor.execute(f"""
                 SELECT today_search_count FROM `{activity_table}`
                 WHERE product_id = %s AND category = %s
@@ -2517,7 +2517,7 @@ def search_user_products():
     return jsonify(results)
 
 # ============================================================
-# ROUTES — ADD TO CART TRACKING
+# ROUTES â€” ADD TO CART TRACKING
 # ============================================================
 @app.route("/track-add-to-cart", methods=["POST"])
 def track_add_to_cart():
@@ -2538,7 +2538,7 @@ def track_add_to_cart():
     table_name = f"{safe_username}_{user_id}_product_activity"
     
     
-    # ✅ Python se IST time
+    # âœ… Python se IST time
     ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
     ist_time = ist_now.strftime('%Y-%m-%d %H:%M:%S')
     ist_month = ist_now.strftime('%B')
@@ -2619,7 +2619,7 @@ def owner_addtocart_data():
 
 
 # ============================================================
-# ROUTES — PROFILE
+# ROUTES â€” PROFILE
 # ============================================================
 @app.route("/save-user-detail", methods=["POST"])
 def save_user_detail():
@@ -2881,7 +2881,7 @@ def profile_view_name_image_page():
 
 
 # ============================================================
-# ROUTES — CART / VIEW
+# ROUTES â€” CART / VIEW
 # ============================================================
 @app.route("/view-cart")
 def view_cart():
@@ -2926,7 +2926,7 @@ def get_store_data():
 
 
 # ============================================================
-# ROUTES — PAYMENT
+# ROUTES â€” PAYMENT
 # ============================================================
 @app.route("/create-order", methods=["POST"])
 def create_order():
@@ -2977,14 +2977,14 @@ def verify_payment():
     cursor = db.cursor()
 
     if expected_signature == razorpay_signature:
-        # ✅ Cart table update
+        # âœ… Cart table update
         cursor.execute(f"""
             UPDATE `{table_name}` 
             SET mode = 'successful'
             WHERE id = %s
         """, (cart_id,))
 
-        # ✅ Purchased product ki detail fetch karo
+        # âœ… Purchased product ki detail fetch karo
         cursor.execute(f"""
             SELECT product_id, category FROM `{table_name}`
             WHERE id = %s
@@ -2995,7 +2995,7 @@ def verify_payment():
             product_id = purchased_item[0]
             category   = purchased_item[1]
 
-            # ✅ product_activity purchase count update
+            # âœ… product_activity purchase count update
             cursor.execute(f"""
                 SELECT today_purchase_count FROM `{activity_table}`
                 WHERE product_id = %s AND category = %s
@@ -3024,14 +3024,14 @@ def verify_payment():
                     VALUES (%s, %s, %s, 1, %s, %s, %s)
                 """, (product_id, prod_name, category, ist_now_str, ist_month, 0.01))
 
-            # ✅ add_to_cart count decrease karo
+            # âœ… add_to_cart count decrease karo
             cursor.execute(f"""
                 UPDATE `{activity_table}`
                 SET today_add_to_cart_count = GREATEST(today_add_to_cart_count - 1, 0)
                 WHERE product_id = %s AND category = %s
             """, (product_id, category))
 
-        # ✅ Orders table INSERT
+        # âœ… Orders table INSERT
         try:
             cursor.execute("""
                 INSERT INTO orders (user_email, razorpay_payment_id, razorpay_order_id, status)
@@ -3117,7 +3117,7 @@ def get_buynow_item(id):
 
 
 # ============================================================
-# ROUTES — EXCEL / MISC
+# ROUTES â€” EXCEL / MISC
 # ============================================================
 @app.route('/save_data', methods=['POST'])
 def save_data():
@@ -3359,10 +3359,10 @@ def create_tables_route():
         db.commit()
         cursor.close()
         db.close()
-        return "✅ All tables created successfully!"
+        return "âœ… All tables created successfully!"
 
     except Exception as e:
-        return f"❌ Error: {str(e)}"
+        return f"âŒ Error: {str(e)}"
 #-------------backup database-----------------
 @app.route("/import-backup")
 def import_backup():
@@ -3385,10 +3385,10 @@ def import_backup():
         db.commit()
         cursor.close()
         db.close()
-        return "✅ Backup imported successfully!"
+        return "âœ… Backup imported successfully!"
     
     except Exception as e:
-        return f"❌ Error: {str(e)}"
+        return f"âŒ Error: {str(e)}"
     
     
 #=========================owner dashboard =========================
@@ -3396,39 +3396,39 @@ def import_backup():
 
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # GET /api/owner/customers
 #
 # Returns:
 #   {
-#     "total_customers"  : int,       — live COUNT(*) from user_activity
-#     "percent_change"   : float,     — month-over-month growth %  (ML: see below)
-#     "customers"        : [ ... ]    — every row, newest first
+#     "total_customers"  : int,       â€” live COUNT(*) from user_activity
+#     "percent_change"   : float,     â€” month-over-month growth %  (ML: see below)
+#     "customers"        : [ ... ]    â€” every row, newest first
 #   }
 #
-# ML USED HERE — Month-over-Month % Change (Baseline Anomaly Detection):
+# ML USED HERE â€” Month-over-Month % Change (Baseline Anomaly Detection):
 # -----------------------------------------------------------------------
 # percent_change is computed as:
-#       (this_month_signups - last_month_signups) / last_month_signups × 100
+#       (this_month_signups - last_month_signups) / last_month_signups Ã— 100
 #
-# This is the foundation of trend-deviation detection — the same
+# This is the foundation of trend-deviation detection â€” the same
 # arithmetic used in EWMA (Exponentially Weighted Moving Average) and
 # Holt-Winters forecasting to establish a "baseline" so you can later
 # flag when the current value is an anomaly vs the expected trend.
 #
 # In plain terms for the owner dashboard:
-#   • +12.4%  → signups are growing faster than last month (healthy)
-#   • -5.0%   → signups dropped vs last month (investigate)
-#   • 0%      → flat month (stable but not growing)
-# ─────────────────────────────────────────────────────────────────────────────
+#   â€¢ +12.4%  â†’ signups are growing faster than last month (healthy)
+#   â€¢ -5.0%   â†’ signups dropped vs last month (investigate)
+#   â€¢ 0%      â†’ flat month (stable but not growing)
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/api/owner/customers", methods=["GET"])
 def get_owner_customers():
     conn = None
     try:
-        conn   = get_db_connection()          # ← your existing function
+        conn   = get_db_connection()          # â† your existing function
         cursor = conn.cursor(dictionary=True)
 
-        # All customers — live, newest first
+        # All customers â€” live, newest first
         cursor.execute("""
             SELECT id, username, email, password,
                 mode, action_date, action_time, action
@@ -3498,7 +3498,7 @@ def get_owner_customers():
 
 #----------------------------delete ML technique----------------------------------    
 
-# ── SOFT DELETE → moves to deleted_customers (ML scores computed here) ────────
+# â”€â”€ SOFT DELETE â†’ moves to deleted_customers (ML scores computed here) â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/api/owner/customers/<int:customer_id>", methods=["DELETE"])
 def delete_customer(customer_id):
     conn = None
@@ -3512,7 +3512,7 @@ def delete_customer(customer_id):
         if not customer:
             return jsonify({"error": "Customer not found"}), 404
 
-        # ── ML: Similarity Score (Collaborative Filtering proxy) ─────────────
+        # â”€â”€ ML: Similarity Score (Collaborative Filtering proxy) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         # Score based on signup mode + account age:
         # google/github OAuth users = higher trust (70+)
         # manual users with older accounts = medium (40-69)
@@ -3534,11 +3534,11 @@ def delete_customer(customer_id):
         ml_score = min(100, base_score + min(days_old // 10, 25))
 
         if ml_score >= 70:
-            recommendation = "High similarity to retained users — recommended to restore"
+            recommendation = "High similarity to retained users â€” recommended to restore"
         elif ml_score >= 40:
-            recommendation = "Moderate activity pattern — consider restoring"
+            recommendation = "Moderate activity pattern â€” consider restoring"
         else:
-            recommendation = "Low activity pattern — safe to keep deleted"
+            recommendation = "Low activity pattern â€” safe to keep deleted"
 
         # Serialize date/time
         from datetime import timedelta
@@ -3579,7 +3579,7 @@ def delete_customer(customer_id):
             conn.close()
 
 
-# ── RECYCLE BIN — fetch all deleted customers ─────────────────────────────────
+# â”€â”€ RECYCLE BIN â€” fetch all deleted customers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             
             
 @app.route("/api/owner/recycle-bin", methods=["GET"])
@@ -3597,7 +3597,7 @@ def get_recycle_bin():
             if isinstance(row.get("action_date"), dt):
                 row["action_date"] = row["action_date"].strftime("%Y-%m-%d")
 
-            # action_time — could be timedelta, string, or None
+            # action_time â€” could be timedelta, string, or None
             at = row.get("action_time")
             if isinstance(at, timedelta):
                 total = int(at.total_seconds())
@@ -3609,7 +3609,7 @@ def get_recycle_bin():
             if isinstance(row.get("deleted_at"), datetime):
                 row["deleted_at"] = row["deleted_at"].strftime("%Y-%m-%d %H:%M:%S")
 
-            # ml_risk_score — ensure it's a plain int/float for JSON
+            # ml_risk_score â€” ensure it's a plain int/float for JSON
             if row.get("ml_risk_score") is not None:
                 row["ml_risk_score"] = int(row["ml_risk_score"])
 
@@ -3622,7 +3622,7 @@ def get_recycle_bin():
         if conn and conn.is_connected():
             conn.close()            
 
-# ── RESTORE — move back to user_activity ─────────────────────────────────────
+# â”€â”€ RESTORE â€” move back to user_activity â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/api/owner/recycle-bin/<int:customer_id>/restore", methods=["POST"])
 def restore_customer(customer_id):
     conn = None
@@ -3636,7 +3636,7 @@ def restore_customer(customer_id):
             return jsonify({"error": "Not found in recycle bin"}), 404
 
         # Row already exists in user_activity (soft delete keeps it there)
-        # So just remove from deleted_customers — no INSERT needed
+        # So just remove from deleted_customers â€” no INSERT needed
         cursor.execute("DELETE FROM deleted_customers WHERE id = %s", (customer_id,))
         conn.commit()
         cursor.close()
@@ -3650,7 +3650,7 @@ def restore_customer(customer_id):
             conn.close()
 
 
-# ── PERMANENT DELETE — remove from recycle bin forever ───────────────────────
+# â”€â”€ PERMANENT DELETE â€” remove from recycle bin forever â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/api/owner/recycle-bin/<int:customer_id>", methods=["DELETE"])
 def permanent_delete_customer(customer_id):
     conn = None
@@ -3698,7 +3698,7 @@ def get_active_buyers():
         last_month      = 12 if this_month == 1 else this_month - 1
         last_month_year = this_year - 1 if this_month == 1 else this_year
 
-        # user table has no date — use total count comparison via id ranges
+        # user table has no date â€” use total count comparison via id ranges
         cursor.execute("SELECT COUNT(*) AS cnt FROM user")
         this_count = cursor.fetchone()["cnt"]
 
@@ -3729,7 +3729,7 @@ def get_active_buyers():
 #------------------delete from user  and recyclebin bin chya option sathi-----------
 
 
-# Soft delete → moves to deleted_users
+# Soft delete â†’ moves to deleted_users
 @app.route("/api/owner/active-buyers/<int:buyer_id>", methods=["DELETE"])
 def delete_active_buyer(buyer_id):
     conn = None
@@ -3746,13 +3746,13 @@ def delete_active_buyer(buyer_id):
         mode = (buyer.get("action") or "").lower()
         if mode in ("google", "github"):
             ml_score = 80
-            recommendation = "High similarity to retained users — recommended to restore"
+            recommendation = "High similarity to retained users â€” recommended to restore"
         elif mode == "manual":
             ml_score = 45
-            recommendation = "Moderate activity pattern — consider restoring"
+            recommendation = "Moderate activity pattern â€” consider restoring"
         else:
             ml_score = 25
-            recommendation = "Low activity pattern — safe to keep deleted"
+            recommendation = "Low activity pattern â€” safe to keep deleted"
 
         cursor.execute("""
             INSERT INTO deleted_users
@@ -3776,7 +3776,7 @@ def delete_active_buyer(buyer_id):
             conn.close()
 
 
-# Recycle bin — fetch deleted users
+# Recycle bin â€” fetch deleted users
 @app.route("/api/owner/active-buyers/recycle-bin", methods=["GET"])
 def get_buyers_recycle_bin():
     conn = None
@@ -3800,7 +3800,7 @@ def get_buyers_recycle_bin():
             conn.close()
 
 
-# Restore — remove from deleted_users only
+# Restore â€” remove from deleted_users only
 @app.route("/api/owner/active-buyers/recycle-bin/<int:buyer_id>/restore", methods=["POST"])
 def restore_buyer(buyer_id):
     conn = None
@@ -3818,7 +3818,7 @@ def restore_buyer(buyer_id):
             conn.close()
 
 
-# Permanent delete — removes from BOTH tables
+# Permanent delete â€” removes from BOTH tables
 @app.route("/api/owner/active-buyers/recycle-bin/<int:buyer_id>", methods=["DELETE"])
 def permanent_delete_buyer(buyer_id):
     conn = None
@@ -3884,7 +3884,7 @@ def get_current_logins():
         today  = date.today()
 
         # Current month logins from user table
-        # user table has no date — return all users as "active this month"
+        # user table has no date â€” return all users as "active this month"
         cursor.execute("""
             SELECT id, username, email, action
             FROM user
@@ -3951,7 +3951,7 @@ def get_new_this_month():
             
             
 
-# ── Strong Password Manager ───────────────────────────────────────────────────
+# â”€â”€ Strong Password Manager â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/api/owner/strong-passwords", methods=["GET"])
 def get_strong_passwords():
     conn = None
@@ -4068,30 +4068,30 @@ def request_category():
 
     # 1. Category Name validation
     if len(category_name) < 3:
-        errors.append("❌ Category name must be at least 3 characters.")
+        errors.append("âŒ Category name must be at least 3 characters.")
     if not re.match(r'^[a-zA-Z\s]+$', category_name):
-        errors.append("❌ Category name must contain only letters.")
+        errors.append("âŒ Category name must contain only letters.")
     if re.match(r'^(.)\1+$', category_name.replace(" ","")):
-        errors.append("❌ Category name looks invalid (e.g. 'aaa').")
+        errors.append("âŒ Category name looks invalid (e.g. 'aaa').")
 
     # 2. Name validation
     if len(user_name) < 3:
-        errors.append("❌ Name must be at least 3 characters.")
+        errors.append("âŒ Name must be at least 3 characters.")
     if not re.match(r'^[a-zA-Z\s]+$', user_name):
-        errors.append("❌ Name must contain only letters, no numbers.")
+        errors.append("âŒ Name must contain only letters, no numbers.")
     if re.match(r'^(.)\1+$', user_name.replace(" ","")):
-        errors.append("❌ Name looks invalid (e.g. 'aaa').")
+        errors.append("âŒ Name looks invalid (e.g. 'aaa').")
 
-    # 3. Reason validation — ML style
+    # 3. Reason validation â€” ML style
     words = reason.split()
     unique_words = set(w.lower() for w in words)
 
     if len(words) < 15:
-        errors.append(f"❌ Reason too short — write at least 15 words. (You wrote {len(words)})")
+        errors.append(f"âŒ Reason too short â€” write at least 15 words. (You wrote {len(words)})")
     if len(unique_words) < 8:
-        errors.append("❌ Reason looks repetitive — please write meaningful content.")
+        errors.append("âŒ Reason looks repetitive â€” please write meaningful content.")
     if not re.search(r'[.!?]', reason):
-        errors.append("❌ Reason must have proper sentences (use . or ! or ?).")
+        errors.append("âŒ Reason must have proper sentences (use . or ! or ?).")
 
     # 4. Spam/random text check
     def is_random_text(text):
@@ -4100,12 +4100,12 @@ def request_category():
         return len(short_words) > len(words_list) * 0.6
 
     if is_random_text(reason):
-        errors.append("❌ Reason contains too many short/random words.")
+        errors.append("âŒ Reason contains too many short/random words.")
 
     if errors:
         return jsonify({"status": "error", "errors": errors})
 
-    # Sab theek hai — DB mein save karo
+    # Sab theek hai â€” DB mein save karo
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -4134,7 +4134,7 @@ def get_category_requests():
             if isinstance(row.get("requested_at"), datetime):
                 row["requested_at"] = row["requested_at"].strftime("%Y-%m-%d %H:%M:%S")
 
-        # ── Default ML fields ──────────────────────────────────────────────────
+        # â”€â”€ Default ML fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         for row in rows:
             row["similarity_score"] = 0.0
             row["is_duplicate"]     = False
@@ -4166,7 +4166,7 @@ def get_category_requests():
                 vectorizer   = TfidfVectorizer(token_pattern=r"(?u)\b\w+\b")
                 tfidf_matrix = vectorizer.fit_transform(reasons)
 
-                # ── 1. TF-IDF + Cosine Similarity (Duplicate Detection) ─────────
+                # â”€â”€ 1. TF-IDF + Cosine Similarity (Duplicate Detection) â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 if len(rows) > 1:
                     sim_matrix = cosine_similarity(tfidf_matrix)
                     for i, row in enumerate(rows):
@@ -4180,7 +4180,7 @@ def get_category_requests():
                         row["is_duplicate"]     = bool(max_sim >= 0.70)
                         row["duplicate_of"]     = dup_of if max_sim >= 0.70 else None
 
-                # ── 2. Sentiment Analysis (Keyword-based, no heavy model needed) ─
+                # â”€â”€ 2. Sentiment Analysis (Keyword-based, no heavy model needed) â”€
                 positive_words = {"great","love","need","want","amazing","important",
                                   "useful","necessary","excellent","good","benefit",
                                   "helpful","required","essential","popular","urgent"}
@@ -4205,7 +4205,7 @@ def get_category_requests():
                     row["sentiment"]       = sentiment
                     row["sentiment_score"] = round(score, 2)
 
-                # ── 3. Smart Priority Scoring ──────────────────────────────────
+                # â”€â”€ 3. Smart Priority Scoring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                 #    Combines: reason length, uniqueness, sentiment, urgency
                 reason_lengths = [len((r.get("reason") or "")) for r in rows]
                 max_len = max(reason_lengths) if reason_lengths else 1
@@ -4233,7 +4233,7 @@ def get_category_requests():
                     row["priority_score"] = priority
                     row["priority_label"] = label
 
-                # ── 4. Category Name Clustering (K-Means on TF-IDF of names) ──
+                # â”€â”€ 4. Category Name Clustering (K-Means on TF-IDF of names) â”€â”€
                 if len(rows) >= 3:
                     from sklearn.cluster import KMeans
                     n_clusters = min(3, len(rows))
@@ -4244,7 +4244,7 @@ def get_category_requests():
                     km = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
                     labels = km.fit_predict(cat_matrix)
 
-                    cluster_colors = ["🔵", "🟣", "🟠"]
+                    cluster_colors = ["ðŸ”µ", "ðŸŸ£", "ðŸŸ "]
                     cluster_names  = {}
                     for cluster_id in range(n_clusters):
                         members = [cat_names[i] for i, l in enumerate(labels) if l == cluster_id]
@@ -4255,7 +4255,7 @@ def get_category_requests():
                         row["cluster_id"]    = cid
                         row["cluster_label"] = f"{cluster_colors[cid]} {cluster_names[cid]}"
 
-                # ── 5. Auto-Summary (extractive: pick best sentence by TF-IDF weight) ─
+                # â”€â”€ 5. Auto-Summary (extractive: pick best sentence by TF-IDF weight) â”€
                 feature_names = vectorizer.get_feature_names_out()
                 for i, row in enumerate(rows):
                     reason = (row.get("reason") or "").strip()
@@ -4305,7 +4305,7 @@ def send_category_request(request_id):
             cursor.close()
             return jsonify({"error": "Request not found"}), 404
 
-        # ✅ Fix datetime
+        # âœ… Fix datetime
         from datetime import datetime
         if isinstance(req.get("requested_at"), datetime):
             req["requested_at"] = req["requested_at"].strftime("%Y-%m-%d %H:%M:%S")
@@ -4317,7 +4317,7 @@ def send_category_request(request_id):
             <div style="margin-top:18px;background:#f0f9ff;border-left:4px solid #6366f1;
                 border-radius:0 10px 10px 0;padding:14px 16px;">
                 <div style="font-size:11px;font-weight:700;color:#6366f1;
-                    text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">✏️ Owner's Note</div>
+                    text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">âœï¸ Owner's Note</div>
                 <div style="font-size:14px;color:#334155;line-height:1.6;">{owner_note}</div>
             </div>
         """ if owner_note else ""
@@ -4336,7 +4336,7 @@ def send_category_request(request_id):
                         <div style="background:linear-gradient(135deg,#8b5cf6,#a855f7);
                             padding:20px 24px;color:white;">
                             <div style="font-size:13px;opacity:0.9;font-weight:600;letter-spacing:0.5px;
-                                text-transform:uppercase;margin-bottom:4px;">📂 New Category Request</div>
+                                text-transform:uppercase;margin-bottom:4px;">ðŸ“‚ New Category Request</div>
                             <div style="font-size:20px;font-weight:800;">{req['category_name']}</div>
                         </div>
 
@@ -4413,7 +4413,7 @@ def search_analytics():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # ✅ Seedha saari product_activity tables lo — user_activity se match nahi karna
+        # âœ… Seedha saari product_activity tables lo â€” user_activity se match nahi karna
         cursor.execute("""
             SELECT table_name FROM information_schema.tables
             WHERE table_schema = DATABASE()
@@ -4478,10 +4478,10 @@ def search_analytics():
                             bucket["last_searched"] = ts
 
             except Exception as e:
-                print(f"DEBUG: Skipping {tbl_name} — {str(e)}", flush=True)
+                print(f"DEBUG: Skipping {tbl_name} â€” {str(e)}", flush=True)
                 continue
 
-        # ✅ ML: Normalize popularity score 0-100
+        # âœ… ML: Normalize popularity score 0-100
         all_searches = [b["total_searches"] for b in aggregated.values()]
         max_search = max(all_searches) if all_searches else 1
 
@@ -4490,15 +4490,15 @@ def search_analytics():
             avg_growth = round(bucket["growth_sum"] / bucket["growth_count"], 2) if bucket["growth_count"] > 0 else 0.0
             popularity_score = round((bucket["total_searches"] / max_search) * 100, 1)
 
-            # ✅ ML: Trend label
+            # âœ… ML: Trend label
             if avg_growth >= 70:
-                trend = "🔥 Hot"
+                trend = "ðŸ”¥ Hot"
             elif avg_growth >= 40:
-                trend = "📈 Rising"
+                trend = "ðŸ“ˆ Rising"
             elif avg_growth >= 10:
-                trend = "➡️ Stable"
+                trend = "âž¡ï¸ Stable"
             else:
-                trend = "📉 Low"
+                trend = "ðŸ“‰ Low"
 
             results.append({
                 "product_name": pname,
@@ -4588,7 +4588,7 @@ def addtocart_analytics():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # ✅ Actual product names fetch karo product tables se
+        # âœ… Actual product names fetch karo product tables se
         cursor.execute("""
             SELECT id, name, category FROM card
             UNION ALL
@@ -4597,10 +4597,10 @@ def addtocart_analytics():
             SELECT id, name, category FROM food_items
         """)
         all_products = cursor.fetchall()
-        # product_id + category → name mapping
+        # product_id + category â†’ name mapping
         product_map = {(p["id"], p["category"]): p["name"] for p in all_products}
 
-        # ✅ Actual product names fetch karo
+        # âœ… Actual product names fetch karo
         cursor.execute("""
             SELECT id, name, category FROM card
             UNION ALL
@@ -4640,12 +4640,12 @@ def addtocart_analytics():
                 rows = cursor.fetchall()
 
                 for row in rows:
-                    # ✅ product_map se sahi naam lo
+                    # âœ… product_map se sahi naam lo
                     actual_name = product_map.get((row["product_id"], row["category"]))
                     if not actual_name:
                         continue
 
-                    # ✅ Unique label = name + category + product_id
+                    # âœ… Unique label = name + category + product_id
                     unique_key = f"{actual_name} ({row['category']}) #{row['product_id']}"
                     bucket = aggregated[unique_key] 
                     bucket["total_addtocart"] += int(row["today_add_to_cart_count"] or 0)
@@ -4672,10 +4672,10 @@ def addtocart_analytics():
                             bucket["last_added"] = ts
 
             except Exception as e:
-                print(f"DEBUG: Skipping {tbl_name} — {str(e)}", flush=True)
+                print(f"DEBUG: Skipping {tbl_name} â€” {str(e)}", flush=True)
                 continue
 
-        # ✅ ML: Normalize popularity score 0-100
+        # âœ… ML: Normalize popularity score 0-100
         all_counts = [b["total_addtocart"] for b in aggregated.values()]
         max_count = max(all_counts) if all_counts else 1
 
@@ -4685,13 +4685,13 @@ def addtocart_analytics():
             popularity_score = round((bucket["total_addtocart"] / max_count) * 100, 1)
 
             if avg_growth >= 70:
-                trend = "🔥 Hot"
+                trend = "ðŸ”¥ Hot"
             elif avg_growth >= 40:
-                trend = "📈 Rising"
+                trend = "ðŸ“ˆ Rising"
             elif avg_growth >= 10:
-                trend = "➡️ Stable"
+                trend = "âž¡ï¸ Stable"
             else:
-                trend = "📉 Low"
+                trend = "ðŸ“‰ Low"
 
             results.append({
                 "product_name": pname,
@@ -4727,7 +4727,7 @@ def purchased_analytics():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # ✅ Actual product names fetch karo
+        # âœ… Actual product names fetch karo
         cursor.execute("""
             SELECT id, name, category FROM card
             UNION ALL
@@ -4792,10 +4792,10 @@ def purchased_analytics():
                             bucket["last_purchased"] = ts
 
             except Exception as e:
-                print(f"DEBUG: Skipping {tbl_name} — {str(e)}", flush=True)
+                print(f"DEBUG: Skipping {tbl_name} â€” {str(e)}", flush=True)
                 continue
 
-        # ✅ ML: Normalize popularity score 0-100
+        # âœ… ML: Normalize popularity score 0-100
         all_counts = [b["total_purchased"] for b in aggregated.values()]
         max_count = max(all_counts) if all_counts else 1
 
@@ -4805,13 +4805,13 @@ def purchased_analytics():
             popularity_score = round((bucket["total_purchased"] / max_count) * 100, 1)
 
             if avg_growth >= 70:
-                trend = "🔥 Hot"
+                trend = "ðŸ”¥ Hot"
             elif avg_growth >= 40:
-                trend = "📈 Rising"
+                trend = "ðŸ“ˆ Rising"
             elif avg_growth >= 10:
-                trend = "➡️ Stable"
+                trend = "âž¡ï¸ Stable"
             else:
-                trend = "📉 Low"
+                trend = "ðŸ“‰ Low"
 
             results.append({
                 "product_name": pname,
@@ -4950,7 +4950,7 @@ def monthly_analysis():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # ✅ Speed Fix 1: Ek hi query mein product map banao
+        # âœ… Speed Fix 1: Ek hi query mein product map banao
         cursor.execute("""
             SELECT id, name, 'card' as category FROM card
             UNION ALL
@@ -4960,7 +4960,7 @@ def monthly_analysis():
         """)
         product_map = {(p["id"], p["category"]): p["name"] for p in cursor.fetchall()}
 
-        # ✅ Speed Fix 2: Sabhi tables ek baar fetch karo
+        # âœ… Speed Fix 2: Sabhi tables ek baar fetch karo
         cursor.execute("""
             SELECT table_name FROM information_schema.tables
             WHERE table_schema = DATABASE()
@@ -4972,7 +4972,7 @@ def monthly_analysis():
             "search": 0, "cart": 0, "purchased": 0, "category": None
         })
 
-        # ✅ Speed Fix 3: Batch queries — cursor reuse
+        # âœ… Speed Fix 3: Batch queries â€” cursor reuse
         for tbl_name in all_tables:
             try:
                 cursor.execute(f"""
@@ -5004,7 +5004,7 @@ def monthly_analysis():
         if not aggregated:
             return jsonify([])
 
-        # ✅ ML 1: Min-Max Normalization
+        # âœ… ML 1: Min-Max Normalization
         all_search = [v["search"] for v in aggregated.values()]
         all_cart = [v["cart"] for v in aggregated.values()]
         all_purchase = [v["purchased"] for v in aggregated.values()]
@@ -5014,29 +5014,29 @@ def monthly_analysis():
 
         results = []
         for pname, bucket in aggregated.items():
-            # ✅ ML 2: Conversion Rate
+            # âœ… ML 2: Conversion Rate
             search_to_cart = round((bucket["cart"] / bucket["search"] * 100), 1) if bucket["search"] > 0 else 0
             cart_to_purchase = round((bucket["purchased"] / bucket["cart"] * 100), 1) if bucket["cart"] > 0 else 0
 
-            # ✅ ML 3: Weighted Growth Score
+            # âœ… ML 3: Weighted Growth Score
             norm_s = bucket["search"] / max_s
             norm_c = bucket["cart"] / max_c
             norm_p = bucket["purchased"] / max_p
             growth_score = round((norm_s * 0.3 + norm_c * 0.3 + norm_p * 0.4) * 100, 1)
 
-            # ✅ ML 4: Trend Classification
+            # âœ… ML 4: Trend Classification
             if growth_score >= 70:
-                trend = "🔥 Hot"
+                trend = "ðŸ”¥ Hot"
             elif growth_score >= 40:
-                trend = "📈 Rising"
+                trend = "ðŸ“ˆ Rising"
             elif bucket["search"] > 0 and bucket["purchased"] == 0:
-                trend = "⚠️ No Purchase"
+                trend = "âš ï¸ No Purchase"
             elif growth_score >= 10:
-                trend = "➡️ Stable"
+                trend = "âž¡ï¸ Stable"
             else:
-                trend = "📉 Low"
+                trend = "ðŸ“‰ Low"
 
-            # ✅ ML 5: Anomaly Detection
+            # âœ… ML 5: Anomaly Detection
             anomaly = bucket["search"] >= 3 and bucket["purchased"] == 0
 
             results.append({
@@ -5106,7 +5106,7 @@ def api_churn_customers():
         if len(parts) == 2 and parts[1].isdigit():
             customer_tables.append(t)
 
-    # ── Pre-fetch which activity tables have add_to_cart_date_time ──
+    # â”€â”€ Pre-fetch which activity tables have add_to_cart_date_time â”€â”€
     cursor.execute("""
         SELECT TABLE_NAME FROM information_schema.columns
         WHERE TABLE_SCHEMA = DATABASE()
@@ -5144,7 +5144,7 @@ def api_churn_customers():
 
         if activity_table:
             try:
-                # ── Smart datetime column check ──
+                # â”€â”€ Smart datetime column check â”€â”€
                 if activity_table in tables_with_datetime:
                     datetime_col = 'MAX(add_to_cart_date_time) AS last_activity'
                 else:
@@ -5215,7 +5215,7 @@ def api_churn_customers():
     return jsonify({'customers': customers})
 
 
-# ── Send Special OR Common offer ───────────────────────────
+# â”€â”€ Send Special OR Common offer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route('/api/send-special-offer', methods=['POST'])
 def send_special_offer():
     import re
@@ -5277,7 +5277,7 @@ def send_special_offer():
         conn.close()
 
 
-# ── Send Common offer to ALL customers ─────────────────────
+# â”€â”€ Send Common offer to ALL customers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route('/api/send-common-offer', methods=['POST'])
 def send_common_offer():
     import re as _re
@@ -5369,7 +5369,7 @@ def send_common_offer():
         cursor.close()
         conn.close()
 
-# ── Customer fetches their offers ──────────────────────────
+# â”€â”€ Customer fetches their offers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route('/api/my-special-offers')
 def my_special_offers():
     import re as _re
@@ -5407,7 +5407,7 @@ def my_special_offers():
 
 
 
-# ── Buy Combo Offer → save to cart → redirect to buynow ───
+# â”€â”€ Buy Combo Offer â†’ save to cart â†’ redirect to buynow â”€â”€â”€
 @app.route('/api/buy-combo-offer', methods=['POST'])
 def buy_combo_offer():
     import re as _re
@@ -5477,7 +5477,7 @@ def buy_combo_offer():
         cursor.close()
         conn.close()
 
-# ── Mark offer as read ─────────────────────────────────────
+# â”€â”€ Mark offer as read â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route('/api/mark-offer-read/<int:offer_id>', methods=['POST'])
 def mark_offer_read(offer_id):
     conn   = get_db_connection()
@@ -5522,77 +5522,6 @@ def all_products_for_offer():
 
 
 
-@app.route('/api/buy-combo-offer', methods=['POST'])
-def buy_combo_offer():
-    import re as _re
-    data           = request.get_json()
-    offer_id       = data.get('offer_id')
-    product1_name  = data.get('product1_name', '')
-    product1_image = data.get('product1_image', '')
-    product2_name  = data.get('product2_name', '')
-    product2_image = data.get('product2_image', '')
-    discount       = float(data.get('discount', 0))
-
-    username = session.get('username', '')
-    uid      = session.get('user_id') or session.get('id')
-
-    if not username or not uid:
-        return jsonify({'success': False, 'error': 'Not logged in'}), 401
-
-    conn   = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    try:
-        import re as _re
-        sanitized  = _re.sub(r'[^a-z0-9_]', '_', username.lower())
-        user_table = f"{sanitized}_{uid}"
-
-        # ── Get real prices from store_data ──
-        cursor.execute("""
-            SELECT name, price, image FROM store_data
-            WHERE name IN (%s, %s)
-        """, (product1_name, product2_name))
-        products = {p['name']: p for p in cursor.fetchall()}
-
-        p1       = products.get(product1_name, {})
-        p2       = products.get(product2_name, {})
-        p1_price = float(p1.get('price') or 0)
-        p2_price = float(p2.get('price') or 0)
-
-        # ── Total with discount ──
-        total_original = p1_price + p2_price
-        if discount > 0:
-            final_price = round(total_original * (1 - discount / 100), 2)
-        else:
-            final_price = round(total_original, 2)
-
-        combo_name  = f"{product1_name} + {product2_name}"
-        combo_image = p1.get('image') or product1_image
-
-        # ── detail field mein full breakdown save karo ──
-        detail = (f"Combo Offer | {product1_name} ₹{p1_price} + "
-                  f"{product2_name} ₹{p2_price} = ₹{total_original} "
-                  f"| {discount}% OFF | Final: ₹{final_price}")
-
-        # ── Insert into user table ──
-        cursor.execute(f"""
-            INSERT INTO `{user_table}`
-            (name, price, image, category, detail, quantity, mode)
-            VALUES (%s, %s, %s, %s, %s, 1, 'combo_offer')
-        """, (combo_name, final_price, combo_image, 'Combo Offer', detail))
-
-        conn.commit()
-        cart_id = cursor.lastrowid
-
-        return jsonify({
-            'success'        : True,
-            'cart_id'        : cart_id,
-            'original_price' : total_original,
-            'discount_pct'   : discount,
-            'final_price'    : final_price
-        })
-
-    except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
     finally:
         cursor.close()
@@ -5673,7 +5602,7 @@ def get_addtocart_user_data():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # ✅ Check which time column exists
+        # âœ… Check which time column exists
         cursor.execute(f"""
             SELECT COUNT(*) as cnt FROM information_schema.columns
             WHERE table_schema = DATABASE()
@@ -5723,7 +5652,7 @@ def get_purchase_data():
     user_id = session["user_id"]
     username = session["username"]
 
-    # ✅ Sanitized cart table name
+    # âœ… Sanitized cart table name
     safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
     if safe_username and safe_username[0].isdigit():
         safe_username = "user_" + safe_username
@@ -5733,7 +5662,7 @@ def get_purchase_data():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # ✅ Product names fetch karo
+        # âœ… Product names fetch karo
         cursor.execute("""
             SELECT id, name, 'card' as category FROM card
             UNION ALL
@@ -5743,7 +5672,7 @@ def get_purchase_data():
         """)
         product_map = {(p["id"], p["category"]): p["name"] for p in cursor.fetchall()}
 
-        # ✅ Successful purchases fetch karo cart table se
+        # âœ… Successful purchases fetch karo cart table se
         cursor.execute(f"""
             SELECT product_id, category, MAX(date) as date, COUNT(*) as purchase_count
             FROM `{cart_table}`
@@ -5862,9 +5791,9 @@ def create_user_your_item_table(username, user_id):
             )
         """)
         db.commit()
-        print(f"✅ Created table: {table_name}")
+        print(f"âœ… Created table: {table_name}")
     except Exception as e:
-        print(f"❌ Error creating {table_name}: {e}")
+        print(f"âŒ Error creating {table_name}: {e}")
     finally:
         cursor.close()
         db.close()
@@ -6021,7 +5950,7 @@ def product_activity_detail():
         
 #__________keyword change karu sathi ___________________
 
-# ── Helper: dynamic category → table name ──
+# â”€â”€ Helper: dynamic category â†’ table name â”€â”€
 def get_product_table(category):
     cat_map = {
         'Food':           'food_items',
@@ -6251,7 +6180,7 @@ def signout_log():
 # ============================================================
 @app.route('/static/videos/<path:filename>')
 def serve_video(filename):
-    print("👉 ROUTE HIT:", request.path)
+    print("ðŸ‘‰ ROUTE HIT:", request.path)
     return send_from_directory('static/videos', filename, mimetype='video/mp4')
 
 
