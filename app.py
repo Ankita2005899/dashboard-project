@@ -5657,7 +5657,8 @@ def all_products():
                 used_for TEXT,
                 harmful_activity TEXT,
                 precautions TEXT
-             """)
+            )
+        """)
         conn.commit()
         cursor.execute(f"""
             SELECT id, category, name, image, price,
@@ -5680,6 +5681,8 @@ def all_products():
     except Exception as e:
         print(f"[all_products] error: {e}")
         return jsonify({'products': [], 'error': str(e)}), 500
+
+
 def create_user_your_item_table(username, user_id):
     table_name = f"{username}_{user_id}_your_item"
     db = get_db_connection()
@@ -5698,7 +5701,12 @@ def create_user_your_item_table(username, user_id):
                 detail        TEXT,
                 address       VARCHAR(255),
                 quantity      INT DEFAULT 1,
-                uploaded_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+                uploaded_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+                keywords      TEXT,
+                made_of       TEXT,
+                used_for      TEXT,
+                harmful_activity TEXT,
+                precautions   TEXT
             )
         """)
         db.commit()
