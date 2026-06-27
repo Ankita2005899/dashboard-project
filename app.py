@@ -2442,12 +2442,12 @@ def track_search():
             UPDATE `{table}` 
             SET searched_count = searched_count + 1,
                 last_searched_time = %s
-            WHERE name LIKE %s OR keywords LIKE %s
+            WHERE name LIKE %s OR COALESCE(keywords, '') LIKE %s
         """, (ist_now_str, like_pattern, like_pattern))
 
         cursor.execute(f"""
             SELECT id, name, '{table}' as category FROM `{table}`
-            WHERE name LIKE %s OR keywords LIKE %s
+            WHERE name LIKE %s OR COALESCE(keywords, '') LIKE %s
         """, (like_pattern, like_pattern))
         matched = cursor.fetchall()
 
@@ -2488,7 +2488,7 @@ def track_search():
     conn.close()
     return jsonify({"status": "updated"})
 
-'''
+
 
 @app.route('/products/search-user')
 def search_user_products():
@@ -2513,7 +2513,6 @@ def search_user_products():
     cursor.close()
     conn.close()
     return jsonify(results)
-'''
 
 # ============================================================
 # ROUTES — ADD TO CART TRACKING
