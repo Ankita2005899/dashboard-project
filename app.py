@@ -5385,6 +5385,33 @@ def mark_offer_read(offer_id):
         cursor.close()
         conn.close()
 
+
+
+
+#___________product part (from store_data table )___________
+
+
+@app.route('/api/owner/all-products-for-offer')
+def all_products_for_offer():
+    conn   = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT DISTINCT name, image, price, category
+            FROM store_data
+            WHERE name IS NOT NULL AND name != ''
+            ORDER BY name
+        """)
+        products = cursor.fetchall()
+        for p in products:
+            p['price'] = float(p['price'] or 0)
+        return jsonify({'products': products})
+    except Exception as e:
+        return jsonify({'products': [], 'error': str(e)})
+    finally:
+        cursor.close()
+        conn.close()
+
 #--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
 
 
