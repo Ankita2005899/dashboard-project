@@ -5719,106 +5719,86 @@ def create_user_your_item_table(username, user_id):
         
 #subpoint-----------profile.html madhle your_item chya aatle card cha view-----------       
 
-
 @app.route('/api/update-keywords', methods=['POST'])
 def update_keywords():
     try:
         data = request.get_json()
         pid  = data.get('product_id')
         kw   = data.get('keywords', '')
+
+        uname = session.get("username")
+        uid   = session.get("user_id")
+        if not uname or not uid:
+            return jsonify({'success': False, 'error': 'Not logged in'}), 401
+
+        safe_un = re.sub(r'[^a-z0-9_]', '_', uname.strip().lower())
+        if safe_un and safe_un[0].isdigit():
+            safe_un = "user_" + safe_un
+        your_item_table = f"{safe_un}_{uid}_your_item"
+
         conn = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
+
+        # Step 1: get name + category from your_item
+        cursor.execute(f"SELECT name, category FROM `{your_item_table}` WHERE store_data_id=%s LIMIT 1", (pid,))
+        item_row = cursor.fetchone()
+
+        if item_row:
+            prod_table = get_product_table(item_row['category'])
+
+            # Step 2: update actual product table (food_items / card / study_material / any future)
+            cursor.execute(f"UPDATE `{prod_table}` SET keywords=%s WHERE name=%s", (kw, item_row['name']))
+
+            # Step 3: update your_item table
+            cursor.execute(f"UPDATE `{your_item_table}` SET keywords=%s WHERE store_data_id=%s", (kw, pid))
+
+        # Step 4: update store_data
         cursor.execute("UPDATE store_data SET keywords=%s WHERE id=%s", (kw, pid))
 
-        # Also update actual product table (food_items / card / study_material)
-        # Also update actual product table (food_items / card / study_material)
-        # Get name + category from your_item table directly (more reliable)
-        uname = session.get("username")
-        uid   = session.get("user_id")
-        if uname and uid:
-            safe_un = re.sub(r'[^a-z0-9_]', '_', uname.strip().lower())
-            if safe_un and safe_un[0].isdigit():
-                safe_un = "user_" + safe_un
-            your_item_table = f"{safe_un}_{uid}_your_item"
-            try:
-                conn2 = get_db_connection()
-                cur2  = conn2.cursor(dictionary=True)
-                cur2.execute(f"SELECT name, category FROM `{your_item_table}` WHERE store_data_id=%s LIMIT 1", (pid,))
-                item_row = cur2.fetchone()
-                if item_row:
-                    cat_map = {
-                        'Food': 'food_items', 'food_items': 'food_items',
-                        'Kitchen': 'card', 'card': 'card',
-                        'Study Material': 'study_material', 'study_material': 'study_material'
-                    }
-                    prod_table = cat_map.get(item_row['category'], 'food_items')
-                    cur2.execute(f"UPDATE `{prod_table}` SET keywords=%s WHERE name=%s", (kw, item_row['name']))
-                    conn2.commit()
-                cur2.close()
-                conn2.close()
-            except Exception as ex:
-                print(f"⚠️ Could not update product table keywords: {ex}")
-        # Also update in user's your_item table
-        uname = session.get("username")
-        uid   = session.get("user_id")
-        if uname and uid:
-            your_item_table = f"{uname}_{uid}_your_item"
-            try:
-                cursor.execute(f"UPDATE `{your_item_table}` SET keywords=%s WHERE store_data_id=%s", (kw, pid))
-            except:
-                pass
         conn.commit()
         cursor.close()
         conn.close()
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
-    
+
 @app.route("/api/product-activity-detail")
 def product_activity_detail():
     if "user_id" not in session or "username" not in session:
         return jsonify({})
 
-    product_id = request.args.get("product_id")  # your_item id
+    product_id = request.args.get("product_id")
     category   = request.args.get("category", "")
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
-# ✅ Get product name and category from your_item table
         safe_username = re.sub(r'[^a-z0-9_]', '_', session["username"].strip().lower())
         if safe_username and safe_username[0].isdigit():
             safe_username = "user_" + safe_username
         your_item_table = f"{safe_username}_{session['user_id']}_your_item"
 
         cursor.execute(f"""
-            SELECT name, category, made_of, used_for, harmful_activity, precautions FROM `{your_item_table}`
-            WHERE id = %s LIMIT 1
+            SELECT name, category, made_of, used_for, harmful_activity, precautions
+            FROM `{your_item_table}` WHERE id = %s LIMIT 1
         """, (product_id,))
         item_row = cursor.fetchone()
         if not item_row:
             return jsonify({"today_search_count":0,"today_add_to_cart_count":0,"today_purchase_count":0})
 
-        product_name = item_row["name"]
+        product_name     = item_row["name"]
         product_category = item_row["category"]
+        prod_table       = get_product_table(product_category)
 
-        # ✅ Map category to actual product table
-        cat_map = {"Food":"food_items","food_items":"food_items","card":"card","Card":"card","study_material":"study_material","Study Material":"study_material"}
-        prod_table = cat_map.get(product_category, "food_items")
-
-        # ✅ Get real product_id from actual product table by name
-        cursor.execute(f"""
-            SELECT id FROM `{prod_table}` WHERE name = %s LIMIT 1
-        """, (product_name,))
+        cursor.execute(f"SELECT id FROM `{prod_table}` WHERE name = %s LIMIT 1", (product_name,))
         prod_row = cursor.fetchone()
         if not prod_row:
             return jsonify({"today_search_count":0,"today_add_to_cart_count":0,"today_purchase_count":0})
 
-        real_pid = prod_row["id"]
-        real_category = prod_table  # e.g. food_items
+        real_pid      = prod_row["id"]
+        real_category = prod_table
 
-        # ✅ Find all cart tables and activity tables across all users
         cursor.execute("""
             SELECT TABLE_NAME FROM information_schema.TABLES
             WHERE TABLE_SCHEMA = DATABASE()
@@ -5835,15 +5815,11 @@ def product_activity_detail():
             AND TABLE_NAME LIKE '%_product_activity'
         """)
         activity_tables = [list(r.values())[0] for r in cursor.fetchall()]
-        
-        
-        
+
         total_purchase = 0
         total_cart     = 0
         total_search   = 0
 
-        # Count from all cart tables
-# Count from all cart tables
         for tbl in cart_tables:
             try:
                 cursor.execute(f"""
@@ -5860,8 +5836,6 @@ def product_activity_detail():
             except:
                 pass
 
-        # Count from all activity tables
-# Count from all activity tables
         for tbl in activity_tables:
             try:
                 cursor.execute(f"""
@@ -5884,15 +5858,30 @@ def product_activity_detail():
             "harmful_activity": item_row.get("harmful_activity") or "",
             "precautions":      item_row.get("precautions") or ""
         })
+
     except Exception as e:
         print("product-activity-detail error:", e)
         return jsonify({"today_search_count":0,"today_add_to_cart_count":0,"today_purchase_count":0})
     finally:
         cursor.close()
-        conn.close()  
-        
+        conn.close()
+  
         
 #__________keyword change karu sathi ___________________
+
+# ── Helper: dynamic category → table name ──
+def get_product_table(category):
+    cat_map = {
+        'Food':           'food_items',
+        'food_items':     'food_items',
+        'Kitchen':        'card',
+        'card':           'card',
+        'Card':           'card',
+        'Study Material': 'study_material',
+        'study_material': 'study_material',
+    }
+    # If not in map, convert category name to table name dynamically
+    return cat_map.get(category, category.strip().lower().replace(' ', '_'))
 
 
 @app.route('/api/get-keywords', methods=['GET'])
@@ -5902,7 +5891,6 @@ def get_keywords():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Step 1: get name + category from your_item table
         uname = session.get("username")
         uid   = session.get("user_id")
         safe_username = re.sub(r'[^a-z0-9_]', '_', uname.strip().lower())
@@ -5913,16 +5901,12 @@ def get_keywords():
         cursor.execute(f"SELECT name, category FROM `{your_item_table}` WHERE store_data_id=%s LIMIT 1", (store_data_id,))
         item = cursor.fetchone()
         if not item:
+            cursor.close()
+            conn.close()
             return jsonify({'keywords': ''})
 
-        cat_map = {
-            'Food': 'food_items', 'food_items': 'food_items',
-            'Kitchen': 'card', 'card': 'card',
-            'Study Material': 'study_material', 'study_material': 'study_material'
-        }
-        prod_table = cat_map.get(item['category'], 'food_items')
+        prod_table = get_product_table(item['category'])
 
-        # Step 2: fetch keywords directly from product table by name
         cursor.execute(f"SELECT keywords FROM `{prod_table}` WHERE name=%s LIMIT 1", (item['name'],))
         prod_row = cursor.fetchone()
         cursor.close()
@@ -5930,7 +5914,8 @@ def get_keywords():
         return jsonify({'keywords': prod_row['keywords'] or '' if prod_row else ''})
     except Exception as e:
         return jsonify({'keywords': '', 'error': str(e)}), 500
-    
+
+
     
               
 #-------------------logout process from profile.html page ({sign out")button sathi-------------------- 
