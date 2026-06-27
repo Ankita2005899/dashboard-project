@@ -5661,7 +5661,7 @@ def all_products():
         """)
         conn.commit()
         cursor.execute(f"""
-            SELECT id, category, name, image, price,
+            SELECT id, store_data_id, category, name, image, price,
                    availability, detail, address, quantity,
                    uploaded_at
             FROM `{your_item_table}`
@@ -5729,6 +5729,19 @@ def update_keywords():
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("UPDATE store_data SET keywords=%s WHERE id=%s", (kw, pid))
+
+        # Also update actual product table (food_items / card / study_material)
+        cursor.execute("SELECT category, product_id FROM store_data WHERE id=%s", (pid,))
+        sd_row = cursor.fetchone()
+        if sd_row:
+            cat_map = {
+                'Food': 'food_items', 'food_items': 'food_items',
+                'Kitchen': 'card', 'card': 'card',
+                'Study Material': 'study_material', 'study_material': 'study_material'
+            }
+            prod_table = cat_map.get(sd_row[0], 'food_items')
+            real_pid   = sd_row[1]
+            cursor.execute(f"UPDATE `{prod_table}` SET keywords=%s WHERE id=%s", (kw, real_pid))
         # Also update in user's your_item table
         uname = session.get("username")
         uid   = session.get("user_id")
@@ -5860,7 +5873,44 @@ def product_activity_detail():
         return jsonify({"today_search_count":0,"today_add_to_cart_count":0,"today_purchase_count":0})
     finally:
         cursor.close()
-        conn.close()        
+        conn.close()  
+        
+        
+#__________keyword change karu sathi ___________________
+
+
+@app.route('/api/get-keywords', methods=['GET'])
+def get_keywords():
+    try:
+        store_data_id = request.args.get('store_data_id')
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Get category and product_id from store_data
+        cursor.execute("SELECT category, product_id FROM store_data WHERE id=%s", (store_data_id,))
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({'keywords': ''})
+
+        category = row['category']
+        product_id = row['product_id']
+
+        cat_map = {
+            'Food': 'food_items', 'food_items': 'food_items',
+            'Kitchen': 'card', 'card': 'card',
+            'Study Material': 'study_material', 'study_material': 'study_material'
+        }
+        prod_table = cat_map.get(category, 'food_items')
+
+        cursor.execute(f"SELECT keywords FROM `{prod_table}` WHERE id=%s", (product_id,))
+        prod_row = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return jsonify({'keywords': prod_row['keywords'] or '' if prod_row else ''})
+    except Exception as e:
+        return jsonify({'keywords': '', 'error': str(e)}), 500
+
+              
 #-------------------logout process from profile.html page ({sign out")button sathi-------------------- 
 
 

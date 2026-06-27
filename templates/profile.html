@@ -1103,7 +1103,7 @@
                 </div>
 
                 <!-- Keyword Editor trigger -->
-                <button onclick="openKeywordEditor(${p.id},'${(p.name || '').replace(/'/g, '')}')"
+                <button onclick="openKeywordEditor(${p.id},'${(p.name || '').replace(/'/g, '')}',${p.store_data_id || 0})"
                     style="width:100%;margin-top:14px;background:#f59e0b;color:white;border:none;
                     padding:11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
                     🏷️ Edit Keywords
@@ -1167,12 +1167,60 @@
             }, 100);
         }
 
-        function openKeywordEditor(productId, productName) {
+        let _currentKeywords = [];
+
+        async function openKeywordEditor(productId, productName, storeDataId) {
             document.getElementById('keywordEditorPanel').style.display = 'flex';
             document.getElementById('keywordProductName').textContent = productName;
             document.getElementById('keywordProductId').value = productId;
-            document.getElementById('keywordInput').value = '';
+            document.getElementById('keywordStoreDataId').value = storeDataId;
+            document.getElementById('keywordNewInput').value = '';
             document.getElementById('keywordSaveMsg').style.display = 'none';
+            document.getElementById('keywordTagsContainer').innerHTML =
+                '<span style="font-size:11px;color:#94a3b8;font-style:italic;">Loading...</span>';
+            _currentKeywords = [];
+
+            try {
+                const res = await fetch(`/api/get-keywords?store_data_id=${storeDataId}`);
+                const data = await res.json();
+                _currentKeywords = (data.keywords || '').split(',').map(k => k.trim()).filter(k => k);
+                renderKeywordTags();
+            } catch(e) {
+                document.getElementById('keywordTagsContainer').innerHTML =
+                    '<span style="font-size:11px;color:#ef4444;">Failed to load keywords.</span>';
+            }
+        }
+
+        function renderKeywordTags() {
+            const container = document.getElementById('keywordTagsContainer');
+            if (!_currentKeywords.length) {
+                container.innerHTML = '<span style="font-size:11px;color:#94a3b8;font-style:italic;">No keywords yet.</span>';
+                return;
+            }
+            container.innerHTML = _currentKeywords.map((kw, i) => `
+                <span style="display:inline-flex;align-items:center;gap:4px;background:#fef3c7;
+                    color:#92400e;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;
+                    border:1px solid #fcd34d;">
+                    ${kw}
+                    <span onclick="removeKeywordTag(${i})"
+                        style="cursor:pointer;font-size:13px;color:#ef4444;font-weight:700;
+                               line-height:1;margin-left:2px;">×</span>
+                </span>`).join('');
+        }
+
+        function removeKeywordTag(index) {
+            _currentKeywords.splice(index, 1);
+            renderKeywordTags();
+        }
+
+        function addKeywordTag() {
+            const input = document.getElementById('keywordNewInput');
+            const val = input.value.trim();
+            if (!val) return;
+            const newTags = val.split(',').map(k => k.trim()).filter(k => k && !_currentKeywords.includes(k));
+            _currentKeywords.push(...newTags);
+            input.value = '';
+            renderKeywordTags();
         }
 
         function closeKeywordEditor() {
@@ -1180,22 +1228,21 @@
         }
 
         function saveKeywords() {
-            const pid = document.getElementById('keywordProductId').value;
-            const kw = document.getElementById('keywordInput').value.trim();
-            if (!kw) { alert('⚠️ Please enter keywords first.'); return; }
+            const storeDataId = document.getElementById('keywordStoreDataId').value;
+            const kw = _currentKeywords.join(', ');
             fetch('/api/update-keywords', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ product_id: pid, keywords: kw })
+                body: JSON.stringify({ product_id: storeDataId, keywords: kw })
             })
-                .then(r => r.json())
-                .then(d => {
-                    const msg = document.getElementById('keywordSaveMsg');
-                    msg.style.display = 'block';
-                    msg.textContent = d.success ? '✅ Keywords updated!' : '⚠️ ' + (d.error || 'Failed');
-                    setTimeout(() => msg.style.display = 'none', 3000);
-                })
-                .catch(() => alert('⚠️ Failed to save keywords.'));
+            .then(r => r.json())
+            .then(d => {
+                const msg = document.getElementById('keywordSaveMsg');
+                msg.style.display = 'block';
+                msg.textContent = d.success ? '✅ Keywords saved!' : '⚠️ ' + (d.error || 'Failed');
+                setTimeout(() => msg.style.display = 'none', 3000);
+            })
+            .catch(() => alert('⚠️ Failed to save keywords.'));
         }
 
         function addToCartFromItems(productId, productName) {
@@ -1212,28 +1259,54 @@
         }
     </script>
 
-    <!-- ===== KEYWORD EDITOR FLOATING PANEL (bottom right) ===== -->
+    <!-- ===== KEYWORD EDITOR FLOATING PANEL ===== -->
     <div id="keywordEditorPanel" style="display:none;position:fixed;bottom:24px;right:24px;z-index:10000;
-    background:white;border-radius:16px;padding:20px;width:320px;
+    background:white;border-radius:16px;padding:20px;width:340px;
     box-shadow:0 8px 32px rgba(0,0,0,0.18);border:2px solid #f59e0b;flex-direction:column;gap:12px;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
             <div style="font-size:14px;font-weight:700;color:#0f172a;">🏷️ Edit Keywords</div>
             <button onclick="closeKeywordEditor()" style="background:#f1f5f9;border:none;border-radius:50%;width:28px;height:28px;
             cursor:pointer;font-size:14px;">✕</button>
         </div>
-        <div style="font-size:12px;color:#64748b;" id="keywordProductName"></div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:2px;" id="keywordProductName"></div>
         <input type="hidden" id="keywordProductId">
-        <textarea id="keywordInput" rows="3"
-            placeholder="Enter keywords separated by commas e.g. apple, fruit, fresh..." style="width:100%;padding:10px;border:1.5px solid #fcd34d;border-radius:10px;
-        font-size:12px;resize:none;box-sizing:border-box;color:#0f172a;"></textarea>
-        <button onclick="saveKeywords()" style="width:100%;background:#f59e0b;color:white;border:none;padding:10px;
-        border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
+        <input type="hidden" id="keywordStoreDataId">
+
+        <!-- Existing keyword tags -->
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">
+            Current Keywords
+        </div>
+        <div id="keywordTagsContainer" style="display:flex;flex-wrap:wrap;gap:6px;min-height:32px;
+            padding:8px;border-radius:10px;background:#fffbeb;border:1.5px solid #fcd34d;">
+            <span style="font-size:11px;color:#94a3b8;font-style:italic;">Loading...</span>
+        </div>
+
+        <!-- Add new keyword -->
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">
+            Add New Keyword
+        </div>
+        <div style="display:flex;gap:8px;">
+            <input id="keywordNewInput" type="text" placeholder="e.g. fresh, organic..."
+                style="flex:1;padding:8px 10px;border:1.5px solid #fcd34d;border-radius:8px;
+                       font-size:12px;color:#0f172a;outline:none;"
+                onkeydown="if(event.key==='Enter') addKeywordTag()">
+            <button onclick="addKeywordTag()"
+                style="background:#f59e0b;color:white;border:none;padding:8px 12px;
+                       border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">
+                ＋
+            </button>
+        </div>
+
+        <button onclick="saveKeywords()"
+            style="width:100%;background:#f59e0b;color:white;border:none;padding:10px;
+            border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
             💾 Save Keywords
         </button>
         <div id="keywordSaveMsg" style="display:none;font-size:12px;font-weight:600;
         color:#22c55e;text-align:center;"></div>
     </div>
-
+    
+    
     <!-- Chart.js for item popup chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
