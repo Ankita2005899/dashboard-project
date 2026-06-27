@@ -6187,7 +6187,7 @@ def signout_log():
             ip_address,
             data.get('user_agent'),
             session_id,
-            datetime.utcnow()
+            datetime.utcnow() + timedelta(hours=5, minutes=30)
         ))
         conn.commit()
         cursor.close()
