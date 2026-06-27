@@ -1052,33 +1052,31 @@
                         ${p.address ? `<p style="font-size:12px;color:#94a3b8;margin-top:8px;">📍 ${p.address}</p>` : ''}
                     </div>
                 </div>
-${p.description ? `
-                <div style="margin:12px 0;">
+<div style="margin:12px 0;">
                     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:6px;">Description</div>
-                    <p style="color:#475569;font-size:13px;line-height:1.7;background:#f8fafc;
-                    border-radius:10px;padding:12px 14px;border-left:3px solid #6366f1;
-                    max-height:120px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;">
-                    ${(p.description || '').split('#')[0].trim() || p.description}
-                    </p>
-                </div>` : ''}
-
-                <!-- Detail Dropdown -->
-                <div style="margin-top:14px;">
-                    <select id="detailDropdown" onchange="showDetailSection(this.value)"
-                        style="width:100%;padding:9px 13px;border-radius:9px;border:1.5px solid #cbd5e1;
-                               font-size:13px;font-weight:600;color:#374151;background:#f8fafc;cursor:pointer;outline:none;">
-                        <option value="">🔍 Select to view more details...</option>
-                        <option value="made_of">🧪 Product Made Up Of</option>
-                        <option value="used_for">✅ Mostly Used For</option>
-                        <option value="harmful_activity">⚠️ Harmful Activities / Misuse</option>
-                        <option value="precautions">🛡️ Safety Precautions</option>
-                    </select>
-                    <div id="detailContent"
-                        style="display:none;margin-top:10px;padding:14px 16px;border-radius:9px;
-                               background:linear-gradient(135deg,#f0f9ff,#e0f2fe);
-                               border:1.5px solid #bae6fd;font-size:13px;color:#1e293b;line-height:1.8;">
+                    <!-- Description box with dropdown inside -->
+                    <div style="background:#f8fafc;border-radius:10px;border-left:3px solid #6366f1;padding:12px 14px;">
+                        ${p.description ? `<p style="color:#475569;font-size:13px;line-height:1.7;
+                            max-height:100px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;margin:0 0 10px 0;">
+                            ${(p.description || '').split('#')[0].trim() || p.description}
+                        </p>` : ''}
+                        <!-- Dropdown inside description -->
+                        <select id="detailDropdown" onchange="showDetailSection(this.value)"
+                            style="width:100%;padding:7px 11px;border-radius:8px;border:1.5px solid #cbd5e1;
+                                   font-size:12px;font-weight:600;color:#374151;background:white;cursor:pointer;outline:none;">
+                            <option value="">🔍 Select detail to view...</option>
+                            <option value="made_of">🧪 Product Made Up Of</option>
+                            <option value="used_for">✅ Mostly Used For</option>
+                            <option value="harmful_activity">⚠️ Harmful Activities / Misuse</option>
+                            <option value="precautions">🛡️ Safety Precautions</option>
+                        </select>
+                        <div id="detailContent"
+                            style="display:none;margin-top:8px;padding:10px 12px;border-radius:8px;
+                                   background:linear-gradient(135deg,#f0f9ff,#e0f2fe);
+                                   border:1.5px solid #bae6fd;font-size:13px;color:#1e293b;line-height:1.8;">
+                        </div>
                     </div>
-                </div>          
+                </div>       
 
                 <!-- Activity Analytics -->
                 <div style="background:#f8fafc;border-radius:12px;padding:14px;margin-top:12px;">
