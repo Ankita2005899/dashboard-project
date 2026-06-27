@@ -5846,16 +5846,15 @@ def product_activity_detail():
             except:
                 pass
 
-            return jsonify({
-                "today_search_count":      total_search,
-                "today_add_to_cart_count": total_cart,
-                "today_purchase_count":    total_purchase,
-                "made_of":          item_row.get("made_of") or "",
-                "used_for":         item_row.get("used_for") or "",
-                "harmful_activity": item_row.get("harmful_activity") or "",
-                "precautions":      item_row.get("precautions") or ""
-            })
-
+        return jsonify({
+            "today_search_count":      total_search,
+            "today_add_to_cart_count": total_cart,
+            "today_purchase_count":    total_purchase,
+            "made_of":          item_row.get("made_of") or "",
+            "used_for":         item_row.get("used_for") or "",
+            "harmful_activity": item_row.get("harmful_activity") or "",
+            "precautions":      item_row.get("precautions") or ""
+        })
     except Exception as e:
         print("product-activity-detail error:", e)
         return jsonify({"today_search_count":0,"today_add_to_cart_count":0,"today_purchase_count":0})
