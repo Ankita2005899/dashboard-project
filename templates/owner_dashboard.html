@@ -5998,391 +5998,357 @@
     </div>
     <!-- ===== SPECIAL OFFER POPUP (opens in front of churn modal) ===== -->
     <div id="specialOfferPopup" style="display:none;position:fixed;inset:0;z-index:10500;
-    background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);justify-content:center;align-items:flex-start;padding-top:16px;">
-        <div style="background:var(--modal-bg);width:97%;max-width:1200px;height:93vh;
-        border-radius:20px;padding:18px;box-shadow:0 24px 64px rgba(0,0,0,0.3);
-        display:flex;flex-direction:column;gap:12px;overflow:hidden;">
+    background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);justify-content:center;align-items:flex-start;padding-top:14px;">
+        <div style="background:var(--modal-bg);width:98%;max-width:1300px;height:94vh;
+        border-radius:20px;padding:16px;box-shadow:0 24px 64px rgba(0,0,0,0.3);
+        display:flex;flex-direction:column;gap:10px;overflow:hidden;">
 
-            <!-- Popup Header -->
+            <!-- HEADER -->
             <div style="display:flex;justify-content:space-between;align-items:center;
             padding-bottom:10px;border-bottom:2px solid var(--churn-hr);flex-shrink:0;">
                 <h3 style="margin:0;font-size:18px;color:#f59e0b;">🎁 Special Offer Manager</h3>
                 <button onclick="closeSpecialOfferPopup()" class="send-btn">✕ Close</button>
             </div>
 
-            <!-- TOP ROW: Common Offer (left) + Mini Product Grid (right) -->
-            <div style="display:flex;gap:14px;flex-shrink:0;background:#dbeafe;
-                border:2px dashed #3b82f6;border-radius:14px;padding:14px;">
+            <!-- MAIN BODY: 3 columns -->
+            <div style="display:flex;gap:12px;flex:1;min-height:0;overflow:hidden;">
 
-                
-                    <div style="background:#dbeafe;border-radius:10px;">
-                        <div style="font-size:14px;font-weight:800;color:#1d4ed8;margin-bottom:12px;">
-                            📢 Send Common Offer — to ALL Customers
+                <!-- COL 1: Common Offer Form -->
+                <div style="flex:0 0 340px;display:flex;flex-direction:column;gap:0;overflow-y:auto;">
+                    <div style="background:#dbeafe;border:2px dashed #3b82f6;border-radius:14px;
+                        padding:14px;display:flex;flex-direction:column;gap:8px;">
+
+                        <div style="font-size:13px;font-weight:800;color:#1d4ed8;">
+                            📢 Common Offer — ALL Customers
                         </div>
 
-                        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-                            <input id="commonOfferType" type="text" placeholder="Offer title e.g. Festival Sale 20% OFF"
-                                style="flex:2;min-width:200px;padding:9px 12px;border-radius:8px;
-            border:1.5px solid #93c5fd;font-size:13px;">
-                            <input id="commonDiscount" type="number" placeholder="Discount %" min="0" max="100" style="flex:0 0 100px;padding:9px 12px;border-radius:8px;
-            border:1.5px solid #93c5fd;font-size:13px;">
-                        </div>
+                        <input id="commonOfferType" type="text"
+                            placeholder="Offer title e.g. Festival Sale 20% OFF"
+                            style="width:100%;padding:8px 10px;border-radius:8px;
+                            border:1.5px solid #93c5fd;font-size:12px;box-sizing:border-box;">
 
-                        <textarea id="commonOfferMsg" placeholder="Type your offer message for all customers..." style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #93c5fd;
-        font-size:13px;resize:vertical;min-height:60px;box-sizing:border-box;
-        margin-bottom:10px;"></textarea>
+                        <input id="commonDiscount" type="number" placeholder="Discount %" min="0" max="100"
+                            style="width:100%;padding:8px 10px;border-radius:8px;
+                            border:1.5px solid #93c5fd;font-size:12px;box-sizing:border-box;">
 
-                        <!-- Combo Product Section -->
-                        <div style="background:white;border-radius:10px;padding:12px;margin-bottom:10px;
-        border:1px solid #bfdbfe;">
-                            <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:8px;">
+                        <textarea id="commonOfferMsg" placeholder="Type your offer message for all customers..."
+                            style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid #93c5fd;
+                            font-size:12px;resize:vertical;min-height:60px;box-sizing:border-box;"></textarea>
+
+                        <!-- Combo Section -->
+                        <div style="background:white;border-radius:10px;padding:10px;border:1px solid #bfdbfe;">
+                            <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:8px;">
                                 🛍️ Combo Offer (Optional) — Product + Product
                             </div>
-                            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                                <!-- Product 1 -->
-                                <div style="flex:1;min-width:140px;border:2px dashed #93c5fd;
-                                    border-radius:10px;padding:6px;transition:border-color 0.2s;"
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <!-- Product 1 Drop Zone -->
+                                <div style="flex:1;border:2px dashed #93c5fd;border-radius:8px;padding:5px;
+                                    transition:all 0.2s;text-align:center;"
                                     ondragover="event.preventDefault();this.style.borderColor='#22c55e';this.style.background='#f0fdf4'"
                                     ondragleave="this.style.borderColor='#93c5fd';this.style.background=''"
                                     ondrop="dropProductToCommonSlot(event,1)">
-                                    <div style="font-size:9px;color:#6366f1;font-weight:700;text-align:center;margin-bottom:4px;">
-                                        ⬇️ Drop Product 1 here
+                                    <div style="font-size:9px;color:#6366f1;font-weight:700;margin-bottom:3px;">
+                                        ⬇️ Drop Product 1
                                     </div>
-                                    <select id="commonProduct1" onchange="previewCommonProduct(1)" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #93c5fd;
-                    font-size:12px;margin-bottom:6px;">
-                                        <option value="">— Select Product 1 —</option>
+                                    <select id="commonProduct1" onchange="previewCommonProduct(1)"
+                                        style="width:100%;padding:5px;border-radius:6px;
+                                        border:1.5px solid #93c5fd;font-size:10px;">
+                                        <option value="">— Select —</option>
                                     </select>
-                                    <img id="commonProduct1Img" src="" style="width:100%;height:60px;object-fit:cover;border-radius:8px;
-                    border:1px solid #e2e8f0;display:none;">
+                                    <img id="commonProduct1Img" src=""
+                                        style="width:100%;height:50px;object-fit:cover;
+                                        border-radius:6px;margin-top:4px;display:none;">
                                 </div>
 
-                                <div style="font-size:22px;font-weight:900;color:#6366f1;">+</div>
+                                <span style="font-size:18px;font-weight:900;color:#6366f1;">+</span>
 
-                                <!-- Product 2 -->
-                                <div style="flex:1;min-width:140px;border:2px dashed #93c5fd;
-                                    border-radius:10px;padding:6px;transition:border-color 0.2s;"
+                                <!-- Product 2 Drop Zone -->
+                                <div style="flex:1;border:2px dashed #93c5fd;border-radius:8px;padding:5px;
+                                    transition:all 0.2s;text-align:center;"
                                     ondragover="event.preventDefault();this.style.borderColor='#22c55e';this.style.background='#f0fdf4'"
                                     ondragleave="this.style.borderColor='#93c5fd';this.style.background=''"
                                     ondrop="dropProductToCommonSlot(event,2)">
-                                    <div style="font-size:9px;color:#6366f1;font-weight:700;text-align:center;margin-bottom:4px;">
-                                        ⬇️ Drop Product 2 here
+                                    <div style="font-size:9px;color:#6366f1;font-weight:700;margin-bottom:3px;">
+                                        ⬇️ Drop Product 2
                                     </div>
-                                    <select id="commonProduct2" onchange="previewCommonProduct(2)" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #93c5fd;
-                    font-size:12px;margin-bottom:6px;">
-                                        <option value="">— Select Product 2 —</option>
+                                    <select id="commonProduct2" onchange="previewCommonProduct(2)"
+                                        style="width:100%;padding:5px;border-radius:6px;
+                                        border:1.5px solid #93c5fd;font-size:10px;">
+                                        <option value="">— Select —</option>
                                     </select>
-                                    <img id="commonProduct2Img" src="" style="width:100%;height:60px;object-fit:cover;border-radius:8px;
-                    border:1px solid #e2e8f0;display:none;">
+                                    <img id="commonProduct2Img" src=""
+                                        style="width:100%;height:50px;object-fit:cover;
+                                        border-radius:6px;margin-top:4px;display:none;">
                                 </div>
                             </div>
                         </div>
 
-                        <button onclick="sendCommonOffer(this)" style="width:100%;background:#3b82f6;color:white;border:none;padding:11px;
-        border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
+                        <button onclick="sendCommonOffer(this)"
+                            style="width:100%;background:#3b82f6;color:white;border:none;padding:10px;
+                            border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
                             📢 Send to All Customers
                         </button>
-                        <div id="commonOfferSentBanner" style="display:none;text-align:center;margin-top:8px;color:#15803d;
-        font-size:13px;font-weight:700;"></div>
+                        <div id="commonOfferSentBanner"
+                            style="display:none;text-align:center;color:#15803d;font-size:12px;font-weight:700;"></div>
                     </div>
-                </div><!-- end left common offer form -->
 
-                <!-- RIGHT: Mini Product Grid -->
-                <div style="flex:0 0 280px;min-width:0;background:white;border-radius:12px;
-                    padding:12px;border:1px solid #bfdbfe;display:flex;flex-direction:column;gap:8px;">
-                    <div style="font-size:11px;font-weight:800;color:#1d4ed8;">
-                        🛒 Products — Drag into combo slots
-                    </div>
-                    <div id="miniProductGrid"
-                        style="display:flex;flex-wrap:wrap;gap:6px;
-                        overflow-y:auto;flex:1;max-height:200px;">
-                        <div style="font-size:11px;color:#94a3b8;">Loading...</div>
+                    <!-- Mini Product Grid below common offer -->
+                    <div style="margin-top:10px;background:white;border:1.5px solid #bfdbfe;
+                        border-radius:12px;padding:10px;flex:1;overflow:hidden;display:flex;flex-direction:column;">
+                        <div style="font-size:11px;font-weight:800;color:#1d4ed8;margin-bottom:8px;">
+                            🛒 Products — Drag into combo slots
+                        </div>
+                        <div id="miniProductGrid"
+                            style="display:flex;flex-wrap:wrap;gap:6px;overflow-y:auto;flex:1;">
+                            <div style="font-size:11px;color:#94a3b8;">Loading...</div>
+                        </div>
                     </div>
                 </div>
 
-            </div><!-- end top row -->
-
-            <!-- BOTTOM: Two column layout - customers + buckets -->
-            <div style="display:flex;gap:16px;flex:1;min-height:0;overflow:hidden;">
-
-                <!-- LEFT: Customer list to drag from -->
-                <div style="flex:0 0 320px;display:flex;flex-direction:column;gap:10px;">
-                    <div style="font-size:12px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">
+                <!-- COL 2: Segmented Customers -->
+                <div style="flex:0 0 220px;display:flex;flex-direction:column;gap:8px;overflow:hidden;">
+                    <div style="font-size:12px;font-weight:700;color:var(--card-text-h2);">
                         👥 All Segmented Customers
                     </div>
-                    <input type="text" placeholder="🔍 Filter customers..." oninput="filterOfferCustomers(this.value)"
-                        style="padding:7px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;
-                    background:var(--input-bg);color:var(--input-color);">
-                    <div id="offerCustomerList" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:7px;
-                    padding-right:4px;">
+                    <input type="text" placeholder="🔍 Filter customers..."
+                        oninput="filterOfferCustomers(this.value)"
+                        style="padding:7px 10px;border:1.5px solid #e2e8f0;border-radius:8px;
+                        font-size:11px;background:var(--input-bg);color:var(--input-color);">
+                    <div id="offerCustomerList"
+                        style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:6px;padding-right:4px;">
                         <!-- filled by JS -->
                     </div>
                 </div>
 
-                <!-- RIGHT: Drop zones per offer type -->
-                <div style="flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding-right:4px;">
-                    <div style="font-size:12px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">
+                <!-- COL 3: Offer Buckets -->
+                <div style="flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden;">
+                    <div style="font-size:12px;font-weight:700;color:var(--card-text-h2);">
                         🎯 Offer Buckets — Drop customers into an offer
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;overflow-y:auto;flex:1;padding-right:4px;">
 
-                        <!-- Offer Bucket 1: 10% Discount -->
+                        <!-- Bucket 1: 10% Discount -->
                         <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
                             ondragleave="this.classList.remove('drag-over')"
                             ondrop="dropToOfferBucket(event,'discount10')"
-                            style="border:2px dashed #6366f1;border-radius:14px;padding:14px;
-                            background:#f5f3ff;transition:background 0.2s;display:flex;flex-direction:column;gap:8px;">
-                            <div style="font-size:13px;font-weight:700;color:#6366f1;">🏷️ 10% Discount</div>
+                            style="border:2px dashed #6366f1;border-radius:14px;padding:12px;
+                            background:#f5f3ff;display:flex;flex-direction:column;gap:7px;">
+                            <div style="font-size:12px;font-weight:700;color:#6366f1;">🏷️ 10% Discount</div>
                             <div class="bucket-list" id="bucket-discount10"
-                                style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:70px;">
+                                style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:60px;">
                                 <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop customers here</div>
                             </div>
-                            <!-- Toggle Buttons -->
-                            <div style="display:flex;gap:5px;">
+                            <div style="display:flex;gap:4px;">
                                 <button onclick="setBucketMode('discount10','message')" id="mode-msg-discount10"
-                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #6366f1;
-                                    background:#6366f1;color:white;font-size:10px;font-weight:700;cursor:pointer;">
-                                    ✏️ Message
-                                </button>
+                                    style="flex:1;padding:4px;border-radius:6px;border:2px solid #6366f1;
+                                    background:#6366f1;color:white;font-size:10px;font-weight:700;cursor:pointer;">✏️ Message</button>
                                 <button onclick="setBucketMode('discount10','combo')" id="mode-combo-discount10"
-                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #6366f1;
-                                    background:white;color:#6366f1;font-size:10px;font-weight:700;cursor:pointer;">
-                                    🛍️ Combo
-                                </button>
+                                    style="flex:1;padding:4px;border-radius:6px;border:2px solid #6366f1;
+                                    background:white;color:#6366f1;font-size:10px;font-weight:700;cursor:pointer;">🛍️ Combo</button>
                             </div>
-                            <!-- Message Panel -->
                             <div id="panel-message-discount10">
                                 <textarea id="msg-discount10" placeholder="✍️ Type offer message..." rows="2"
-                                    style="width:100%;padding:7px;border:1.5px solid #c4b5fd;border-radius:8px;
+                                    style="width:100%;padding:6px;border:1.5px solid #c4b5fd;border-radius:7px;
                                     font-size:11px;resize:none;background:white;color:#1e293b;box-sizing:border-box;"></textarea>
                             </div>
-                            <!-- Combo Panel -->
                             <div id="panel-combo-discount10" style="display:none;">
-                                <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+                                <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;">
                                     <div style="flex:1;">
                                         <select id="bucket-combo-discount10-p1" onchange="previewBucketProduct('discount10','p1')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'discount10',1)"
-                                            style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #c4b5fd;font-size:10px;">
-                                            <option value="">— Product 1 —</option>
+                                            style="width:100%;padding:4px;border-radius:6px;border:1.5px solid #c4b5fd;font-size:10px;">
+                                            <option value="">— P1 —</option>
                                         </select>
-                                        <img id="bucket-img-discount10-p1" src=""
-                                            style="width:100%;height:45px;object-fit:cover;border-radius:7px;margin-top:3px;display:none;">
+                                        <img id="bucket-img-discount10-p1" src="" style="width:100%;height:40px;object-fit:cover;border-radius:6px;margin-top:3px;display:none;">
                                     </div>
-                                    <span style="font-weight:900;color:#6366f1;font-size:16px;">+</span>
+                                    <span style="font-weight:900;color:#6366f1;">+</span>
                                     <div style="flex:1;">
                                         <select id="bucket-combo-discount10-p2" onchange="previewBucketProduct('discount10','p2')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'discount10',2)"
-                                            style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #c4b5fd;font-size:10px;">
-                                            <option value="">— Product 2 —</option>
+                                            style="width:100%;padding:4px;border-radius:6px;border:1.5px solid #c4b5fd;font-size:10px;">
+                                            <option value="">— P2 —</option>
                                         </select>
-                                        <img id="bucket-img-discount10-p2" src=""
-                                            style="width:100%;height:45px;object-fit:cover;border-radius:7px;margin-top:3px;display:none;">
+                                        <img id="bucket-img-discount10-p2" src="" style="width:100%;height:40px;object-fit:cover;border-radius:6px;margin-top:3px;display:none;">
                                     </div>
                                 </div>
                                 <input id="combo-msg-discount10" type="text" placeholder="Combo message..."
-                                    style="width:100%;padding:6px;border-radius:7px;border:1.5px solid #c4b5fd;
-                                    font-size:10px;box-sizing:border-box;">
+                                    style="width:100%;padding:5px;border-radius:6px;border:1.5px solid #c4b5fd;font-size:10px;box-sizing:border-box;">
                             </div>
                             <button onclick="sendBucketOffer('discount10','10% Discount')"
-                                style="width:100%;background:#6366f1;color:white;border:none;padding:8px;
-                                border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                                style="background:#6366f1;color:white;border:none;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
                                 📧 Send 10% Discount
                             </button>
                             <div id="sent-discount10" style="display:none;font-size:11px;font-weight:700;text-align:center;"></div>
                         </div>
 
-                        <!-- Offer Bucket 2: 20% Discount -->
+                        <!-- Bucket 2: 20% Discount -->
                         <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
                             ondragleave="this.classList.remove('drag-over')"
                             ondrop="dropToOfferBucket(event,'discount20')"
-                            style="border:2px dashed #ef4444;border-radius:14px;padding:14px;
-                            background:#fff1f2;transition:background 0.2s;display:flex;flex-direction:column;gap:8px;">
-                            <div style="font-size:13px;font-weight:700;color:#ef4444;">🏷️ 20% Discount</div>
+                            style="border:2px dashed #ef4444;border-radius:14px;padding:12px;
+                            background:#fff1f2;display:flex;flex-direction:column;gap:7px;">
+                            <div style="font-size:12px;font-weight:700;color:#ef4444;">🏷️ 20% Discount</div>
                             <div class="bucket-list" id="bucket-discount20"
-                                style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:70px;">
+                                style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:60px;">
                                 <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop customers here</div>
                             </div>
-                            <div style="display:flex;gap:5px;">
+                            <div style="display:flex;gap:4px;">
                                 <button onclick="setBucketMode('discount20','message')" id="mode-msg-discount20"
-                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #ef4444;
-                                    background:#ef4444;color:white;font-size:10px;font-weight:700;cursor:pointer;">
-                                    ✏️ Message
-                                </button>
+                                    style="flex:1;padding:4px;border-radius:6px;border:2px solid #ef4444;
+                                    background:#ef4444;color:white;font-size:10px;font-weight:700;cursor:pointer;">✏️ Message</button>
                                 <button onclick="setBucketMode('discount20','combo')" id="mode-combo-discount20"
-                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #ef4444;
-                                    background:white;color:#ef4444;font-size:10px;font-weight:700;cursor:pointer;">
-                                    🛍️ Combo
-                                </button>
+                                    style="flex:1;padding:4px;border-radius:6px;border:2px solid #ef4444;
+                                    background:white;color:#ef4444;font-size:10px;font-weight:700;cursor:pointer;">🛍️ Combo</button>
                             </div>
                             <div id="panel-message-discount20">
                                 <textarea id="msg-discount20" placeholder="✍️ Type offer message..." rows="2"
-                                    style="width:100%;padding:7px;border:1.5px solid #fca5a5;border-radius:8px;
+                                    style="width:100%;padding:6px;border:1.5px solid #fca5a5;border-radius:7px;
                                     font-size:11px;resize:none;background:white;color:#1e293b;box-sizing:border-box;"></textarea>
                             </div>
                             <div id="panel-combo-discount20" style="display:none;">
-                                <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+                                <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;">
                                     <div style="flex:1;">
                                         <select id="bucket-combo-discount20-p1" onchange="previewBucketProduct('discount20','p1')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'discount20',1)"
-                                            style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #fca5a5;font-size:10px;">
-                                            <option value="">— Product 1 —</option>
+                                            style="width:100%;padding:4px;border-radius:6px;border:1.5px solid #fca5a5;font-size:10px;">
+                                            <option value="">— P1 —</option>
                                         </select>
-                                        <img id="bucket-img-discount20-p1" src=""
-                                            style="width:100%;height:45px;object-fit:cover;border-radius:7px;margin-top:3px;display:none;">
+                                        <img id="bucket-img-discount20-p1" src="" style="width:100%;height:40px;object-fit:cover;border-radius:6px;margin-top:3px;display:none;">
                                     </div>
-                                    <span style="font-weight:900;color:#ef4444;font-size:16px;">+</span>
+                                    <span style="font-weight:900;color:#ef4444;">+</span>
                                     <div style="flex:1;">
                                         <select id="bucket-combo-discount20-p2" onchange="previewBucketProduct('discount20','p2')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'discount20',2)"
-                                            style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #fca5a5;font-size:10px;">
-                                            <option value="">— Product 2 —</option>
+                                            style="width:100%;padding:4px;border-radius:6px;border:1.5px solid #fca5a5;font-size:10px;">
+                                            <option value="">— P2 —</option>
                                         </select>
-                                        <img id="bucket-img-discount20-p2" src=""
-                                            style="width:100%;height:45px;object-fit:cover;border-radius:7px;margin-top:3px;display:none;">
+                                        <img id="bucket-img-discount20-p2" src="" style="width:100%;height:40px;object-fit:cover;border-radius:6px;margin-top:3px;display:none;">
                                     </div>
                                 </div>
                                 <input id="combo-msg-discount20" type="text" placeholder="Combo message..."
-                                    style="width:100%;padding:6px;border-radius:7px;border:1.5px solid #fca5a5;
-                                    font-size:10px;box-sizing:border-box;">
+                                    style="width:100%;padding:5px;border-radius:6px;border:1.5px solid #fca5a5;font-size:10px;box-sizing:border-box;">
                             </div>
                             <button onclick="sendBucketOffer('discount20','20% Discount')"
-                                style="width:100%;background:#ef4444;color:white;border:none;padding:8px;
-                                border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                                style="background:#ef4444;color:white;border:none;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
                                 📧 Send 20% Discount
                             </button>
                             <div id="sent-discount20" style="display:none;font-size:11px;font-weight:700;text-align:center;"></div>
                         </div>
 
-                        <!-- Offer Bucket 3: Free Shipping -->
+                        <!-- Bucket 3: Free Shipping -->
                         <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
                             ondragleave="this.classList.remove('drag-over')"
                             ondrop="dropToOfferBucket(event,'freeship')"
-                            style="border:2px dashed #22c55e;border-radius:14px;padding:14px;
-                            background:#f0fdf4;transition:background 0.2s;display:flex;flex-direction:column;gap:8px;">
-                            <div style="font-size:13px;font-weight:700;color:#22c55e;">🚚 Free Shipping</div>
+                            style="border:2px dashed #22c55e;border-radius:14px;padding:12px;
+                            background:#f0fdf4;display:flex;flex-direction:column;gap:7px;">
+                            <div style="font-size:12px;font-weight:700;color:#22c55e;">🚚 Free Shipping</div>
                             <div class="bucket-list" id="bucket-freeship"
-                                style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:70px;">
+                                style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:60px;">
                                 <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop customers here</div>
                             </div>
-                            <div style="display:flex;gap:5px;">
+                            <div style="display:flex;gap:4px;">
                                 <button onclick="setBucketMode('freeship','message')" id="mode-msg-freeship"
-                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #22c55e;
-                                    background:#22c55e;color:white;font-size:10px;font-weight:700;cursor:pointer;">
-                                    ✏️ Message
-                                </button>
+                                    style="flex:1;padding:4px;border-radius:6px;border:2px solid #22c55e;
+                                    background:#22c55e;color:white;font-size:10px;font-weight:700;cursor:pointer;">✏️ Message</button>
                                 <button onclick="setBucketMode('freeship','combo')" id="mode-combo-freeship"
-                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #22c55e;
-                                    background:white;color:#22c55e;font-size:10px;font-weight:700;cursor:pointer;">
-                                    🛍️ Combo
-                                </button>
+                                    style="flex:1;padding:4px;border-radius:6px;border:2px solid #22c55e;
+                                    background:white;color:#22c55e;font-size:10px;font-weight:700;cursor:pointer;">🛍️ Combo</button>
                             </div>
                             <div id="panel-message-freeship">
                                 <textarea id="msg-freeship" placeholder="✍️ Type offer message..." rows="2"
-                                    style="width:100%;padding:7px;border:1.5px solid #86efac;border-radius:8px;
+                                    style="width:100%;padding:6px;border:1.5px solid #86efac;border-radius:7px;
                                     font-size:11px;resize:none;background:white;color:#1e293b;box-sizing:border-box;"></textarea>
                             </div>
                             <div id="panel-combo-freeship" style="display:none;">
-                                <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+                                <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;">
                                     <div style="flex:1;">
                                         <select id="bucket-combo-freeship-p1" onchange="previewBucketProduct('freeship','p1')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'freeship',1)"
-                                            style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #86efac;font-size:10px;">
-                                            <option value="">— Product 1 —</option>
+                                            style="width:100%;padding:4px;border-radius:6px;border:1.5px solid #86efac;font-size:10px;">
+                                            <option value="">— P1 —</option>
                                         </select>
-                                        <img id="bucket-img-freeship-p1" src=""
-                                            style="width:100%;height:45px;object-fit:cover;border-radius:7px;margin-top:3px;display:none;">
+                                        <img id="bucket-img-freeship-p1" src="" style="width:100%;height:40px;object-fit:cover;border-radius:6px;margin-top:3px;display:none;">
                                     </div>
-                                    <span style="font-weight:900;color:#22c55e;font-size:16px;">+</span>
+                                    <span style="font-weight:900;color:#22c55e;">+</span>
                                     <div style="flex:1;">
                                         <select id="bucket-combo-freeship-p2" onchange="previewBucketProduct('freeship','p2')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'freeship',2)"
-                                            style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #86efac;font-size:10px;">
-                                            <option value="">— Product 2 —</option>
+                                            style="width:100%;padding:4px;border-radius:6px;border:1.5px solid #86efac;font-size:10px;">
+                                            <option value="">— P2 —</option>
                                         </select>
-                                        <img id="bucket-img-freeship-p2" src=""
-                                            style="width:100%;height:45px;object-fit:cover;border-radius:7px;margin-top:3px;display:none;">
+                                        <img id="bucket-img-freeship-p2" src="" style="width:100%;height:40px;object-fit:cover;border-radius:6px;margin-top:3px;display:none;">
                                     </div>
                                 </div>
                                 <input id="combo-msg-freeship" type="text" placeholder="Combo message..."
-                                    style="width:100%;padding:6px;border-radius:7px;border:1.5px solid #86efac;
-                                    font-size:10px;box-sizing:border-box;">
+                                    style="width:100%;padding:5px;border-radius:6px;border:1.5px solid #86efac;font-size:10px;box-sizing:border-box;">
                             </div>
                             <button onclick="sendBucketOffer('freeship','Free Shipping')"
-                                style="width:100%;background:#22c55e;color:white;border:none;padding:8px;
-                                border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                                style="background:#22c55e;color:white;border:none;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
                                 📧 Send Free Shipping
                             </button>
                             <div id="sent-freeship" style="display:none;font-size:11px;font-weight:700;text-align:center;"></div>
                         </div>
 
-                        <!-- Offer Bucket 4: Buy 1 Get 1 -->
+                        <!-- Bucket 4: Buy 1 Get 1 -->
                         <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
                             ondragleave="this.classList.remove('drag-over')"
                             ondrop="dropToOfferBucket(event,'bogo')"
-                            style="border:2px dashed #f59e0b;border-radius:14px;padding:14px;
-                            background:#fffbeb;transition:background 0.2s;display:flex;flex-direction:column;gap:8px;">
-                            <div style="font-size:13px;font-weight:700;color:#f59e0b;">🎁 Buy 1 Get 1</div>
+                            style="border:2px dashed #f59e0b;border-radius:14px;padding:12px;
+                            background:#fffbeb;display:flex;flex-direction:column;gap:7px;">
+                            <div style="font-size:12px;font-weight:700;color:#f59e0b;">🎁 Buy 1 Get 1</div>
                             <div class="bucket-list" id="bucket-bogo"
-                                style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:70px;">
+                                style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:60px;">
                                 <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop customers here</div>
                             </div>
-                            <div style="display:flex;gap:5px;">
+                            <div style="display:flex;gap:4px;">
                                 <button onclick="setBucketMode('bogo','message')" id="mode-msg-bogo"
-                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #f59e0b;
-                                    background:#f59e0b;color:white;font-size:10px;font-weight:700;cursor:pointer;">
-                                    ✏️ Message
-                                </button>
+                                    style="flex:1;padding:4px;border-radius:6px;border:2px solid #f59e0b;
+                                    background:#f59e0b;color:white;font-size:10px;font-weight:700;cursor:pointer;">✏️ Message</button>
                                 <button onclick="setBucketMode('bogo','combo')" id="mode-combo-bogo"
-                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #f59e0b;
-                                    background:white;color:#f59e0b;font-size:10px;font-weight:700;cursor:pointer;">
-                                    🛍️ Combo
-                                </button>
+                                    style="flex:1;padding:4px;border-radius:6px;border:2px solid #f59e0b;
+                                    background:white;color:#f59e0b;font-size:10px;font-weight:700;cursor:pointer;">🛍️ Combo</button>
                             </div>
                             <div id="panel-message-bogo">
                                 <textarea id="msg-bogo" placeholder="✍️ Type offer message..." rows="2"
-                                    style="width:100%;padding:7px;border:1.5px solid #fcd34d;border-radius:8px;
+                                    style="width:100%;padding:6px;border:1.5px solid #fcd34d;border-radius:7px;
                                     font-size:11px;resize:none;background:white;color:#1e293b;box-sizing:border-box;"></textarea>
                             </div>
                             <div id="panel-combo-bogo" style="display:none;">
-                                <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+                                <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;">
                                     <div style="flex:1;">
                                         <select id="bucket-combo-bogo-p1" onchange="previewBucketProduct('bogo','p1')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'bogo',1)"
-                                            style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #fcd34d;font-size:10px;">
-                                            <option value="">— Product 1 —</option>
+                                            style="width:100%;padding:4px;border-radius:6px;border:1.5px solid #fcd34d;font-size:10px;">
+                                            <option value="">— P1 —</option>
                                         </select>
-                                        <img id="bucket-img-bogo-p1" src=""
-                                            style="width:100%;height:45px;object-fit:cover;border-radius:7px;margin-top:3px;display:none;">
+                                        <img id="bucket-img-bogo-p1" src="" style="width:100%;height:40px;object-fit:cover;border-radius:6px;margin-top:3px;display:none;">
                                     </div>
-                                    <span style="font-weight:900;color:#f59e0b;font-size:16px;">+</span>
+                                    <span style="font-weight:900;color:#f59e0b;">+</span>
                                     <div style="flex:1;">
                                         <select id="bucket-combo-bogo-p2" onchange="previewBucketProduct('bogo','p2')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'bogo',2)"
-                                            style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #fcd34d;font-size:10px;">
-                                            <option value="">— Product 2 —</option>
+                                            style="width:100%;padding:4px;border-radius:6px;border:1.5px solid #fcd34d;font-size:10px;">
+                                            <option value="">— P2 —</option>
                                         </select>
-                                        <img id="bucket-img-bogo-p2" src=""
-                                            style="width:100%;height:45px;object-fit:cover;border-radius:7px;margin-top:3px;display:none;">
+                                        <img id="bucket-img-bogo-p2" src="" style="width:100%;height:40px;object-fit:cover;border-radius:6px;margin-top:3px;display:none;">
                                     </div>
                                 </div>
                                 <input id="combo-msg-bogo" type="text" placeholder="Combo message..."
-                                    style="width:100%;padding:6px;border-radius:7px;border:1.5px solid #fcd34d;
-                                    font-size:10px;box-sizing:border-box;">
+                                    style="width:100%;padding:5px;border-radius:6px;border:1.5px solid #fcd34d;font-size:10px;box-sizing:border-box;">
                             </div>
                             <button onclick="sendBucketOffer('bogo','Buy 1 Get 1')"
-                                style="width:100%;background:#f59e0b;color:white;border:none;padding:8px;
-                                border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+                                style="background:#f59e0b;color:white;border:none;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
                                 📧 Send Buy 1 Get 1
                             </button>
                             <div id="sent-bogo" style="display:none;font-size:11px;font-weight:700;text-align:center;"></div>
                         </div>
 
-                    </div>
+                    </div><!-- end grid -->
 
-                    <!-- Send button -->
-                    <button onclick="sendSpecialOffers()" style="margin-top:6px;width:100%;background:#f59e0b;color:white;
-                    border:none;padding:11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;
-                    transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'"
-                        onmouseout="this.style.transform=''">
+                    <!-- Send All -->
+                    <button onclick="sendSpecialOffers()" style="flex-shrink:0;width:100%;background:#f59e0b;color:white;
+                        border:none;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
                         📧 Send All Offers
                     </button>
-                    <div id="offerSentBanner" style="display:none;background:#22c55e;color:white;padding:10px;
-                    border-radius:10px;font-size:12px;font-weight:700;text-align:center;">
+                    <div id="offerSentBanner" style="display:none;background:#22c55e;color:white;padding:8px;
+                        border-radius:10px;font-size:12px;font-weight:700;text-align:center;">
                         ✅ Offers sent!
                     </div>
-                </div>
-            </div>
+                </div><!-- end col3 -->
+
+            </div><!-- end main body -->
         </div>
     </div>
     <style>
