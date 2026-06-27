@@ -737,40 +737,58 @@
                 <span style="font-size:13px;color:#64748b;" id="ksSlideLabel"></span>
             </div>
 
-            <!-- Slideshow container -->
             <div style="position:relative;width:100%;border-radius:14px;overflow:hidden;
-                background:#000;min-height:280px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
+                background:#000;box-shadow:0 8px 24px rgba(0,0,0,0.18);height:340px;
+                display:flex;">
 
-                <!-- Media display -->
-                <div id="ksMediaBox" style="width:100%;height:300px;position:relative;">
-                    <img id="ksImage" src="" alt="" style="width:100%;height:300px;object-fit:cover;display:block;
-                               border-radius:14px;transition:opacity 0.5s ease;">
-                    <video id="ksVideo" src="" muted autoplay playsinline style="display:none;width:100%;height:300px;object-fit:cover;
-                               border-radius:14px;">
-                    </video>
-                    <!-- Overlay: product name + price -->
+                <!-- LEFT HALF: Image -->
+                <div style="flex:1;position:relative;overflow:hidden;">
+                    <img id="ksImage" src="" alt="" style="width:100%;height:340px;object-fit:cover;display:block;">
+                    <!-- No image fallback -->
+                    <div id="ksNoImage" style="display:none;width:100%;height:340px;
+                        background:#1e293b;align-items:center;justify-content:center;
+                        font-size:48px;">🖼️</div>
+                    <!-- Name + price overlay on image -->
                     <div style="position:absolute;bottom:0;left:0;right:0;
-                        background:linear-gradient(transparent,rgba(0,0,0,0.7));
-                        padding:16px 20px;border-radius:0 0 14px 14px;">
-                        <div id="ksName" style="color:white;font-size:18px;font-weight:800;"></div>
-                        <div id="ksPrice" style="color:#a5f3fc;font-size:15px;font-weight:700;margin-top:4px;"></div>
+                        background:linear-gradient(transparent,rgba(0,0,0,0.75));
+                        padding:14px 16px;">
+                        <div id="ksName" style="color:white;font-size:17px;font-weight:800;"></div>
+                        <div id="ksPrice" style="color:#a5f3fc;font-size:14px;font-weight:700;margin-top:3px;"></div>
                     </div>
                 </div>
 
-                <!-- Prev / Next -->
+                <!-- Divider -->
+                <div style="width:3px;background:rgba(255,255,255,0.15);flex-shrink:0;"></div>
+
+                <!-- RIGHT HALF: Video -->
+                <div style="flex:1;position:relative;overflow:hidden;background:#0f172a;">
+                    <video id="ksVideo" muted autoplay playsinline loop
+                        style="width:100%;height:340px;object-fit:cover;display:block;">
+                    </video>
+                    <div id="ksNoVideo" style="display:none;width:100%;height:340px;background:#0f172a;
+                               align-items:center;justify-content:center;flex-direction:column;gap:8px;">
+                        <span style="font-size:40px;">🎬</span>
+                        <span style="color:#64748b;font-size:13px;">No video available</span>
+                    </div>
+                </div>
+
+                <!-- Prev -->
                 <button onclick="ksPrev()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);
                            background:rgba(255,255,255,0.85);border:none;border-radius:50%;
-                           width:36px;height:36px;font-size:18px;cursor:pointer;z-index:2;">‹</button>
+                           width:38px;height:38px;font-size:20px;cursor:pointer;z-index:3;
+                           box-shadow:0 2px 8px rgba(0,0,0,0.3);">‹</button>
+
+                <!-- Next -->
                 <button onclick="ksNext()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
                            background:rgba(255,255,255,0.85);border:none;border-radius:50%;
-                           width:36px;height:36px;font-size:18px;cursor:pointer;z-index:2;">›</button>
+                           width:38px;height:38px;font-size:20px;cursor:pointer;z-index:3;
+                           box-shadow:0 2px 8px rgba(0,0,0,0.3);">›</button>
 
                 <!-- Dots -->
-                <div id="ksDots" style="position:absolute;bottom:10px;right:16px;
-                    display:flex;gap:5px;z-index:2;"></div>
+                <div id="ksDots" style="position:absolute;bottom:10px;left:50%;
+                    transform:translateX(-50%);display:flex;gap:6px;z-index:3;"></div>
             </div>
         </div>
-
 
     </div>
     <div id="yourItemDetailPopup" style="display:none;position:fixed;inset:0;z-index:9999;
@@ -1023,6 +1041,8 @@
 
             const img = document.getElementById('ksImage');
             const vid = document.getElementById('ksVideo');
+            const noImg = document.getElementById('ksNoImage');
+            const noVid = document.getElementById('ksNoVideo');
             const label = document.getElementById('ksSlideLabel');
 
             document.getElementById('ksName').textContent = p.name || '';
@@ -1032,44 +1052,43 @@
             // Update dots
             _ksProducts.forEach((_, i) => {
                 const dot = document.getElementById(`ksDot${i}`);
-                if (dot) dot.style.background = i === _ksIndex
-                    ? 'white' : 'rgba(255,255,255,0.4)';
+                if (dot) dot.style.background = i === _ksIndex ? 'white' : 'rgba(255,255,255,0.4)';
             });
-
-            // Decide: show image first, then video if available
-            const hasImage = p.image && p.image.startsWith('http');
-            const hasVideo = p.video && p.video.startsWith('http');
 
             clearTimeout(_ksTimer);
 
+            // LEFT: Image
+            const hasImage = p.image && p.image.startsWith('http');
             if (hasImage) {
                 img.src = p.image;
                 img.style.display = 'block';
-                vid.style.display = 'none';
-                vid.pause();
-
-                if (hasVideo) {
-                    // Show image for 3s then switch to video
-                    _ksTimer = setTimeout(() => {
-                        img.style.display = 'none';
-                        vid.src = p.video;
-                        vid.style.display = 'block';
-                        vid.play();
-                        // After video plays 5s move to next
-                        _ksTimer = setTimeout(() => ksNext(), 5000);
-                    }, 3000);
-                } else {
-                    // No video — stay 4s then next
-                    _ksTimer = setTimeout(() => ksNext(), 4000);
-                }
-            } else if (hasVideo) {
+                noImg.style.display = 'none';
+            } else {
+                img.src = '';
                 img.style.display = 'none';
+                noImg.style.display = 'flex';
+            }
+
+            // RIGHT: Video simultaneously
+            const hasVideo = p.video && p.video.startsWith('http');
+            if (hasVideo) {
                 vid.src = p.video;
                 vid.style.display = 'block';
-                vid.play();
-                _ksTimer = setTimeout(() => ksNext(), 5000);
+                noVid.style.display = 'none';
+                vid.load();
+                vid.play().catch(() => { });
+            } else {
+                vid.pause();
+                vid.src = '';
+                vid.style.display = 'none';
+                noVid.style.display = 'flex';
             }
+
+            // Auto advance every 6s
+            _ksTimer = setTimeout(() => ksNext(), 6000);
         }
+
+
 
         function ksNext() { ksShow(_ksIndex + 1); }
         function ksPrev() { ksShow(_ksIndex - 1); }
