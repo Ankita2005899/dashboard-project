@@ -757,6 +757,57 @@
             <div id="yourItemDetailContent"></div>
         </div>
     </div>
+
+    <!-- ===== PRODUCT DETAIL MODAL (Buy Again / Your Orders) ===== -->
+    <div id="productDetailModal" style="display:none;position:fixed;inset:0;z-index:10000;
+        background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);justify-content:center;align-items:center;">
+        <div style="background:white;width:95%;max-width:750px;border-radius:16px;padding:24px;
+            box-shadow:0 24px 70px rgba(0,0,0,0.3);position:relative;max-height:88vh;overflow-y:auto;
+            border:2px solid #cbd5e1;">
+            <!-- Close -->
+            <button onclick="document.getElementById('productDetailModal').style.display='none';" style="position:absolute;top:12px;right:16px;font-size:22px;background:transparent;
+                border:2px solid #cbd5e1;border-radius:8px;color:#1e293b;font-weight:600;
+                cursor:pointer;padding:2px 10px;transition:all 0.2s;"
+                onmouseover="this.style.background='#f97316';this.style.color='white';this.style.borderColor='#f97316';"
+                onmouseout="this.style.background='transparent';this.style.color='#1e293b';this.style.borderColor='#cbd5e1';">✕</button>
+
+            <!-- Modal body -->
+            <div style="display:flex;gap:24px;flex-wrap:wrap;">
+                <!-- Left: image + video -->
+                <div style="flex:1 1 250px;">
+                    <img id="pdModalImage" src="" style="width:100%;max-height:260px;object-fit:cover;
+                        border-radius:10px;border:2px solid #cbd5e1;">
+                    <video id="pdModalVideo" controls style="display:none;width:100%;max-height:220px;
+                        margin-top:12px;border-radius:10px;border:1px solid #cbd5e1;object-fit:cover;">
+                        <source id="pdModalVideoSrc" src="">
+                    </video>
+                    <p id="pdNoVideo" style="font-size:12px;color:#94a3b8;margin-top:8px;">No video available</p>
+                    <!-- Rate -->
+                    <div
+                        style="background:#fffbeb;border-radius:10px;padding:12px;margin-top:14px;border:1px solid #fcd34d;">
+                        <div style="font-size:13px;font-weight:700;color:#92400e;">⭐ Rate this Product</div>
+                        <div id="pdStars" style="font-size:22px;margin-top:6px;cursor:pointer;">
+                            ☆ ☆ ☆ ☆ ☆
+                        </div>
+                        <div id="pdRatingMsg" style="font-size:12px;color:#6b7280;margin-top:4px;"></div>
+                    </div>
+                </div>
+                <!-- Right: details -->
+                <div style="flex:2 1 300px;display:flex;flex-direction:column;gap:10px;">
+                    <h2 id="pdModalName"
+                        style="font-size:20px;font-weight:800;color:#0f172a;margin:0;padding-right:40px;"></h2>
+                    <div><b>Available:</b> <span id="pdModalAvail"></span></div>
+                    <div style="font-size:22px;font-weight:800;color:#6366f1;">Price: ₹<span id="pdModalPrice"></span>
+                    </div>
+                    <hr style="border:0;border-top:1px solid #e5e7eb;">
+                    <div><span style="font-size:13px;">📅 <b>Uploaded:</b> <span id="pdModalDate"></span></span></div>
+                    <div><span style="font-size:13px;">📍 <b>Address:</b> <span id="pdModalAddr"></span></span></div>
+                    <div id="pdModalDetail" style="font-size:14px;max-height:300px;overflow-y:auto;
+                        padding:10px;border:1px solid #e5e7eb;border-radius:8px;margin-top:4px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- POPUP 1 -->
     <div class="popup-overlay" id="popup1">
         <div class="popup-box">
@@ -836,7 +887,7 @@
         async function loadBuyAgain() {
             const grid = document.getElementById('buyAgainGrid');
             try {
-                const res   = await fetch('/api/my-purchased-items');
+                const res = await fetch('/api/my-purchased-items');
                 const items = await res.json();
                 if (!items.length) {
                     grid.innerHTML = '<div style="color:#94a3b8;font-size:13px;padding:10px;">No purchases yet.</div>';
@@ -851,8 +902,8 @@
                         background:#ffffff;padding:14px;border-radius:10px;
                         border:2px solid #cbd5e1;box-shadow:0 4px 10px rgba(0,0,0,0.06);
                         transition:all 0.25s ease;cursor:pointer;`;
-                    card.onmouseover = () => { card.style.transform='translateY(-5px)'; card.style.borderColor='#4f46e5'; };
-                    card.onmouseout  = () => { card.style.transform=''; card.style.borderColor='#cbd5e1'; };
+                    card.onmouseover = () => { card.style.transform = 'translateY(-5px)'; card.style.borderColor = '#4f46e5'; };
+                    card.onmouseout = () => { card.style.transform = ''; card.style.borderColor = '#cbd5e1'; };
                     card.innerHTML = `
                         <img src="${p.image || ''}"
                             onerror="this.style.display='none'"
@@ -863,12 +914,12 @@
                         </p>
                         <h4 style="margin-top:8px;font-size:16px;color:var(--card-text);">₹${p.price}</h4>
                         <div style="display:flex;gap:10px;margin-top:12px;">
-                            <button onclick="addToCartFromProfile(${p.product_id},'${p.category}','${(p.name||'').replace(/'/g,'')}',${p.price},'${p.image||''}')"
+                            <button onclick="addToCartFromProfile(${p.product_id},'${p.category}','${(p.name || '').replace(/'/g, '')}',${p.price},'${p.image || ''}')"
                                 style="flex:1;padding:8px;border-radius:6px;border:none;cursor:pointer;font-weight:600;
                                        background:linear-gradient(135deg,#4f46e5,#6366f1);color:white;">
                                 🛒 Add to Cart
                             </button>
-                            <button onclick="viewDetailsFromProfile(${JSON.stringify(p).replace(/"/g,'&quot;')})"
+                            <button onclick="viewDetailsFromProfile(${p.product_id},'${p.category}')"
                                 style="flex:1;padding:8px;border-radius:6px;border:none;cursor:pointer;font-weight:600;
                                        background:#10b981;color:white;">
                                 ℹ See Details
@@ -876,7 +927,7 @@
                         </div>`;
                     grid.appendChild(card);
                 });
-            } catch(e) {
+            } catch (e) {
                 grid.innerHTML = '<div style="color:#ef4444;font-size:13px;padding:10px;">Failed to load purchases.</div>';
             }
         }
@@ -885,15 +936,77 @@
             fetch("/final-add", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ cart: [{ product_id: productId, category, name, price, image, video:'', availability:1, detail:'', address:'' }] })
+                body: JSON.stringify({ cart: [{ product_id: productId, category, name, price, image, video: '', availability: 1, detail: '', address: '' }] })
             })
-            .then(r => r.json())
-            .then(d => alert(d.success ? `✅ "${name}" added to cart!` : '⚠️ ' + (d.error || 'Failed')))
-            .catch(() => alert('⚠️ Failed to add to cart.'));
+                .then(r => r.json())
+                .then(d => alert(d.success ? `✅ "${name}" added to cart!` : '⚠️ ' + (d.error || 'Failed')))
+                .catch(() => alert('⚠️ Failed to add to cart.'));
         }
 
-        function viewDetailsFromProfile(p) {
-            window.location.href = `/home?highlight=${p.product_id}&category=${p.category}`;
+        async function viewDetailsFromProfile(productId, category) {
+            const modal = document.getElementById('productDetailModal');
+            modal.style.display = 'flex';
+
+            // Reset
+            document.getElementById('pdModalImage').src = '';
+            document.getElementById('pdModalName').textContent = 'Loading...';
+            document.getElementById('pdModalAvail').textContent = '';
+            document.getElementById('pdModalPrice').textContent = '';
+            document.getElementById('pdModalDate').textContent = '';
+            document.getElementById('pdModalAddr').textContent = '';
+            document.getElementById('pdModalDetail').innerHTML = '';
+            document.getElementById('pdModalVideo').style.display = 'none';
+            document.getElementById('pdNoVideo').style.display = 'block';
+
+            try {
+                const res = await fetch(`/api/product-detail?product_id=${productId}&category=${encodeURIComponent(category)}`);
+                const p = await res.json();
+
+                document.getElementById('pdModalImage').src = p.image || '';
+                document.getElementById('pdModalName').textContent = p.name || '';
+                document.getElementById('pdModalAvail').textContent = p.availability ?? '';
+                document.getElementById('pdModalPrice').textContent = p.price ?? '';
+                document.getElementById('pdModalDate').textContent = p.uploaded_at ? new Date(p.uploaded_at).toISOString().split('T')[0] : 'N/A';
+                document.getElementById('pdModalAddr').textContent = p.address || 'N/A';
+
+                // Detail HTML (split by \n and bold labels)
+                const detail = p.detail || p.material || '';
+                document.getElementById('pdModalDetail').innerHTML = detail.split('\n').map(line => {
+                    const ci = line.indexOf(':');
+                    if (ci !== -1) {
+                        return `<div style="margin-bottom:12px;">
+                            <span style="font-weight:700;color:#4f46e5;font-size:14px;">${line.substring(0, ci)}:</span>
+                            <p style="margin:4px 0 0;color:#374151;font-size:13px;line-height:1.6;">${line.substring(ci + 1).trim()}</p>
+                        </div>`;
+                    }
+                    return `<p style="color:#374151;">${line}</p>`;
+                }).join('');
+
+                // Video
+                if (p.video) {
+                    document.getElementById('pdModalVideoSrc').src = p.video;
+                    document.getElementById('pdModalVideo').style.display = 'block';
+                    document.getElementById('pdModalVideo').load();
+                    document.getElementById('pdNoVideo').style.display = 'none';
+                }
+
+                // Stars
+                const stars = document.getElementById('pdStars');
+                stars.innerHTML = '☆ ☆ ☆ ☆ ☆'.split(' ').map((s, i) =>
+                    `<span onclick="pdRate(${i + 1})" style="cursor:pointer;">☆</span>`).join(' ');
+
+            } catch (e) {
+                document.getElementById('pdModalName').textContent = 'Failed to load.';
+            }
+        }
+
+        function pdRate(val) {
+            const msgs = ["😞 Poor", "😐 Fair", "🙂 Good", "😊 Very Good", "🤩 Excellent!"];
+            document.getElementById('pdStars').innerHTML =
+                [1, 2, 3, 4, 5].map(i =>
+                    `<span onclick="pdRate(${i})" style="cursor:pointer;">${i <= val ? '⭐' : '☆'}</span>`
+                ).join(' ');
+            document.getElementById('pdRatingMsg').textContent = msgs[val - 1];
         }
 
         // Run on page load

@@ -5979,7 +5979,29 @@ def my_purchased_items():
     except Exception as e:
         print("my-purchased-items error:", e)
         return jsonify([])
+#_____________________"Buy again" part of the profile to get display the corrct detail in see detail option ______________
 
+
+@app.route('/api/product-detail')
+def api_product_detail():
+    product_id = request.args.get('product_id')
+    category   = request.args.get('category', '')
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        prod_table = get_product_table(category)
+        cursor.execute(f"SELECT * FROM `{prod_table}` WHERE id=%s LIMIT 1", (product_id,))
+        row = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        if not row:
+            return jsonify({})
+        row['price']        = float(row['price']) if row['price'] else 0
+        row['availability'] = int(row['availability']) if row['availability'] else 0
+        row['uploaded_at']  = str(row['uploaded_at']) if row.get('uploaded_at') else ''
+        return jsonify(row)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
    
               
 #-------------------logout process from profile.html page ({sign out")button sathi-------------------- 
