@@ -1630,7 +1630,10 @@ def add_to_cart():
         }
 
         client_table = get_cart_table_name(username, user_id)
-        activity_table = f"{username}_{user_id}_product_activity"
+        safe_un = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
+        if safe_un and safe_un[0].isdigit():
+            safe_un = "user_" + safe_un
+        activity_table = f"{safe_un}_{user_id}_product_activity"
 
         # IST time fallback
         ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
@@ -3008,11 +3011,18 @@ def verify_payment():
                     WHERE product_id = %s AND category = %s
                 """, (new_count, ist_now_str, round(new_count / 100, 2), product_id, category))
             else:
+                # Get product name first
+                cat_table_map = {"card":"card","food_items":"food_items","study_material":"study_material"}
+                prod_table = cat_table_map.get(category, "card")
+                cursor.execute(f"SELECT name FROM `{prod_table}` WHERE id=%s", (product_id,))
+                prod_row = cursor.fetchone()
+                prod_name = prod_row[0] if prod_row else "Unknown"
+
                 cursor.execute(f"""
                     INSERT INTO `{activity_table}`
-                    (product_id, category, today_purchase_count, purchased_time, month, growth)
-                    VALUES (%s, %s, 1, %s, %s, %s)
-                """, (product_id, category, ist_now_str, ist_month, 0.01))
+                    (product_id, name, category, today_purchase_count, purchased_time, month, growth)
+                    VALUES (%s, %s, %s, 1, %s, %s, %s)
+                """, (product_id, prod_name, category, ist_now_str, ist_month, 0.01))
 
         try:
             cursor.execute("""
