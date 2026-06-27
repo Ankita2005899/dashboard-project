@@ -168,7 +168,9 @@
             padding: 30px;
             padding-bottom: 100px;
 
-            max-width: 1200px;
+            width: calc(100vw - 260px);
+            max-width: calc(100vw - 260px);
+            overflow-x: hidden;
         }
 
         .profile-header {
@@ -402,9 +404,10 @@
         /* ================= SHOP SECTIONS ================= */
 
         .shop-section {
-            max-width: 900px;
-            margin: 35px auto;
+            width: 100%;
+            margin: 35px 0;
             text-align: left;
+            padding: 0 4px;
         }
 
         .shop-header {
@@ -427,8 +430,8 @@
 
         .shop-items {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 18px;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
         }
 
         .shop-card {
