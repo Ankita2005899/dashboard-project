@@ -5519,14 +5519,6 @@ def all_products_for_offer():
         
         
 #__________total discount ko calculate karne ki leya to send every user common offer (" owner_dashboard to dashboard")
-
-
-
-        return jsonify({'success': False, 'error': str(e)}), 500
-    finally:
-        cursor.close()
-        conn.close()        
-
 #--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
 
 
