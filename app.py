@@ -2937,6 +2937,7 @@ def create_order():
         "payment_capture": 1
     })
     return jsonify(order)
+
 @app.route("/verify-payment", methods=["POST"])
 def verify_payment():
     data = request.get_json()
@@ -3053,6 +3054,7 @@ def verify_payment():
         cursor.close()
         db.close()
         return jsonify({"status": "failed"})
+    
     
 @app.route("/verify-payment-failed", methods=["POST"])
 def verify_payment_failed():
