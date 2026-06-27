@@ -5936,7 +5936,7 @@ def my_cart_items():
         cursor.execute(f"""
             SELECT id, product_id, category, name, image, price, quantity, mode
             FROM `{cart_table}`
-            WHERE mode != 'successful'
+            WHERE (mode IS NULL OR mode != 'successful')
             ORDER BY id DESC LIMIT 10
         """)
         items = cursor.fetchall()
