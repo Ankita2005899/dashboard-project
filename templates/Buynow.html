@@ -688,54 +688,36 @@
                     productAmount = Number(item.price);
 
 
-                    // ✅ rest of your code continues
                     // ✅ Card
-                    document.querySelector(".card h3").innerText = item.name;
-document.querySelector(".card img").src = item.image;
+                    if (item.mode === 'combo_offer') {
+                        // Combo: show both products side by side
+                        const parts = item.name.split(' + ');
+                        const p1name = parts[0] || '';
+                        const p2name = parts[1] || '';
 
-// ── Combo: show both product images ──
-if (item.mode === 'combo_offer') {
-    const parts = item.name.split(' + ');
-    const p1name = parts[0] || '';
-    const p2name = parts[1] || '';
+                        // Parse images from detail field
+                        // image = p1 image, we need p2 image from detail or fallback
+                        const comboImgSrc = item.image || '';
+                        const combo2Src = item.image2 || item.image || '';
 
-    // Parse detail for images
-    // detail format: "Combo Offer | P1 ₹x + P2 ₹y = ₹total | disc% OFF | Final: ₹z"
-    document.querySelector(".card").innerHTML = `
-        <div style="display:flex;gap:8px;align-items:center;justify-content:center;padding:10px;">
-            <div style="text-align:center;flex:1;">
-                <img src="${item.image}"
-                    style="width:100%;height:120px;object-fit:cover;border-radius:10px;">
-                <div style="font-size:12px;font-weight:700;margin-top:4px;color:#1e293b;">
-                    ${p1name}
-                </div>
-            </div>
-            <div style="font-size:24px;font-weight:900;color:#6366f1;">+</div>
-            <div style="text-align:center;flex:1;">
-                <img src="${item.image2 || item.image}"
-                    style="width:100%;height:120px;object-fit:cover;border-radius:10px;">
-                <div style="font-size:12px;font-weight:700;margin-top:4px;color:#1e293b;">
-                    ${p2name}
-                </div>
-            </div>
-        </div>
-        <h3 style="text-align:center;">${item.name}</h3>
-        <p style="text-align:center;">Combo Offer</p>
-        <div style="background:#ede9fe;border-radius:10px;padding:10px;margin:8px;
-            font-size:12px;color:#4c1d95;line-height:1.6;">
-            <div style="font-weight:700;margin-bottom:4px;">🎁 Combo Breakdown</div>
-            <div>${item.detail || ''}</div>
-        </div>
-    `;
-}
+                        document.querySelector(".card img").style.display = 'none';
+                        document.querySelector(".card h3").innerHTML = `
+                            <div style="display:flex;gap:8px;align-items:flex-start;justify-content:center;margin-bottom:8px;">
+                                <div style="text-align:center;flex:1;">
+                                    <img src="${comboImgSrc}" onerror="this.src=''"
+                                        style="width:100%;height:110px;object-fit:cover;border-radius:10px;border:1px solid #e2e8f0;">
+                                    <div style="font-size:11px;font-weight:700;margin-top:4px;color:#1e293b;">${p1name}</div>
+                                </div>
+                                <div style="font-size:22px;font-weight:900;color:#6366f1;padding-top:40px;">+</div>
+                                <div style="text-align:center;flex:1;">
+                                    <img src="${combo2Src}" onerror="this.src=''"
+                                        style="width:100%;height:110px;object-fit:cover;border-radius:10px;border:1px solid #e2e8f0;">
+                                    <div style="font-size:11px;font-weight:700;margin-top:4px;color:#1e293b;">${p2name}</div>
+                                </div>
+                            </div>
+                            ${item.name}`;
 
-                    // ✅ Summary popup
-                    document.getElementById("upiTitle").innerText = item.name + " Summary";
-                    document.getElementById("itemPrice").innerText = productAmount;
-                    document.getElementById("totalPrice").innerText = productAmount;
-
-                    // ✅ Combo offer breakdown
-                    if (item.mode === 'combo_offer' && item.detail) {
+                        // Combo breakdown below price
                         const existing = document.getElementById('itemDetail');
                         if (existing) existing.remove();
                         const detailDiv = document.createElement('div');
@@ -743,11 +725,21 @@ if (item.mode === 'combo_offer') {
                         detailDiv.innerHTML = `
                             <div style="background:#ede9fe;border-radius:10px;padding:10px;
                                 margin-top:8px;font-size:12px;color:#4c1d95;line-height:1.6;">
-                                <div style="font-weight:700;margin-bottom:4px;">🎁 Combo Offer Breakdown</div>
-                                <div style="color:#6d28d9;">${item.detail}</div>
+                                <div style="font-weight:700;margin-bottom:4px;">🎁 Combo Breakdown</div>
+                                <div>${item.detail || ''}</div>
                             </div>`;
-                        document.getElementById('itemPrice').parentElement.appendChild(detailDiv);
+                        document.querySelector('.card').appendChild(detailDiv);
+
+                    } else {
+                        // Normal item
+                        document.querySelector(".card h3").innerText = item.name;
+                        document.querySelector(".card img").src = item.image;
                     }
+
+                    // ✅ Summary popup
+                    document.getElementById("upiTitle").innerText = item.name + " Summary";
+                    document.getElementById("itemPrice").innerText = productAmount;
+                    document.getElementById("totalPrice").innerText = productAmount;
 
                     document.querySelector("#upiDetailsPopup img").src = item.image;
                     document.querySelector("#upiDetailsPopup h3:nth-of-type(2)").innerText = item.name;
