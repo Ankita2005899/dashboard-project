@@ -5965,7 +5965,7 @@ def my_purchased_items():
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute(f"""
-            SELECT id, product_id, category, name, image, price, quantity
+            SELECT id, product_id, category, name, image, price, quantity as availability
             FROM `{cart_table}`
             WHERE mode = 'successful'
             ORDER BY id DESC LIMIT 10
