@@ -5747,22 +5747,24 @@ def product_activity_detail():
 
         # ✅ Find all cart tables and activity tables across all users
         cursor.execute("""
-            SELECT table_name FROM information_schema.tables
-            WHERE table_schema = DATABASE()
-            AND table_name NOT LIKE '%_product_activity'
-            AND table_name NOT LIKE '%_your_item'
-            AND table_name NOT LIKE '%_product'
-            AND table_name REGEXP '^[a-z0-9_]+_[0-9]+$'
+            SELECT TABLE_NAME FROM information_schema.TABLES
+            WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME NOT LIKE '%_product_activity'
+            AND TABLE_NAME NOT LIKE '%_your_item'
+            AND TABLE_NAME NOT LIKE '%_product'
+            AND TABLE_NAME REGEXP '^[a-zA-Z0-9_]+_[0-9]+$'
         """)
-        cart_tables = [r["table_name"] for r in cursor.fetchall()]
+        cart_tables = [list(r.values())[0] for r in cursor.fetchall()]
 
         cursor.execute("""
-            SELECT table_name FROM information_schema.tables
-            WHERE table_schema = DATABASE()
-            AND table_name LIKE '%_product_activity'
+            SELECT TABLE_NAME FROM information_schema.TABLES
+            WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME LIKE '%_product_activity'
         """)
-        activity_tables = [r["table_name"] for r in cursor.fetchall()]
-
+        activity_tables = [list(r.values())[0] for r in cursor.fetchall()]
+        
+        
+        
         total_purchase = 0
         total_cart     = 0
         total_search   = 0
