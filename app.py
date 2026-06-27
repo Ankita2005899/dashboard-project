@@ -6161,41 +6161,46 @@ def decrement_availability():
 
 @app.route('/api/signout-log', methods=['POST'])
 def signout_log():
-    data = request.get_json()
+    try:
+        data       = request.get_json()
+        user_id    = session.get('user_id')
+        user_name  = session.get('username', '')
+        user_email = session.get('email', '')
+        ip_address = request.remote_addr
+        session_id = request.cookies.get('session', '')
 
-    # Pull server-side values (more trustworthy than client-side)
-    user_id       = session.get('user_id')
-    user_name     = session.get('user_name', '')
-    user_email    = session.get('user_email', '')
-    ip_address    = request.remote_addr
-    session_id    = session.get('session_id') or request.cookies.get('session')
-
-    cursor = db.cursor()
-    cursor.execute("""
-        INSERT INTO user_signout_logs
-            (user_id, user_name, user_email, profile_image,
-             signout_reason, custom_reason,
-             ip_address, user_agent, session_id, signout_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """, (
-        user_id,
-        user_name,
-        user_email,
-        data.get('profile_image'),
-        data.get('signout_reason'),
-        data.get('custom_reason'),
-        ip_address,
-        data.get('user_agent'),
-        session_id,
-        datetime.datetime.utcnow()
-    ))
-    db.commit()
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO user_signout_logs
+                (user_id, user_name, user_email, profile_image,
+                 signout_reason, custom_reason,
+                 ip_address, user_agent, session_id, signout_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            user_id,
+            user_name,
+            user_email,
+            data.get('profile_image'),
+            data.get('signout_reason'),
+            data.get('custom_reason') or data.get('extra_feedback'),
+            ip_address,
+            data.get('user_agent'),
+            session_id,
+            datetime.utcnow()
+        ))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"signout-log error: {e}")
 
     return jsonify({'success': True})
 
-
-
-
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
        
 # ============================================================
 # STATIC FILE SERVING
