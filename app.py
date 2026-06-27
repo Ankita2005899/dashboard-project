@@ -1531,11 +1531,13 @@ def add_product():
         your_item_table = f"{uname}_{uid}_your_item"
         cursor.execute(f"""
             INSERT INTO `{your_item_table}`
-            (store_data_id, category, name, image, video, price, availability, detail, address, quantity)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            (store_data_id, category, name, image, video, price, availability, detail, address, quantity,
+             made_of, used_for, harmful_activity, precautions)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             store_data_id, category_label, name, image_name, video_name,
-            price, availability, detail, address, availability
+            price, availability, detail, address, availability,
+            made_of, used_for, harmful, precautions
         ))
         print(f"✅ Inserted into {your_item_table}")
     except Exception as e:
@@ -5639,20 +5641,23 @@ def all_products():
         cursor = conn.cursor(dictionary=True)
         cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS `{your_item_table}` (
-                id            INT AUTO_INCREMENT PRIMARY KEY,
+                id INT AUTO_INCREMENT PRIMARY KEY,
                 store_data_id INT,
-                category      VARCHAR(20),
-                name          VARCHAR(255),
-                image         VARCHAR(255),
-                video         VARCHAR(255),
-                price         DECIMAL(10,2),
-                availability  INT,
-                detail        TEXT,
-                address       VARCHAR(255),
-                quantity      INT DEFAULT 1,
-                uploaded_at   DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+                category VARCHAR(100),
+                name VARCHAR(255),
+                image TEXT,
+                video TEXT,
+                price DECIMAL(10,2),
+                availability INT,
+                detail TEXT,
+                address TEXT,
+                quantity INT,
+                keywords TEXT,
+                made_of TEXT,
+                used_for TEXT,
+                harmful_activity TEXT,
+                precautions TEXT
+             """)
         conn.commit()
         cursor.execute(f"""
             SELECT id, category, name, image, price,
@@ -5751,7 +5756,7 @@ def product_activity_detail():
         your_item_table = f"{safe_username}_{session['user_id']}_your_item"
 
         cursor.execute(f"""
-            SELECT name, category FROM `{your_item_table}`
+            SELECT name, category, made_of, used_for, harmful_activity, precautions FROM `{your_item_table}`
             WHERE id = %s LIMIT 1
         """, (product_id,))
         item_row = cursor.fetchone()
@@ -5833,11 +5838,15 @@ def product_activity_detail():
             except:
                 pass
 
-        return jsonify({
-            "today_search_count":      total_search,
-            "today_add_to_cart_count": total_cart,
-            "today_purchase_count":    total_purchase
-        })
+            return jsonify({
+                "today_search_count":      total_search,
+                "today_add_to_cart_count": total_cart,
+                "today_purchase_count":    total_purchase,
+                "made_of":          item_row.get("made_of") or "",
+                "used_for":         item_row.get("used_for") or "",
+                "harmful_activity": item_row.get("harmful_activity") or "",
+                "precautions":      item_row.get("precautions") or ""
+            })
 
     except Exception as e:
         print("product-activity-detail error:", e)

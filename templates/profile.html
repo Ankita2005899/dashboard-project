@@ -771,9 +771,10 @@
         <div style="background:white;width:95%;max-width:720px;border-radius:20px;padding:30px;
         box-shadow:0 24px 70px rgba(0,0,0,0.3);position:relative;max-height:85vh;overflow-y:auto;
         border:2px solid #e0e7ff;">
-            <button onclick="document.getElementById('yourItemDetailPopup').style.display='none'" style="position:absolute;top:14px;right:14px;background:#f1f5f9;border:none;
-            border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;
-            display:flex;align-items:center;justify-content:center;z-index:10;">✕</button>
+            <button
+                onclick="document.getElementById('yourItemDetailPopup').style.display='none'; document.getElementById('detailDropdown').value=''; document.getElementById('detailContent').style.display='none'; currentProductDetail={};"
+                border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;
+                display:flex;align-items:center;justify-content:center;z-index:10;">✕</button>
             <div id="yourItemDetailContent"></div>
         </div>
     </div>
@@ -827,6 +828,8 @@
 
     <script>
         const mainImg = document.getElementById("mainProfileImg");
+        let currentProductDetail = {};
+
         const popup1 = document.getElementById("popup1");
         const popup2 = document.getElementById("popup2");
         const addProfileBtn = document.getElementById("addProfileBtn");
@@ -1057,7 +1060,25 @@ ${p.description ? `
                     max-height:120px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;">
                     ${(p.description || '').split('#')[0].trim() || p.description}
                     </p>
-                </div>` : ''}              
+                </div>` : ''}
+
+                <!-- Detail Dropdown -->
+                <div style="margin-top:14px;">
+                    <select id="detailDropdown" onchange="showDetailSection(this.value)"
+                        style="width:100%;padding:9px 13px;border-radius:9px;border:1.5px solid #cbd5e1;
+                               font-size:13px;font-weight:600;color:#374151;background:#f8fafc;cursor:pointer;outline:none;">
+                        <option value="">🔍 Select to view more details...</option>
+                        <option value="made_of">🧪 Product Made Up Of</option>
+                        <option value="used_for">✅ Mostly Used For</option>
+                        <option value="harmful_activity">⚠️ Harmful Activities / Misuse</option>
+                        <option value="precautions">🛡️ Safety Precautions</option>
+                    </select>
+                    <div id="detailContent"
+                        style="display:none;margin-top:10px;padding:14px 16px;border-radius:9px;
+                               background:linear-gradient(135deg,#f0f9ff,#e0f2fe);
+                               border:1.5px solid #bae6fd;font-size:13px;color:#1e293b;line-height:1.8;">
+                    </div>
+                </div>          
 
                 <!-- Activity Analytics -->
                 <div style="background:#f8fafc;border-radius:12px;padding:14px;margin-top:12px;">
@@ -1103,7 +1124,7 @@ ${p.description ? `
                 try {
                     const res = await fetch(`/api/product-activity-detail?product_id=${p.id}&category=${encodeURIComponent(p.category)}`);
                     const actData = await res.json();
-
+                    currentProductDetail = actData;
                     document.getElementById('kpi_search').textContent = actData.today_search_count || 0;
                     document.getElementById('kpi_cart').textContent = actData.today_add_to_cart_count || 0;
                     document.getElementById('kpi_purchase').textContent = actData.today_purchase_count || 0;
@@ -1420,6 +1441,24 @@ ${p.description ? `
 
             window.location.href = '/logout';
         }
+
+
+        function showDetailSection(key) {
+            const box = document.getElementById("detailContent");
+            if (!key) { box.style.display = "none"; return; }
+            const labels = {
+                made_of: "🧪 Product Made Up Of",
+                used_for: "✅ Mostly Used For",
+                harmful_activity: "⚠️ Harmful Activities / Misuse",
+                precautions: "🛡️ Safety Precautions"
+            };
+            const text = currentProductDetail[key] || "No information available.";
+            box.innerHTML = `<strong>${labels[key]}</strong><br><br>${text}`;
+            box.style.display = "block";
+        }
+
+
+
     </script>
 
     <!-- ===== END SIGN-OUT MODAL ===== -->
