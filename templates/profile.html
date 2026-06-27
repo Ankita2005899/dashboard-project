@@ -729,21 +729,43 @@
 
         <!-- KEEP SHOPPING -->
         <div class="shop-section">
-
             <div class="shop-header">
-                <h3>Keep shopping for</h3>
-                <span>Edit | Browsing history</span>
+                <h3>🛍️ Keep shopping for</h3>
+                <span style="font-size:13px;color:#64748b;" id="ksSlideLabel"></span>
             </div>
 
-            <div class="shop-items">
+            <!-- Slideshow container -->
+            <div style="position:relative;width:100%;border-radius:14px;overflow:hidden;
+                background:#000;min-height:280px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
 
-                <div class="shop-card">
-                    <img src="https://m.media-amazon.com/images/I/61p15B2FqDL.jpg">
-                    <p>Shampoos</p>
+                <!-- Media display -->
+                <div id="ksMediaBox" style="width:100%;height:300px;position:relative;">
+                    <img id="ksImage" src="" alt="" style="width:100%;height:300px;object-fit:cover;display:block;
+                               border-radius:14px;transition:opacity 0.5s ease;">
+                    <video id="ksVideo" src="" muted autoplay playsinline style="display:none;width:100%;height:300px;object-fit:cover;
+                               border-radius:14px;">
+                    </video>
+                    <!-- Overlay: product name + price -->
+                    <div style="position:absolute;bottom:0;left:0;right:0;
+                        background:linear-gradient(transparent,rgba(0,0,0,0.7));
+                        padding:16px 20px;border-radius:0 0 14px 14px;">
+                        <div id="ksName" style="color:white;font-size:18px;font-weight:800;"></div>
+                        <div id="ksPrice" style="color:#a5f3fc;font-size:15px;font-weight:700;margin-top:4px;"></div>
+                    </div>
                 </div>
 
-            </div>
+                <!-- Prev / Next -->
+                <button onclick="ksPrev()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);
+                           background:rgba(255,255,255,0.85);border:none;border-radius:50%;
+                           width:36px;height:36px;font-size:18px;cursor:pointer;z-index:2;">‹</button>
+                <button onclick="ksNext()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                           background:rgba(255,255,255,0.85);border:none;border-radius:50%;
+                           width:36px;height:36px;font-size:18px;cursor:pointer;z-index:2;">›</button>
 
+                <!-- Dots -->
+                <div id="ksDots" style="position:absolute;bottom:10px;right:16px;
+                    display:flex;gap:5px;z-index:2;"></div>
+            </div>
         </div>
 
 
@@ -963,7 +985,92 @@
                 grid.innerHTML = '<div style="color:#ef4444;font-size:13px;padding:10px;">Failed to load purchases.</div>';
             }
         }
+        // ── Keep Shopping Slideshow ──
+        let _ksProducts = [];
+        let _ksIndex = 0;
+        let _ksTimer = null;
+        let _ksMediaIndex = 0; // 0 = image, 1 = video
 
+        async function loadKeepShopping() {
+            try {
+                const res = await fetch('/api/all-dashboard-products');
+                const data = await res.json();
+                _ksProducts = (data.products || []).filter(p => p.image || p.video);
+                if (!_ksProducts.length) return;
+                buildKsDots();
+                ksShow(0);
+            } catch (e) {
+                console.warn('Keep shopping load failed:', e);
+            }
+        }
+
+        function buildKsDots() {
+            const dots = document.getElementById('ksDots');
+            dots.innerHTML = _ksProducts.map((_, i) =>
+                `<span onclick="ksJump(${i})" style="width:8px;height:8px;border-radius:50%;
+                 background:rgba(255,255,255,0.5);cursor:pointer;display:inline-block;
+                 transition:background 0.3s;" id="ksDot${i}"></span>`
+            ).join('');
+        }
+
+        function ksShow(idx) {
+            if (!_ksProducts.length) return;
+            _ksIndex = (idx + _ksProducts.length) % _ksProducts.length;
+            const p = _ksProducts[_ksIndex];
+
+            const img = document.getElementById('ksImage');
+            const vid = document.getElementById('ksVideo');
+            const label = document.getElementById('ksSlideLabel');
+
+            document.getElementById('ksName').textContent = p.name || '';
+            document.getElementById('ksPrice').textContent = p.price ? `₹${p.price}` : '';
+            label.textContent = `${_ksIndex + 1} / ${_ksProducts.length}`;
+
+            // Update dots
+            _ksProducts.forEach((_, i) => {
+                const dot = document.getElementById(`ksDot${i}`);
+                if (dot) dot.style.background = i === _ksIndex
+                    ? 'white' : 'rgba(255,255,255,0.4)';
+            });
+
+            // Decide: show image first, then video if available
+            const hasImage = p.image && p.image.startsWith('http');
+            const hasVideo = p.video && p.video.startsWith('http');
+
+            clearTimeout(_ksTimer);
+
+            if (hasImage) {
+                img.src = p.image;
+                img.style.display = 'block';
+                vid.style.display = 'none';
+                vid.pause();
+
+                if (hasVideo) {
+                    // Show image for 3s then switch to video
+                    _ksTimer = setTimeout(() => {
+                        img.style.display = 'none';
+                        vid.src = p.video;
+                        vid.style.display = 'block';
+                        vid.play();
+                        // After video plays 5s move to next
+                        _ksTimer = setTimeout(() => ksNext(), 5000);
+                    }, 3000);
+                } else {
+                    // No video — stay 4s then next
+                    _ksTimer = setTimeout(() => ksNext(), 4000);
+                }
+            } else if (hasVideo) {
+                img.style.display = 'none';
+                vid.src = p.video;
+                vid.style.display = 'block';
+                vid.play();
+                _ksTimer = setTimeout(() => ksNext(), 5000);
+            }
+        }
+
+        function ksNext() { ksShow(_ksIndex + 1); }
+        function ksPrev() { ksShow(_ksIndex - 1); }
+        function ksJump(i) { ksShow(i); }
         function addToCartFromProfile(productId, category, name, price, image) {
             // Step 1: track add-to-cart in product_activity
             fetch("/track-add-to-cart", {
@@ -1054,6 +1161,7 @@
         // Run on page load
         loadYourOrders();
         loadBuyAgain();
+        loadKeepShopping();
         const popup1 = document.getElementById("popup1");
         const popup2 = document.getElementById("popup2");
         const addProfileBtn = document.getElementById("addProfileBtn");

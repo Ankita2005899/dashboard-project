@@ -5993,6 +5993,32 @@ def get_keywords():
         return jsonify({'keywords': '', 'error': str(e)}), 500
 
 
+#______________________profile page cha "Keep shopping for" part to get display the image and video of product simultaneously __________________________
+
+
+@app.route('/api/all-dashboard-products')
+def all_dashboard_products():
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        products = []
+        for tbl in ['food_items', 'card', 'study_material']:
+            try:
+                cursor.execute(f"SELECT id, name, image, video, price, availability, '{tbl}' as category FROM `{tbl}` WHERE availability > 0 ORDER BY id DESC LIMIT 20")
+                products += cursor.fetchall()
+            except:
+                pass
+        cursor.close()
+        conn.close()
+        for p in products:
+            p['price'] = float(p['price']) if p['price'] else 0
+        return jsonify({'products': products})
+    except Exception as e:
+        return jsonify({'products': [], 'error': str(e)}), 500
+
+
+
+
 #----------------profile page ("your Order " and ""Buy Again"") section sathi -----------------
 
 
