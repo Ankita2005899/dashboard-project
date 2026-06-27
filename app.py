@@ -5730,36 +5730,47 @@ def product_activity_detail():
     safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
     if safe_username and safe_username[0].isdigit():
         safe_username = "user_" + safe_username
-    cart_table = f"{safe_username}_{user_id}"
+    cart_table     = f"{safe_username}_{user_id}"
+    activity_table = f"{safe_username}_{user_id}_product_activity"
+    your_item_table = f"{safe_username}_{user_id}_your_item"
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        # Total purchases from cart table (mode = successful)
+        # ✅ Get store_data_id from your_item table using the item's id
         cursor.execute(f"""
-            SELECT COUNT(*) as today_purchase_count
-            FROM `{cart_table}`
+            SELECT store_data_id, category FROM `{your_item_table}`
+            WHERE id = %s LIMIT 1
+        """, (product_id,))
+        item_row = cursor.fetchone()
+
+        if not item_row:
+            return jsonify({"today_search_count":0,"today_add_to_cart_count":0,"today_purchase_count":0})
+
+        real_product_id = item_row["store_data_id"]
+        real_category   = item_row["category"]
+
+        # ✅ Purchases from cart table
+        cursor.execute(f"""
+            SELECT COUNT(*) as cnt FROM `{cart_table}`
             WHERE product_id = %s AND category = %s AND mode = 'successful'
-        """, (product_id, category))
-        purchase_row = cursor.fetchone()
+        """, (real_product_id, real_category))
+        purchase_count = cursor.fetchone()["cnt"]
 
-        # Total add to cart (all entries = add to cart actions)
+        # ✅ Add to cart from cart table
         cursor.execute(f"""
-            SELECT COUNT(*) as today_add_to_cart_count
-            FROM `{cart_table}`
+            SELECT COUNT(*) as cnt FROM `{cart_table}`
             WHERE product_id = %s AND category = %s
-        """, (product_id, category))
-        cart_row = cursor.fetchone()
+        """, (real_product_id, real_category))
+        cart_count = cursor.fetchone()["cnt"]
 
-        # Search count from product_activity if available, else 0
-        activity_table = f"{safe_username}_{user_id}_product_activity"
+        # ✅ Search from activity table
         search_count = 0
         try:
             cursor.execute(f"""
                 SELECT today_search_count FROM `{activity_table}`
-                WHERE product_id = %s AND category = %s
-                LIMIT 1
-            """, (product_id, category))
+                WHERE product_id = %s AND category = %s LIMIT 1
+            """, (real_product_id, real_category))
             search_row = cursor.fetchone()
             if search_row:
                 search_count = search_row["today_search_count"] or 0
@@ -5767,20 +5778,17 @@ def product_activity_detail():
             pass
 
         return jsonify({
-            "today_search_count":        search_count,
-            "today_add_to_cart_count":   cart_row["today_add_to_cart_count"] if cart_row else 0,
-            "today_purchase_count":      purchase_row["today_purchase_count"] if purchase_row else 0
+            "today_search_count":      search_count,
+            "today_add_to_cart_count": cart_count,
+            "today_purchase_count":    purchase_count
         })
 
     except Exception as e:
-        
         print("product-activity-detail error:", e)
         return jsonify({"today_search_count":0,"today_add_to_cart_count":0,"today_purchase_count":0})
     finally:
         cursor.close()
-        conn.close()
-        
-        
+        conn.close()       
         
 #-------------------logout process from profile.html page ({sign out")button sathi-------------------- 
 
