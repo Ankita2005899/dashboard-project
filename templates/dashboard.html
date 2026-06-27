@@ -1236,21 +1236,75 @@
             </div>
         </div>
 
-        <!-- Common Notifications — loaded dynamically -->
-<div id="commonNotifs" style="overflow-y:auto;flex:1;">
-    <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
-        <div style="font-size:32px;margin-bottom:10px;">📢</div>
-        <div style="font-size:13px;">Loading notifications...</div>
-    </div>
-</div>
+        <!-- Common Notifications -->
+        <div id="commonNotifs" style="overflow-y:auto;flex:1;">
 
-<!-- Special Notifications — loaded dynamically -->
-<div id="specialNotifs" style="display:none;overflow-y:auto;flex:1;">
-    <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
-        <div style="font-size:32px;margin-bottom:10px;">🎁</div>
-        <div style="font-size:13px;">Loading offers...</div>
-    </div>
-</div>
+            <div class="notif-item-dash unread-notif" id="cn1" onclick="readNotif('cn1')">
+                <div class="notif-icon-dash" style="background:#dbeafe;color:#1d4ed8;">📢</div>
+                <div style="flex:1;">
+                    <div class="notif-title-dash">New feature launched</div>
+                    <div class="notif-desc-dash">Fuzzy search is now live on ShopSphere!</div>
+                    <div class="notif-time-dash">2 hours ago</div>
+                </div>
+                <div class="unread-dot" id="dot-cn1"></div>
+            </div>
+
+            <div class="notif-item-dash unread-notif" id="cn2" onclick="readNotif('cn2')">
+                <div class="notif-icon-dash" style="background:#fef3c7;color:#b45309;">⚠️</div>
+                <div style="flex:1;">
+                    <div class="notif-title-dash">Low stock alert</div>
+                    <div class="notif-desc-dash">Physics Notes Class 12 has only 5 items left.</div>
+                    <div class="notif-time-dash">5 hours ago</div>
+                </div>
+                <div class="unread-dot" id="dot-cn2"></div>
+            </div>
+
+            <div class="notif-item-dash" id="cn3" onclick="readNotif('cn3')">
+                <div class="notif-icon-dash" style="background:#dcfce7;color:#15803d;">✅</div>
+                <div style="flex:1;">
+                    <div class="notif-title-dash">Maintenance done</div>
+                    <div class="notif-desc-dash">All services are running smoothly.</div>
+                    <div class="notif-time-dash">Yesterday</div>
+                </div>
+                <div class="unread-dot" style="opacity:0"></div>
+            </div>
+
+            <div class="notif-item-dash" id="cn4" onclick="readNotif('cn4')">
+                <div class="notif-icon-dash" style="background:#dbeafe;color:#1d4ed8;">👥</div>
+                <div style="flex:1;">
+                    <div class="notif-title-dash">New users joined</div>
+                    <div class="notif-desc-dash">5 new users signed up today.</div>
+                    <div class="notif-time-dash">2 days ago</div>
+                </div>
+                <div class="unread-dot" style="opacity:0"></div>
+            </div>
+
+        </div>
+
+        <!-- Special Notifications -->
+        <div id="specialNotifs" style="display:none;overflow-y:auto;flex:1;">
+
+            <div class="notif-item-dash unread-notif" id="sn1" onclick="readNotif('sn1')">
+                <div class="notif-icon-dash" style="background:#ede9fe;color:#6d28d9;">⭐</div>
+                <div style="flex:1;">
+                    <div class="notif-title-dash">Request approved</div>
+                    <div class="notif-desc-dash">Your "Veg Biryani" featured listing has been approved.</div>
+                    <div class="notif-time-dash">1 hour ago</div>
+                </div>
+                <div class="unread-dot" id="dot-sn1"></div>
+            </div>
+
+            <div class="notif-item-dash unread-notif" id="sn2" onclick="readNotif('sn2')">
+                <div class="notif-icon-dash" style="background:#fce7f3;color:#be185d;">🎁</div>
+                <div style="flex:1;">
+                    <div class="notif-title-dash">Special offer for you</div>
+                    <div class="notif-desc-dash">Exclusive 20% discount selected just for you!</div>
+                    <div class="notif-time-dash">3 hours ago</div>
+                </div>
+                <div class="unread-dot" id="dot-sn2"></div>
+            </div>
+
+        </div>
 
     </div>
 
@@ -1768,166 +1822,137 @@
             else { badge.style.display = "inline"; badge.textContent = count; }
         }
 
+        // ── Load ALL offers (common + special) ────────────────
+        async function loadAllOffers() {
+            try {
+                const res    = await fetch('/api/my-special-offers');
+                const data   = await res.json();
+                const offers = data.offers || [];
 
+                const specialContainer = document.getElementById('specialNotifs');
+                const commonContainer  = document.getElementById('commonNotifs');
 
-        // ── Load special offers for this customer ──────────────────
-async function loadSpecialOffers() {
-    try {
-        const res  = await fetch('/api/my-special-offers');
-        const data = await res.json();
-        const offers = data.offers || [];
+                const specialOffers = offers.filter(o => o.offer_category === 'special');
+                const commonOffers  = offers.filter(o => o.offer_category === 'common');
 
-        const container = document.getElementById('specialNotifs');
-        
-        if (!offers.length) {
-            container.innerHTML = `
-                <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
-                    <div style="font-size:32px;margin-bottom:10px;">🎁</div>
-                    <div style="font-size:13px;">No special offers yet!</div>
-                </div>`;
-            return;
+                specialContainer.innerHTML = specialOffers.length
+                    ? specialOffers.map(o => renderOfferCard(o)).join('')
+                    : `<div style="text-align:center;padding:40px 20px;color:#94a3b8;">
+                        <div style="font-size:32px;">🎁</div>
+                        <div style="font-size:13px;">No special offers yet!</div>
+                       </div>`;
+
+                commonContainer.innerHTML = commonOffers.length
+                    ? commonOffers.map(o => renderOfferCard(o)).join('')
+                    : `<div style="text-align:center;padding:40px 20px;color:#94a3b8;">
+                        <div style="font-size:32px;">📢</div>
+                        <div style="font-size:13px;">No announcements yet!</div>
+                       </div>`;
+
+                const unread = offers.filter(o => !o.is_read).length;
+                const b = document.getElementById('notifBadge');
+                if (b) { b.textContent = unread > 0 ? unread : ''; }
+
+            } catch(e) { console.error('Failed to load offers:', e); }
         }
 
-        // Update badge count
-        const unread = offers.filter(o => !o.is_read).length;
-        const badge  = document.getElementById('notifBadge');
-        if (badge) badge.textContent = unread;
+        // ── Render single offer card ───────────────────────────
+        function renderOfferCard(o) {
+            const isCombo = o.product1_image || o.product2_image;
 
-        container.innerHTML = offers.map(o => `
-            <div class="notif-item-dash ${!o.is_read ? 'unread-notif' : ''}"
-                 onclick="markOfferRead(${o.id}, this)"
-                 style="cursor:pointer;">
-                <div class="notif-icon-dash" style="background:#fce7f3;color:#be185d;">🎁</div>
-                <div style="flex:1;">
-                    <div class="notif-title-dash">${o.offer_type}</div>
-                    <div class="notif-desc-dash">${o.message}</div>
-                    <div class="notif-time-dash">${new Date(o.created_at).toLocaleString('en-IN')}</div>
-                </div>
-                ${!o.is_read ? '<div class="unread-dot"></div>' : ''}
-            </div>
-        `).join('');
+            const comboHTML = isCombo ? `
+                <div style="display:flex;align-items:center;gap:8px;margin-top:8px;
+                    background:#f8fafc;padding:8px;border-radius:10px;border:1px solid #e2e8f0;">
+                    ${o.product1_image ? `<img src="${o.product1_image}"
+                        style="width:44px;height:44px;object-fit:cover;border-radius:8px;
+                        border:1px solid #e2e8f0;">` : ''}
+                    ${o.product1_image && o.product2_image
+                        ? `<span style="font-size:16px;font-weight:700;color:#6366f1;">+</span>` : ''}
+                    ${o.product2_image ? `<img src="${o.product2_image}"
+                        style="width:44px;height:44px;object-fit:cover;border-radius:8px;
+                        border:1px solid #e2e8f0;">` : ''}
+                    <div style="flex:1;">
+                        <div style="font-size:11px;font-weight:700;color:#1e293b;">
+                            ${o.product1_name || ''} ${o.product2_name ? '+ ' + o.product2_name : ''}
+                        </div>
+                        <div style="font-size:11px;color:#6366f1;font-weight:700;">
+                            Buy Now — ${o.discount}% OFF 🎉
+                        </div>
+                    </div>
+                </div>` : '';
 
-    } catch(e) {
-        console.error('Failed to load offers:', e);
-    }
-}
+            const buyNowBtn = (o.product1_name || o.product2_name) ? `
+                <button onclick="buyComboOffer(${o.id},'${(o.product1_name||'').replace(/'/g,"\\'")}','${(o.product1_image||'').replace(/'/g,"\\'")}','${(o.product2_name||'').replace(/'/g,"\\'")}','${(o.product2_image||'').replace(/'/g,"\\'")}',${o.discount||0})"
+                    style="margin-top:8px;width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                    color:white;border:none;padding:8px;border-radius:10px;font-size:12px;
+                    font-weight:700;cursor:pointer;"
+                    onmouseover="this.style.opacity='0.85'"
+                    onmouseout="this.style.opacity='1'">
+                    🛒 Buy Now
+                </button>` : '';
 
-async function markOfferRead(offerId, el) {
-    await fetch(`/api/mark-offer-read/${offerId}`, { method: 'POST' });
-    el.classList.remove('unread-notif');
-    const dot = el.querySelector('.unread-dot');
-    if (dot) dot.remove();
-}
-
-// ── openOffers — open notification panel on Special tab ────
-function openOffers() {
-    openNotifications();
-    switchNotifTab('special');
-    loadSpecialOffers();
-}
-
-// Auto-load on page open
-window.addEventListener('load', loadSpecialOffers);
-
-// ── Load ALL offers for this customer ──────────────────────
-async function loadAllOffers() {
-    try {
-        const res  = await fetch('/api/my-special-offers');
-        const data = await res.json();
-        const offers = data.offers || [];
-
-        const specialContainer = document.getElementById('specialNotifs');
-        const commonContainer  = document.getElementById('commonNotifs');
-
-        const specialOffers = offers.filter(o => o.offer_category === 'special');
-        const commonOffers  = offers.filter(o => o.offer_category === 'common');
-
-        // ── Render Special ──
-        if (!specialOffers.length) {
-            specialContainer.innerHTML = `
-                <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
-                    <div style="font-size:32px;margin-bottom:10px;">🎁</div>
-                    <div style="font-size:13px;">No special offers yet!</div>
+            return `
+                <div class="notif-item-dash ${!o.is_read ? 'unread-notif' : ''}"
+                     onclick="markOfferRead(${o.id}, this)"
+                     style="cursor:pointer;">
+                    <div class="notif-icon-dash" style="background:#fce7f3;color:#be185d;">🎁</div>
+                    <div style="flex:1;">
+                        <div class="notif-title-dash">${o.offer_type}</div>
+                        <div class="notif-desc-dash">${o.message}</div>
+                        ${comboHTML}
+                        ${buyNowBtn}
+                        <div class="notif-time-dash">
+                            ${new Date(o.created_at).toLocaleString('en-IN')}
+                        </div>
+                    </div>
+                    ${!o.is_read ? '<div class="unread-dot"></div>' : ''}
                 </div>`;
-        } else {
-            specialContainer.innerHTML = specialOffers.map(o => renderOfferCard(o)).join('');
         }
 
-        // ── Render Common ──
-        if (!commonOffers.length) {
-            commonContainer.innerHTML = `
-                <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
-                    <div style="font-size:32px;margin-bottom:10px;">📢</div>
-                    <div style="font-size:13px;">No announcements yet!</div>
-                </div>`;
-        } else {
-            commonContainer.innerHTML = commonOffers.map(o => renderOfferCard(o)).join('');
+        // ── Mark offer as read ─────────────────────────────────
+        async function markOfferRead(offerId, el) {
+            await fetch(`/api/mark-offer-read/${offerId}`, { method: 'POST' });
+            el.classList.remove('unread-notif');
+            const dot = el.querySelector('.unread-dot');
+            if (dot) dot.remove();
         }
 
-        // ── Update badge ──
-        const unread = offers.filter(o => !o.is_read).length;
-        const badge  = document.getElementById('notifBadge');
-        if (badge) badge.textContent = unread > 0 ? unread : '';
+        // ── Buy Combo Offer → go to buynow page ───────────────
+        async function buyComboOffer(offerId, p1Name, p1Image, p2Name, p2Image, discount) {
+            try {
+                const res = await fetch('/api/buy-combo-offer', {
+                    method : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body   : JSON.stringify({
+                        offer_id      : offerId,
+                        product1_name : p1Name,
+                        product1_image: p1Image,
+                        product2_name : p2Name,
+                        product2_image: p2Image,
+                        discount      : discount
+                    })
+                });
+                const data = await res.json();
+                if (data.success && data.cart_id) {
+                    window.location.href = `/buynow?cart_id=${data.cart_id}&combo=1`;
+                } else {
+                    alert('Error: ' + (data.error || 'Could not process'));
+                }
+            } catch(e) {
+                alert('Network error: ' + e.message);
+            }
+        }
 
-    } catch(e) {
-        console.error('Failed to load offers:', e);
-    }
-}
+        // ── Open notification panel on Special tab ─────────────
+        function openOffers() {
+            openNotifications();
+            switchNotifTab('special');
+            loadAllOffers();
+        }
 
-function renderOfferCard(o) {
-    const isCombo = o.product1_image || o.product2_image;
-    const comboHTML = isCombo ? `
-        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;background:#f8fafc;
-            padding:8px;border-radius:10px;border:1px solid #e2e8f0;">
-            ${o.product1_image ? `<img src="${o.product1_image}" 
-                style="width:44px;height:44px;object-fit:cover;border-radius:8px;
-                border:1px solid #e2e8f0;">` : ''}
-            ${o.product1_image && o.product2_image ? 
-                `<span style="font-size:16px;font-weight:700;color:#6366f1;">+</span>` : ''}
-            ${o.product2_image ? `<img src="${o.product2_image}" 
-                style="width:44px;height:44px;object-fit:cover;border-radius:8px;
-                border:1px solid #e2e8f0;">` : ''}
-            <div style="flex:1;">
-                <div style="font-size:11px;font-weight:700;color:#1e293b;">
-                    ${o.product1_name || ''} ${o.product2_name ? '+ ' + o.product2_name : ''}
-                </div>
-                <div style="font-size:11px;color:#6366f1;font-weight:700;">
-                    Buy Now — ${o.discount}% OFF 🎉
-                </div>
-            </div>
-        </div>` : '';
+        // Auto load on page open
+        window.addEventListener('load', loadAllOffers);
 
-    return `
-        <div class="notif-item-dash ${!o.is_read ? 'unread-notif' : ''}"
-             onclick="markOfferRead(${o.id}, this)"
-             style="cursor:pointer;">
-            <div class="notif-icon-dash" style="background:#fce7f3;color:#be185d;">🎁</div>
-            <div style="flex:1;">
-                <div class="notif-title-dash">${o.offer_type}</div>
-                <div class="notif-desc-dash">${o.message}</div>
-                ${comboHTML}
-                <div class="notif-time-dash">
-                    ${new Date(o.created_at).toLocaleString('en-IN')}
-                </div>
-            </div>
-            ${!o.is_read ? '<div class="unread-dot"></div>' : ''}
-        </div>`;
-}
-
-async function markOfferRead(offerId, el) {
-    await fetch(`/api/mark-offer-read/${offerId}`, { method: 'POST' });
-    el.classList.remove('unread-notif');
-    const dot = el.querySelector('.unread-dot');
-    if (dot) dot.remove();
-}
-
-function openOffers() {
-    openNotifications();
-    switchNotifTab('special');
-    loadAllOffers();
-}
-
-window.addEventListener('load', loadAllOffers);
     </script>
 
     <!-- SUCCESS POPUP -->

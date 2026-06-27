@@ -8,42 +8,42 @@
     <style>
         /* ===== THEME VARIABLES ===== */
         :root {
-            --page-bg:        #d4f4f8;
-            --card-bg:        #ffffff;
-            --card-text:      #111827;
-            --muted:          #555;
-            --border:         #ddd;
-            --input-bg:       #ffffff;
-            --input-color:    #111827;
-            --header-bg:      linear-gradient(135deg,#e0f2fe,#f0fdfa);
-            --header-border:  #1e293b;
-            --header-btn-bg:  #ffffff;
+            --page-bg: #d4f4f8;
+            --card-bg: #ffffff;
+            --card-text: #111827;
+            --muted: #555;
+            --border: #ddd;
+            --input-bg: #ffffff;
+            --input-color: #111827;
+            --header-bg: linear-gradient(135deg, #e0f2fe, #f0fdfa);
+            --header-border: #1e293b;
+            --header-btn-bg: #ffffff;
             --header-btn-clr: #1e293b;
             --header-btn-bdr: #cbd5e1;
-            --modal-bg:       #ffffff;
-            --tr-hover:       #f1f5ff;
-            --grid-bg: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
-                       linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+            --modal-bg: #ffffff;
+            --tr-hover: #f1f5ff;
+            --grid-bg: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
             --grid-size: 50px 50px;
         }
 
         [data-theme="dark"] {
-            --page-bg:        #0a0a0f;
-            --card-bg:        #12121a;
-            --card-text:      #f0eee8;
-            --muted:          #8a8a9a;
-            --border:         rgba(255,255,255,0.1);
-            --input-bg:       #1e1e2e;
-            --input-color:    #f0eee8;
-            --header-bg:      linear-gradient(135deg,#0a0a0f,#12121a);
-            --header-border:  #2d2d3d;
-            --header-btn-bg:  #1a1a26;
+            --page-bg: #0a0a0f;
+            --card-bg: #12121a;
+            --card-text: #f0eee8;
+            --muted: #8a8a9a;
+            --border: rgba(255, 255, 255, 0.1);
+            --input-bg: #1e1e2e;
+            --input-color: #f0eee8;
+            --header-bg: linear-gradient(135deg, #0a0a0f, #12121a);
+            --header-border: #2d2d3d;
+            --header-btn-bg: #1a1a26;
             --header-btn-clr: #d0d0e0;
-            --header-btn-bdr: rgba(255,255,255,0.12);
-            --modal-bg:       #12121a;
-            --tr-hover:       #1a1a26;
-            --grid-bg: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-                       linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            --header-btn-bdr: rgba(255, 255, 255, 0.12);
+            --modal-bg: #12121a;
+            --tr-hover: #1a1a26;
+            --grid-bg: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
             --grid-size: 50px 50px;
         }
 
@@ -220,28 +220,36 @@
         .modal.active {
             display: flex;
         }
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    justify-content: center;
-    align-items: center;
-    z-index: 5000;  /* higher than footer */
-}.modal {
-    padding-bottom: 80px;   /* ✅ space for footer */
-}
-        .modal-content {
-    background: var(--modal-bg);
-    width: 420px;
-    border-radius: 14px;
-    padding: 18px;
-    position: relative;
-    animation: pop 0.25s ease;
 
-    max-height: 80vh;        /* ✅ limit height */
-    overflow-y: auto;        /* ✅ enable scroll */
-}
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            /* higher than footer */
+        }
+
+        .modal {
+            padding-bottom: 80px;
+            /* ✅ space for footer */
+        }
+
+        .modal-content {
+            background: var(--modal-bg);
+            width: 420px;
+            border-radius: 14px;
+            padding: 18px;
+            position: relative;
+            animation: pop 0.25s ease;
+
+            max-height: 80vh;
+            /* ✅ limit height */
+            overflow-y: auto;
+            /* ✅ enable scroll */
+        }
 
         @keyframes pop {
             from {
@@ -424,138 +432,140 @@
         }
 
         /* ================= FOOTER ================= */
-.footer{
-    position:fixed;
+        .footer {
+            position: fixed;
 
-    bottom:0;
-    left:0;
+            bottom: 0;
+            left: 0;
 
-    width:100%;
-    height:60px;
+            width: 100%;
+            height: 60px;
 
-    background:linear-gradient(90deg,#111827,#1f2937,#0f766e);
+            background: linear-gradient(90deg, #111827, #1f2937, #0f766e);
 
-    color:white;
+            color: white;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-    font-size:14px;
+            font-size: 14px;
 
-    z-index:1000;
-}
+            z-index: 1000;
+        }
 
-.header-btn{
-    padding:8px 16px;
+        .header-btn {
+            padding: 8px 16px;
 
-    border-radius:8px;
-    border:2px solid var(--header-btn-bdr);
+            border-radius: 8px;
+            border: 2px solid var(--header-btn-bdr);
 
-    background:var(--header-btn-bg);
-    color:var(--header-btn-clr);
+            background: var(--header-btn-bg);
+            color: var(--header-btn-clr);
 
-    text-decoration:none;
-    font-weight:600;
+            text-decoration: none;
+            font-weight: 600;
 
-    transition:all 0.25s ease;
-}
+            transition: all 0.25s ease;
+        }
 
-.header-btn:hover{
-    background:linear-gradient(135deg,#f97316,#f59e0b);
-    color:white;
-    border-color:#f97316;
-}
+        .header-btn:hover {
+            background: linear-gradient(135deg, #f97316, #f59e0b);
+            color: white;
+            border-color: #f97316;
+        }
 
-.container{
-    margin-top:100px;
-}
-/* ================= HEADER ================= */
+        .container {
+            margin-top: 100px;
+        }
 
-.header{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:70px;
+        /* ================= HEADER ================= */
 
-    background:var(--header-bg);
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
 
-    border-bottom:3px solid var(--header-border);
+            background: var(--header-bg);
 
-    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+            border-bottom: 3px solid var(--header-border);
 
-    display:flex;
-    justify-content:center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 
-    z-index:3000;
-}
+            display: flex;
+            justify-content: center;
 
-/* header inner container */
-.header-container{
-    width:100%;
-    max-width:1200px;
+            z-index: 3000;
+        }
 
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+        /* header inner container */
+        .header-container {
+            width: 100%;
+            max-width: 1200px;
 
-    padding:0 20px;
-}
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
 
-.header-left h2{
-    font-weight:700;
-    color:var(--card-text);
-}
+            padding: 0 20px;
+        }
 
-.header-right{
-    display:flex;
-    gap:10px;
-}
-.main-content{
-    max-width:1200px;
-    margin:auto;
-    padding-top:100px;
-}
-.header-right{
-    display:flex;
-    gap:12px;
-    align-items:center;
-}
+        .header-left h2 {
+            font-weight: 700;
+            color: var(--card-text);
+        }
 
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: auto;
+            padding-top: 100px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
     </style>
 </head>
 
 <body>
-<script>
-  (function(){
-    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-  })();
-</script>
-<header class="header">
+    <script>
+        (function () {
+            var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <header class="header">
 
-    <div class="header-container">
+        <div class="header-container">
 
-        <div class="header-left">
-            <h2>👀 View Cart</h2>
+            <div class="header-left">
+                <h2>👀 View Cart</h2>
+            </div>
+
+            <div class="header-right">
+
+                <button id="userBtn" class="header-btn">
+                    👤 User Details
+                </button>
+
+                <a href="dashboard.html" class="header-btn">
+                    🏠 Dashboard
+                </a>
+
+            </div>
+
         </div>
 
-        <div class="header-right">
-
-            <button id="userBtn" class="header-btn">
-                👤 User Details
-            </button>
-
-            <a href="dashboard.html" class="header-btn">
-                🏠 Dashboard
-            </a>
-
-        </div>
-
-    </div>
-
-</header>
+    </header>
 
     <!-- this is the message from the save detail button-->
     {% with messages = get_flashed_messages() %}
@@ -568,7 +578,7 @@
 
 
     <!-- ================= USER DETAILS BUTTON ================= -->
-<!---  <button id="userBtn" style="
+    <!---  <button id="userBtn" style="
     position: fixed;
     top: 20px;
     right: 20px;
@@ -606,7 +616,8 @@
             <h1>✅ Purchased Items</h1>
         </div>
         <div id="purchasedGrid"></div>
-        <p id="emptyPurchased" style="display:none;text-align:center;color:#94a3b8;padding:20px;">No purchased items yet.</p>
+        <p id="emptyPurchased" style="display:none;text-align:center;color:#94a3b8;padding:20px;">No purchased items
+            yet.</p>
     </div>
 
     <!-- ================= MODAL ================= -->
@@ -632,51 +643,52 @@
     </div>
     <!--save button popup -->
     <!-- ================= USER DETAILS MODAL ================= -->
-<!-- ================= USER DETAILS MODAL ================= -->
-<div id="userModal" class="modal">
-    <div class="modal-content" style="width: 450px; max-width: 95%;">
-        <button class="close-btn" onclick="closeUserModal()">×</button>
-        <h2>User Details</h2>
+    <!-- ================= USER DETAILS MODAL ================= -->
+    <div id="userModal" class="modal">
+        <div class="modal-content" style="width: 450px; max-width: 95%;">
+            <button class="close-btn" onclick="closeUserModal()">×</button>
+            <h2>User Details</h2>
 
-        <form id="userForm" method="POST" action="/save-user-detail" enctype="multipart/form-data">
+            <form id="userForm" method="POST" action="/save-user-detail" enctype="multipart/form-data">
 
-            <!-- Profile Image Upload -->
-            <div style="text-align:center; margin: 10px 0;">
-                <img id="profilePreview" src="https://via.placeholder.com/120"
-                    style="width:120px; height:120px; object-fit:cover; border-radius:50%; margin-bottom:10px;">
-                <input type="file" id="profileImage" name="profile_image" accept="image/*" style="display:block; margin:auto;">
-            </div>
+                <!-- Profile Image Upload -->
+                <div style="text-align:center; margin: 10px 0;">
+                    <img id="profilePreview" src="https://via.placeholder.com/120"
+                        style="width:120px; height:120px; object-fit:cover; border-radius:50%; margin-bottom:10px;">
+                    <input type="file" id="profileImage" name="profile_image" accept="image/*"
+                        style="display:block; margin:auto;">
+                </div>
 
-            <!-- User Form Fields -->
-            <label>Username</label>
-            <input type="text" id="username" name="name" value="{{ user.name }}"
-                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
+                <!-- User Form Fields -->
+                <label>Username</label>
+                <input type="text" id="username" name="name" value="{{ user.name }}"
+                    style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
 
-            <label>Age</label>
-            <input type="number" id="userAge" name="age"
-                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
+                <label>Age</label>
+                <input type="number" id="userAge" name="age"
+                    style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
 
-            <label>Main Phone</label>
-            <input type="tel" id="mainPhone" name="phone1"
-                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
+                <label>Main Phone</label>
+                <input type="tel" id="mainPhone" name="phone1"
+                    style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
 
-            <label>Secondary Phone</label>
-            <input type="tel" id="secondPhone" name="phone2"
-                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
+                <label>Secondary Phone</label>
+                <input type="tel" id="secondPhone" name="phone2"
+                    style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;">
 
-            <label>Main Address</label>
-            <textarea id="mainAddress" name="address1" rows="2"
-                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;"></textarea>
+                <label>Main Address</label>
+                <textarea id="mainAddress" name="address1" rows="2"
+                    style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;"></textarea>
 
-            <label>Secondary Address</label>
-            <textarea id="secondAddress" name="address2" rows="2"
-                style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;"></textarea>
+                <label>Secondary Address</label>
+                <textarea id="secondAddress" name="address2" rows="2"
+                    style="width:100%; padding:6px; margin:4px 0 8px; border-radius:6px; border:1px solid #ccc;"></textarea>
 
-            <label>Email</label>
-            <input type="email" id="email" name="email" value="{{ user.email }}" readonly
-                style="width:100%; padding:6px; margin:4px 0 12px; border-radius:6px; border:1px solid #ccc; background:#f3f4f6;">
+                <label>Email</label>
+                <input type="email" id="email" name="email" value="{{ user.email }}" readonly
+                    style="width:100%; padding:6px; margin:4px 0 12px; border-radius:6px; border:1px solid #ccc; background:#f3f4f6;">
 
-            <button type="submit" style="
+                <button type="submit" style="
                 background:#10b981;
                 color:white;
                 border:none;
@@ -686,22 +698,22 @@
                 cursor:pointer;
                 font-weight:600;
             ">Save</button>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 
 
     <!-- ================= EXISTING DETAIL OPTION MODAL ================= -->
-<div id="detailOptionModal" class="modal">
-    <div class="modal-content" style="width:380px; text-align:center;">
-        <h3 style="margin-bottom:15px;">⚠️ Details Already Exist</h3>
-        <p style="margin-bottom:20px;">
-            Your details are already saved.<br>
-            What would you like to do?
-        </p>
+    <div id="detailOptionModal" class="modal">
+        <div class="modal-content" style="width:380px; text-align:center;">
+            <h3 style="margin-bottom:15px;">⚠️ Details Already Exist</h3>
+            <p style="margin-bottom:20px;">
+                Your details are already saved.<br>
+                What would you like to do?
+            </p>
 
-        <div style="display:flex; gap:10px; justify-content:center;">
-            <button id="saveAsIsBtn" style="
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button id="saveAsIsBtn" style="
                 background:#3b82f6;
                 color:white;
                 border:none;
@@ -711,7 +723,7 @@
                 font-weight:600;
             ">Save as it is</button>
 
-            <button id="saveAnotherBtn" style="
+                <button id="saveAnotherBtn" style="
                 background:#10b981;
                 color:white;
                 border:none;
@@ -720,9 +732,9 @@
                 cursor:pointer;
                 font-weight:600;
             ">Save another detail</button>
+            </div>
         </div>
     </div>
-</div>
 
     <script>
 
@@ -774,22 +786,26 @@
                     card.dataset.cartId = item.id;
                     card.dataset.quantity = item.quantity || 1;
 
+                    const isCombo = item.mode === 'combo_offer';
                     card.innerHTML = `
-                <img src="${item.image}">
-                <h3>${item.name}</h3>
-                <p>Available: ${item.availability}</p>
-                <h4>₹${item.price}</h4>
-                ${item.quantity > 1 ? `<div class="qty-badge">${item.quantity}</div>` : ""}
-                <div class="card-actions" style="margin-top:10px; display:flex; gap:8px;">
-                    <button class="buy-btn" data-id="${item.id}">🛍 Buy Now</button>
-                    <button class="delete-btn" data-id="${item.id}">❌</button>
-                </div>
-            `;
+    <img src="${item.image}" onerror="this.src='https://via.placeholder.com/200?text=📦'">
+    <h3>${item.name}</h3>
+    <p>Category: ${item.category}</p>
+    ${isCombo ? `<div style="background:#ede9fe;color:#6d28d9;padding:4px 10px;
+        border-radius:8px;font-size:11px;font-weight:700;margin-bottom:6px;text-align:center;">
+        🎁 Combo Offer Purchase
+    </div>` : ''}
+    <h4>₹${item.price}</h4>
+    <div style="margin-top:8px;background:#d1fae5;color:#065f46;padding:6px 12px;
+        border-radius:8px;font-size:13px;font-weight:700;text-align:center;">
+        ✅ Purchased on ${item.date}
+    </div>
+`;
 
                     card.querySelector(".buy-btn").addEventListener("click", function (e) {
                         e.preventDefault();
                         buyNow(card.dataset.cartId, card);
-                  });
+                    });
 
 
 
@@ -917,9 +933,10 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.exists) {
-    // ✅ user exists → navigate to Buynow page
-window.location.href = `/Buynow.html?cart_id=${cardId}`;}
- else {
+                        // ✅ user exists → navigate to Buynow page
+                        window.location.href = `/Buynow.html?cart_id=${cardId}`;
+                    }
+                    else {
                         // ❌ user missing → vibrate card & highlight user button
                         const userBtn = document.getElementById("userBtn");
 
@@ -949,34 +966,34 @@ window.location.href = `/Buynow.html?cart_id=${cardId}`;}
         const profilePreview = document.getElementById("profilePreview");
 
 
-// 🔽 ADD THIS CODE HERE
-const detailOptionModal = document.getElementById("detailOptionModal");
-const saveAsIsBtn = document.getElementById("saveAsIsBtn");
-const saveAnotherBtn = document.getElementById("saveAnotherBtn");
+        // 🔽 ADD THIS CODE HERE
+        const detailOptionModal = document.getElementById("detailOptionModal");
+        const saveAsIsBtn = document.getElementById("saveAsIsBtn");
+        const saveAnotherBtn = document.getElementById("saveAnotherBtn");
 
-userBtn.addEventListener("click", async () => {
-    const res = await fetch("/check-user-detail", { method: "POST" });
-    const data = await res.json();
+        userBtn.addEventListener("click", async () => {
+            const res = await fetch("/check-user-detail", { method: "POST" });
+            const data = await res.json();
 
-    if (data.exists) {
-        // show custom modal instead of confirm
-        detailOptionModal.classList.add("active");
-    } else {
-        userModal.classList.add("active");
-    }
-});
+            if (data.exists) {
+                // show custom modal instead of confirm
+                detailOptionModal.classList.add("active");
+            } else {
+                userModal.classList.add("active");
+            }
+        });
 
-// Option 1: Save as it is → go back to cart page
-saveAsIsBtn.addEventListener("click", () => {
-    detailOptionModal.classList.remove("active");
-    window.location.href = "/view-cart";
-});
+        // Option 1: Save as it is → go back to cart page
+        saveAsIsBtn.addEventListener("click", () => {
+            detailOptionModal.classList.remove("active");
+            window.location.href = "/view-cart";
+        });
 
-// Option 2: Save another detail → open form modal
-saveAnotherBtn.addEventListener("click", () => {
-    detailOptionModal.classList.remove("active");
-    userModal.classList.add("active");
-});
+        // Option 2: Save another detail → open form modal
+        saveAnotherBtn.addEventListener("click", () => {
+            detailOptionModal.classList.remove("active");
+            userModal.classList.add("active");
+        });
 
 
         function closeUserModal() { userModal.classList.remove("active"); }
@@ -991,38 +1008,38 @@ saveAnotherBtn.addEventListener("click", () => {
         });
 
         document.getElementById("userForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
+            e.preventDefault();
 
-    // 🔹 Check if detail already exists
-    const checkRes = await fetch("/check-user-detail", { method: "POST" });
-    const checkData = await checkRes.json();
+            // 🔹 Check if detail already exists
+            const checkRes = await fetch("/check-user-detail", { method: "POST" });
+            const checkData = await checkRes.json();
 
-    if (checkData.exists) {
-        // show 2 option popup
-        const choice = confirm(
-            "⚠️ Your details already exist.\n\nOK = Save another detail (update existing)\nCancel = Save as it is"
-        );
+            if (checkData.exists) {
+                // show 2 option popup
+                const choice = confirm(
+                    "⚠️ Your details already exist.\n\nOK = Save another detail (update existing)\nCancel = Save as it is"
+                );
 
-        if (!choice) {
-            // Save as it is → go back to cart
-            window.location.href = "/view-cart";
-            return;
-        }
-        // else continue to update existing row
-    }
+                if (!choice) {
+                    // Save as it is → go back to cart
+                    window.location.href = "/view-cart";
+                    return;
+                }
+                // else continue to update existing row
+            }
 
-    // 🔹 Save / Update detail
-    const formData = new FormData(this);
-    const res = await fetch("/save-user-detail", { method: "POST", body: formData });
+            // 🔹 Save / Update detail
+            const formData = new FormData(this);
+            const res = await fetch("/save-user-detail", { method: "POST", body: formData });
 
-    if (res.ok) {
-        alert("✅ Details saved successfully!");
-        closeUserModal();
-        window.location.href = "/view-cart";
-    } else {
-        alert("❌ Server error");
-    }
-});
+            if (res.ok) {
+                alert("✅ Details saved successfully!");
+                closeUserModal();
+                window.location.href = "/view-cart";
+            } else {
+                alert("❌ Server error");
+            }
+        });
 
 
         // ================= INIT =================
@@ -1030,9 +1047,9 @@ saveAnotherBtn.addEventListener("click", () => {
 
     </script>
 
-<footer class="footer">
-    © 2026 Product Dashboard | All Rights Reserved
-</footer>
+    <footer class="footer">
+        © 2026 Product Dashboard | All Rights Reserved
+    </footer>
 </body>
 
 </html>
