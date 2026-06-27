@@ -761,9 +761,10 @@
                 <div style="width:3px;background:rgba(255,255,255,0.15);flex-shrink:0;"></div>
 
                 <!-- RIGHT HALF: Video -->
-                <div style="flex:1;position:relative;overflow:hidden;background:#0f172a;">
+                <div style="flex:1;position:relative;overflow:hidden;background:#0f172a;
+                    display:flex;align-items:center;justify-content:center;">
                     <video id="ksVideo" muted autoplay playsinline loop
-                        style="width:100%;height:340px;object-fit:cover;display:block;">
+                        style="width:100%;height:100%;object-fit:contain;display:block;max-height:340px;">
                     </video>
                     <div id="ksNoVideo" style="display:none;width:100%;height:340px;background:#0f172a;
                                align-items:center;justify-content:center;flex-direction:column;gap:8px;">
