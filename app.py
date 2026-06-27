@@ -5516,6 +5516,87 @@ def all_products_for_offer():
     finally:
         cursor.close()
         conn.close()
+        
+        
+#__________total discount ko calculate karne ki leya to send every user common offer (" owner_dashboard to dashboard")
+
+
+
+@app.route('/api/buy-combo-offer', methods=['POST'])
+def buy_combo_offer():
+    import re as _re
+    data           = request.get_json()
+    offer_id       = data.get('offer_id')
+    product1_name  = data.get('product1_name', '')
+    product1_image = data.get('product1_image', '')
+    product2_name  = data.get('product2_name', '')
+    product2_image = data.get('product2_image', '')
+    discount       = float(data.get('discount', 0))
+
+    username = session.get('username', '')
+    uid      = session.get('user_id') or session.get('id')
+
+    if not username or not uid:
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+
+    conn   = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        import re as _re
+        sanitized  = _re.sub(r'[^a-z0-9_]', '_', username.lower())
+        user_table = f"{sanitized}_{uid}"
+
+        # ── Get real prices from store_data ──
+        cursor.execute("""
+            SELECT name, price, image FROM store_data
+            WHERE name IN (%s, %s)
+        """, (product1_name, product2_name))
+        products = {p['name']: p for p in cursor.fetchall()}
+
+        p1       = products.get(product1_name, {})
+        p2       = products.get(product2_name, {})
+        p1_price = float(p1.get('price') or 0)
+        p2_price = float(p2.get('price') or 0)
+
+        # ── Total with discount ──
+        total_original = p1_price + p2_price
+        if discount > 0:
+            final_price = round(total_original * (1 - discount / 100), 2)
+        else:
+            final_price = round(total_original, 2)
+
+        combo_name  = f"{product1_name} + {product2_name}"
+        combo_image = p1.get('image') or product1_image
+
+        # ── detail field mein full breakdown save karo ──
+        detail = (f"Combo Offer | {product1_name} ₹{p1_price} + "
+                  f"{product2_name} ₹{p2_price} = ₹{total_original} "
+                  f"| {discount}% OFF | Final: ₹{final_price}")
+
+        # ── Insert into user table ──
+        cursor.execute(f"""
+            INSERT INTO `{user_table}`
+            (name, price, image, category, detail, quantity, mode)
+            VALUES (%s, %s, %s, %s, %s, 1, 'combo_offer')
+        """, (combo_name, final_price, combo_image, 'Combo Offer', detail))
+
+        conn.commit()
+        cart_id = cursor.lastrowid
+
+        return jsonify({
+            'success'        : True,
+            'cart_id'        : cart_id,
+            'original_price' : total_original,
+            'discount_pct'   : discount,
+            'final_price'    : final_price
+        })
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()        
 
 #--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
 
