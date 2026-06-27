@@ -5731,17 +5731,33 @@ def update_keywords():
         cursor.execute("UPDATE store_data SET keywords=%s WHERE id=%s", (kw, pid))
 
         # Also update actual product table (food_items / card / study_material)
-        cursor.execute("SELECT category, product_id FROM store_data WHERE id=%s", (pid,))
-        sd_row = cursor.fetchone()
-        if sd_row:
-            cat_map = {
-                'Food': 'food_items', 'food_items': 'food_items',
-                'Kitchen': 'card', 'card': 'card',
-                'Study Material': 'study_material', 'study_material': 'study_material'
-            }
-            prod_table = cat_map.get(sd_row[0], 'food_items')
-            real_pid   = sd_row[1]
-            cursor.execute(f"UPDATE `{prod_table}` SET keywords=%s WHERE id=%s", (kw, real_pid))
+        # Also update actual product table (food_items / card / study_material)
+        # Get name + category from your_item table directly (more reliable)
+        uname = session.get("username")
+        uid   = session.get("user_id")
+        if uname and uid:
+            safe_un = re.sub(r'[^a-z0-9_]', '_', uname.strip().lower())
+            if safe_un and safe_un[0].isdigit():
+                safe_un = "user_" + safe_un
+            your_item_table = f"{safe_un}_{uid}_your_item"
+            try:
+                conn2 = get_db_connection()
+                cur2  = conn2.cursor(dictionary=True)
+                cur2.execute(f"SELECT name, category FROM `{your_item_table}` WHERE store_data_id=%s LIMIT 1", (pid,))
+                item_row = cur2.fetchone()
+                if item_row:
+                    cat_map = {
+                        'Food': 'food_items', 'food_items': 'food_items',
+                        'Kitchen': 'card', 'card': 'card',
+                        'Study Material': 'study_material', 'study_material': 'study_material'
+                    }
+                    prod_table = cat_map.get(item_row['category'], 'food_items')
+                    cur2.execute(f"UPDATE `{prod_table}` SET keywords=%s WHERE name=%s", (kw, item_row['name']))
+                    conn2.commit()
+                cur2.close()
+                conn2.close()
+            except Exception as ex:
+                print(f"⚠️ Could not update product table keywords: {ex}")
         # Also update in user's your_item table
         uname = session.get("username")
         uid   = session.get("user_id")
