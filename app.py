@@ -3025,13 +3025,13 @@ def verify_payment():
                     VALUES (%s, %s, %s, 1, %s, %s, %s)
                 """, (product_id, prod_name, category, ist_now_str, ist_month, 0.01))
 
-        try:
-            cursor.execute("""
-                INSERT INTO orders (user_email, razorpay_payment_id, razorpay_order_id, status)
-                VALUES (%s, %s, %s, 'PAID')
-            """, (session.get("user_email"), razorpay_payment_id, razorpay_order_id))
-        except:
-            pass
+        # ✅ Purchase hone pe add_to_cart count decrease karo
+        if purchased_item:
+            cursor.execute(f"""
+                UPDATE `{activity_table}`
+                SET today_add_to_cart_count = GREATEST(today_add_to_cart_count - 1, 0)
+                WHERE product_id = %s AND category = %s
+            """, (product_id, category))
 
         db.commit()
         cursor.close()
