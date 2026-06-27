@@ -5430,12 +5430,13 @@ def buy_combo_offer():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        sanitized  = _re.sub(r'[^a-z0-9_]', '_', username.lower())
-        user_table = f"{sanitized}_{uid}"
+        sanitized      = _re.sub(r'[^a-z0-9_]', '_', username.lower())
+        user_table     = f"{sanitized}_{uid}"
+        activity_table = f"{sanitized}_{uid}_product_activity"
 
         # ── Get real prices + images from store_data ──
         cursor.execute("""
-            SELECT name, price, image FROM store_data
+            SELECT name, price, image, product_id FROM store_data
             WHERE name IN (%s, %s)
         """, (product1_name, product2_name))
         products = {p['name']: p for p in cursor.fetchall()}
@@ -5446,6 +5447,8 @@ def buy_combo_offer():
         p2_price = float(p2.get('price') or 0)
         p1_image = p1.get('image') or product1_image
         p2_image = p2.get('image') or product2_image
+        p1_pid   = p1.get('product_id') or p1.get('id') or 0
+        p2_pid   = p2.get('product_id') or p2.get('id') or 0
 
         # ── Calculate discounted total ──
         total_original = p1_price + p2_price
@@ -5471,7 +5474,42 @@ def buy_combo_offer():
         """, (combo_name, final_price, p1_image, p2_image, 'Combo Offer', detail))
 
         conn.commit()
-        cart_id = cursor.lastrowid
+        cart_id      = cursor.lastrowid
+        current_month = datetime.now().strftime('%B')
+
+        # ── Update product_activity table ──
+        cursor.execute("""
+            SELECT COUNT(*) as cnt FROM information_schema.tables
+            WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME = %s
+        """, (activity_table,))
+
+        if cursor.fetchone()['cnt'] > 0:
+            for pname, pid in [(product1_name, p1_pid), (product2_name, p2_pid)]:
+                if not pname:
+                    continue
+                # Try update first
+                cursor.execute(f"""
+                    UPDATE `{activity_table}`
+                    SET today_purchase_count = today_purchase_count + 1,
+                        month = %s
+                    WHERE name = %s
+                """, (current_month, pname))
+
+                if cursor.rowcount == 0:
+                    # Not found — insert new row
+                    try:
+                        cursor.execute(f"""
+                            INSERT INTO `{activity_table}`
+                            (name, product_id, category,
+                             today_search_count, today_add_to_cart_count,
+                             today_purchase_count, month)
+                            VALUES (%s, %s, %s, 0, 0, 1, %s)
+                        """, (pname, pid, 'Combo Offer', current_month))
+                    except Exception as ae:
+                        print(f"Activity insert error for {pname}: {ae}")
+
+            conn.commit()
 
         return jsonify({
             'success'       : True,
@@ -5486,8 +5524,7 @@ def buy_combo_offer():
         return jsonify({'success': False, 'error': str(e)}), 500
     finally:
         cursor.close()
-        conn.close()
-        
+        conn.close()        
         
 # â”€â”€ Mark offer as read â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route('/api/mark-offer-read/<int:offer_id>', methods=['POST'])
