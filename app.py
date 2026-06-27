@@ -2442,17 +2442,19 @@ def track_search():
             UPDATE `{table}` 
             SET searched_count = searched_count + 1,
                 last_searched_time = %s
-            WHERE name = %s OR keywords LIKE %s
-        """, (ist_now_str, query, like_pattern))
+            WHERE name LIKE %s OR keywords LIKE %s
+        """, (ist_now_str, like_pattern, like_pattern))
 
         cursor.execute(f"""
-            SELECT id, name, category FROM `{table}`
-            WHERE name = %s OR keywords LIKE %s
-        """, (query, like_pattern))
+            SELECT id, name, '{table}' as category FROM `{table}`
+            WHERE name LIKE %s OR keywords LIKE %s
+        """, (like_pattern, like_pattern))
         matched = cursor.fetchall()
 
         for product in matched:
             # ✅ search_logs INSERT
+            print(f"✅ track-search matched: {product['id']} {product['name']} {product['category']} table={table}")
+            
             cursor.execute("""
                 INSERT INTO search_logs (user_id, product_id, category, search_time)
                 VALUES (%s, %s, %s, %s)
