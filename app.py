@@ -2525,7 +2525,7 @@ def track_add_to_cart():
 
     product_id = request.form.get("product_id")
     product_name = request.form.get("name")
-    product_category = request.form.get("category")
+    product_category = get_product_table(request.form.get("category", ""))
 
     conn = get_db_connection()
     cursor = conn.cursor()
