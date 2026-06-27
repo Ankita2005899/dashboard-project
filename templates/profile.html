@@ -973,26 +973,6 @@
             // Step 2: add to cart table (also decrements availability)
             fetch("/final-add", {
                 method: "POST",
-                body: new URLSearchParams({
-                    product_id: productId,
-                    category: category,
-                    name: name
-                })
-            }).catch(e => console.warn("track-add-to-cart failed:", e));
-
-            // Step 3: add to cart table
-            fetch("/final-add", {
-                method: "POST",
-                body: new URLSearchParams({
-                    product_id: productId,
-                    category: category,
-                    name: name
-                })
-            }).catch(e => console.warn("track-add-to-cart failed:", e));
-
-            // Step 2: add to cart table
-            fetch("/final-add", {
-                method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ cart: [{ product_id: productId, category, name, price, image, video: '', availability: 1, detail: '', address: '' }] })
             })
