@@ -5886,30 +5886,36 @@ def get_keywords():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Get category and product_id from store_data
-        cursor.execute("SELECT category, product_id FROM store_data WHERE id=%s", (store_data_id,))
-        row = cursor.fetchone()
-        if not row:
-            return jsonify({'keywords': ''})
+        # Step 1: get name + category from your_item table
+        uname = session.get("username")
+        uid   = session.get("user_id")
+        safe_username = re.sub(r'[^a-z0-9_]', '_', uname.strip().lower())
+        if safe_username and safe_username[0].isdigit():
+            safe_username = "user_" + safe_username
+        your_item_table = f"{safe_username}_{uid}_your_item"
 
-        category = row['category']
-        product_id = row['product_id']
+        cursor.execute(f"SELECT name, category FROM `{your_item_table}` WHERE store_data_id=%s LIMIT 1", (store_data_id,))
+        item = cursor.fetchone()
+        if not item:
+            return jsonify({'keywords': ''})
 
         cat_map = {
             'Food': 'food_items', 'food_items': 'food_items',
             'Kitchen': 'card', 'card': 'card',
             'Study Material': 'study_material', 'study_material': 'study_material'
         }
-        prod_table = cat_map.get(category, 'food_items')
+        prod_table = cat_map.get(item['category'], 'food_items')
 
-        cursor.execute(f"SELECT keywords FROM `{prod_table}` WHERE id=%s", (product_id,))
+        # Step 2: fetch keywords directly from product table by name
+        cursor.execute(f"SELECT keywords FROM `{prod_table}` WHERE name=%s LIMIT 1", (item['name'],))
         prod_row = cursor.fetchone()
         cursor.close()
         conn.close()
         return jsonify({'keywords': prod_row['keywords'] or '' if prod_row else ''})
     except Exception as e:
         return jsonify({'keywords': '', 'error': str(e)}), 500
-
+    
+    
               
 #-------------------logout process from profile.html page ({sign out")button sathi-------------------- 
 
