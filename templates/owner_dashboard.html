@@ -5997,22 +5997,30 @@
     </div>
     </div>
     <!-- ===== SPECIAL OFFER POPUP (opens in front of churn modal) ===== -->
-    <div id="specialOfferPopup" style="display:none;position:fixed;inset:0;z-index:10500;
-    background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);justify-content:center;align-items:center;">
-        <div style="background:var(--modal-bg);width:95%;max-width:900px;max-height:90vh;
-        border-radius:20px;padding:24px;box-shadow:0 24px 64px rgba(0,0,0,0.3);
-        display:flex;flex-direction:column;gap:16px;overflow:hidden;">
+    <div id="specialOfferPopup"
+        style="display:none;position:fixed;inset:0;z-index:10500;
+    background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);justify-content:center;align-items:flex-start;padding-top:16px;">
+        <div style="background:var(--modal-bg);width:97%;max-width:1200px;height:93vh;
+        border-radius:20px;padding:18px;box-shadow:0 24px 64px rgba(0,0,0,0.3);
+        display:flex;flex-direction:column;gap:12px;overflow:hidden;">
 
             <!-- Popup Header -->
             <div style="display:flex;justify-content:space-between;align-items:center;
-            padding-bottom:14px;border-bottom:2px solid var(--churn-hr);">
-                <div>
-                    <h3 style="margin:0;font-size:18px;color:#f59e0b;">🎁 Special Offer Manager</h3>
+            padding-bottom:10px;border-bottom:2px solid var(--churn-hr);flex-shrink:0;">
+                <h3 style="margin:0;font-size:18px;color:#f59e0b;">🎁 Special Offer Manager</h3>
+                <button onclick="closeSpecialOfferPopup()" class="send-btn">✕ Close</button>
+            </div>
 
+            <!-- TOP ROW: Common Offer (left) + Mini Product Grid (right) -->
+            <div style="display:flex;gap:14px;flex-shrink:0;background:#dbeafe;
+                border:2px dashed #3b82f6;border-radius:14px;padding:14px;">
 
-                    <!-- Common Offer Section -->
-                    <div style="background:#dbeafe;border:2px dashed #3b82f6;border-radius:14px;
-    padding:18px;margin-bottom:20px;">
+                <!-- LEFT: Common Offer Form -->
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:800;color:#1d4ed8;margin-bottom:10px;">
+                        📢 Send Common Offer — to ALL Customers
+                    </div>
+                    <div style="background:#dbeafe;border-radius:10px;">
                         <div style="font-size:14px;font-weight:800;color:#1d4ed8;margin-bottom:12px;">
                             📢 Send Common Offer — to ALL Customers
                         </div>
@@ -6060,18 +6068,6 @@
                             </div>
                         </div>
 
-                        <!-- Mini Product Collection -->
-                        <div style="background:white;border-radius:10px;padding:10px;
-                            border:1px solid #bfdbfe;margin-bottom:8px;">
-                            <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:7px;">
-                                🛒 Products — Drag into combo slots
-                            </div>
-                            <div id="miniProductGrid" style="display:flex;flex-wrap:wrap;gap:6px;
-                                max-height:120px;overflow-y:auto;">
-                                <div style="font-size:11px;color:#94a3b8;">Loading...</div>
-                            </div>
-                        </div>
-
                         <button onclick="sendCommonOffer(this)" style="width:100%;background:#3b82f6;color:white;border:none;padding:11px;
         border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
                             📢 Send to All Customers
@@ -6079,16 +6075,24 @@
                         <div id="commonOfferSentBanner" style="display:none;text-align:center;margin-top:8px;color:#15803d;
         font-size:13px;font-weight:700;"></div>
                     </div>
+                </div><!-- end left common offer form -->
 
-
-                    <small style="color:#64748b;font-size:12px;">Drag customers from the left list → Drop onto offer
-                        cards on the right</small>
+                <!-- RIGHT: Mini Product Grid -->
+                <div style="flex:0 0 280px;min-width:0;background:white;border-radius:12px;
+                    padding:12px;border:1px solid #bfdbfe;display:flex;flex-direction:column;gap:8px;">
+                    <div style="font-size:11px;font-weight:800;color:#1d4ed8;">
+                        🛒 Products — Drag into combo slots
+                    </div>
+                    <div id="miniProductGrid" style="display:flex;flex-wrap:wrap;gap:6px;
+                        overflow-y:auto;flex:1;max-height:200px;">
+                        <div style="font-size:11px;color:#94a3b8;">Loading...</div>
+                    </div>
                 </div>
-                <button onclick="closeSpecialOfferPopup()" class="send-btn">✕ Close</button>
-            </div>
 
-            <!-- Two column layout inside popup -->
-            <div style="display:flex;gap:16px;flex:1;min-height:0;overflow:hidden;height:75vh;">
+            </div><!-- end top row -->
+
+            <!-- BOTTOM: Two column layout - customers + buckets -->
+            <div style="display:flex;gap:16px;flex:1;min-height:0;overflow:hidden;">
 
                 <!-- LEFT: Customer list to drag from -->
                 <div style="flex:0 0 320px;display:flex;flex-direction:column;gap:10px;">
@@ -6099,13 +6103,13 @@
                         style="padding:7px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;
                     background:var(--input-bg);color:var(--input-color);">
                     <div id="offerCustomerList" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:7px;
-                    max-height:450px;padding-right:4px;">
+                    padding-right:4px;">
                         <!-- filled by JS -->
                     </div>
                 </div>
 
                 <!-- RIGHT: Drop zones per offer type -->
-                <div style="flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto;">
+                <div style="flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding-right:4px;">
                     <div style="font-size:12px;font-weight:700;color:var(--card-text-h2);margin-bottom:4px;">
                         🎯 Offer Buckets — Drop customers into an offer
                     </div>
