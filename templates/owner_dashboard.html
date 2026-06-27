@@ -5997,8 +5997,7 @@
     </div>
     </div>
     <!-- ===== SPECIAL OFFER POPUP (opens in front of churn modal) ===== -->
-    <div id="specialOfferPopup"
-        style="display:none;position:fixed;inset:0;z-index:10500;
+    <div id="specialOfferPopup" style="display:none;position:fixed;inset:0;z-index:10500;
     background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);justify-content:center;align-items:flex-start;padding-top:16px;">
         <div style="background:var(--modal-bg);width:97%;max-width:1200px;height:93vh;
         border-radius:20px;padding:18px;box-shadow:0 24px 64px rgba(0,0,0,0.3);
@@ -6045,7 +6044,14 @@
                             </div>
                             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                                 <!-- Product 1 -->
-                                <div style="flex:1;min-width:140px;">
+                                <div style="flex:1;min-width:140px;border:2px dashed #93c5fd;
+                                    border-radius:10px;padding:6px;transition:border-color 0.2s;"
+                                    ondragover="event.preventDefault();this.style.borderColor='#22c55e';this.style.background='#f0fdf4'"
+                                    ondragleave="this.style.borderColor='#93c5fd';this.style.background=''"
+                                    ondrop="dropProductToCommonSlot(event,1)">
+                                    <div style="font-size:9px;color:#6366f1;font-weight:700;text-align:center;margin-bottom:4px;">
+                                        ⬇️ Drop Product 1 here
+                                    </div>
                                     <select id="commonProduct1" onchange="previewCommonProduct(1)" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #93c5fd;
                     font-size:12px;margin-bottom:6px;">
                                         <option value="">— Select Product 1 —</option>
@@ -6057,7 +6063,14 @@
                                 <div style="font-size:22px;font-weight:900;color:#6366f1;">+</div>
 
                                 <!-- Product 2 -->
-                                <div style="flex:1;min-width:140px;">
+                                <div style="flex:1;min-width:140px;border:2px dashed #93c5fd;
+                                    border-radius:10px;padding:6px;transition:border-color 0.2s;"
+                                    ondragover="event.preventDefault();this.style.borderColor='#22c55e';this.style.background='#f0fdf4'"
+                                    ondragleave="this.style.borderColor='#93c5fd';this.style.background=''"
+                                    ondrop="dropProductToCommonSlot(event,2)">
+                                    <div style="font-size:9px;color:#6366f1;font-weight:700;text-align:center;margin-bottom:4px;">
+                                        ⬇️ Drop Product 2 here
+                                    </div>
                                     <select id="commonProduct2" onchange="previewCommonProduct(2)" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #93c5fd;
                     font-size:12px;margin-bottom:6px;">
                                         <option value="">— Select Product 2 —</option>
@@ -6083,7 +6096,8 @@
                     <div style="font-size:11px;font-weight:800;color:#1d4ed8;">
                         🛒 Products — Drag into combo slots
                     </div>
-                    <div id="miniProductGrid" style="display:flex;flex-wrap:wrap;gap:6px;
+                    <div id="miniProductGrid"
+                        style="display:flex;flex-wrap:wrap;gap:6px;
                         overflow-y:auto;flex:1;max-height:200px;">
                         <div style="font-size:11px;color:#94a3b8;">Loading...</div>
                     </div>
@@ -6118,22 +6132,23 @@
                         <!-- Offer Bucket 1: 10% Discount -->
                         <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
                             ondragleave="this.classList.remove('drag-over')"
-                            ondrop="dropToOfferBucket(event,'discount10')" style="border:2px dashed #6366f1;border-radius:14px;padding:14px;
+                            ondrop="dropToOfferBucket(event,'discount10')"
+                            style="border:2px dashed #6366f1;border-radius:14px;padding:14px;
                             background:#f5f3ff;transition:background 0.2s;display:flex;flex-direction:column;gap:8px;">
                             <div style="font-size:13px;font-weight:700;color:#6366f1;">🏷️ 10% Discount</div>
                             <div class="bucket-list" id="bucket-discount10"
                                 style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:70px;">
-                                <div class="bucket-hint"
-                                    style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop
-                                    customers here</div>
+                                <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop customers here</div>
                             </div>
                             <!-- Toggle Buttons -->
                             <div style="display:flex;gap:5px;">
-                                <button onclick="setBucketMode('discount10','message')" id="mode-msg-discount10" style="flex:1;padding:5px;border-radius:7px;border:2px solid #6366f1;
+                                <button onclick="setBucketMode('discount10','message')" id="mode-msg-discount10"
+                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #6366f1;
                                     background:#6366f1;color:white;font-size:10px;font-weight:700;cursor:pointer;">
                                     ✏️ Message
                                 </button>
-                                <button onclick="setBucketMode('discount10','combo')" id="mode-combo-discount10" style="flex:1;padding:5px;border-radius:7px;border:2px solid #6366f1;
+                                <button onclick="setBucketMode('discount10','combo')" id="mode-combo-discount10"
+                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #6366f1;
                                     background:white;color:#6366f1;font-size:10px;font-weight:700;cursor:pointer;">
                                     🛍️ Combo
                                 </button>
@@ -6148,10 +6163,7 @@
                             <div id="panel-combo-discount10" style="display:none;">
                                 <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
                                     <div style="flex:1;">
-                                        <select id="bucket-combo-discount10-p1"
-                                            onchange="previewBucketProduct('discount10','p1')"
-                                            ondragover="event.preventDefault()"
-                                            ondrop="dropProductToSlot(event,'discount10',1)"
+                                        <select id="bucket-combo-discount10-p1" onchange="previewBucketProduct('discount10','p1')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'discount10',1)"
                                             style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #c4b5fd;font-size:10px;">
                                             <option value="">— Product 1 —</option>
                                         </select>
@@ -6160,10 +6172,7 @@
                                     </div>
                                     <span style="font-weight:900;color:#6366f1;font-size:16px;">+</span>
                                     <div style="flex:1;">
-                                        <select id="bucket-combo-discount10-p2"
-                                            onchange="previewBucketProduct('discount10','p2')"
-                                            ondragover="event.preventDefault()"
-                                            ondrop="dropProductToSlot(event,'discount10',2)"
+                                        <select id="bucket-combo-discount10-p2" onchange="previewBucketProduct('discount10','p2')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'discount10',2)"
                                             style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #c4b5fd;font-size:10px;">
                                             <option value="">— Product 2 —</option>
                                         </select>
@@ -6171,35 +6180,37 @@
                                             style="width:100%;height:45px;object-fit:cover;border-radius:7px;margin-top:3px;display:none;">
                                     </div>
                                 </div>
-                                <input id="combo-msg-discount10" type="text" placeholder="Combo message..." style="width:100%;padding:6px;border-radius:7px;border:1.5px solid #c4b5fd;
+                                <input id="combo-msg-discount10" type="text" placeholder="Combo message..."
+                                    style="width:100%;padding:6px;border-radius:7px;border:1.5px solid #c4b5fd;
                                     font-size:10px;box-sizing:border-box;">
                             </div>
-                            <button onclick="sendBucketOffer('discount10','10% Discount')" style="width:100%;background:#6366f1;color:white;border:none;padding:8px;
+                            <button onclick="sendBucketOffer('discount10','10% Discount')"
+                                style="width:100%;background:#6366f1;color:white;border:none;padding:8px;
                                 border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
                                 📧 Send 10% Discount
                             </button>
-                            <div id="sent-discount10"
-                                style="display:none;font-size:11px;font-weight:700;text-align:center;"></div>
+                            <div id="sent-discount10" style="display:none;font-size:11px;font-weight:700;text-align:center;"></div>
                         </div>
 
                         <!-- Offer Bucket 2: 20% Discount -->
                         <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
                             ondragleave="this.classList.remove('drag-over')"
-                            ondrop="dropToOfferBucket(event,'discount20')" style="border:2px dashed #ef4444;border-radius:14px;padding:14px;
+                            ondrop="dropToOfferBucket(event,'discount20')"
+                            style="border:2px dashed #ef4444;border-radius:14px;padding:14px;
                             background:#fff1f2;transition:background 0.2s;display:flex;flex-direction:column;gap:8px;">
                             <div style="font-size:13px;font-weight:700;color:#ef4444;">🏷️ 20% Discount</div>
                             <div class="bucket-list" id="bucket-discount20"
                                 style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:70px;">
-                                <div class="bucket-hint"
-                                    style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop
-                                    customers here</div>
+                                <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop customers here</div>
                             </div>
                             <div style="display:flex;gap:5px;">
-                                <button onclick="setBucketMode('discount20','message')" id="mode-msg-discount20" style="flex:1;padding:5px;border-radius:7px;border:2px solid #ef4444;
+                                <button onclick="setBucketMode('discount20','message')" id="mode-msg-discount20"
+                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #ef4444;
                                     background:#ef4444;color:white;font-size:10px;font-weight:700;cursor:pointer;">
                                     ✏️ Message
                                 </button>
-                                <button onclick="setBucketMode('discount20','combo')" id="mode-combo-discount20" style="flex:1;padding:5px;border-radius:7px;border:2px solid #ef4444;
+                                <button onclick="setBucketMode('discount20','combo')" id="mode-combo-discount20"
+                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #ef4444;
                                     background:white;color:#ef4444;font-size:10px;font-weight:700;cursor:pointer;">
                                     🛍️ Combo
                                 </button>
@@ -6212,10 +6223,7 @@
                             <div id="panel-combo-discount20" style="display:none;">
                                 <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
                                     <div style="flex:1;">
-                                        <select id="bucket-combo-discount20-p1"
-                                            onchange="previewBucketProduct('discount20','p1')"
-                                            ondragover="event.preventDefault()"
-                                            ondrop="dropProductToSlot(event,'discount20',1)"
+                                        <select id="bucket-combo-discount20-p1" onchange="previewBucketProduct('discount20','p1')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'discount20',1)"
                                             style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #fca5a5;font-size:10px;">
                                             <option value="">— Product 1 —</option>
                                         </select>
@@ -6224,10 +6232,7 @@
                                     </div>
                                     <span style="font-weight:900;color:#ef4444;font-size:16px;">+</span>
                                     <div style="flex:1;">
-                                        <select id="bucket-combo-discount20-p2"
-                                            onchange="previewBucketProduct('discount20','p2')"
-                                            ondragover="event.preventDefault()"
-                                            ondrop="dropProductToSlot(event,'discount20',2)"
+                                        <select id="bucket-combo-discount20-p2" onchange="previewBucketProduct('discount20','p2')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'discount20',2)"
                                             style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #fca5a5;font-size:10px;">
                                             <option value="">— Product 2 —</option>
                                         </select>
@@ -6235,35 +6240,37 @@
                                             style="width:100%;height:45px;object-fit:cover;border-radius:7px;margin-top:3px;display:none;">
                                     </div>
                                 </div>
-                                <input id="combo-msg-discount20" type="text" placeholder="Combo message..." style="width:100%;padding:6px;border-radius:7px;border:1.5px solid #fca5a5;
+                                <input id="combo-msg-discount20" type="text" placeholder="Combo message..."
+                                    style="width:100%;padding:6px;border-radius:7px;border:1.5px solid #fca5a5;
                                     font-size:10px;box-sizing:border-box;">
                             </div>
-                            <button onclick="sendBucketOffer('discount20','20% Discount')" style="width:100%;background:#ef4444;color:white;border:none;padding:8px;
+                            <button onclick="sendBucketOffer('discount20','20% Discount')"
+                                style="width:100%;background:#ef4444;color:white;border:none;padding:8px;
                                 border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
                                 📧 Send 20% Discount
                             </button>
-                            <div id="sent-discount20"
-                                style="display:none;font-size:11px;font-weight:700;text-align:center;"></div>
+                            <div id="sent-discount20" style="display:none;font-size:11px;font-weight:700;text-align:center;"></div>
                         </div>
 
                         <!-- Offer Bucket 3: Free Shipping -->
                         <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
                             ondragleave="this.classList.remove('drag-over')"
-                            ondrop="dropToOfferBucket(event,'freeship')" style="border:2px dashed #22c55e;border-radius:14px;padding:14px;
+                            ondrop="dropToOfferBucket(event,'freeship')"
+                            style="border:2px dashed #22c55e;border-radius:14px;padding:14px;
                             background:#f0fdf4;transition:background 0.2s;display:flex;flex-direction:column;gap:8px;">
                             <div style="font-size:13px;font-weight:700;color:#22c55e;">🚚 Free Shipping</div>
                             <div class="bucket-list" id="bucket-freeship"
                                 style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:70px;">
-                                <div class="bucket-hint"
-                                    style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop
-                                    customers here</div>
+                                <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop customers here</div>
                             </div>
                             <div style="display:flex;gap:5px;">
-                                <button onclick="setBucketMode('freeship','message')" id="mode-msg-freeship" style="flex:1;padding:5px;border-radius:7px;border:2px solid #22c55e;
+                                <button onclick="setBucketMode('freeship','message')" id="mode-msg-freeship"
+                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #22c55e;
                                     background:#22c55e;color:white;font-size:10px;font-weight:700;cursor:pointer;">
                                     ✏️ Message
                                 </button>
-                                <button onclick="setBucketMode('freeship','combo')" id="mode-combo-freeship" style="flex:1;padding:5px;border-radius:7px;border:2px solid #22c55e;
+                                <button onclick="setBucketMode('freeship','combo')" id="mode-combo-freeship"
+                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #22c55e;
                                     background:white;color:#22c55e;font-size:10px;font-weight:700;cursor:pointer;">
                                     🛍️ Combo
                                 </button>
@@ -6276,10 +6283,7 @@
                             <div id="panel-combo-freeship" style="display:none;">
                                 <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
                                     <div style="flex:1;">
-                                        <select id="bucket-combo-freeship-p1"
-                                            onchange="previewBucketProduct('freeship','p1')"
-                                            ondragover="event.preventDefault()"
-                                            ondrop="dropProductToSlot(event,'freeship',1)"
+                                        <select id="bucket-combo-freeship-p1" onchange="previewBucketProduct('freeship','p1')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'freeship',1)"
                                             style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #86efac;font-size:10px;">
                                             <option value="">— Product 1 —</option>
                                         </select>
@@ -6288,10 +6292,7 @@
                                     </div>
                                     <span style="font-weight:900;color:#22c55e;font-size:16px;">+</span>
                                     <div style="flex:1;">
-                                        <select id="bucket-combo-freeship-p2"
-                                            onchange="previewBucketProduct('freeship','p2')"
-                                            ondragover="event.preventDefault()"
-                                            ondrop="dropProductToSlot(event,'freeship',2)"
+                                        <select id="bucket-combo-freeship-p2" onchange="previewBucketProduct('freeship','p2')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'freeship',2)"
                                             style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #86efac;font-size:10px;">
                                             <option value="">— Product 2 —</option>
                                         </select>
@@ -6299,35 +6300,37 @@
                                             style="width:100%;height:45px;object-fit:cover;border-radius:7px;margin-top:3px;display:none;">
                                     </div>
                                 </div>
-                                <input id="combo-msg-freeship" type="text" placeholder="Combo message..." style="width:100%;padding:6px;border-radius:7px;border:1.5px solid #86efac;
+                                <input id="combo-msg-freeship" type="text" placeholder="Combo message..."
+                                    style="width:100%;padding:6px;border-radius:7px;border:1.5px solid #86efac;
                                     font-size:10px;box-sizing:border-box;">
                             </div>
-                            <button onclick="sendBucketOffer('freeship','Free Shipping')" style="width:100%;background:#22c55e;color:white;border:none;padding:8px;
+                            <button onclick="sendBucketOffer('freeship','Free Shipping')"
+                                style="width:100%;background:#22c55e;color:white;border:none;padding:8px;
                                 border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
                                 📧 Send Free Shipping
                             </button>
-                            <div id="sent-freeship"
-                                style="display:none;font-size:11px;font-weight:700;text-align:center;"></div>
+                            <div id="sent-freeship" style="display:none;font-size:11px;font-weight:700;text-align:center;"></div>
                         </div>
 
                         <!-- Offer Bucket 4: Buy 1 Get 1 -->
                         <div class="offer-bucket" ondragover="event.preventDefault();this.classList.add('drag-over')"
-                            ondragleave="this.classList.remove('drag-over')" ondrop="dropToOfferBucket(event,'bogo')"
+                            ondragleave="this.classList.remove('drag-over')"
+                            ondrop="dropToOfferBucket(event,'bogo')"
                             style="border:2px dashed #f59e0b;border-radius:14px;padding:14px;
                             background:#fffbeb;transition:background 0.2s;display:flex;flex-direction:column;gap:8px;">
                             <div style="font-size:13px;font-weight:700;color:#f59e0b;">🎁 Buy 1 Get 1</div>
                             <div class="bucket-list" id="bucket-bogo"
                                 style="flex:1;display:flex;flex-direction:column;gap:5px;min-height:70px;">
-                                <div class="bucket-hint"
-                                    style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop
-                                    customers here</div>
+                                <div class="bucket-hint" style="font-size:10px;color:#94a3b8;text-align:center;margin:auto;">⬇️ Drop customers here</div>
                             </div>
                             <div style="display:flex;gap:5px;">
-                                <button onclick="setBucketMode('bogo','message')" id="mode-msg-bogo" style="flex:1;padding:5px;border-radius:7px;border:2px solid #f59e0b;
+                                <button onclick="setBucketMode('bogo','message')" id="mode-msg-bogo"
+                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #f59e0b;
                                     background:#f59e0b;color:white;font-size:10px;font-weight:700;cursor:pointer;">
                                     ✏️ Message
                                 </button>
-                                <button onclick="setBucketMode('bogo','combo')" id="mode-combo-bogo" style="flex:1;padding:5px;border-radius:7px;border:2px solid #f59e0b;
+                                <button onclick="setBucketMode('bogo','combo')" id="mode-combo-bogo"
+                                    style="flex:1;padding:5px;border-radius:7px;border:2px solid #f59e0b;
                                     background:white;color:#f59e0b;font-size:10px;font-weight:700;cursor:pointer;">
                                     🛍️ Combo
                                 </button>
@@ -6340,9 +6343,7 @@
                             <div id="panel-combo-bogo" style="display:none;">
                                 <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
                                     <div style="flex:1;">
-                                        <select id="bucket-combo-bogo-p1" onchange="previewBucketProduct('bogo','p1')"
-                                            ondragover="event.preventDefault()"
-                                            ondrop="dropProductToSlot(event,'bogo',1)"
+                                        <select id="bucket-combo-bogo-p1" onchange="previewBucketProduct('bogo','p1')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'bogo',1)"
                                             style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #fcd34d;font-size:10px;">
                                             <option value="">— Product 1 —</option>
                                         </select>
@@ -6351,9 +6352,7 @@
                                     </div>
                                     <span style="font-weight:900;color:#f59e0b;font-size:16px;">+</span>
                                     <div style="flex:1;">
-                                        <select id="bucket-combo-bogo-p2" onchange="previewBucketProduct('bogo','p2')"
-                                            ondragover="event.preventDefault()"
-                                            ondrop="dropProductToSlot(event,'bogo',2)"
+                                        <select id="bucket-combo-bogo-p2" onchange="previewBucketProduct('bogo','p2')" ondragover="event.preventDefault()" ondrop="dropProductToSlot(event,'bogo',2)"
                                             style="width:100%;padding:5px;border-radius:7px;border:1.5px solid #fcd34d;font-size:10px;">
                                             <option value="">— Product 2 —</option>
                                         </select>
@@ -6361,15 +6360,16 @@
                                             style="width:100%;height:45px;object-fit:cover;border-radius:7px;margin-top:3px;display:none;">
                                     </div>
                                 </div>
-                                <input id="combo-msg-bogo" type="text" placeholder="Combo message..." style="width:100%;padding:6px;border-radius:7px;border:1.5px solid #fcd34d;
+                                <input id="combo-msg-bogo" type="text" placeholder="Combo message..."
+                                    style="width:100%;padding:6px;border-radius:7px;border:1.5px solid #fcd34d;
                                     font-size:10px;box-sizing:border-box;">
                             </div>
-                            <button onclick="sendBucketOffer('bogo','Buy 1 Get 1')" style="width:100%;background:#f59e0b;color:white;border:none;padding:8px;
+                            <button onclick="sendBucketOffer('bogo','Buy 1 Get 1')"
+                                style="width:100%;background:#f59e0b;color:white;border:none;padding:8px;
                                 border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
                                 📧 Send Buy 1 Get 1
                             </button>
-                            <div id="sent-bogo" style="display:none;font-size:11px;font-weight:700;text-align:center;">
-                            </div>
+                            <div id="sent-bogo" style="display:none;font-size:11px;font-weight:700;text-align:center;"></div>
                         </div>
 
                     </div>
@@ -6825,26 +6825,26 @@
 
         // ── Toggle bucket mode: message vs combo ──────────────────
         function setBucketMode(bucketId, mode) {
-            const msgPanel = document.getElementById(`panel-message-${bucketId}`);
+            const msgPanel   = document.getElementById(`panel-message-${bucketId}`);
             const comboPanel = document.getElementById(`panel-combo-${bucketId}`);
-            const msgBtn = document.getElementById(`mode-msg-${bucketId}`);
-            const comboBtn = document.getElementById(`mode-combo-${bucketId}`);
+            const msgBtn     = document.getElementById(`mode-msg-${bucketId}`);
+            const comboBtn   = document.getElementById(`mode-combo-${bucketId}`);
             if (!msgPanel || !comboPanel) return;
 
             if (mode === 'message') {
-                msgPanel.style.display = 'block';
-                comboPanel.style.display = 'none';
-                msgBtn.style.opacity = '1';
-                msgBtn.style.fontWeight = '800';
-                comboBtn.style.opacity = '0.6';
+                msgPanel.style.display    = 'block';
+                comboPanel.style.display  = 'none';
+                msgBtn.style.opacity      = '1';
+                msgBtn.style.fontWeight   = '800';
+                comboBtn.style.opacity    = '0.6';
                 comboBtn.style.fontWeight = '600';
             } else {
-                msgPanel.style.display = 'none';
-                comboPanel.style.display = 'block';
-                comboBtn.style.opacity = '1';
+                msgPanel.style.display    = 'none';
+                comboPanel.style.display  = 'block';
+                comboBtn.style.opacity    = '1';
                 comboBtn.style.fontWeight = '800';
-                msgBtn.style.opacity = '0.6';
-                msgBtn.style.fontWeight = '600';
+                msgBtn.style.opacity      = '0.6';
+                msgBtn.style.fontWeight   = '600';
             }
         }
 
@@ -6857,16 +6857,16 @@
             try {
                 const p = JSON.parse(sel.value);
                 if (p.image) {
-                    img.src = p.image;
+                    img.src           = p.image;
                     img.style.display = 'block';
                 } else {
                     img.style.display = 'none';
                 }
-            } catch (e) { img.style.display = 'none'; }
+            } catch(e) { img.style.display = 'none'; }
         }
 
         async function sendBucketOffer(bucketId, offerLabel) {
-            const bucket = document.getElementById('bucket-' + bucketId);
+            const bucket    = document.getElementById('bucket-' + bucketId);
             const customers = bucket.querySelectorAll('div[data-cname]');
 
             if (!customers.length) {
@@ -6876,17 +6876,17 @@
 
             // ── Detect mode: message or combo ──
             const comboPanel = document.getElementById(`panel-combo-${bucketId}`);
-            const isCombo = comboPanel && comboPanel.style.display !== 'none';
+            const isCombo    = comboPanel && comboPanel.style.display !== 'none';
 
-            let message = '', p1 = { name: '', image: '' }, p2 = { name: '', image: '' }, discount = 0;
+            let message = '', p1 = {name:'',image:''}, p2 = {name:'',image:''}, discount = 0;
 
             if (isCombo) {
                 const sel1 = document.getElementById(`bucket-combo-${bucketId}-p1`);
                 const sel2 = document.getElementById(`bucket-combo-${bucketId}-p2`);
                 const comboMsg = document.getElementById(`combo-msg-${bucketId}`);
                 message = comboMsg ? comboMsg.value.trim() : '';
-                try { if (sel1 && sel1.value) p1 = JSON.parse(sel1.value); } catch (e) { }
-                try { if (sel2 && sel2.value) p2 = JSON.parse(sel2.value); } catch (e) { }
+                try { if (sel1 && sel1.value) p1 = JSON.parse(sel1.value); } catch(e){}
+                try { if (sel2 && sel2.value) p2 = JSON.parse(sel2.value); } catch(e){}
                 if (!p1.name && !p2.name) {
                     alert('⚠️ Combo mode mein kam se kam ek product select karo!'); return;
                 }
@@ -6901,12 +6901,12 @@
             }
 
             const sentEl = document.getElementById('sent-' + bucketId);
-            sentEl.textContent = '⏳ Sending...';
-            sentEl.style.display = 'block';
-            sentEl.style.color = '#64748b';
+            sentEl.textContent    = '⏳ Sending...';
+            sentEl.style.display  = 'block';
+            sentEl.style.color    = '#64748b';
 
             let successCount = 0;
-            let failCount = 0;
+            let failCount    = 0;
 
             const allCustomers = [
                 ...churnSegmented.champions,
@@ -6916,7 +6916,7 @@
 
             for (const card of customers) {
                 const rawName = card.dataset.cname || '';
-                const email = card.dataset.email || '';
+                const email   = card.dataset.email || '';
 
                 const matched = allCustomers.find(c =>
                     c.name.toLowerCase() === rawName.toLowerCase() ||
@@ -6931,19 +6931,19 @@
 
                 try {
                     const res = await fetch('/api/send-special-offer', {
-                        method: 'POST',
+                        method : 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            username: matched.name,
-                            uid: matched.id,
-                            offer_type: offerLabel,
+                        body   : JSON.stringify({
+                            username      : matched.name,
+                            uid           : matched.id,
+                            offer_type    : offerLabel,
                             offer_category: 'special',
-                            message: message,
-                            product1_name: p1.name || '',
+                            message       : message,
+                            product1_name : p1.name  || '',
                             product1_image: p1.image || '',
-                            product2_name: p2.name || '',
+                            product2_name : p2.name  || '',
                             product2_image: p2.image || '',
-                            discount: discount
+                            discount      : discount
                         })
                     });
                     const data = await res.json();
@@ -6954,7 +6954,7 @@
                         failCount++;
                         console.error('Send failed:', data.error);
                     }
-                } catch (e) {
+                } catch(e) {
                     failCount++;
                     console.error('Network error:', e);
                 }
@@ -7011,57 +7011,57 @@
 
 
         async function loadComboProducts() {
-            try {
-                const res = await fetch('/api/owner/all-products-for-offer');
-                const data = await res.json();
-                const products = data.products || [];
+    try {
+        const res  = await fetch('/api/owner/all-products-for-offer');
+        const data = await res.json();
+        const products = data.products || [];
 
-                ['commonProduct1', 'commonProduct2'].forEach(selId => {
-                    const sel = document.getElementById(selId);
-                    if (!sel) return;
-                    // Clear existing options except first
-                    sel.innerHTML = `<option value="">— Select Product —</option>`;
-                    products.forEach(p => {
-                        const opt = document.createElement('option');
-                        opt.value = JSON.stringify({
-                            name: p.name,
-                            image: p.image || '',
-                            price: p.price || 0
-                        });
-                        opt.textContent = `${p.name} — ₹${p.price}`;
-                        sel.appendChild(opt);
-                    });
+        ['commonProduct1', 'commonProduct2'].forEach(selId => {
+            const sel = document.getElementById(selId);
+            if (!sel) return;
+            // Clear existing options except first
+            sel.innerHTML = `<option value="">— Select Product —</option>`;
+            products.forEach(p => {
+                const opt       = document.createElement('option');
+                opt.value       = JSON.stringify({
+                    name : p.name,
+                    image: p.image || '',
+                    price: p.price || 0
                 });
+                opt.textContent = `${p.name} — ₹${p.price}`;
+                sel.appendChild(opt);
+            });
+        });
 
-                // Also populate bucket combo selects
-                ['discount10', 'discount20', 'freeship', 'bogo'].forEach(bid => {
-                    ['p1', 'p2'].forEach(pn => {
-                        const sel = document.getElementById(`bucket-combo-${bid}-${pn}`);
-                        if (!sel) return;
-                        sel.innerHTML = `<option value="">— Select Product —</option>`;
-                        products.forEach(p => {
-                            const opt = document.createElement('option');
-                            opt.value = JSON.stringify({
-                                name: p.name,
-                                image: p.image || '',
-                                price: p.price || 0
-                            });
-                            opt.textContent = `${p.name} — ₹${p.price}`;
-                            sel.appendChild(opt);
-                        });
+        // Also populate bucket combo selects
+        ['discount10','discount20','freeship','bogo'].forEach(bid => {
+            ['p1','p2'].forEach(pn => {
+                const sel = document.getElementById(`bucket-combo-${bid}-${pn}`);
+                if (!sel) return;
+                sel.innerHTML = `<option value="">— Select Product —</option>`;
+                products.forEach(p => {
+                    const opt       = document.createElement('option');
+                    opt.value       = JSON.stringify({
+                        name : p.name,
+                        image: p.image || '',
+                        price: p.price || 0
                     });
+                    opt.textContent = `${p.name} — ₹${p.price}`;
+                    sel.appendChild(opt);
                 });
+            });
+        });
 
-                // ── Mini product grid render ──
-                const grid = document.getElementById('miniProductGrid');
-                if (grid) {
-                    if (!products.length) {
-                        grid.innerHTML = '<div style="font-size:11px;color:#94a3b8;">No products found</div>';
-                    } else {
-                        grid.innerHTML = products.map(p => {
-                            const pData = JSON.stringify({ name: p.name, image: p.image || '', price: p.price });
-                            const safe = pData.replace(/'/g, "\\'");
-                            return `<div draggable="true"
+        // ── Mini product grid render ──
+        const grid = document.getElementById('miniProductGrid');
+        if (grid) {
+            if (!products.length) {
+                grid.innerHTML = '<div style="font-size:11px;color:#94a3b8;">No products found</div>';
+            } else {
+                grid.innerHTML = products.map(p => {
+                    const pData = JSON.stringify({name:p.name, image:p.image||'', price:p.price});
+                    const safe  = pData.replace(/'/g, "\\'");
+                    return `<div draggable="true"
                         ondragstart="dragProductToCombo(event,'${safe}')"
                         title="${p.name} — ₹${p.price}"
                         style="cursor:grab;border-radius:8px;overflow:hidden;
@@ -7070,7 +7070,7 @@
                         transition:transform 0.15s;box-shadow:0 1px 4px rgba(0,0,0,0.08);"
                         onmouseenter="this.style.transform='scale(1.06)'"
                         onmouseleave="this.style.transform='scale(1)'">
-                        <img src="${p.image || ''}"
+                        <img src="${p.image||''}"
                             onerror="this.src='https://via.placeholder.com/62x45?text=📦'"
                             style="width:62px;height:45px;object-fit:cover;display:block;">
                         <div style="font-size:8px;color:#1e293b;padding:2px 3px;
@@ -7081,14 +7081,14 @@
                             ₹${p.price}
                         </div>
                     </div>`;
-                        }).join('');
-                    }
-                }
-
-            } catch (e) {
-                console.error('Failed to load products:', e);
+                }).join('');
             }
         }
+
+    } catch(e) {
+        console.error('Failed to load products:', e);
+    }
+}
 
         function dragProductToCombo(event, productJson) {
             event.dataTransfer.setData('comboProduct', productJson);
@@ -7099,29 +7099,65 @@
             const productJson = event.dataTransfer.getData('comboProduct');
             if (!productJson) return;
             try {
-                const p = JSON.parse(productJson);
+                const p   = JSON.parse(productJson);
                 const sel = document.getElementById(`bucket-combo-${bucketId}-p${slotNum}`);
                 const img = document.getElementById(`bucket-img-${bucketId}-p${slotNum}`);
                 if (!sel) return;
 
-                const val = JSON.stringify({ name: p.name, image: p.image, price: p.price });
-                let opt = [...sel.options].find(o => o.value === val);
+                const val = JSON.stringify({name:p.name, image:p.image, price:p.price});
+                let opt   = [...sel.options].find(o => o.value === val);
                 if (!opt) {
-                    opt = document.createElement('option');
-                    opt.value = val;
+                    opt             = document.createElement('option');
+                    opt.value       = val;
                     opt.textContent = `${p.name} — ₹${p.price}`;
                     sel.appendChild(opt);
                 }
                 sel.value = val;
 
                 if (img && p.image) {
-                    img.src = p.image;
+                    img.src           = p.image;
                     img.style.display = 'block';
                 }
                 // Visual feedback
                 sel.style.borderColor = '#22c55e';
                 setTimeout(() => sel.style.borderColor = '', 1500);
-            } catch (e) { console.error('Drop error:', e); }
+            } catch(e) { console.error('Drop error:', e); }
+        }
+
+        function dropProductToCommonSlot(event, slotNum) {
+            event.preventDefault();
+            const productJson = event.dataTransfer.getData('comboProduct');
+            if (!productJson) return;
+            try {
+                const p   = JSON.parse(productJson);
+                const sel = document.getElementById(`commonProduct${slotNum}`);
+                const img = document.getElementById(`commonProduct${slotNum}Img`);
+
+                const val = JSON.stringify({name:p.name, image:p.image||'', price:p.price});
+                let opt   = [...sel.options].find(o => o.value === val);
+                if (!opt) {
+                    opt             = document.createElement('option');
+                    opt.value       = val;
+                    opt.textContent = `${p.name} — ₹${p.price}`;
+                    sel.appendChild(opt);
+                }
+                sel.value = val;
+
+                if (img && p.image) {
+                    img.src           = p.image;
+                    img.style.display = 'block';
+                }
+
+                // Reset drop zone style + green flash
+                event.currentTarget.style.borderColor = '#22c55e';
+                event.currentTarget.style.background  = '#f0fdf4';
+                sel.style.borderColor = '#22c55e';
+                setTimeout(() => {
+                    event.currentTarget.style.borderColor = '#93c5fd';
+                    event.currentTarget.style.background  = '';
+                    sel.style.borderColor = '';
+                }, 1500);
+            } catch(e) { console.error('Drop error:', e); }
         }
 
         function previewCommonProduct(num) {
