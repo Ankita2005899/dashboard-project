@@ -2937,7 +2937,6 @@ def create_order():
         "payment_capture": 1
     })
     return jsonify(order)
-
 @app.route("/verify-payment", methods=["POST"])
 def verify_payment():
     data = request.get_json()
@@ -2962,13 +2961,11 @@ def verify_payment():
         safe_un = "user_" + safe_un
     table_name = f"{safe_un}_{user_id}"
 
-    # ✅ Sanitized username for activity table
     safe_username = re.sub(r'[^a-z0-9_]', '_', username.strip().lower())
     if safe_username[0].isdigit():
         safe_username = "user_" + safe_username
     activity_table = f"{safe_username}_{user_id}_product_activity"
 
-    # ✅ IST time
     ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
     ist_now_str = ist_now.strftime('%Y-%m-%d %H:%M:%S')
     ist_month = ist_now.strftime('%B')
@@ -2995,7 +2992,7 @@ def verify_payment():
             product_id = purchased_item[0]
             category   = purchased_item[1]
 
-            # ✅ product_activity update
+            # ✅ product_activity purchase count update
             cursor.execute(f"""
                 SELECT today_purchase_count FROM `{activity_table}`
                 WHERE product_id = %s AND category = %s
@@ -3012,7 +3009,6 @@ def verify_payment():
                     WHERE product_id = %s AND category = %s
                 """, (new_count, ist_now_str, round(new_count / 100, 2), product_id, category))
             else:
-                # Get product name first
                 cat_table_map = {"card":"card","food_items":"food_items","study_material":"study_material"}
                 prod_table = cat_table_map.get(category, "card")
                 cursor.execute(f"SELECT name FROM `{prod_table}` WHERE id=%s", (product_id,))
@@ -3025,13 +3021,21 @@ def verify_payment():
                     VALUES (%s, %s, %s, 1, %s, %s, %s)
                 """, (product_id, prod_name, category, ist_now_str, ist_month, 0.01))
 
-        # ✅ Purchase hone pe add_to_cart count decrease karo
-        if purchased_item:
+            # ✅ add_to_cart count decrease karo
             cursor.execute(f"""
                 UPDATE `{activity_table}`
                 SET today_add_to_cart_count = GREATEST(today_add_to_cart_count - 1, 0)
                 WHERE product_id = %s AND category = %s
             """, (product_id, category))
+
+        # ✅ Orders table INSERT
+        try:
+            cursor.execute("""
+                INSERT INTO orders (user_email, razorpay_payment_id, razorpay_order_id, status)
+                VALUES (%s, %s, %s, 'PAID')
+            """, (session.get("user_email"), razorpay_payment_id, razorpay_order_id))
+        except:
+            pass
 
         db.commit()
         cursor.close()
@@ -3049,8 +3053,6 @@ def verify_payment():
         cursor.close()
         db.close()
         return jsonify({"status": "failed"})
-
-    
     
 @app.route("/verify-payment-failed", methods=["POST"])
 def verify_payment_failed():
