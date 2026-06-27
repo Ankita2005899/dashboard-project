@@ -2569,42 +2569,94 @@
         }
 
 
+        // ── Customer Behavior Trends — real data from DB ──
+        async function loadCustomerBehaviorTrends() {
+            const ctx = document.getElementById('customerTrendChart').getContext('2d');
 
-
-        const ctx = document.getElementById('customerTrendChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [
-                    {
-                        label: 'Churn Risk',
-                        data: [22, 30, 38, 35, 42, 48],
-                        borderColor: '#ef4444',
-                        backgroundColor: 'transparent',
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Retention Success',
-                        data: [40, 45, 50, 58, 63, 68],
-                        borderColor: '#10b981',
-                        backgroundColor: 'transparent',
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Purchase Frequency',
-                        data: [12, 18, 22, 28, 31, 36],
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'transparent',
-                        tension: 0.4
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
+            // Helper: fetch an API and return sorted results
+            async function fetchTotals(url, field) {
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) return [];
+                    const data = await res.json();
+                    return (data.results ?? [])
+                        .map(r => r[field] || 0)
+                        .sort((a, b) => a - b); // ascending = oldest-like to newest-like
+                } catch { return []; }
             }
-        });
+
+            // Helper: slice into 6 buckets and sum each bucket
+            function toBuckets(arr, n = 6) {
+                if (!arr.length) return Array(n).fill(0);
+                const size = Math.ceil(arr.length / n);
+                return Array.from({ length: n }, (_, i) => {
+                    const slice = arr.slice(i * size, (i + 1) * size);
+                    return slice.reduce((s, v) => s + v, 0);
+                });
+            }
+
+            const [searchTotals, cartTotals, purchaseTotals] = await Promise.all([
+                fetchTotals('/api/owner/search-analytics', 'total_searches'),
+                fetchTotals('/api/owner/addtocart-analytics', 'total_addtocart'),
+                fetchTotals('/api/owner/purchased-analytics', 'total_purchased'),
+            ]);
+
+            const searchBuckets = toBuckets(searchTotals);
+            const cartBuckets = toBuckets(cartTotals);
+            const purchaseBuckets = toBuckets(purchaseTotals);
+
+            // Normalize to 0–100 scale so all 3 lines are visible on same axis
+            function normalize(arr) {
+                const max = Math.max(...arr, 1);
+                return arr.map(v => Math.round((v / max) * 100));
+            }
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Slot 1', 'Slot 2', 'Slot 3', 'Slot 4', 'Slot 5', 'Slot 6'],
+                    datasets: [
+                        {
+                            label: 'Churn Risk (Searches)',
+                            data: normalize(searchBuckets),
+                            borderColor: '#ef4444',
+                            backgroundColor: 'transparent',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Retention Success (Cart)',
+                            data: normalize(cartBuckets),
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Purchase Frequency',
+                            data: normalize(purchaseBuckets),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'transparent',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}%`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+                    }
+                }
+            });
+        }
+
+        loadCustomerBehaviorTrends();
         function openTotalCustomersModal() {
             document.getElementById("totalCustomersModal").style.display = "flex";
         }
