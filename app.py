@@ -5940,6 +5940,17 @@ def my_cart_items():
             ORDER BY id DESC LIMIT 10
         """)
         items = cursor.fetchall()
+
+        # Fetch real availability from product tables
+        for item in items:
+            try:
+                prod_table = get_product_table(item['category'])
+                cursor.execute(f"SELECT availability FROM `{prod_table}` WHERE id=%s LIMIT 1", (item['product_id'],))
+                prod_row = cursor.fetchone()
+                item['availability'] = int(prod_row['availability']) if prod_row else 0
+            except:
+                item['availability'] = 0
+
         cursor.close()
         conn.close()
         for item in items:
@@ -5948,7 +5959,6 @@ def my_cart_items():
     except Exception as e:
         print("my-cart-items error:", e)
         return jsonify([])
-
 
 @app.route('/api/my-purchased-items')
 def my_purchased_items():
@@ -5971,6 +5981,17 @@ def my_purchased_items():
             ORDER BY id DESC LIMIT 10
         """)
         items = cursor.fetchall()
+
+        # Fetch real availability from product tables
+        for item in items:
+            try:
+                prod_table = get_product_table(item['category'])
+                cursor.execute(f"SELECT availability FROM `{prod_table}` WHERE id=%s LIMIT 1", (item['product_id'],))
+                prod_row = cursor.fetchone()
+                item['availability'] = int(prod_row['availability']) if prod_row else 0
+            except:
+                item['availability'] = 0
+
         cursor.close()
         conn.close()
         for item in items:
