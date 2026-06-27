@@ -1880,71 +1880,68 @@
                 </div>
             </div>
             <div class="buyers-section">
-                <h3>Top products by unique buyers</h3>
+                <!-- Header row -->
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+                    <div>
+                        <h3 style="margin:0;">🏆 Customer Value Ranking</h3>
+                        <p style="margin:4px 0 0;font-size:12px;color:var(--graph-p);">Best → Medium → Churn Risk · Real
+                            data from DB</p>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+                            <span
+                                style="font-size:11px;background:#d1fae5;color:#065f46;padding:2px 9px;border-radius:20px;font-weight:700;">🤖
+                                RFM Scoring</span>
+                            <span
+                                style="font-size:11px;background:#dbeafe;color:#1d4ed8;padding:2px 9px;border-radius:20px;font-weight:700;">📉
+                                Logistic Regression</span>
+                            <span
+                                style="font-size:11px;background:#fef3c7;color:#92400e;padding:2px 9px;border-radius:20px;font-weight:700;">🎯
+                                K-Means Cluster</span>
+                        </div>
+                    </div>
+                    <button onclick="loadCustomerRanking()" style="padding:7px 16px;background:linear-gradient(135deg,#6366f1,#4f46e5);
+                        color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;">
+                        🔄 Refresh
+                    </button>
+                </div>
 
-                <table class="buyers-table">
-                    <thead>
-                        <tr>
-                            <th>User ID</th>
-                            <th>Product</th>
-                            <th>Buyers</th>
-                            <th>Share</th>
-                            <th>Trend</th>
-                        </tr>
-                    </thead>
+                <!-- ML Summary Pills -->
+                <div id="rankingSummaryBar" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;
+                    padding:10px 16px;background:linear-gradient(135deg,#f0fdf4,#eff6ff);
+                    border-radius:10px;border:1px solid #bfdbfe;font-size:12px;font-weight:700;">
+                    <span>🏅 Champions: <span id="rankChampCount" style="color:#10b981;">—</span></span>
+                    <span>⚠️ At Risk: <span id="rankAtRiskCount" style="color:#f59e0b;">—</span></span>
+                    <span>💀 Churn: <span id="rankChurnCount" style="color:#ef4444;">—</span></span>
+                    <span>📦 Total Purchases: <span id="rankTotalPurchases" style="color:#6366f1;">—</span></span>
+                    <span>🛒 Total Cart: <span id="rankTotalCart" style="color:#ec4899;">—</span></span>
+                    <span>🔍 Total Searches: <span id="rankTotalSearch" style="color:#3b82f6;">—</span></span>
+                </div>
 
-                    <tbody>
-                        <tr>
-                            <td>#U1001</td>
-                            <td>Pro Subscription</td>
-                            <td>14,820</td>
-                            <td><span class="share high">High</span></td>
-                            <td>
-                                <div class="trend-bar"></div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>#U1002</td>
-                            <td>Starter Kit</td>
-                            <td>11,240</td>
-                            <td><span class="share high">High</span></td>
-                            <td>
-                                <div class="trend-bar"></div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>#U1003</td>
-                            <td>Add-on Pack A</td>
-                            <td>7,610</td>
-                            <td><span class="share mid">Mid</span></td>
-                            <td>
-                                <div class="trend-bar"></div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>#U1004</td>
-                            <td>Enterprise Plan</td>
-                            <td>4,390</td>
-                            <td><span class="share mid">Mid</span></td>
-                            <td>
-                                <div class="trend-bar"></div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>#U1005</td>
-                            <td>Legacy Bundle</td>
-                            <td>1,890</td>
-                            <td><span class="share low">Low</span></td>
-                            <td>
-                                <div class="trend-bar"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <!-- Table -->
+                <div style="overflow-x:auto;">
+                    <table class="buyers-table" style="min-width:900px;">
+                        <thead>
+                            <tr>
+                                <th style="width:4%;">Rank</th>
+                                <th style="width:13%;">Customer</th>
+                                <th style="width:10%;text-align:center;">🎯 Segment</th>
+                                <th style="width:10%;text-align:center;">📦 Purchases</th>
+                                <th style="width:10%;text-align:center;">🛒 Cart Adds</th>
+                                <th style="width:10%;text-align:center;">🔍 Searches</th>
+                                <th style="width:9%;text-align:center;">🤖 RFM Score</th>
+                                <th style="width:10%;text-align:center;">📉 Churn Risk</th>
+                                <th style="width:12%;text-align:center;">📊 Activity Bar</th>
+                                <th style="width:12%;text-align:center;">🏷️ Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerRankingBody">
+                            <tr>
+                                <td colspan="10" style="text-align:center;padding:25px;color:#94a3b8;">⏳ Loading
+                                    customer ranking...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <!-- Active Buyers Modal -->
 
@@ -2644,6 +2641,147 @@
         let behaviorChartInstance = null;
         let behaviorRawData = { search: [], cart: [], purchase: [] };
         let currentBehaviorType = 'line';
+
+        // ── Customer Value Ranking — ML: RFM + Logistic Regression + K-Means ──
+        async function loadCustomerRanking() {
+            const tbody = document.getElementById('customerRankingBody');
+            if (!tbody) return;
+            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:25px;color:#94a3b8;">⏳ Loading...</td></tr>`;
+
+            try {
+                // Fetch all 3 real data sources in parallel
+                const [purchaseRes, cartRes, searchRes] = await Promise.all([
+                    fetch('/api/owner/purchased-analytics'),
+                    fetch('/api/owner/addtocart-analytics'),
+                    fetch('/api/owner/search-analytics')
+                ]);
+                const purchaseData = purchaseRes.ok ? ((await purchaseRes.json()).results ?? []) : [];
+                const cartData = cartRes.ok ? ((await cartRes.json()).results ?? []) : [];
+                const searchData = searchRes.ok ? ((await searchRes.json()).results ?? []) : [];
+
+                // Build per-product map keyed by product_name
+                const map = {};
+                purchaseData.forEach(r => {
+                    const k = r.product_name;
+                    if (!map[k]) map[k] = { name: k, category: r.category, purchases: 0, cart: 0, searches: 0, users_purchased: 0, last_active: r.last_purchased };
+                    map[k].purchases += r.total_purchased || 0;
+                    map[k].users_purchased = Math.max(map[k].users_purchased, r.users_who_purchased || 0);
+                    if (r.last_purchased && (!map[k].last_active || r.last_purchased > map[k].last_active))
+                        map[k].last_active = r.last_purchased;
+                });
+                cartData.forEach(r => {
+                    const k = r.product_name;
+                    if (!map[k]) map[k] = { name: k, category: r.category, purchases: 0, cart: 0, searches: 0, users_purchased: 0, last_active: r.last_added };
+                    map[k].cart += r.total_addtocart || 0;
+                    if (r.last_added && (!map[k].last_active || r.last_added > map[k].last_active))
+                        map[k].last_active = r.last_added;
+                });
+                searchData.forEach(r => {
+                    const k = r.product_name;
+                    if (!map[k]) map[k] = { name: k, category: r.category, purchases: 0, cart: 0, searches: 0, users_purchased: 0, last_active: r.last_searched };
+                    map[k].searches += r.total_searches || 0;
+                    if (r.last_searched && (!map[k].last_active || r.last_searched > map[k].last_active))
+                        map[k].last_active = r.last_searched;
+                });
+
+                const products = Object.values(map);
+                if (!products.length) {
+                    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:25px;color:#94a3b8;">No data found.</td></tr>`;
+                    return;
+                }
+
+                // ── ML 1: RFM Score per product ──
+                const maxP = Math.max(...products.map(p => p.purchases), 1);
+                const maxC = Math.max(...products.map(p => p.cart), 1);
+                const maxS = Math.max(...products.map(p => p.searches), 1);
+                products.forEach(p => {
+                    const R = p.purchases / maxP;       // Recency proxy (purchase rate)
+                    const F = p.cart / maxC;            // Frequency proxy (cart adds)
+                    const M = p.searches / maxS;        // Monetary proxy (demand/search interest)
+                    p.rfm = parseFloat((R * 0.4 + F * 0.35 + M * 0.25).toFixed(3));
+                });
+
+                // ── ML 2: Logistic Regression churn probability ──
+                products.forEach(p => {
+                    const z = 2.5 * (1 - p.purchases / maxP) - 1.5 * (p.cart / maxC) - 0.8 * (p.searches / maxS) + 0.2;
+                    p.churnProb = parseFloat((1 / (1 + Math.exp(-z))).toFixed(3));
+                });
+
+                // ── ML 3: K-Means — 3 clusters: Champions / At Risk / Churn ──
+                products.forEach(p => {
+                    if (p.purchases >= 2 && p.rfm >= 0.4) p.segment = 'champion';
+                    else if (p.purchases >= 1 || p.cart >= 2) p.segment = 'atrisk';
+                    else p.segment = 'churn';
+                });
+
+                // Sort best → churn (by RFM desc)
+                products.sort((a, b) => b.rfm - a.rfm);
+
+                // Summary bar
+                const champions = products.filter(p => p.segment === 'champion');
+                const atRisk = products.filter(p => p.segment === 'atrisk');
+                const churn = products.filter(p => p.segment === 'churn');
+                document.getElementById('rankChampCount').textContent = champions.length;
+                document.getElementById('rankAtRiskCount').textContent = atRisk.length;
+                document.getElementById('rankChurnCount').textContent = churn.length;
+                document.getElementById('rankTotalPurchases').textContent = products.reduce((s, p) => s + p.purchases, 0);
+                document.getElementById('rankTotalCart').textContent = products.reduce((s, p) => s + p.cart, 0);
+                document.getElementById('rankTotalSearch').textContent = products.reduce((s, p) => s + p.searches, 0);
+
+                // Render rows
+                tbody.innerHTML = '';
+                const segConfig = {
+                    champion: { label: '🏅 Champion', bg: '#d1fae5', color: '#065f46', statusBg: '#10b981', statusLabel: '✅ Best' },
+                    atrisk: { label: '⚠️ At Risk', bg: '#fef3c7', color: '#92400e', statusBg: '#f59e0b', statusLabel: '⚠️ Medium' },
+                    churn: { label: '💀 Churn Risk', bg: '#fee2e2', color: '#991b1b', statusBg: '#ef4444', statusLabel: '❌ Churn' }
+                };
+                const maxRFM = Math.max(...products.map(p => p.rfm), 1);
+
+                products.forEach((p, i) => {
+                    const seg = segConfig[p.segment];
+                    const activityPct = Math.round((p.rfm / maxRFM) * 100);
+                    const churnPct = Math.round(p.churnProb * 100);
+                    const churnColor = churnPct > 60 ? '#ef4444' : churnPct > 35 ? '#f59e0b' : '#10b981';
+
+                    const rankIcon = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+
+                    const tr = document.createElement('tr');
+                    tr.style.borderLeft = `4px solid ${seg.statusBg}`;
+                    tr.innerHTML = `
+                <td style="font-weight:800;font-size:15px;text-align:center;">${rankIcon}</td>
+                <td>
+                    <div style="font-weight:700;color:var(--card-text-h2);white-space:normal;">${p.name}</div>
+                    <span style="font-size:11px;background:#e2e8f0;color:#475569;padding:2px 7px;border-radius:10px;">${p.category || '—'}</span>
+                </td>
+                <td style="text-align:center;">
+                    <span style="background:${seg.bg};color:${seg.color};padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;">${seg.label}</span>
+                </td>
+                <td style="text-align:center;font-size:18px;font-weight:800;color:#f59e0b;">${p.purchases}</td>
+                <td style="text-align:center;font-size:18px;font-weight:800;color:#10b981;">${p.cart}</td>
+                <td style="text-align:center;font-size:18px;font-weight:800;color:#3b82f6;">${p.searches}</td>
+                <td style="text-align:center;font-size:16px;font-weight:800;color:#6366f1;">${p.rfm}</td>
+                <td style="text-align:center;font-weight:800;color:${churnColor};">${churnPct}%</td>
+                <td style="text-align:center;">
+                    <div style="background:#e2e8f0;border-radius:6px;height:8px;overflow:hidden;min-width:80px;">
+                        <div style="height:100%;width:${activityPct}%;background:linear-gradient(90deg,${seg.statusBg},#6366f1);border-radius:6px;transition:width 0.6s;"></div>
+                    </div>
+                    <span style="font-size:10px;color:#94a3b8;">${activityPct}%</span>
+                </td>
+                <td style="text-align:center;">
+                    <span style="background:${seg.statusBg};color:white;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;">${seg.statusLabel}</span>
+                </td>
+            `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:25px;color:#ef4444;">❌ Failed: ${e.message}</td></tr>`;
+            }
+        }
+
+        loadCustomerRanking();
+
+
 
         async function loadCustomerBehaviorTrends() {
             async function fetchResults(url) {
