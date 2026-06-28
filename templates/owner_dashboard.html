@@ -2960,28 +2960,10 @@
             loadCustomerRanking();
             loadCustomerBehaviorTrends();
         });
+
         function openTotalCustomersModal() {
             document.getElementById("totalCustomersModal").style.display = "flex";
         }
-        
-
-        // ── Sidebar churn card — load silently on page start ──
-        window.addEventListener('DOMContentLoaded', async function () {
-            try {
-                const resp = await fetch('/api/churn-customers');
-                if (!resp.ok) throw new Error('failed');
-                const data = await resp.json();
-                churnCustomerData = data.customers || [];
-                if (!churnCustomerData.length) throw new Error('empty');
-            } catch (e) {
-                churnCustomerData = generateMockChurnData();
-            }
-            applyMLSegmentation();
-        });
-    </script>
-    <footer class="footer">
-
-        
 
         function closeTotalCustomersModal() {
             document.getElementById("totalCustomersModal").style.display = "none";
@@ -7636,6 +7618,19 @@
                 btnEl.textContent = '📢 Send to All Customers';
             }
         }
+        // ── Sidebar churn card — load silently on page start ──
+        window.addEventListener('DOMContentLoaded', async function () {
+            try {
+                const resp = await fetch('/api/churn-customers');
+                if (!resp.ok) throw new Error('failed');
+                const data = await resp.json();
+                churnCustomerData = data.customers || [];
+                if (!churnCustomerData.length) throw new Error('empty');
+            } catch (e) {
+                churnCustomerData = generateMockChurnData();
+            }
+            applyMLSegmentation();
+        });
     </script>
     <footer class="footer">
         © 2026 Product Dashboard | All Rights Reserved
