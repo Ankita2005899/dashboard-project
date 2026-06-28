@@ -3951,7 +3951,178 @@ def get_new_this_month():
         if conn and conn.is_connected():
             conn.close()
             
-            
+# -------------------forth part of box {" Avg. orders/customer "} ----------------------------           
+
+
+@app.route('/api/owner/avg-orders')
+def avg_orders():
+    conn   = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get all customer tables
+        cursor.execute("""
+            SELECT TABLE_NAME FROM information_schema.tables
+            WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME NOT LIKE '%_product_activity'
+            AND TABLE_NAME NOT LIKE '%_your_item'
+            AND TABLE_NAME REGEXP '^[a-z0-9_]+_[0-9]+$'
+        """)
+        tables = [r['TABLE_NAME'] for r in cursor.fetchall()]
+
+        from datetime import datetime
+        current_month = datetime.now().month
+        current_year  = datetime.now().year
+
+        # Last month
+        if current_month == 1:
+            last_month = 12
+            last_year  = current_year - 1
+        else:
+            last_month = current_month - 1
+            last_year  = current_year
+
+        total_orders_curr = 0
+        total_orders_last = 0
+        total_customers   = 0
+
+        skip = {
+            'user', 'user_activity', 'user_signout_logs', 'user_survey',
+            'user_template', 'deleted_users', 'deleted_customers',
+            'addtocart_logs', 'search_logs', 'cart', 'cart_summary',
+            'card', 'food_items', 'study_material', 'store_data',
+            'strong_password', 'sample', 'save_detail',
+            'category_requests', 'support_sd', 'product_availability',
+            'special_offers'
+        }
+
+        for table in tables:
+            if table in skip:
+                continue
+            try:
+                # Current month orders
+                cursor.execute(f"""
+                    SELECT COUNT(*) as cnt FROM `{table}`
+                    WHERE mode IN ('successful', 'combo_offer')
+                    AND MONTH(date) = %s AND YEAR(date) = %s
+                """, (current_month, current_year))
+                curr = cursor.fetchone()['cnt']
+
+                # Last month orders
+                cursor.execute(f"""
+                    SELECT COUNT(*) as cnt FROM `{table}`
+                    WHERE mode IN ('successful', 'combo_offer')
+                    AND MONTH(date) = %s AND YEAR(date) = %s
+                """, (last_month, last_year))
+                last = cursor.fetchone()['cnt']
+
+                total_orders_curr += curr
+                total_orders_last += last
+                total_customers   += 1
+
+            except:
+                continue
+
+        avg_curr = round(total_orders_curr / total_customers, 1) if total_customers else 0
+        avg_last = round(total_orders_last / total_customers, 1) if total_customers else 0
+
+        # Trend %
+        if avg_last > 0:
+            trend = round(((avg_curr - avg_last) / avg_last) * 100, 1)
+        else:
+            trend = 0
+
+        return jsonify({
+            'avg_orders'     : avg_curr,
+            'avg_last_month' : avg_last,
+            'trend'          : trend,
+            'total_customers': total_customers
+        })
+
+    except Exception as e:
+        return jsonify({'avg_orders': 0, 'trend': 0, 'error': str(e)})
+    finally:
+        cursor.close()
+        conn.close()
+        
+        
+@app.route('/api/owner/avg-orders-detail')
+def avg_orders_detail():
+    conn   = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT TABLE_NAME FROM information_schema.tables
+            WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME NOT LIKE '%_product_activity'
+            AND TABLE_NAME NOT LIKE '%_your_item'
+            AND TABLE_NAME REGEXP '^[a-z0-9_]+_[0-9]+$'
+        """)
+        tables = [r['TABLE_NAME'] for r in cursor.fetchall()]
+
+        skip = {
+            'user', 'user_activity', 'user_signout_logs', 'user_survey',
+            'user_template', 'deleted_users', 'deleted_customers',
+            'addtocart_logs', 'search_logs', 'cart', 'cart_summary',
+            'card', 'food_items', 'study_material', 'store_data',
+            'strong_password', 'sample', 'save_detail',
+            'category_requests', 'support_sd', 'product_availability',
+            'special_offers'
+        }
+
+        customers = []
+        for table in tables:
+            if table in skip:
+                continue
+            try:
+                parts = table.rsplit('_', 1)
+                if len(parts) != 2 or not parts[1].isdigit():
+                    continue
+                username = parts[0].replace('_', ' ').title()
+
+                cursor.execute(f"""
+                    SELECT
+                        COUNT(*) as total_orders,
+                        MAX(date)  as last_order,
+                        MIN(date)  as first_order
+                    FROM `{table}`
+                    WHERE mode IN ('successful', 'combo_offer')
+                """)
+                row = cursor.fetchone()
+                total  = int(row['total_orders'] or 0)
+                last_o = row['last_order']
+                first_o = row['first_order']
+
+                # Avg per month
+                if first_o and last_o and total > 0:
+                    from datetime import datetime
+                    months = max(1, (last_o.year - first_o.year) * 12
+                                  + (last_o.month - first_o.month) + 1)
+                    avg_pm = round(total / months, 1)
+                else:
+                    avg_pm = 0
+
+                customers.append({
+                    'username'     : username,
+                    'total_orders' : total,
+                    'avg_per_month': avg_pm,
+                    'last_order'   : last_o.strftime('%b %d, %Y') if last_o else None
+                })
+            except:
+                continue
+
+        customers.sort(key=lambda x: x['total_orders'], reverse=True)
+        return jsonify({'customers': customers})
+
+    except Exception as e:
+        return jsonify({'customers': [], 'error': str(e)})
+    finally:
+        cursor.close()
+        conn.close()
+       
+
+#--------------------------------------------------------------------------------------------------
 
 # â”€â”€ Strong Password Manager â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/api/owner/strong-passwords", methods=["GET"])
@@ -6266,174 +6437,7 @@ def logout():
 
 #_________________signout table madhun data owner_section madhe ghaychya sathi __________
 
-
-@app.route('/api/owner/avg-orders')
-def avg_orders():
-    conn   = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    try:
-        # Get all customer tables
-        cursor.execute("""
-            SELECT TABLE_NAME FROM information_schema.tables
-            WHERE TABLE_SCHEMA = DATABASE()
-            AND TABLE_NAME NOT LIKE '%_product_activity'
-            AND TABLE_NAME NOT LIKE '%_your_item'
-            AND TABLE_NAME REGEXP '^[a-z0-9_]+_[0-9]+$'
-        """)
-        tables = [r['TABLE_NAME'] for r in cursor.fetchall()]
-
-        from datetime import datetime
-        current_month = datetime.now().month
-        current_year  = datetime.now().year
-
-        # Last month
-        if current_month == 1:
-            last_month = 12
-            last_year  = current_year - 1
-        else:
-            last_month = current_month - 1
-            last_year  = current_year
-
-        total_orders_curr = 0
-        total_orders_last = 0
-        total_customers   = 0
-
-        skip = {
-            'user', 'user_activity', 'user_signout_logs', 'user_survey',
-            'user_template', 'deleted_users', 'deleted_customers',
-            'addtocart_logs', 'search_logs', 'cart', 'cart_summary',
-            'card', 'food_items', 'study_material', 'store_data',
-            'strong_password', 'sample', 'save_detail',
-            'category_requests', 'support_sd', 'product_availability',
-            'special_offers'
-        }
-
-        for table in tables:
-            if table in skip:
-                continue
-            try:
-                # Current month orders
-                cursor.execute(f"""
-                    SELECT COUNT(*) as cnt FROM `{table}`
-                    WHERE mode IN ('successful', 'combo_offer')
-                    AND MONTH(date) = %s AND YEAR(date) = %s
-                """, (current_month, current_year))
-                curr = cursor.fetchone()['cnt']
-
-                # Last month orders
-                cursor.execute(f"""
-                    SELECT COUNT(*) as cnt FROM `{table}`
-                    WHERE mode IN ('successful', 'combo_offer')
-                    AND MONTH(date) = %s AND YEAR(date) = %s
-                """, (last_month, last_year))
-                last = cursor.fetchone()['cnt']
-
-                total_orders_curr += curr
-                total_orders_last += last
-                total_customers   += 1
-
-            except:
-                continue
-
-        avg_curr = round(total_orders_curr / total_customers, 1) if total_customers else 0
-        avg_last = round(total_orders_last / total_customers, 1) if total_customers else 0
-
-        # Trend %
-        if avg_last > 0:
-            trend = round(((avg_curr - avg_last) / avg_last) * 100, 1)
-        else:
-            trend = 0
-
-        return jsonify({
-            'avg_orders'     : avg_curr,
-            'avg_last_month' : avg_last,
-            'trend'          : trend,
-            'total_customers': total_customers
-        })
-
-    except Exception as e:
-        return jsonify({'avg_orders': 0, 'trend': 0, 'error': str(e)})
-    finally:
-        cursor.close()
-        conn.close()
-        
-        
-@app.route('/api/owner/avg-orders-detail')
-def avg_orders_detail():
-    conn   = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    try:
-        cursor.execute("""
-            SELECT TABLE_NAME FROM information_schema.tables
-            WHERE TABLE_SCHEMA = DATABASE()
-            AND TABLE_NAME NOT LIKE '%_product_activity'
-            AND TABLE_NAME NOT LIKE '%_your_item'
-            AND TABLE_NAME REGEXP '^[a-z0-9_]+_[0-9]+$'
-        """)
-        tables = [r['TABLE_NAME'] for r in cursor.fetchall()]
-
-        skip = {
-            'user', 'user_activity', 'user_signout_logs', 'user_survey',
-            'user_template', 'deleted_users', 'deleted_customers',
-            'addtocart_logs', 'search_logs', 'cart', 'cart_summary',
-            'card', 'food_items', 'study_material', 'store_data',
-            'strong_password', 'sample', 'save_detail',
-            'category_requests', 'support_sd', 'product_availability',
-            'special_offers'
-        }
-
-        customers = []
-        for table in tables:
-            if table in skip:
-                continue
-            try:
-                parts = table.rsplit('_', 1)
-                if len(parts) != 2 or not parts[1].isdigit():
-                    continue
-                username = parts[0].replace('_', ' ').title()
-
-                cursor.execute(f"""
-                    SELECT
-                        COUNT(*) as total_orders,
-                        MAX(date)  as last_order,
-                        MIN(date)  as first_order
-                    FROM `{table}`
-                    WHERE mode IN ('successful', 'combo_offer')
-                """)
-                row = cursor.fetchone()
-                total  = int(row['total_orders'] or 0)
-                last_o = row['last_order']
-                first_o = row['first_order']
-
-                # Avg per month
-                if first_o and last_o and total > 0:
-                    from datetime import datetime
-                    months = max(1, (last_o.year - first_o.year) * 12
-                                  + (last_o.month - first_o.month) + 1)
-                    avg_pm = round(total / months, 1)
-                else:
-                    avg_pm = 0
-
-                customers.append({
-                    'username'     : username,
-                    'total_orders' : total,
-                    'avg_per_month': avg_pm,
-                    'last_order'   : last_o.strftime('%b %d, %Y') if last_o else None
-                })
-            except:
-                continue
-
-        customers.sort(key=lambda x: x['total_orders'], reverse=True)
-        return jsonify({'customers': customers})
-
-    except Exception as e:
-        return jsonify({'customers': [], 'error': str(e)})
-    finally:
-        cursor.close()
-        conn.close()
-        
+ 
         
 # ============================================================
 # STATIC FILE SERVING
