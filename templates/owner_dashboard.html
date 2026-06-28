@@ -1607,8 +1607,8 @@
 
                 <div class="card dashboard-card" onclick="openAvgOrdersModal()" style="cursor:pointer;">
                     <h3>Avg. orders/customer</h3>
-                    <h2>3.2</h2>
-                    <p class="down">↓ 2.0% vs last month</p>
+                    <h2 id="avgOrdersValue">—</h2>
+                    <p id="avgOrdersTrend" class="down"></p>
                 </div>
 
             </div>
@@ -2578,6 +2578,11 @@
             else if (currentPage === "purchased") window.location.href = "/purchased?year=" + year + "&months=" + selectedMonths.join(",");
         }
 
+        function openSearchPage() {
+            window.location.href = "/searchfortheownersection";
+        }
+
+
         function openActiveBuyersModal() {
             document.getElementById("activeBuyersModal").style.display = "flex";
         }
@@ -2951,11 +2956,53 @@
             renderBehaviorChart(type);
         }
 
-        window.addEventListener('DOMContentLoaded', function () {
+window.addEventListener('DOMContentLoaded', function () {
             loadCustomerRanking();
             loadCustomerBehaviorTrends();
+            loadChurnDataSilent();
+            loadAvgOrders();
         });
 
+        // ── Avg Orders per Customer ────────────────────────────
+        async function loadAvgOrders() {
+            try {
+                const res  = await fetch('/api/owner/avg-orders');
+                const data = await res.json();
+
+                const valEl = document.getElementById('avgOrdersValue');
+                if (valEl) valEl.textContent = data.avg_orders ?? '—';
+
+                const trendEl = document.getElementById('avgOrdersTrend');
+                if (trendEl && data.trend !== undefined) {
+                    const isUp       = data.trend >= 0;
+                    trendEl.className   = isUp ? 'up' : 'down';
+                    trendEl.textContent = `${isUp ? '↑' : '↓'} ${Math.abs(data.trend)}% vs last month`;
+                }
+            } catch(e) {
+                console.error('Avg orders load error:', e);
+            }
+        }
+
+        async function loadChurnDataSilent() {
+            try {
+                const resp = await fetch('/api/churn-customers');
+                if (!resp.ok) throw new Error('API failed');
+                const data = await resp.json();
+                churnCustomerData = data.customers || [];
+                if (!churnCustomerData.length) throw new Error('empty');
+            } catch (e) {
+                churnCustomerData = generateMockChurnData();
+            }
+            applyMLSegmentation();
+        }
+
+        function openTotalCustomersModal() {
+            document.getElementById("totalCustomersModal").style.display = "flex";
+        }
+
+        function closeTotalCustomersModal() {
+            document.getElementById("totalCustomersModal").style.display = "none";
+        }
         function searchTotalCustomers() {
             const raw = document.getElementById("customerSearch").value.toLowerCase().trim();
             const allRows = document.querySelectorAll("#totalCustomersTableBody tr");
@@ -6848,45 +6895,51 @@
 
         function renderSegmentCards() {
             const ch = churnSegmented.champions;
+            document.getElementById('champCount').textContent = ch.length + ' Customers';
+            document.getElementById('champChurn').textContent = ch.length ? (ch.reduce((a, b) => a + b.churnProb, 0) / ch.length * 100).toFixed(1) + '%' : '—';
+
+            // ── Sync sidebar card with live ML data ──
             const mo = churnSegmented.moderate;
             const do2 = churnSegmented.dormant;
             const all = [...ch, ...mo, ...do2];
 
-            // ── Champions card ──
-            document.getElementById('champCount').textContent = ch.length + ' Customers';
-            document.getElementById('champChurn').textContent = ch.length ? (ch.reduce((a, b) => a + b.churnProb, 0) / ch.length * 100).toFixed(1) + '%' : '—';
-            setTimeout(() => { document.getElementById('champOrderBar').style.width = '88%'; document.getElementById('champRetBar').style.width = '92%'; document.getElementById('champSpendBar').style.width = '85%'; }, 300);
+            // At Risk = moderate + dormant count
+            const atRiskCount = mo.length + do2.length;
+            document.getElementById('sidebarAtRisk').textContent = atRiskCount;
+            document.getElementById('sidebarAtRiskPct').textContent = atRiskCount > 0 ? `↑ ${atRiskCount} customers need attention` : 'No at-risk customers';
+
+            // Recovered = champions count (orders ≥ 5 = retained/recovered)
+            document.getElementById('sidebarRecovered').textContent = ch.length;
+            document.getElementById('sidebarRecoveredPct').textContent = ch.length > 0 ? `↑ ${ch.length} champions retained` : 'No champions yet';
+
+            // Avg Churn Probability across all
+            const avgChurn = all.length
+                ? (all.reduce((s, c) => s + c.churnProb, 0) / all.length * 100).toFixed(1)
+                : 0;
+            document.getElementById('sidebarAvgChurn').textContent = avgChurn + '%';
+            document.getElementById('sidebarChurnLabel').textContent =
+                avgChurn > 60 ? 'High attention needed' :
+                    avgChurn > 35 ? 'Moderate risk' : 'Low risk ✅';
+
+            // Retention Success = champions / total * 100
+            const retention = all.length ? Math.round((ch.length / all.length) * 100) : 0;
+            document.getElementById('sidebarRetention').textContent = retention + '%';
+            document.getElementById('sidebarRetentionLabel').textContent =
+                retention >= 60 ? 'Improved ✅' :
+                    retention >= 30 ? 'Stable' : 'Needs improvement'; setTimeout(() => { document.getElementById('champOrderBar').style.width = '88%'; document.getElementById('champRetBar').style.width = '92%'; document.getElementById('champSpendBar').style.width = '85%'; }, 300);
             document.getElementById('champList').innerHTML = ch.slice(0, 4).map(c => `<div class="churn-mini-customer"><span>👤 ${c.name}</span><span style="color:#15803d;font-weight:700;">${c.orders} orders · ₹${c.spend}</span></div>`).join('');
 
-            // ── Moderate card ──
+            const mo = churnSegmented.moderate;
             document.getElementById('modCount').textContent = mo.length + ' Customers';
             document.getElementById('modChurn').textContent = mo.length ? (mo.reduce((a, b) => a + b.churnProb, 0) / mo.length * 100).toFixed(1) + '%' : '—';
             setTimeout(() => { document.getElementById('modOrderBar').style.width = '52%'; document.getElementById('modRetBar').style.width = '58%'; document.getElementById('modSpendBar').style.width = '44%'; }, 300);
             document.getElementById('modList').innerHTML = mo.slice(0, 4).map(c => `<div class="churn-mini-customer"><span>👤 ${c.name}</span><span style="color:#b45309;font-weight:700;">${c.orders} orders · ₹${c.spend}</span></div>`).join('');
 
-            // ── Dormant card ──
+            const do2 = churnSegmented.dormant;
             document.getElementById('dormCount').textContent = do2.length + ' Customers';
             document.getElementById('dormChurn').textContent = do2.length ? (do2.reduce((a, b) => a + b.churnProb, 0) / do2.length * 100).toFixed(1) + '%' : '—';
             setTimeout(() => { document.getElementById('dormInactBar').style.width = '80%'; document.getElementById('dormRecBar').style.width = '22%'; document.getElementById('dormLoginBar').style.width = '15%'; }, 300);
             document.getElementById('dormList').innerHTML = do2.slice(0, 4).map(c => `<div class="churn-mini-customer"><span>👤 ${c.name}</span><span style="color:#b91c1c;font-weight:700;">0 orders · Inactive ${c.daysSinceLast}d</span></div>`).join('');
-
-            // ── Sync sidebar card with live ML data ──
-            const atRiskCount = mo.length + do2.length;
-            document.getElementById('sidebarAtRisk').textContent = atRiskCount;
-            document.getElementById('sidebarAtRiskPct').textContent = atRiskCount > 0 ? `↑ ${atRiskCount} customers need attention` : 'No at-risk customers';
-
-            document.getElementById('sidebarRecovered').textContent = ch.length;
-            document.getElementById('sidebarRecoveredPct').textContent = ch.length > 0 ? `↑ ${ch.length} champions retained` : 'No champions yet';
-
-            const avgChurn = all.length ? (all.reduce((s, c) => s + c.churnProb, 0) / all.length * 100).toFixed(1) : 0;
-            document.getElementById('sidebarAvgChurn').textContent = avgChurn + '%';
-            document.getElementById('sidebarChurnLabel').textContent =
-                avgChurn > 60 ? 'High attention needed' : avgChurn > 35 ? 'Moderate risk' : 'Low risk ✅';
-
-            const retention = all.length ? Math.round((ch.length / all.length) * 100) : 0;
-            document.getElementById('sidebarRetention').textContent = retention + '%';
-            document.getElementById('sidebarRetentionLabel').textContent =
-                retention >= 60 ? 'Improved ✅' : retention >= 30 ? 'Stable' : 'Needs improvement';
         }
 
         function renderChurnCharts() {
@@ -7600,21 +7653,6 @@
                 btnEl.textContent = '📢 Send to All Customers';
             }
         }
-
-        // ── Sidebar churn card — silent load on page start ──
-        window.addEventListener('DOMContentLoaded', async function () {
-            try {
-                const resp = await fetch('/api/churn-customers');
-                if (!resp.ok) throw new Error('failed');
-                const data = await resp.json();
-                churnCustomerData = data.customers || [];
-                if (!churnCustomerData.length) throw new Error('empty');
-            } catch (e) {
-                churnCustomerData = generateMockChurnData();
-            }
-            applyMLSegmentation();
-        });
-
     </script>
     <footer class="footer">
         © 2026 Product Dashboard | All Rights Reserved
