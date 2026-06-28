@@ -6359,7 +6359,7 @@ def avg_orders():
         conn.close()
         
         
-        @app.route('/api/owner/avg-orders-detail')
+@app.route('/api/owner/avg-orders-detail')
 def avg_orders_detail():
     conn   = get_db_connection()
     cursor = conn.cursor(dictionary=True)
