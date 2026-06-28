@@ -2578,11 +2578,6 @@
             else if (currentPage === "purchased") window.location.href = "/purchased?year=" + year + "&months=" + selectedMonths.join(",");
         }
 
-        function openSearchPage() {
-            window.location.href = "/searchfortheownersection";
-        }
-
-
         function openActiveBuyersModal() {
             document.getElementById("activeBuyersModal").style.display = "flex";
         }
@@ -2961,13 +2956,6 @@
             loadCustomerBehaviorTrends();
         });
 
-        function openTotalCustomersModal() {
-            document.getElementById("totalCustomersModal").style.display = "flex";
-        }
-
-        function closeTotalCustomersModal() {
-            document.getElementById("totalCustomersModal").style.display = "none";
-        }
         function searchTotalCustomers() {
             const raw = document.getElementById("customerSearch").value.toLowerCase().trim();
             const allRows = document.querySelectorAll("#totalCustomersTableBody tr");
@@ -6860,51 +6848,45 @@
 
         function renderSegmentCards() {
             const ch = churnSegmented.champions;
-            document.getElementById('champCount').textContent = ch.length + ' Customers';
-            document.getElementById('champChurn').textContent = ch.length ? (ch.reduce((a, b) => a + b.churnProb, 0) / ch.length * 100).toFixed(1) + '%' : '—';
-
-            // ── Sync sidebar card with live ML data ──
             const mo = churnSegmented.moderate;
             const do2 = churnSegmented.dormant;
             const all = [...ch, ...mo, ...do2];
 
-            // At Risk = moderate + dormant count
-            const atRiskCount = mo.length + do2.length;
-            document.getElementById('sidebarAtRisk').textContent = atRiskCount;
-            document.getElementById('sidebarAtRiskPct').textContent = atRiskCount > 0 ? `↑ ${atRiskCount} customers need attention` : 'No at-risk customers';
-
-            // Recovered = champions count (orders ≥ 5 = retained/recovered)
-            document.getElementById('sidebarRecovered').textContent = ch.length;
-            document.getElementById('sidebarRecoveredPct').textContent = ch.length > 0 ? `↑ ${ch.length} champions retained` : 'No champions yet';
-
-            // Avg Churn Probability across all
-            const avgChurn = all.length
-                ? (all.reduce((s, c) => s + c.churnProb, 0) / all.length * 100).toFixed(1)
-                : 0;
-            document.getElementById('sidebarAvgChurn').textContent = avgChurn + '%';
-            document.getElementById('sidebarChurnLabel').textContent =
-                avgChurn > 60 ? 'High attention needed' :
-                    avgChurn > 35 ? 'Moderate risk' : 'Low risk ✅';
-
-            // Retention Success = champions / total * 100
-            const retention = all.length ? Math.round((ch.length / all.length) * 100) : 0;
-            document.getElementById('sidebarRetention').textContent = retention + '%';
-            document.getElementById('sidebarRetentionLabel').textContent =
-                retention >= 60 ? 'Improved ✅' :
-                    retention >= 30 ? 'Stable' : 'Needs improvement'; setTimeout(() => { document.getElementById('champOrderBar').style.width = '88%'; document.getElementById('champRetBar').style.width = '92%'; document.getElementById('champSpendBar').style.width = '85%'; }, 300);
+            // ── Champions card ──
+            document.getElementById('champCount').textContent = ch.length + ' Customers';
+            document.getElementById('champChurn').textContent = ch.length ? (ch.reduce((a, b) => a + b.churnProb, 0) / ch.length * 100).toFixed(1) + '%' : '—';
+            setTimeout(() => { document.getElementById('champOrderBar').style.width = '88%'; document.getElementById('champRetBar').style.width = '92%'; document.getElementById('champSpendBar').style.width = '85%'; }, 300);
             document.getElementById('champList').innerHTML = ch.slice(0, 4).map(c => `<div class="churn-mini-customer"><span>👤 ${c.name}</span><span style="color:#15803d;font-weight:700;">${c.orders} orders · ₹${c.spend}</span></div>`).join('');
 
-            const mo = churnSegmented.moderate;
+            // ── Moderate card ──
             document.getElementById('modCount').textContent = mo.length + ' Customers';
             document.getElementById('modChurn').textContent = mo.length ? (mo.reduce((a, b) => a + b.churnProb, 0) / mo.length * 100).toFixed(1) + '%' : '—';
             setTimeout(() => { document.getElementById('modOrderBar').style.width = '52%'; document.getElementById('modRetBar').style.width = '58%'; document.getElementById('modSpendBar').style.width = '44%'; }, 300);
             document.getElementById('modList').innerHTML = mo.slice(0, 4).map(c => `<div class="churn-mini-customer"><span>👤 ${c.name}</span><span style="color:#b45309;font-weight:700;">${c.orders} orders · ₹${c.spend}</span></div>`).join('');
 
-            const do2 = churnSegmented.dormant;
+            // ── Dormant card ──
             document.getElementById('dormCount').textContent = do2.length + ' Customers';
             document.getElementById('dormChurn').textContent = do2.length ? (do2.reduce((a, b) => a + b.churnProb, 0) / do2.length * 100).toFixed(1) + '%' : '—';
             setTimeout(() => { document.getElementById('dormInactBar').style.width = '80%'; document.getElementById('dormRecBar').style.width = '22%'; document.getElementById('dormLoginBar').style.width = '15%'; }, 300);
             document.getElementById('dormList').innerHTML = do2.slice(0, 4).map(c => `<div class="churn-mini-customer"><span>👤 ${c.name}</span><span style="color:#b91c1c;font-weight:700;">0 orders · Inactive ${c.daysSinceLast}d</span></div>`).join('');
+
+            // ── Sync sidebar card with live ML data ──
+            const atRiskCount = mo.length + do2.length;
+            document.getElementById('sidebarAtRisk').textContent = atRiskCount;
+            document.getElementById('sidebarAtRiskPct').textContent = atRiskCount > 0 ? `↑ ${atRiskCount} customers need attention` : 'No at-risk customers';
+
+            document.getElementById('sidebarRecovered').textContent = ch.length;
+            document.getElementById('sidebarRecoveredPct').textContent = ch.length > 0 ? `↑ ${ch.length} champions retained` : 'No champions yet';
+
+            const avgChurn = all.length ? (all.reduce((s, c) => s + c.churnProb, 0) / all.length * 100).toFixed(1) : 0;
+            document.getElementById('sidebarAvgChurn').textContent = avgChurn + '%';
+            document.getElementById('sidebarChurnLabel').textContent =
+                avgChurn > 60 ? 'High attention needed' : avgChurn > 35 ? 'Moderate risk' : 'Low risk ✅';
+
+            const retention = all.length ? Math.round((ch.length / all.length) * 100) : 0;
+            document.getElementById('sidebarRetention').textContent = retention + '%';
+            document.getElementById('sidebarRetentionLabel').textContent =
+                retention >= 60 ? 'Improved ✅' : retention >= 30 ? 'Stable' : 'Needs improvement';
         }
 
         function renderChurnCharts() {
