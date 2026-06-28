@@ -2956,16 +2956,20 @@
             renderBehaviorChart(type);
         }
 
-window.addEventListener('DOMContentLoaded', function () {
+        window.addEventListener('DOMContentLoaded', function () {
             loadCustomerRanking();
             loadCustomerBehaviorTrends();
-            loadChurnDataSilent();
         });
+        function openTotalCustomersModal() {
+            document.getElementById("totalCustomersModal").style.display = "flex";
+        }
+        
 
-        async function loadChurnDataSilent() {
+        // ── Sidebar churn card — load silently on page start ──
+        window.addEventListener('DOMContentLoaded', async function () {
             try {
                 const resp = await fetch('/api/churn-customers');
-                if (!resp.ok) throw new Error('API failed');
+                if (!resp.ok) throw new Error('failed');
                 const data = await resp.json();
                 churnCustomerData = data.customers || [];
                 if (!churnCustomerData.length) throw new Error('empty');
@@ -2973,11 +2977,11 @@ window.addEventListener('DOMContentLoaded', function () {
                 churnCustomerData = generateMockChurnData();
             }
             applyMLSegmentation();
-        }
+        });
+    </script>
+    <footer class="footer">
 
-        function openTotalCustomersModal() {
-            document.getElementById("totalCustomersModal").style.display = "flex";
-        }
+        
 
         function closeTotalCustomersModal() {
             document.getElementById("totalCustomersModal").style.display = "none";
