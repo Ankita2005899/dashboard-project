@@ -7618,7 +7618,8 @@
                 btnEl.textContent = '📢 Send to All Customers';
             }
         }
-        // ── Sidebar churn card — load silently on page start ──
+
+        // ── Sidebar churn card — silent load on page start ──
         window.addEventListener('DOMContentLoaded', async function () {
             try {
                 const resp = await fetch('/api/churn-customers');
@@ -7631,6 +7632,7 @@
             }
             applyMLSegmentation();
         });
+
     </script>
     <footer class="footer">
         © 2026 Product Dashboard | All Rights Reserved
