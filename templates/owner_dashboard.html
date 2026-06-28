@@ -1543,26 +1543,26 @@
 
             <div class="card churn-card">
                 <h3>At Risk Customers</h3>
-                <h2>1,284</h2>
-                <p class="down">↑ 6.4% this month</p>
+                <h2 id="sidebarAtRisk">—</h2>
+                <p class="down" id="sidebarAtRiskPct">Loading...</p>
 
                 <hr>
 
                 <h3>Recovered Customers</h3>
-                <h2>426</h2>
-                <p class="up">↑ 12.1%</p>
+                <h2 id="sidebarRecovered">—</h2>
+                <p class="up" id="sidebarRecoveredPct">Loading...</p>
 
                 <hr>
 
                 <h3>Avg Churn Probability</h3>
-                <h2>42%</h2>
-                <p class="down">High attention needed</p>
+                <h2 id="sidebarAvgChurn">—</h2>
+                <p class="down" id="sidebarChurnLabel">Loading...</p>
 
                 <hr>
 
                 <h3>Retention Success</h3>
-                <h2>68%</h2>
-                <p class="up">Improved</p>
+                <h2 id="sidebarRetention">—</h2>
+                <p class="up" id="sidebarRetentionLabel">Loading...</p>
 
                 <button class="open-churn-btn" onclick="openChurnModal()">
                     Open
@@ -6863,7 +6863,36 @@
             const ch = churnSegmented.champions;
             document.getElementById('champCount').textContent = ch.length + ' Customers';
             document.getElementById('champChurn').textContent = ch.length ? (ch.reduce((a, b) => a + b.churnProb, 0) / ch.length * 100).toFixed(1) + '%' : '—';
-            setTimeout(() => { document.getElementById('champOrderBar').style.width = '88%'; document.getElementById('champRetBar').style.width = '92%'; document.getElementById('champSpendBar').style.width = '85%'; }, 300);
+
+            // ── Sync sidebar card with live ML data ──
+            const mo = churnSegmented.moderate;
+            const do2 = churnSegmented.dormant;
+            const all = [...ch, ...mo, ...do2];
+
+            // At Risk = moderate + dormant count
+            const atRiskCount = mo.length + do2.length;
+            document.getElementById('sidebarAtRisk').textContent = atRiskCount;
+            document.getElementById('sidebarAtRiskPct').textContent = atRiskCount > 0 ? `↑ ${atRiskCount} customers need attention` : 'No at-risk customers';
+
+            // Recovered = champions count (orders ≥ 5 = retained/recovered)
+            document.getElementById('sidebarRecovered').textContent = ch.length;
+            document.getElementById('sidebarRecoveredPct').textContent = ch.length > 0 ? `↑ ${ch.length} champions retained` : 'No champions yet';
+
+            // Avg Churn Probability across all
+            const avgChurn = all.length
+                ? (all.reduce((s, c) => s + c.churnProb, 0) / all.length * 100).toFixed(1)
+                : 0;
+            document.getElementById('sidebarAvgChurn').textContent = avgChurn + '%';
+            document.getElementById('sidebarChurnLabel').textContent =
+                avgChurn > 60 ? 'High attention needed' :
+                    avgChurn > 35 ? 'Moderate risk' : 'Low risk ✅';
+
+            // Retention Success = champions / total * 100
+            const retention = all.length ? Math.round((ch.length / all.length) * 100) : 0;
+            document.getElementById('sidebarRetention').textContent = retention + '%';
+            document.getElementById('sidebarRetentionLabel').textContent =
+                retention >= 60 ? 'Improved ✅' :
+                    retention >= 30 ? 'Stable' : 'Needs improvement'; setTimeout(() => { document.getElementById('champOrderBar').style.width = '88%'; document.getElementById('champRetBar').style.width = '92%'; document.getElementById('champSpendBar').style.width = '85%'; }, 300);
             document.getElementById('champList').innerHTML = ch.slice(0, 4).map(c => `<div class="churn-mini-customer"><span>👤 ${c.name}</span><span style="color:#15803d;font-weight:700;">${c.orders} orders · ₹${c.spend}</span></div>`).join('');
 
             const mo = churnSegmented.moderate;
