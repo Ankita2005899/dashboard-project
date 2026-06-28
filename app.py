@@ -6475,6 +6475,60 @@ def logout():
     return redirect(url_for('login'))
 
 
+#_____________________delete in signout sathi _____________
+
+
+
+@app.route('/api/owner/signout-logs')
+def get_signout_logs():
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, user_id, user_name, user_email, profile_image,
+                   signout_reason, custom_reason, ip_address, signout_at
+            FROM user_signout_logs
+            ORDER BY signout_at DESC
+        """)
+        logs = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        for l in logs:
+            if l.get('signout_at'):
+                l['signout_at'] = str(l['signout_at'])
+        return jsonify({'logs': logs})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/owner/signout-log/<int:log_id>', methods=['DELETE'])
+def delete_signout_log(log_id):
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM user_signout_logs WHERE id = %s", (log_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/owner/signout-logs/<int:user_id>', methods=['DELETE'])
+def delete_user_signout_logs(user_id):
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM user_signout_logs WHERE user_id = %s", (user_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 
  
         
