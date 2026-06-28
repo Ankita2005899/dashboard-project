@@ -6389,96 +6389,6 @@ def decrement_availability():
     
                   
 #-------------------logout process from profile.html page ({sign out")button sathi-------------------- 
-
-
-@app.route('/api/signout-log', methods=['POST'])
-def signout_log():
-    try:
-        data       = request.get_json()
-        user_id    = session.get('user_id')
-        user_name  = session.get('username', '')
-        user_email = session.get('email', '')
-        ip_address = request.remote_addr
-        session_id = request.cookies.get('session', '')
-
-        conn   = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO user_signout_logs
-                (user_id, user_name, user_email, profile_image,
-                 signout_reason, custom_reason,
-                 ip_address, user_agent, session_id, signout_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            user_id,
-            user_name,
-            user_email,
-            data.get('profile_image'),
-            data.get('signout_reason'),
-            data.get('custom_reason') or data.get('extra_feedback'),
-            ip_address,
-            data.get('user_agent'),
-            session_id,
-            datetime.utcnow() + timedelta(hours=5, minutes=30)
-        ))
-        conn.commit()
-        cursor.close()
-        conn.close()
-    except Exception as e:
-        print(f"signout-log error: {e}")
-
-    return jsonify({'success': True})
-
-
-
-@app.route('/api/owner/signout-logs')
-def get_signout_logs():
-    try:
-        conn   = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
-            SELECT id, user_id, user_name, user_email, profile_image,
-                   signout_reason, custom_reason, ip_address, signout_at
-            FROM user_signout_logs
-            ORDER BY signout_at DESC
-        """)
-        logs = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        # Convert datetime to string
-        for l in logs:
-            if l.get('signout_at'):
-                l['signout_at'] = str(l['signout_at'])
-        return jsonify({'logs': logs})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/api/owner/signout-logs/<int:user_id>', methods=['DELETE'])
-def delete_signout_logs(user_id):
-    try:
-        conn   = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM user_signout_logs WHERE user_id = %s", (user_id,))
-        conn.commit()
-        cursor.close()
-        conn.close()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    
-    
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
-
-
-#_____________________delete in signout sathi _____________
-
-
-
 @app.route('/api/owner/signout-logs')
 def get_signout_logs():
     try:
@@ -6529,7 +6439,10 @@ def delete_user_signout_logs(user_id):
         return jsonify({'error': str(e)}), 500
 
 
-
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
  
         
 # ============================================================
