@@ -2800,8 +2800,6 @@
             }
         }
 
-        loadCustomerRanking();
-
         async function loadCustomerBehaviorTrends() {
             async function fetchResults(url) {
                 try {
@@ -2958,8 +2956,10 @@
             renderBehaviorChart(type);
         }
 
-        loadCustomerBehaviorTrends();
-
+        window.addEventListener('DOMContentLoaded', function () {
+            loadCustomerRanking();
+            loadCustomerBehaviorTrends();
+        });
 
 
         function openTotalCustomersModal() {
