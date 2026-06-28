@@ -2956,11 +2956,11 @@
             renderBehaviorChart(type);
         }
 
-        window.addEventListener('DOMContentLoaded', function () {
+window.addEventListener('DOMContentLoaded', function () {
             loadCustomerRanking();
             loadCustomerBehaviorTrends();
+            loadChurnData();
         });
-
 
         function openTotalCustomersModal() {
             document.getElementById("totalCustomersModal").style.display = "flex";
