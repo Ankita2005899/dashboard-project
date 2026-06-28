@@ -6267,7 +6267,6 @@ def logout():
 #_________________signout table madhun data owner_section madhe ghaychya sathi __________
 
 
-
 @app.route('/api/owner/avg-orders')
 def avg_orders():
     conn   = get_db_connection()
@@ -6317,7 +6316,7 @@ def avg_orders():
                 # Current month orders
                 cursor.execute(f"""
                     SELECT COUNT(*) as cnt FROM `{table}`
-                    WHERE mode = 'purchased'
+                    WHERE mode IN ('successful', 'combo_offer')
                     AND MONTH(date) = %s AND YEAR(date) = %s
                 """, (current_month, current_year))
                 curr = cursor.fetchone()['cnt']
@@ -6325,7 +6324,7 @@ def avg_orders():
                 # Last month orders
                 cursor.execute(f"""
                     SELECT COUNT(*) as cnt FROM `{table}`
-                    WHERE mode = 'purchased'
+                    WHERE mode IN ('successful', 'combo_offer')
                     AND MONTH(date) = %s AND YEAR(date) = %s
                 """, (last_month, last_year))
                 last = cursor.fetchone()['cnt']
@@ -6358,7 +6357,6 @@ def avg_orders():
     finally:
         cursor.close()
         conn.close()
-       
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
