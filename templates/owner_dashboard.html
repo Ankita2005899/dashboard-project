@@ -1691,39 +1691,7 @@
 
                         <tbody id="avgOrdersTableBody">
                             <tr>
-                                <td>#A3001</td>
-                                <td>Michael Brown</td>
-                                <td>24</td>
-                                <td>4.0</td>
-                                <td>May 03, 2026</td>
-                                <td>Frequent Buyer</td>
-                            </tr>
-
-                            <tr>
-                                <td>#A3002</td>
-                                <td>Emily Davis</td>
-                                <td>12</td>
-                                <td>2.0</td>
-                                <td>May 01, 2026</td>
-                                <td>Regular Buyer</td>
-                            </tr>
-
-                            <tr>
-                                <td>#A3003</td>
-                                <td>William Clark</td>
-                                <td>6</td>
-                                <td>1.0</td>
-                                <td>Apr 28, 2026</td>
-                                <td>Low Activity</td>
-                            </tr>
-
-                            <tr>
-                                <td>#A3004</td>
-                                <td>Olivia Turner</td>
-                                <td>18</td>
-                                <td>3.0</td>
-                                <td>May 04, 2026</td>
-                                <td>Stable Buyer</td>
+                                <td colspan="6" style="text-align:center;color:#94a3b8;">Loading...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -2982,7 +2950,51 @@
                 console.error('Avg orders load error:', e);
             }
         }
+        async function loadAvgOrdersTable() {
+            const tbody = document.getElementById('avgOrdersTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;">Loading...</td></tr>';
 
+            try {
+                const res = await fetch('/api/owner/avg-orders-detail');
+                const data = await res.json();
+                const customers = data.customers || [];
+
+                if (!customers.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;">No data found</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = customers.map((c, i) => {
+                    const status = c.total_orders >= 10 ? 'Frequent Buyer'
+                        : c.total_orders >= 5 ? 'Regular Buyer'
+                            : c.total_orders >= 1 ? 'Low Activity'
+                                : 'Inactive';
+                    const statusColor = c.total_orders >= 10 ? '#15803d'
+                        : c.total_orders >= 5 ? '#1d4ed8'
+                            : c.total_orders >= 1 ? '#92400e'
+                                : '#b91c1c';
+                    return `<tr>
+                <td>#${String(i + 1).padStart(4, '0')}</td>
+                <td>${c.username}</td>
+                <td>${c.total_orders}</td>
+                <td>${c.avg_per_month}</td>
+                <td>${c.last_order || '—'}</td>
+                <td style="color:${statusColor};font-weight:700;">${status}</td>
+            </tr>`;
+                }).join('');
+
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">Error loading data</td></tr>';
+            }
+        }
+
+        function searchAvgOrders() {
+            const q = document.getElementById('avgOrdersSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#avgOrdersTableBody tr');
+            rows.forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
         async function loadChurnDataSilent() {
             try {
                 const resp = await fetch('/api/churn-customers');
@@ -3084,6 +3096,7 @@
 
         function openAvgOrdersModal() {
             document.getElementById("avgOrdersModal").style.display = "flex";
+            loadAvgOrdersTable();
         }
 
         function closeAvgOrdersModal() {

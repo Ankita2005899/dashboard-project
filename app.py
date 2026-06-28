@@ -6357,6 +6357,84 @@ def avg_orders():
     finally:
         cursor.close()
         conn.close()
+        
+        
+        @app.route('/api/owner/avg-orders-detail')
+def avg_orders_detail():
+    conn   = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT TABLE_NAME FROM information_schema.tables
+            WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME NOT LIKE '%_product_activity'
+            AND TABLE_NAME NOT LIKE '%_your_item'
+            AND TABLE_NAME REGEXP '^[a-z0-9_]+_[0-9]+$'
+        """)
+        tables = [r['TABLE_NAME'] for r in cursor.fetchall()]
+
+        skip = {
+            'user', 'user_activity', 'user_signout_logs', 'user_survey',
+            'user_template', 'deleted_users', 'deleted_customers',
+            'addtocart_logs', 'search_logs', 'cart', 'cart_summary',
+            'card', 'food_items', 'study_material', 'store_data',
+            'strong_password', 'sample', 'save_detail',
+            'category_requests', 'support_sd', 'product_availability',
+            'special_offers'
+        }
+
+        customers = []
+        for table in tables:
+            if table in skip:
+                continue
+            try:
+                parts = table.rsplit('_', 1)
+                if len(parts) != 2 or not parts[1].isdigit():
+                    continue
+                username = parts[0].replace('_', ' ').title()
+
+                cursor.execute(f"""
+                    SELECT
+                        COUNT(*) as total_orders,
+                        MAX(date)  as last_order,
+                        MIN(date)  as first_order
+                    FROM `{table}`
+                    WHERE mode IN ('successful', 'combo_offer')
+                """)
+                row = cursor.fetchone()
+                total  = int(row['total_orders'] or 0)
+                last_o = row['last_order']
+                first_o = row['first_order']
+
+                # Avg per month
+                if first_o and last_o and total > 0:
+                    from datetime import datetime
+                    months = max(1, (last_o.year - first_o.year) * 12
+                                  + (last_o.month - first_o.month) + 1)
+                    avg_pm = round(total / months, 1)
+                else:
+                    avg_pm = 0
+
+                customers.append({
+                    'username'     : username,
+                    'total_orders' : total,
+                    'avg_per_month': avg_pm,
+                    'last_order'   : last_o.strftime('%b %d, %Y') if last_o else None
+                })
+            except:
+                continue
+
+        customers.sort(key=lambda x: x['total_orders'], reverse=True)
+        return jsonify({'customers': customers})
+
+    except Exception as e:
+        return jsonify({'customers': [], 'error': str(e)})
+    finally:
+        cursor.close()
+        conn.close()
+        
+        
 # ============================================================
 # STATIC FILE SERVING
 # ============================================================
