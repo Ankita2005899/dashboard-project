@@ -276,7 +276,7 @@
 
 
 
-
+        
 
         /* ===== Modal Content ===== */
         .modal-content {
@@ -1300,8 +1300,8 @@
 
                         <button onclick="openAllDashboardCardsModal(); closeHeaderMenu();" style="width:100%;text-align:left;background:none;border:none;
     padding:14px 18px;font-size:14px;font-weight:600;color:#1e293b;
-    cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f1f5f9;"
-                            onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+    cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f1f5f9;" onmouseover="this.style.background='#f8fafc'"
+                            onmouseout="this.style.background='white'">
                             🗂️ All Dashboard Cards
                         </button>
 
@@ -2948,7 +2948,7 @@
             renderBehaviorChart(type);
         }
 
-        window.addEventListener('DOMContentLoaded', function () {
+window.addEventListener('DOMContentLoaded', function () {
             loadCustomerRanking();
             loadCustomerBehaviorTrends();
             loadChurnDataSilent();
@@ -6895,13 +6895,13 @@
                     retention >= 30 ? 'Stable' : 'Needs improvement'; setTimeout(() => { document.getElementById('champOrderBar').style.width = '88%'; document.getElementById('champRetBar').style.width = '92%'; document.getElementById('champSpendBar').style.width = '85%'; }, 300);
             document.getElementById('champList').innerHTML = ch.slice(0, 4).map(c => `<div class="churn-mini-customer"><span>👤 ${c.name}</span><span style="color:#15803d;font-weight:700;">${c.orders} orders · ₹${c.spend}</span></div>`).join('');
 
-            // mo already defined above
+
             document.getElementById('modCount').textContent = mo.length + ' Customers';
             document.getElementById('modChurn').textContent = mo.length ? (mo.reduce((a, b) => a + b.churnProb, 0) / mo.length * 100).toFixed(1) + '%' : '—';
             setTimeout(() => { document.getElementById('modOrderBar').style.width = '52%'; document.getElementById('modRetBar').style.width = '58%'; document.getElementById('modSpendBar').style.width = '44%'; }, 300);
             document.getElementById('modList').innerHTML = mo.slice(0, 4).map(c => `<div class="churn-mini-customer"><span>👤 ${c.name}</span><span style="color:#b45309;font-weight:700;">${c.orders} orders · ₹${c.spend}</span></div>`).join('');
 
-            // do2 already defined above
+
             document.getElementById('dormCount').textContent = do2.length + ' Customers';
             document.getElementById('dormChurn').textContent = do2.length ? (do2.reduce((a, b) => a + b.churnProb, 0) / do2.length * 100).toFixed(1) + '%' : '—';
             setTimeout(() => { document.getElementById('dormInactBar').style.width = '80%'; document.getElementById('dormRecBar').style.width = '22%'; document.getElementById('dormLoginBar').style.width = '15%'; }, 300);
@@ -7651,18 +7651,18 @@
             logs.forEach(l => { freqMap[l.user_id] = (freqMap[l.user_id] || 0) + 1; });
             const counts = Object.values(freqMap);
             const mean = counts.reduce((s, v) => s + v, 0) / (counts.length || 1);
-            const std = Math.sqrt(counts.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / (counts.length || 1));
+            const std  = Math.sqrt(counts.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / (counts.length || 1));
             const threshold = mean + 1.5 * std;
             const anomalyUsers = new Set(
                 Object.entries(freqMap).filter(([uid, c]) => c > threshold).map(([uid]) => String(uid))
             );
             const uniqueUsers = Object.keys(freqMap).length;
-            const avgPerUser = uniqueUsers ? (logs.length / uniqueUsers).toFixed(1) : 0;
-            document.getElementById('solTotal').textContent = logs.length;
-            document.getElementById('solUnique').textContent = uniqueUsers;
-            document.getElementById('solLatest').textContent = logs.length ? logs[0].signout_at : '—';
+            const avgPerUser  = uniqueUsers ? (logs.length / uniqueUsers).toFixed(1) : 0;
+            document.getElementById('solTotal').textContent     = logs.length;
+            document.getElementById('solUnique').textContent    = uniqueUsers;
+            document.getElementById('solLatest').textContent    = logs.length ? logs[0].signout_at : '—';
             document.getElementById('solAnomalies').textContent = anomalyUsers.size;
-            document.getElementById('solAvg').textContent = avgPerUser;
+            document.getElementById('solAvg').textContent       = avgPerUser;
             renderSignOutLogs(logs, freqMap, anomalyUsers);
         }
 
@@ -7679,8 +7679,8 @@
             }
             tbody.innerHTML = logs.map((l, i) => {
                 const isAnomaly = anomalyUsers.has(String(l.user_id));
-                const freq = freqMap[l.user_id] || 1;
-                const mlBadge = isAnomaly
+                const freq      = freqMap[l.user_id] || 1;
+                const mlBadge   = isAnomaly
                     ? `<span style="background:#fee2e2;color:#dc2626;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:800;">⚠️ Anomaly</span>`
                     : freq >= 3
                         ? `<span style="background:#fef3c7;color:#b45309;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;">🔁 Frequent</span>`
@@ -7691,8 +7691,8 @@
                     <td>
                         <div style="display:flex;align-items:center;gap:8px;">
                             ${l.profile_image
-                        ? `<img src="${l.profile_image}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">`
-                        : '<span style="font-size:20px;">👤</span>'}
+                                ? `<img src="${l.profile_image}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">`
+                                : '<span style="font-size:20px;">👤</span>'}
                             <span style="font-weight:600;">${l.user_name || '—'}</span>
                         </div>
                     </td>
@@ -7715,9 +7715,9 @@
             const q = document.getElementById('signOutSearch').value.toLowerCase();
             const filtered = signOutLogsData.filter(l =>
                 String(l.user_id || '').includes(q) ||
-                (l.user_name || '').toLowerCase().includes(q) ||
-                (l.user_email || '').toLowerCase().includes(q) ||
-                (l.signout_reason || '').toLowerCase().includes(q) ||
+                (l.user_name     || '').toLowerCase().includes(q) ||
+                (l.user_email    || '').toLowerCase().includes(q) ||
+                (l.signout_reason|| '').toLowerCase().includes(q) ||
                 (l.custom_reason || '').toLowerCase().includes(q)
             );
             renderSignOutLogs(filtered, null, null);
@@ -7746,26 +7746,20 @@
                     <h3 style="color:#ef4444;">🚪 Sign Out Users</h3>
                     <small>All user sign-out logs · real-time from DB</small>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
-                        <span
-                            style="font-size:11px;background:#fee2e2;color:#991b1b;padding:2px 9px;border-radius:20px;font-weight:700;">🤖
-                            Anomaly Detection</span>
-                        <span
-                            style="font-size:11px;background:#fef3c7;color:#92400e;padding:2px 9px;border-radius:20px;font-weight:700;">📊
-                            Frequency Analysis</span>
-                        <span
-                            style="font-size:11px;background:#dbeafe;color:#1d4ed8;padding:2px 9px;border-radius:20px;font-weight:700;">⚡
-                            Real-time DB</span>
+                        <span style="font-size:11px;background:#fee2e2;color:#991b1b;padding:2px 9px;border-radius:20px;font-weight:700;">🤖 Anomaly Detection</span>
+                        <span style="font-size:11px;background:#fef3c7;color:#92400e;padding:2px 9px;border-radius:20px;font-weight:700;">📊 Frequency Analysis</span>
+                        <span style="font-size:11px;background:#dbeafe;color:#1d4ed8;padding:2px 9px;border-radius:20px;font-weight:700;">⚡ Real-time DB</span>
                     </div>
                 </div>
                 <button onclick="closeSignOutLogsModal()" class="send-btn">✕ Close</button>
             </div>
 
             <input type="text" id="signOutSearch" placeholder="🔍 Search by name, email, ID or reason..."
-                oninput="filterSignOutLogs()" style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;
+                oninput="filterSignOutLogs()"
+                style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;
                 font-size:13px;margin-bottom:14px;box-sizing:border-box;">
 
-            <div
-                style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;
+            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;
                 padding:10px 16px;background:#fff5f5;border-radius:10px;border:1px solid #fecaca;font-size:12px;font-weight:700;">
                 <span>🚪 Total Sign-outs: <span id="solTotal" style="color:#ef4444;">—</span></span>
                 <span>👤 Unique Users: <span id="solUnique" style="color:#f59e0b;">—</span></span>
@@ -7790,9 +7784,7 @@
                         </tr>
                     </thead>
                     <tbody id="signOutLogsBody">
-                        <tr>
-                            <td colspan="9" style="text-align:center;padding:25px;color:#94a3b8;">⏳ Loading...</td>
-                        </tr>
+                        <tr><td colspan="9" style="text-align:center;padding:25px;color:#94a3b8;">⏳ Loading...</td></tr>
                     </tbody>
                 </table>
             </div>
