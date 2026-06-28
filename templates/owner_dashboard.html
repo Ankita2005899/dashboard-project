@@ -2956,7 +2956,7 @@
             renderBehaviorChart(type);
         }
 
-window.addEventListener('DOMContentLoaded', function () {
+        window.addEventListener('DOMContentLoaded', function () {
             loadCustomerRanking();
             loadCustomerBehaviorTrends();
             loadChurnDataSilent();
@@ -2966,7 +2966,7 @@ window.addEventListener('DOMContentLoaded', function () {
         // ── Avg Orders per Customer ────────────────────────────
         async function loadAvgOrders() {
             try {
-                const res  = await fetch('/api/owner/avg-orders');
+                const res = await fetch('/api/owner/avg-orders');
                 const data = await res.json();
 
                 const valEl = document.getElementById('avgOrdersValue');
@@ -2974,11 +2974,11 @@ window.addEventListener('DOMContentLoaded', function () {
 
                 const trendEl = document.getElementById('avgOrdersTrend');
                 if (trendEl && data.trend !== undefined) {
-                    const isUp       = data.trend >= 0;
-                    trendEl.className   = isUp ? 'up' : 'down';
+                    const isUp = data.trend >= 0;
+                    trendEl.className = isUp ? 'up' : 'down';
                     trendEl.textContent = `${isUp ? '↑' : '↓'} ${Math.abs(data.trend)}% vs last month`;
                 }
-            } catch(e) {
+            } catch (e) {
                 console.error('Avg orders load error:', e);
             }
         }
