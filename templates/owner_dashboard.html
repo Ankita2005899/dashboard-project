@@ -2959,8 +2959,21 @@
 window.addEventListener('DOMContentLoaded', function () {
             loadCustomerRanking();
             loadCustomerBehaviorTrends();
-            loadChurnData();
+            loadChurnDataSilent();
         });
+
+        async function loadChurnDataSilent() {
+            try {
+                const resp = await fetch('/api/churn-customers');
+                if (!resp.ok) throw new Error('API failed');
+                const data = await resp.json();
+                churnCustomerData = data.customers || [];
+                if (!churnCustomerData.length) throw new Error('empty');
+            } catch (e) {
+                churnCustomerData = generateMockChurnData();
+            }
+            applyMLSegmentation();
+        }
 
         function openTotalCustomersModal() {
             document.getElementById("totalCustomersModal").style.display = "flex";
