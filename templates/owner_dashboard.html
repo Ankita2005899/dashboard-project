@@ -1310,9 +1310,16 @@
 
                         <button onclick="openAllDashboardCardsModal(); closeHeaderMenu();" style="width:100%;text-align:left;background:none;border:none;
     padding:14px 18px;font-size:14px;font-weight:600;color:#1e293b;
-    cursor:pointer;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f8fafc'"
+    cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f1f5f9;" onmouseover="this.style.background='#f8fafc'"
                             onmouseout="this.style.background='white'">
                             🗂️ All Dashboard Cards
+                        </button>
+
+                        <button onclick="openSignOutLogsModal(); closeHeaderMenu();" style="width:100%;text-align:left;background:none;border:none;
+    padding:14px 18px;font-size:14px;font-weight:600;color:#1e293b;
+    cursor:pointer;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f8fafc'"
+                            onmouseout="this.style.background='white'">
+                            🚪 Sign Out Users
                         </button>
                     </div>
                 </div>
@@ -4161,7 +4168,7 @@
         }
 
         // Permanently delete from recycle bin (no recovery)
-        async function permanentDelete(id, username, trElement) {
+async function permanentDelete(id, username, trElement) {
             if (!confirm(`Permanently delete "${username}"?\n\nThis CANNOT be undone.`)) return;
 
             try {
@@ -4169,6 +4176,8 @@
                 const data = await res.json();
 
                 if (res.ok) {
+                    // Also delete signout logs for this user
+                    await fetch(`/api/owner/signout-logs/${id}`, { method: "DELETE" });
                     trElement.style.transition = "opacity 0.3s";
                     trElement.style.opacity = "0";
                     setTimeout(() => trElement.remove(), 300);
@@ -4179,7 +4188,6 @@
                 alert("Permanent delete failed: " + err.message);
             }
         }
-
         function openRewardModal() {
             document.getElementById("rewardModal").style.display = "flex";
         }
@@ -4581,12 +4589,13 @@
             if (!confirm(`Permanently delete "${username}"?\nThis CANNOT be undone.`)) return;
             const res = await fetch(`/api/owner/active-buyers/recycle-bin/${id}`, { method: "DELETE" });
             if (res.ok) {
+                // Also delete signout logs for this user
+                await fetch(`/api/owner/signout-logs/${id}`, { method: "DELETE" });
                 trElement.style.opacity = "0";
                 trElement.style.transition = "0.3s";
                 setTimeout(() => trElement.remove(), 300);
             } else { alert("Permanent delete failed!"); }
         }
-
         // ── Accordion: Active User Website Duration ───────────────────────────────────
         const buyerAccCharts = {};
 
@@ -7600,6 +7609,75 @@
                 btnEl.textContent = '📢 Send to All Customers';
             }
         }
+         // ── Sign Out Logs Modal ──────────────────────────────────────────────────────────
+        let signOutLogsData = [];
+
+        function openSignOutLogsModal() {
+            document.getElementById('signOutLogsModal').style.display = 'flex';
+            loadSignOutLogs();
+        }
+
+        function closeSignOutLogsModal() {
+            document.getElementById('signOutLogsModal').style.display = 'none';
+        }
+
+        async function loadSignOutLogs() {
+            const tbody = document.getElementById('signOutLogsBody');
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:25px;color:#94a3b8;">⏳ Loading...</td></tr>`;
+            try {
+                const res = await fetch('/api/owner/signout-logs');
+                if (!res.ok) throw new Error('status ' + res.status);
+                const data = await res.json();
+                signOutLogsData = data.logs ?? [];
+                renderSignOutLogs(signOutLogsData);
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:25px;color:#ef4444;">❌ Failed: ${e.message}</td></tr>`;
+            }
+        }
+
+        function renderSignOutLogs(logs) {
+            const tbody = document.getElementById('signOutLogsBody');
+            document.getElementById('solTotal').textContent  = logs.length;
+            document.getElementById('solUnique').textContent = new Set(logs.map(l => l.user_id)).size;
+            document.getElementById('solLatest').textContent = logs.length ? logs[0].signout_at : '—';
+
+            if (!logs.length) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:25px;color:#94a3b8;">No sign-out logs found.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = logs.map((l, i) => `
+                <tr>
+                    <td style="text-align:center;font-weight:700;">${i + 1}</td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            ${l.profile_image ? `<img src="${l.profile_image}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : '<span style="font-size:20px;">👤</span>'}
+                            <span style="font-weight:600;">${l.user_name || '—'}</span>
+                        </div>
+                    </td>
+                    <td style="color:#6366f1;">${l.user_email || '—'}</td>
+                    <td><span style="background:#fee2e2;color:#991b1b;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:600;">${l.signout_reason || '—'}</span></td>
+                    <td style="color:#475569;font-size:12px;">${l.custom_reason || '—'}</td>
+                    <td style="font-size:12px;color:#64748b;">${l.ip_address || '—'}</td>
+                    <td style="font-size:12px;color:#64748b;">${l.signout_at || '—'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterSignOutLogs() {
+            const q = document.getElementById('signOutSearch').value.toLowerCase();
+            const filtered = signOutLogsData.filter(l =>
+                (l.user_name  || '').toLowerCase().includes(q) ||
+                (l.user_email || '').toLowerCase().includes(q) ||
+                (l.signout_reason || '').toLowerCase().includes(q) ||
+                (l.custom_reason  || '').toLowerCase().includes(q)
+            );
+            renderSignOutLogs(filtered);
+        }
+
+        // ── Sidebar churn card — silent load on page start ──
+        
+        
+
 
         // ── Sidebar churn card — silent load on page start ──
         window.addEventListener('DOMContentLoaded', async function () {
@@ -7616,6 +7694,53 @@
         });
 
     </script>
+    <!-- ═══════════════════════════════ SIGN OUT LOGS MODAL ═══════════════════════════════ -->
+    <div id="signOutLogsModal" class="modal-overlay" style="display:none;z-index:9999;">
+        <div class="buyers-modal" style="max-width:1300px;width:97%;">
+            <div class="buyers-header" style="margin-bottom:16px;">
+                <div>
+                    <h3 style="color:#ef4444;">🚪 Sign Out Users</h3>
+                    <small>All user sign-out logs · real-time from DB</small>
+                </div>
+                <button onclick="closeSignOutLogsModal()" class="send-btn">✕ Close</button>
+            </div>
+
+            <!-- Search -->
+            <input type="text" id="signOutSearch" placeholder="🔍 Search by name, email or reason..."
+                oninput="filterSignOutLogs()"
+                style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;
+                font-size:13px;margin-bottom:14px;box-sizing:border-box;">
+
+            <!-- Stats bar -->
+            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;
+                padding:10px 16px;background:#fff5f5;border-radius:10px;border:1px solid #fecaca;font-size:12px;font-weight:700;">
+                <span>🚪 Total Sign-outs: <span id="solTotal" style="color:#ef4444;">—</span></span>
+                <span>👤 Unique Users: <span id="solUnique" style="color:#f59e0b;">—</span></span>
+                <span>📅 Latest: <span id="solLatest" style="color:#6366f1;">—</span></span>
+            </div>
+
+            <!-- Table -->
+            <div style="overflow-x:auto;">
+                <table class="buyers-table" style="min-width:1000px;">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>👤 User</th>
+                            <th>📧 Email</th>
+                            <th>📝 Reason</th>
+                            <th>💬 Custom Reason</th>
+                            <th>🌐 IP Address</th>
+                            <th>🕐 Signed Out At</th>
+                        </tr>
+                    </thead>
+                    <tbody id="signOutLogsBody">
+                        <tr><td colspan="7" style="text-align:center;padding:25px;color:#94a3b8;">⏳ Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <footer class="footer">
         © 2026 Product Dashboard | All Rights Reserved
     </footer>
