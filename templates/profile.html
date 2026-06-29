@@ -1850,7 +1850,10 @@
             const payload = {
                 signout_reason: _selectedReason,
                 custom_reason: customText || null,
-                extra_feedback: extraText || null,       // ← new field
+                extra_feedback: extraText || null,
+                user_email: document.getElementById('userEmailDisplay')?.textContent?.trim()
+                    || document.getElementById('profileEmail')?.textContent?.trim()
+                    || '',
                 profile_image: document.getElementById('mainProfileImg')?.src || null,
                 user_agent: navigator.userAgent,
             };
