@@ -2697,7 +2697,10 @@ def profile_page():
         cursor = db.cursor(dictionary=True)
 
         # Step 1: Get email from user table using session user_id
-        cursor.execute("SELECT email FROM user WHERE id = %s LIMIT 1", (user_id,))
+        cursor.execute("""
+            SELECT email FROM user_activity 
+            WHERE id = %s LIMIT 1
+        """, (user_id,))
         login_user = cursor.fetchone()
         email = login_user["email"] if login_user else ""
 
@@ -2738,7 +2741,7 @@ def get_latest_profile():
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT email FROM user WHERE id=%s", (session["user_id"],))
+    cursor.execute("SELECT email FROM user_activity WHERE id=%s", (session["user_id"],))
     user_row = cursor.fetchone()
 
     if not user_row:
