@@ -4309,9 +4309,9 @@ def get_category_requests():
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
     SELECT cr.id, cr.user_name, cr.category_name, cr.reason, cr.status, cr.requested_at,
-           sd.id AS user_id
+           u.id AS user_id
     FROM category_requests cr
-    LEFT JOIN save_detail sd ON sd.username = cr.user_name
+    LEFT JOIN user u ON u.username = cr.user_name
     ORDER BY cr.requested_at DESC
 """)
         rows = cursor.fetchall()
