@@ -4584,7 +4584,76 @@ def send_category_request(request_id):
         if conn and conn.is_connected():
             conn.close()
    
-   
+#---------------owner_section madhun category request chi return message to that user notification sathi ----------------------------------
+
+@app.route("/api/owner/send-notification", methods=["POST"])
+def send_notification_to_user():
+    try:
+        body    = request.get_json(silent=True) or {}
+        user_id = body.get("user_id")
+        title   = body.get("title", "").strip()
+        message = body.get("message", "").strip()
+
+        if not user_id or not message:
+            return jsonify({"error": "user_id and message required"}), 400
+
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO user_notifications (user_id, title, message)
+            VALUES (%s, %s, %s)
+        """, (user_id, title, message))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/user/notifications", methods=["GET"])
+def get_user_notifications():
+    try:
+        uid = session.get("user_id")
+        if not uid:
+            return jsonify({"notifications": []})
+
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, title, message, is_read, created_at
+            FROM user_notifications
+            WHERE user_id = %s
+            ORDER BY created_at DESC
+        """, (uid,))
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        for row in rows:
+            if hasattr(row["created_at"], "strftime"):
+                row["created_at"] = row["created_at"].strftime("%Y-%m-%d %H:%M")
+
+        return jsonify({"notifications": rows})
+    except Exception as e:
+        return jsonify({"error": str(e), "notifications": []}), 500
+
+
+@app.route("/api/user/notifications/read/<int:notif_id>", methods=["POST"])
+def mark_notification_read(notif_id):
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE user_notifications SET is_read=1 WHERE id=%s", (notif_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+#------------------------------------------------------------------------------------------------------------   
 #---------------owner search data of ( owner_section ) ------------------------------------            
 @app.route("/api/owner/search-analytics", methods=["GET"])
 def search_analytics():

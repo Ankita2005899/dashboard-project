@@ -3962,6 +3962,27 @@
                             </div>
                         </div>
 
+                        <!-- 📩 Message to User -->
+                        <div style="padding:14px 18px;border-top:1px solid #ede9fe;background:#f0fdf4;">
+                            <div style="font-size:11.5px;font-weight:700;color:#16a34a;
+                                text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">
+                                📩 Message to User
+                            </div>
+                            <textarea id="user-msg-${row.id}" rows="2"
+                                placeholder="Write a message to send to this user..."
+                                style="width:100%;padding:10px 12px;border:2px solid #86efac;
+                                    border-radius:10px;font-size:13.5px;resize:none;outline:none;
+                                    box-sizing:border-box;background:#fff;color:#334155;"></textarea>
+                            <button onclick="sendMessageToUser(${row.user_id}, ${row.id}, this)"
+                                style="margin-top:8px;background:linear-gradient(135deg,#16a34a,#15803d);
+                                    color:white;border:none;padding:8px 24px;border-radius:20px;
+                                    font-size:13px;font-weight:700;cursor:pointer;
+                                    box-shadow:0 4px 12px rgba(22,163,74,0.3);">
+                                📨 Send to User
+                            </button>
+                            <span id="user-msg-status-${row.id}" style="margin-left:10px;font-size:12px;"></span>
+                        </div>
+
                         <!-- ✍️ Note + Send -->
                         <div style="padding:18px 18px 20px;border-top:1px solid #ede9fe;
                             background:linear-gradient(135deg,#faf5ff 0%,#f0fdf4 100%);
@@ -7745,7 +7766,52 @@
                 } else { alert('Delete failed!'); }
             } catch (e) { alert('Delete failed: ' + e.message); }
         }
+        async function sendMessageToUser(userId, requestId, btnEl) {
+            const textarea = document.getElementById(`user-msg-${requestId}`);
+            const status = document.getElementById(`user-msg-status-${requestId}`);
+            const msg = textarea ? textarea.value.trim() : "";
 
+            if (!msg) {
+                status.style.color = "red";
+                status.textContent = "⚠ Please write a message first.";
+                return;
+            }
+            if (!userId || userId === "null") {
+                status.style.color = "red";
+                status.textContent = "⚠ User ID not found for this request.";
+                return;
+            }
+
+            btnEl.disabled = true;
+            btnEl.textContent = "Sending...";
+
+            try {
+                const res = await fetch("/api/owner/send-notification", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        title: "📂 Category Request Update",
+                        message: msg
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === "success") {
+                    status.style.color = "#16a34a";
+                    status.textContent = "✅ Message sent!";
+                    textarea.value = "";
+                } else {
+                    status.style.color = "red";
+                    status.textContent = "❌ Failed: " + (data.error || "Unknown error");
+                }
+            } catch (err) {
+                status.style.color = "red";
+                status.textContent = "❌ Network error.";
+            } finally {
+                btnEl.disabled = false;
+                btnEl.textContent = "📨 Send to User";
+            }
+        }
     </script>
 
     <!-- ══════════════════════════ SIGN OUT LOGS MODAL ══════════════════════════ -->
