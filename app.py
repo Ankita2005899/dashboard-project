@@ -4242,10 +4242,10 @@ def bulk_update_password_status():
 @app.route("/request-category", methods=["POST"])
 def request_category():
     data = request.get_json()
-    user_name = data.get("user_name", "").strip()
+    user_name = session.get("username", "").strip()
     category_name = data.get("category_name", "").strip()
+    reason_name = data.get("reason_name", "").strip()
     reason = data.get("reason", "").strip()
-
     errors = []
 
     # 1. Category Name validation
@@ -4256,13 +4256,6 @@ def request_category():
     if re.match(r'^(.)\1+$', category_name.replace(" ","")):
         errors.append("âŒ Category name looks invalid (e.g. 'aaa').")
 
-    # 2. Name validation
-    if len(user_name) < 3:
-        errors.append("âŒ Name must be at least 3 characters.")
-    if not re.match(r'^[a-zA-Z\s]+$', user_name):
-        errors.append("âŒ Name must contain only letters, no numbers.")
-    if re.match(r'^(.)\1+$', user_name.replace(" ","")):
-        errors.append("âŒ Name looks invalid (e.g. 'aaa').")
 
     # 3. Reason validation â€” ML style
     words = reason.split()
@@ -4289,21 +4282,22 @@ def request_category():
 
     # Sab theek hai â€” DB mein save karo
     conn = get_db_connection()
-    cursor = conn.cursor()
-    # Get user_id from user table
+    cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT id FROM user WHERE username = %s LIMIT 1", (user_name,))
     user_row = cursor.fetchone()
     uid = user_row["id"] if user_row else None
 
     cursor.execute("""
-        INSERT INTO category_requests (user_id, user_name, category_name, reason)
-        VALUES (%s, %s, %s, %s)
-    """, (uid, user_name, category_name, reason))
+        INSERT INTO category_requests (user_id, user_name, category_name, reason_name, reason)
+        VALUES (%s, %s, %s, %s, %s)
+    """, (uid, user_name, category_name, reason_name, reason))
     conn.commit()
     cursor.close()
     conn.close()
     return jsonify({"status": "success"})
-   
+
+
+
 #--------------------owner dashooard madhe category request sathi ------------------------------   
 
 @app.route("/api/owner/category-requests", methods=["GET"])
