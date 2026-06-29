@@ -2687,28 +2687,36 @@ def profile_page():
         if "user_id" not in session:
             return redirect(url_for("login"))
 
-        db = get_db_connection()
+        user_id  = session["user_id"]
+        username = session.get("username", "")
+
+        db     = get_db_connection()
         cursor = db.cursor(dictionary=True)
 
-        user = {"name": "", "email": "", "profile_image": "/static/default_profile.png"}
-
-        cursor.execute("SELECT email FROM user WHERE id=%s", (session["user_id"],))
+        # Step 1: Get email from user table using session user_id
+        cursor.execute("SELECT email FROM user WHERE id = %s LIMIT 1", (user_id,))
         login_user = cursor.fetchone()
+        email = login_user["email"] if login_user else ""
 
-        if login_user:
-            email = login_user["email"]
-            cursor.execute("""
-                SELECT name, email, profile_image FROM save_detail WHERE email=%s ORDER BY id DESC LIMIT 1
-            """, (email,))
-            detail = cursor.fetchone()
+        user = {
+            "name"         : username,
+            "email"        : email,
+            "profile_image": "/static/default_profile.png"
+        }
 
-            if detail:
-                user["name"] = detail["name"] or ""
-                user["email"] = detail["email"] or ""
-                user["profile_image"] = detail["profile_image"] or "/static/default_profile.png"
-            else:
-                user["name"] = login_user.get("username", "")
-                user["email"] = email
+        # Step 2: Get profile details from save_detail using user_id
+        cursor.execute("""
+            SELECT name, email, profile_image
+            FROM save_detail
+            WHERE user_id = %s
+            ORDER BY id DESC LIMIT 1
+        """, (user_id,))
+        detail = cursor.fetchone()
+
+        if detail:
+            user["name"]          = detail["name"]          or username
+            user["email"]         = detail["email"]         or email
+            user["profile_image"] = detail["profile_image"] or "/static/default_profile.png"
 
         cursor.close()
         db.close()
@@ -2717,7 +2725,8 @@ def profile_page():
     except Exception as e:
         print("Error loading profile:", e)
         return render_template("profile.html", user={"name": "", "email": ""})
-
+    
+    
 
 @app.route("/get-latest-profile")
 def get_latest_profile():
@@ -4298,7 +4307,13 @@ def get_category_requests():
     try:
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM category_requests ORDER BY requested_at DESC")
+        cursor.execute("""
+    SELECT cr.id, cr.user_name, cr.category_name, cr.reason, cr.status, cr.requested_at,
+           sd.id AS user_id
+    FROM category_requests cr
+    LEFT JOIN save_detail sd ON sd.username = cr.user_name
+    ORDER BY cr.requested_at DESC
+""")
         rows = cursor.fetchall()
         cursor.close()
 
