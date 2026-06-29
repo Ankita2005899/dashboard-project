@@ -6448,7 +6448,22 @@ def signout_log():
         data       = request.get_json()
         user_id    = session.get('user_id')
         user_name  = session.get('username', '')
-        user_email = session.get('email', '')
+        user_email = (session.get('user_email') or 
+              session.get('email', ''))
+
+        # Fallback: get from user table if still empty
+        if not user_email and user_id:
+            try:
+                conn2  = get_db_connection()
+                cur2   = conn2.cursor(dictionary=True)
+                cur2.execute("SELECT email FROM user WHERE id = %s LIMIT 1", (user_id,))
+                row = cur2.fetchone()
+                if row:
+                    user_email = row.get('email', '')
+                cur2.close()
+                conn2.close()
+            except:
+                pass
 
         # Fallback: get email from user table if not in session
         if not user_email and user_id:
