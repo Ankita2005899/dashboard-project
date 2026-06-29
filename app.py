@@ -4242,7 +4242,6 @@ def bulk_update_password_status():
 @app.route("/request-category", methods=["POST"])
 def request_category():
     data = request.get_json()
-    user_name = session.get("username", "").strip()
     category_name = data.get("category_name", "").strip()
     reason_name = data.get("reason_name", "").strip()
     reason = data.get("reason", "").strip()
@@ -4278,11 +4277,12 @@ def request_category():
         return jsonify({"status": "error", "errors": errors})
 
     # Sab theek hai â€” DB mein save karo
+    # Sab theek hai — DB mein save karo
+    user_name = session.get("username", "").strip()
+    uid = session.get("user_id")
+
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id FROM user WHERE username = %s LIMIT 1", (user_name,))
-    user_row = cursor.fetchone()
-    uid = user_row["id"] if user_row else None
 
     cursor.execute("""
         INSERT INTO category_requests (user_id, user_name, category_name, reason_name, reason)
@@ -4292,7 +4292,6 @@ def request_category():
     cursor.close()
     conn.close()
     return jsonify({"status": "success"})
-
 
 
 #--------------------owner dashooard madhe category request sathi ------------------------------   
