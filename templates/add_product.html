@@ -659,13 +659,12 @@
             </p>
 
             <div class="row g-3">
-                <div class="col-12">
+                <div class="col-md-6">
                     <label style="font-size:13px;font-weight:600;color:#374151;">Category Name</label>
                     <input type="text" id="reqCategoryName" placeholder="e.g. Electronics, Books, Toys..."
                         class="form-control mt-1" style="border-radius:8px;border:1px solid #cbd5e1;">
                 </div>
-                <input type="hidden" id="reqUserName" value="{{ session.get('username', '') }}">
-                <div class="col-12">
+                <div class="col-md-6">
                     <label style="font-size:13px;font-weight:600;color:#374151;">Reason Name</label>
                     <input type="text" id="reqReasonName" placeholder="e.g. High demand, Missing category..."
                         class="form-control mt-1" style="border-radius:8px;border:1px solid #cbd5e1;">
@@ -677,7 +676,7 @@
                         style="border-radius:8px;border:1px solid #cbd5e1;resize:vertical;position:relative;z-index:1;"></textarea>
                 </div>
                 <div class="col-12">
-                    <button onclick="submitCategoryRequest()"
+                    <button id="reqSubmitBtn" onclick="submitCategoryRequest()"
                         style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;border:none;padding:10px 28px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;">
                         📨 Send Request to Owner
                     </button>
@@ -720,7 +719,7 @@
             const reasonName = document.getElementById("reqReasonName").value.trim();
             const reason = document.getElementById("reqReason").value.trim();
             const msg = document.getElementById("reqMsg");
-            const btn = document.querySelector("button[onclick='submitCategoryRequest()']");
+            const btn = document.getElementById("reqSubmitBtn");
 
             if (!category || !reasonName || !reason) {
                 msg.style.display = "block";
