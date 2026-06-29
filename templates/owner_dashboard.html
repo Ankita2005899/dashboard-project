@@ -3934,95 +3934,104 @@
                             📋 Request Details
                         </div>
 
+                        <!-- Two column: Left = Developer | Right = User -->
                         <div style="display:flex;gap:0;align-items:stretch;">
-                        <div style="padding:18px;flex:1;border-right:1px solid #f1f5f9;">
-                            <div style="display:flex;justify-content:space-between;align-items:center;
-                                padding:9px 0;border-bottom:1px solid #f1f5f9;">
-                                <span style="font-size:12.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;white-space:nowrap;">Category</span>
-                                <span style="font-size:14.5px;font-weight:600;color:#1e293b;text-align:right;">${row.category_name || "-"}</span>
-                            </div>
-                            <div style="display:flex;justify-content:space-between;align-items:center;
-                                padding:9px 0;border-bottom:1px solid #f1f5f9;">
-                                <span style="font-size:12.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;white-space:nowrap;">Reason Name</span>
-                                <span style="font-size:14.5px;font-weight:600;color:#1e293b;text-align:right;">${row.reason_name || "-"}</span>
-                            </div>
-                            <div style="padding:12px 0 2px;">
-                                <span style="font-size:12.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;display:block;margin-bottom:6px;">Reason</span>
-                                <span style="font-size:14.5px;color:#334155;line-height:1.6;display:block;
-                                    white-space:normal;word-wrap:break-word;word-break:break-word;
-                                    overflow-wrap:break-word;">${row.reason || "-"}</span>
+
+                            <!-- LEFT: Note for Developer -->
+                            <div style="flex:1;padding:18px;border-right:1px solid #ede9fe;
+                                background:linear-gradient(135deg,#faf5ff,#f5f3ff);
+                                border-radius:0 0 0 14px;">
+
+                                <!-- Request Info -->
+                                <div style="display:flex;justify-content:space-between;align-items:center;
+                                    padding:9px 0;border-bottom:1px solid #ede9fe;">
+                                    <span style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;">Category</span>
+                                    <span style="font-size:14px;font-weight:600;color:#1e293b;">${row.category_name || "-"}</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;
+                                    padding:9px 0;border-bottom:1px solid #ede9fe;">
+                                    <span style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;">Reason Name</span>
+                                    <span style="font-size:14px;font-weight:600;color:#1e293b;">${row.reason_name || "-"}</span>
+                                </div>
+                                <div style="padding:10px 0 2px;">
+                                    <span style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;display:block;margin-bottom:6px;">Reason</span>
+                                    <span style="font-size:13.5px;color:#334155;line-height:1.6;display:block;word-break:break-word;">${row.reason || "-"}</span>
+                                </div>
+                                <!-- AI Summary -->
+                                <div style="margin-top:12px;padding:10px 12px;background:#f5f3ff;
+                                    border-left:3px solid #8b5cf6;border-radius:6px;">
+                                    <span style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;">🤖 AI Summary</span>
+                                    <p style="font-size:13px;color:#4c1d95;margin:5px 0 0;line-height:1.5;">${row.auto_summary || "-"}</p>
+                                </div>
+
+                                <!-- Developer Note -->
+                                <div style="margin-top:16px;">
+                                    <div style="font-size:11px;font-weight:700;color:#8b5cf6;
+                                        text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">
+                                        ✉️ Note for Developer
+                                    </div>
+                                    <textarea id="msg-input-${row.id}" rows="3"
+                                        placeholder="Write a note to send with this request..."
+                                        style="width:100%;padding:10px 12px;border:2px solid #d8b4fe;
+                                            border-radius:10px;font-size:13px;resize:vertical;outline:none;
+                                            box-sizing:border-box;background:#fff;color:#334155;
+                                            transition:border-color 0.2s;line-height:1.5;"
+                                        onfocus="this.style.borderColor='#8b5cf6'"
+                                        onblur="this.style.borderColor='#d8b4fe'"
+                                    ></textarea>
+                                    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+                                        <button ${isSent ? "disabled" : ""} onclick="sendCategoryRequest(${row.id}, this)"
+                                            style="background:${isSent ? '#94a3b8' : 'linear-gradient(135deg,#8b5cf6,#a855f7)'};
+                                                color:white;border:none;padding:10px 24px;border-radius:20px;
+                                                font-size:13px;font-weight:700;
+                                                cursor:${isSent ? 'not-allowed' : 'pointer'};
+                                                box-shadow:${isSent ? 'none' : '0 4px 12px rgba(139,92,246,0.3)'};
+                                                transition:transform 0.15s;white-space:nowrap;"
+                                            onmouseover="if(!this.disabled)this.style.transform='scale(1.04)'"
+                                            onmouseout="if(!this.disabled)this.style.transform=''">
+                                            ${isSent ? '✅ Sent' : '📧 Send to Developer'}
+                                        </button>
+                                        <!-- Double tick -->
+                                        <span id="dev-tick-${row.id}" style="font-size:18px;color:${isSent ? '#2563eb' : '#cbd5e1'};"
+                                            title="${isSent ? 'Seen' : 'Not yet seen'}">✔✔</span>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- 🤖 ML Auto-Summary -->
-                            <div style="margin-top:12px;padding:12px;background:#f5f3ff;
-                                border-left:3px solid #8b5cf6;border-radius:6px;">
-                                <span style="font-size:11.5px;font-weight:700;color:#8b5cf6;
-                                    text-transform:uppercase;letter-spacing:0.6px;">🤖 AI Summary</span>
-                                <p style="font-size:13.5px;color:#4c1d95;margin:5px 0 0;line-height:1.5;">
-                                    ${row.auto_summary || "-"}
-                                </p>
+                            <!-- RIGHT: Message to User -->
+                            <div style="flex:1;padding:18px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);
+                                border-radius:0 0 14px 0;">
+                                <div style="font-size:11px;font-weight:700;color:#16a34a;
+                                    text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">
+                                    📩 Message to User
+                                </div>
+                                <textarea id="user-msg-${row.id}" rows="6"
+                                    placeholder="Write a message to send to this user..."
+                                    style="width:100%;padding:10px 12px;border:2px solid #86efac;
+                                        border-radius:10px;font-size:13px;resize:none;outline:none;
+                                        box-sizing:border-box;background:#fff;color:#334155;
+                                        transition:border-color 0.2s;"
+                                    onfocus="this.style.borderColor='#16a34a'"
+                                    onblur="this.style.borderColor='#86efac'"></textarea>
+                                <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+                                    <button onclick="sendMessageToUser(${row.user_id || 'null'}, ${row.id}, this)"
+                                        style="background:linear-gradient(135deg,#16a34a,#15803d);
+                                            color:white;border:none;padding:10px 24px;border-radius:20px;
+                                            font-size:13px;font-weight:700;cursor:pointer;
+                                            box-shadow:0 4px 12px rgba(22,163,74,0.3);
+                                            transition:transform 0.15s;white-space:nowrap;"
+                                        onmouseover="this.style.transform='scale(1.04)'"
+                                        onmouseout="this.style.transform=''">
+                                        📨 Send to User
+                                    </button>
+                                    <!-- Double tick - turns blue when user reads -->
+                                    <span id="user-tick-${row.id}" style="font-size:18px;color:#cbd5e1;"
+                                        title="Not yet seen">✔✔</span>
+                                    <span id="user-msg-status-${row.id}" style="font-size:12px;color:#16a34a;"></span>
+                                </div>
                             </div>
-                        </div>
 
-                        </div><!-- end left col -->
-                        <div style="flex:1;display:flex;flex-direction:column;">
-                        <!-- 📩 Message to User -->
-                        <div style="padding:18px;flex:1;background:#f0fdf4;border-radius:0 0 14px 0;">
-                            <div style="font-size:11.5px;font-weight:700;color:#16a34a;
-                                text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">
-                                📩 Message to User
-                            </div>
-                            <textarea id="user-msg-${row.id}" rows="2"
-                                placeholder="Write a message to send to this user..."
-                                style="width:100%;padding:10px 12px;border:2px solid #86efac;
-                                    border-radius:10px;font-size:13.5px;resize:none;outline:none;
-                                    box-sizing:border-box;background:#fff;color:#334155;"></textarea>
-                            <button onclick="sendMessageToUser(${row.user_id || 'null'}, ${row.id}, this)"
-                                style="margin-top:8px;background:linear-gradient(135deg,#16a34a,#15803d);
-                                    color:white;border:none;padding:8px 24px;border-radius:20px;
-                                    font-size:13px;font-weight:700;cursor:pointer;
-                                    box-shadow:0 4px 12px rgba(22,163,74,0.3);">
-                                📨 Send to User
-                            </button>
-                            <span id="user-msg-status-${row.id}" style="margin-left:10px;font-size:12px;"></span>
-                        </div>
-
-                        </div><!-- end right col -->
                         </div><!-- end two-col wrapper -->
-                        <!-- ✍️ Note + Send -->
-                        <div style="padding:18px 18px 20px;border-top:1px solid #ede9fe;
-                            background:linear-gradient(135deg,#faf5ff 0%,#f0fdf4 100%);
-                            border-radius:0 0 14px 14px;
-                            display:flex;flex-direction:column;align-items:center;gap:10px;">
-                            <div style="width:100%;font-size:11.5px;font-weight:700;color:#8b5cf6;
-                                text-transform:uppercase;letter-spacing:0.8px;margin-bottom:2px;">
-                                ✉️ Note for Developer
-                            </div>
-                            <textarea id="msg-input-${row.id}" rows="3"
-                                placeholder="Write a note to send with this request..."
-                                style="width:100%;padding:10px 12px;border:2px solid #d8b4fe;
-                                    border-radius:10px;font-size:13.5px;font-family:'Segoe UI',sans-serif;
-                                    resize:vertical;outline:none;box-sizing:border-box;
-                                    background:#fff;color:#334155;
-                                    box-shadow:0 2px 8px rgba(139,92,246,0.08);
-                                    transition:border-color 0.2s, box-shadow 0.2s;line-height:1.5;"
-                                onfocus="this.style.borderColor='#8b5cf6';this.style.boxShadow='0 0 0 3px rgba(139,92,246,0.15)'"
-                                onblur="this.style.borderColor='#d8b4fe';this.style.boxShadow='0 2px 8px rgba(139,92,246,0.08)'"
-                            ></textarea>
-                            <button ${isSent ? "disabled" : ""} onclick="sendCategoryRequest(${row.id}, this)"
-                                style="background:${isSent ? '#94a3b8' : 'linear-gradient(135deg,#8b5cf6,#a855f7)'};
-                                    color:white;border:none;padding:10px 30px;border-radius:20px;
-                                    font-size:13.5px;font-weight:700;
-                                    cursor:${isSent ? 'not-allowed' : 'pointer'};
-                                    letter-spacing:0.5px;
-                                    box-shadow:${isSent ? 'none' : '0 4px 12px rgba(139,92,246,0.3)'};
-                                    transition:transform 0.15s, box-shadow 0.15s;white-space:nowrap;"
-                                onmouseover="if(!this.disabled){this.style.transform='scale(1.04)';this.style.boxShadow='0 6px 18px rgba(139,92,246,0.4)';}"
-                                onmouseout="if(!this.disabled){this.style.transform='';this.style.boxShadow='0 4px 12px rgba(139,92,246,0.3)';}"
-                            >
-                                ${isSent ? '✅ Sent' : '📧 Send to Developer'}
-                            </button>
-                        </div>
                     </div>
                 </td>
             `;
@@ -7806,9 +7815,13 @@
                 });
                 const data = await res.json();
                 if (res.ok && data.status === "success") {
-                    status.style.color = "#16a34a";
-                    status.textContent = "✅ Message sent!";
-                    textarea.value = "";
+                status.style.color = "#16a34a";
+                status.textContent = "✅ Message sent!";
+                textarea.value = "";
+                // Turn tick white (sent but not yet read)
+                const tick = document.getElementById(`user-tick-${requestId}`);
+                if (tick) { tick.style.color = "#94a3b8"; tick.title = "Sent - not yet read"; }
+
                 } else {
                     status.style.color = "red";
                     status.textContent = "❌ Failed: " + (data.error || "Unknown error");
@@ -7821,6 +7834,22 @@
                 btnEl.textContent = "📨 Send to User";
             }
         }
+
+
+
+
+        
+        // Poll every 30s to check if user read the message
+async function pollUserReadStatus(requestId, notifId) {
+    try {
+        const res  = await fetch(`/api/owner/notif-read-status/${notifId}`);
+        const data = await res.json();
+        if (data.is_read) {
+            const tick = document.getElementById(`user-tick-${requestId}`);
+            if (tick) { tick.style.color = "#2563eb"; tick.title = "Seen by user"; }
+        }
+    } catch(e) {}
+}
     </script>
 
     <!-- ══════════════════════════ SIGN OUT LOGS MODAL ══════════════════════════ -->

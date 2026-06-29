@@ -4660,7 +4660,21 @@ def mark_notification_read(notif_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+#__________owner provider message from owner_section to dashboard where if user see that message it will blue tick at the owner_dashboard ________________________
 
+
+@app.route("/api/owner/notif-read-status/<int:notif_id>", methods=["GET"])
+def notif_read_status(notif_id):
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT is_read FROM user_notifications WHERE id = %s", (notif_id,))
+        row = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return jsonify({"is_read": bool(row["is_read"]) if row else False})
+    except Exception as e:
+        return jsonify({"is_read": False}), 500
 #------------------------------------------------------------------------------------------------------------   
 #---------------owner search data of ( owner_section ) ------------------------------------            
 @app.route("/api/owner/search-analytics", methods=["GET"])
