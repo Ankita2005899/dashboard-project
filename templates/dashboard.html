@@ -1941,13 +1941,6 @@
             await fetch(`/api/user/notifications/read/${id}`, { method: "POST" });
             loadUserNotifications();
         }
-
-        // Load on open
-        function openNotifications() {
-            document.getElementById("notificationPanel").style.display = "flex";
-            document.getElementById("notifOverlay").style.display = "block";
-            loadUserNotifications();
-        }
     </script>
 
     <!-- SUCCESS POPUP -->
