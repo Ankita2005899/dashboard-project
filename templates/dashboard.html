@@ -1224,25 +1224,9 @@
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div style="display:flex;border-bottom:1px solid #e5e7eb;">
-            <div id="tabCommon" onclick="switchNotifTab('common')"
-                style="flex:1;text-align:center;padding:12px;font-size:13px;font-weight:600;cursor:pointer;color:#4f46e5;border-bottom:2px solid #4f46e5;">
-                Common
-            </div>
-            <div id="tabSpecial" onclick="switchNotifTab('special')"
-                style="flex:1;text-align:center;padding:12px;font-size:13px;font-weight:600;cursor:pointer;color:#64748b;border-bottom:2px solid transparent;">
-                Special ✨
-            </div>
-        </div>
-
-        <!-- Common Notifications -->
+        <!-- Common Notifications only -->
         <div id="commonNotifs" style="overflow-y:auto;flex:1;">
             <div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">Loading...</div>
-        </div>
-
-        <!-- Special Notifications -->
-        <div id="specialNotifs" style="display:none;overflow-y:auto;flex:1;">
         </div>
 
     </div>
@@ -1250,6 +1234,27 @@
     <!-- Overlay -->
     <div id="notifOverlay" onclick="closeNotifications()"
         style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:9998;">
+    </div>
+
+    <!-- ================= SPECIAL OFFERS SLIDER ================= -->
+    <div id="specialOffersPanel" style="display:none;position:fixed;top:0;right:0;width:380px;
+        height:100vh;background:white;z-index:99999;flex-direction:column;overflow:hidden;
+        box-shadow:-4px 0 30px rgba(0,0,0,0.18);border-left:2px solid #e2e8f0;">
+        <!-- Header -->
+        <div style="padding:18px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;
+            justify-content:space-between;background:linear-gradient(135deg,#fce7f3,#ede9fe);">
+            <h3 style="font-size:16px;font-weight:700;color:#1e293b;">🎁 Special Offers</h3>
+            <button onclick="closeSpecialOffers()"
+                style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;padding:0;">✕</button>
+        </div>
+        <!-- Content -->
+        <div id="specialOffersContent" style="overflow-y:auto;flex:1;padding:10px;">
+            <div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">Loading offers...</div>
+        </div>
+    </div>
+    <div id="specialOffersOverlay" onclick="closeSpecialOffers()"
+        style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+        background:rgba(0,0,0,0.4);z-index:99998;">
     </div>
 
 
@@ -1735,14 +1740,7 @@
             document.getElementById("notificationPanel").style.display = "none";
             document.getElementById("notifOverlay").style.display = "none";
         }
-        window.switchNotifTab = function (tab) {
-            document.getElementById("commonNotifs").style.display = tab === "common" ? "block" : "none";
-            document.getElementById("specialNotifs").style.display = tab === "special" ? "block" : "none";
-            document.getElementById("tabCommon").style.color = tab === "common" ? "#4f46e5" : "#64748b";
-            document.getElementById("tabCommon").style.borderBottom = tab === "common" ? "2px solid #4f46e5" : "2px solid transparent";
-            document.getElementById("tabSpecial").style.color = tab === "special" ? "#4f46e5" : "#64748b";
-            document.getElementById("tabSpecial").style.borderBottom = tab === "special" ? "2px solid #4f46e5" : "2px solid transparent";
-        }
+
         window.readNotif = function (id) {
             const el = document.getElementById(id);
             if (el) el.classList.remove("unread-notif");
@@ -1762,25 +1760,15 @@
             else { badge.style.display = "inline"; badge.textContent = count; }
         }
 
-        // ── Load ALL offers (common + special) ────────────────
+        // ── Load common offers into notification panel ─────────
         async function loadAllOffers() {
             try {
                 const res = await fetch('/api/my-special-offers');
                 const data = await res.json();
                 const offers = data.offers || [];
 
-                const specialContainer = document.getElementById('specialNotifs');
                 const commonContainer = document.getElementById('commonNotifs');
-
-                const specialOffers = offers.filter(o => o.offer_category === 'special');
                 const commonOffers = offers.filter(o => o.offer_category === 'common');
-
-                specialContainer.innerHTML = specialOffers.length
-                    ? specialOffers.map(o => renderOfferCard(o)).join('')
-                    : `<div style="text-align:center;padding:40px 20px;color:#94a3b8;">
-                        <div style="font-size:32px;">🎁</div>
-                        <div style="font-size:13px;">No special offers yet!</div>
-                       </div>`;
 
                 commonContainer.innerHTML = commonOffers.length
                     ? commonOffers.map(o => renderOfferCard(o)).join('')
@@ -1883,11 +1871,34 @@
             }
         }
 
-        // ── Open notification panel on Special tab ─────────────
+        // ── Open Special Offers right slider ──────────────────
         function openOffers() {
-            openNotifications();
-            switchNotifTab('special');
-            loadAllOffers();
+            document.getElementById("specialOffersPanel").style.display = "flex";
+            document.getElementById("specialOffersOverlay").style.display = "block";
+            loadSpecialOffers();
+        }
+
+        function closeSpecialOffers() {
+            document.getElementById("specialOffersPanel").style.display = "none";
+            document.getElementById("specialOffersOverlay").style.display = "none";
+        }
+
+        async function loadSpecialOffers() {
+            const container = document.getElementById("specialOffersContent");
+            try {
+                const res = await fetch('/api/my-special-offers');
+                const data = await res.json();
+                const offers = (data.offers || []).filter(o => o.offer_category === 'special');
+
+                container.innerHTML = offers.length
+                    ? offers.map(o => renderOfferCard(o)).join('')
+                    : `<div style="text-align:center;padding:40px 20px;color:#94a3b8;">
+                        <div style="font-size:32px;">🎁</div>
+                        <div style="font-size:13px;">No special offers yet!</div>
+                       </div>`;
+            } catch(e) {
+                container.innerHTML = `<div style="text-align:center;padding:20px;color:red;font-size:13px;">Failed to load</div>`;
+            }
         }
 
         // Auto load on page open
