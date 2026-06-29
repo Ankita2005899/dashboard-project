@@ -721,7 +721,7 @@
             const msg = document.getElementById("reqMsg");
             const btn = document.querySelector("button[onclick='submitCategoryRequest()']");
 
-            if (!category || !name || !reason) {
+            if (!category || !reason) {
                 msg.style.display = "block";
                 msg.style.color = "red";
                 msg.innerText = "⚠ Please fill all fields!";
@@ -731,12 +731,12 @@
             // Disable button + show loading
             btn.disabled = true;
             btn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
-            style="animation:spin 0.8s linear infinite;">
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-        </svg>
-        Sending...
-    </span>`;
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+                style="animation:spin 0.8s linear infinite;">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+            Sending...
+        </span>`;
             msg.style.display = "none";
 
             fetch("/request-category", {
@@ -749,17 +749,26 @@
                     if (data.status === "success") {
                         document.getElementById("categorySuccessPopup").style.display = "flex";
                         document.getElementById("reqCategoryName").value = "";
-                        document.getElementById("reqUserName").value = "";
                         document.getElementById("reqReason").value = "";
                         msg.style.display = "none";
-                        // Reset button after success
                         btn.disabled = false;
                         btn.innerHTML = "📨 Send Request to Owner";
                     } else {
                         msg.style.display = "block";
                         msg.style.color = "red";
                         msg.innerHTML = data.errors.join("<br>");
-
+                        btn.disabled = false;
+                        btn.innerHTML = "📨 Send Request to Owner";
+                    }
+                })
+                .catch(() => {
+                    msg.style.display = "block";
+                    msg.style.color = "red";
+                    msg.innerText = "⚠ Network error. Please try again.";
+                    btn.disabled = false;
+                    btn.innerHTML = "📨 Send Request to Owner";
+                });
+        }
     </script>
     <!-- SUCCESS POPUP -->
     <div id="categorySuccessPopup"
@@ -806,106 +815,106 @@
     </style>
 
     <script>
-                        function closeCategoryPopup() {
-                            document.getElementById("categorySuccessPopup").style.display = "none";
-                        }
+        function closeCategoryPopup() {
+            document.getElementById("categorySuccessPopup").style.display = "none";
+        }
     </script>
     <!-- JS -->
     <script>
-                        function previewImage(event) {
-                            const img = document.getElementById("imagePreview");
-                            img.src = URL.createObjectURL(event.target.files[0]);
-                            img.style.display = "block";
-                        }
+        function previewImage(event) {
+            const img = document.getElementById("imagePreview");
+            img.src = URL.createObjectURL(event.target.files[0]);
+            img.style.display = "block";
+        }
 
-                        function previewVideo(event) {
-                            const video = document.getElementById("videoPreview");
-                            video.src = URL.createObjectURL(event.target.files[0]);
-                            video.style.display = "block";
-                        }
+        function previewVideo(event) {
+            const video = document.getElementById("videoPreview");
+            video.src = URL.createObjectURL(event.target.files[0]);
+            video.style.display = "block";
+        }
 
-                        function toggleExpiry() {
-                            const checkbox = document.getElementById("noExpiry");
-                            const expiryDate = document.getElementById("expiryDate");
+        function toggleExpiry() {
+            const checkbox = document.getElementById("noExpiry");
+            const expiryDate = document.getElementById("expiryDate");
 
-                            expiryDate.disabled = checkbox.checked;
-                            if (checkbox.checked) expiryDate.value = "";
-                        }
+            expiryDate.disabled = checkbox.checked;
+            if (checkbox.checked) expiryDate.value = "";
+        }
 
-                        document.querySelector("form").addEventListener("submit", function (e) {
+        document.querySelector("form").addEventListener("submit", function (e) {
 
-                            let isValid = true;
+            let isValid = true;
 
-                            // 🔴 FORM ERROR BOX
-                            const formError = document.getElementById("formError");
-                            formError.style.display = "none";
-                            formError.innerText = "";
+            // 🔴 FORM ERROR BOX
+            const formError = document.getElementById("formError");
+            formError.style.display = "none";
+            formError.innerText = "";
 
-                            // 🔴 PRODUCT TYPE VALIDATION (checkbox group)
-                            const productTypes = document.querySelectorAll(".product-type");
-                            const typeError = document.getElementById("typeError");
+            // 🔴 PRODUCT TYPE VALIDATION (checkbox group)
+            const productTypes = document.querySelectorAll(".product-type");
+            const typeError = document.getElementById("typeError");
 
-                            let isChecked = false;
-                            productTypes.forEach(cb => {
-                                if (cb.checked) isChecked = true;
-                            });
+            let isChecked = false;
+            productTypes.forEach(cb => {
+                if (cb.checked) isChecked = true;
+            });
 
-                            if (!isChecked) {
-                                isValid = false;
-                                typeError.style.display = "block";
-                                typeError.scrollIntoView({ behavior: "smooth", block: "center" });
-                            } else {
-                                typeError.style.display = "none";
-                            }
+            if (!isChecked) {
+                isValid = false;
+                typeError.style.display = "block";
+                typeError.scrollIntoView({ behavior: "smooth", block: "center" });
+            } else {
+                typeError.style.display = "none";
+            }
 
-                            // 🔴 REQUIRED INPUTS & TEXTAREAS
-                            const requiredFields = document.querySelectorAll(
-                                "input[required], textarea[required]"
-                            );
+            // 🔴 REQUIRED INPUTS & TEXTAREAS
+            const requiredFields = document.querySelectorAll(
+                "input[required], textarea[required]"
+            );
 
-                            requiredFields.forEach(field => {
-                                if (!field.value.trim()) {
-                                    field.style.border = "1px solid red";
-                                    isValid = false;
-                                } else {
-                                    field.style.border = "1px solid #ced4da";
-                                }
-                            });
-                            // 🔴 250 WORDS VALIDATION for detail fields
-                            const detailFields = [
-                                { name: "made_of", label: "Product Made Up Of" },
-                                { name: "used_for", label: "Mostly Used For" },
-                                { name: "harmful_activity", label: "Harmful Activities / Misuse" },
-                                { name: "precautions", label: "Safety Precautions" }
-                            ];
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.style.border = "1px solid red";
+                    isValid = false;
+                } else {
+                    field.style.border = "1px solid #ced4da";
+                }
+            });
+            // 🔴 250 WORDS VALIDATION for detail fields
+            const detailFields = [
+                { name: "made_of", label: "Product Made Up Of" },
+                { name: "used_for", label: "Mostly Used For" },
+                { name: "harmful_activity", label: "Harmful Activities / Misuse" },
+                { name: "precautions", label: "Safety Precautions" }
+            ];
 
-                            detailFields.forEach(f => {
-                                const field = document.querySelector(`textarea[name="${f.name}"]`);
-                                const wordCount = field.value.trim().split(/\s+/).filter(w => w.length > 0).length;
-                                if (wordCount < 50) {
-                                    field.style.border = "1px solid red";
-                                    isValid = false;
-                                    formError.style.display = "block";
-                                    formError.innerText = `⚠ "${f.label}" must have at least 50 words. Currently: ${wordCount} words.`;
-                                    field.style.border = "1px solid #ced4da";
-                                }
-                            });
-                            // ❌ STOP SUBMISSION
-                            if (!isValid) {
-                                e.preventDefault();
-                                if (!formError.innerText) {
-                                    formError.style.display = "block";
-                                    formError.innerText = "⚠ Please fill all required fields before adding the product.";
-                                }
-                            }
-                        });  // form submit listener end
+            detailFields.forEach(f => {
+                const field = document.querySelector(`textarea[name="${f.name}"]`);
+                const wordCount = field.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+                if (wordCount < 50) {
+                    field.style.border = "1px solid red";
+                    isValid = false;
+                    formError.style.display = "block";
+                    formError.innerText = `⚠ "${f.label}" must have at least 50 words. Currently: ${wordCount} words.`;
+                    field.style.border = "1px solid #ced4da";
+                }
+            });
+            // ❌ STOP SUBMISSION
+            if (!isValid) {
+                e.preventDefault();
+                if (!formError.innerText) {
+                    formError.style.display = "block";
+                    formError.innerText = "⚠ Please fill all required fields before adding the product.";
+                }
+            }
+        });  // form submit listener end
 
-                        function countWords(textarea, counterId) {
-                            const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0).length;
-                            const el = document.getElementById(counterId);
-                            el.innerText = `${words} / 50 words`;
-                            el.style.color = words >= 50 ? "green" : "red";
-                        }
+        function countWords(textarea, counterId) {
+            const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+            const el = document.getElementById(counterId);
+            el.innerText = `${words} / 50 words`;
+            el.style.color = words >= 50 ? "green" : "red";
+        }
     </script>
     <br>
     <br>
