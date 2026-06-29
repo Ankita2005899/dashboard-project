@@ -4251,11 +4251,8 @@ def request_category():
     # 1. Category Name validation
     if len(category_name) < 3:
         errors.append("âŒ Category name must be at least 3 characters.")
-    if not re.match(r'^[a-zA-Z\s]+$', category_name):
-        errors.append("âŒ Category name must contain only letters.")
-    if re.match(r'^(.)\1+$', category_name.replace(" ","")):
-        errors.append("âŒ Category name looks invalid (e.g. 'aaa').")
-
+    if not re.match(r'^[a-zA-Z0-9\s]+$', category_name):
+        errors.append("❌ Category name must contain only letters and numbers.")
 
     # 3. Reason validation â€” ML style
     words = reason.split()
