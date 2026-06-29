@@ -4612,9 +4612,10 @@ def send_notification_to_user():
             VALUES (%s, %s, %s)
         """, (user_id, title, message))
         conn.commit()
+        notif_id = cursor.lastrowid
         cursor.close()
         conn.close()
-        return jsonify({"status": "success"})
+        return jsonify({"status": "success", "notif_id": notif_id})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
