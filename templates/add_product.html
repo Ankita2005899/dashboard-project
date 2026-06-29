@@ -658,6 +658,7 @@
                 Can't find your product category? Request the owner to add a new one!
             </p>
 
+            <input type="hidden" id="reqUserName" value="{{ session.get('username', '') }}">
             <div class="row g-3">
                 <div class="col-md-6">
                     <label style="font-size:13px;font-weight:600;color:#374151;">Category Name</label>
@@ -715,7 +716,8 @@
     <script>
         function submitCategoryRequest() {
             const category = document.getElementById("reqCategoryName").value.trim();
-            const name = document.getElementById("reqUserName").value.trim();
+            const nameEl = document.getElementById("reqUserName");
+            const name = nameEl ? nameEl.value.trim() : "";
             const reasonName = document.getElementById("reqReasonName").value.trim();
             const reason = document.getElementById("reqReason").value.trim();
             const msg = document.getElementById("reqMsg");
