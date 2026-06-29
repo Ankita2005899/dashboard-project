@@ -2661,14 +2661,17 @@ def save_user_detail():
         if existing:
             cursor.execute("""
                 UPDATE save_detail SET name=%s, age=%s, phone1=%s, phone2=%s,
-                    address1=%s, address2=%s, profile_image=COALESCE(%s, profile_image)
+                    address1=%s, address2=%s, profile_image=COALESCE(%s, profile_image),
+                    user_id=%s
                 WHERE id=%s
-            """, (name, age, phone1, phone2, address1, address2, profile_image_path, existing[0]))
+            """, (name, age, phone1, phone2, address1, address2, profile_image_path,
+                  session.get('user_id'), existing[0]))
         else:
             cursor.execute("""
-                INSERT INTO save_detail (name, age, phone1, phone2, address1, address2, email, profile_image)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-            """, (name, age, phone1, phone2, address1, address2, email, profile_image_path))
+                INSERT INTO save_detail (name, age, phone1, phone2, address1, address2, email, profile_image, user_id)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (name, age, phone1, phone2, address1, address2, email, profile_image_path,
+                  session.get('user_id')))
 
         db.commit()
         cursor.close()
@@ -2744,8 +2747,10 @@ def get_latest_profile():
         return jsonify({"success": False})
 
     cursor.execute("""
-        SELECT name, email, profile_image FROM save_detail WHERE email=%s ORDER BY id DESC LIMIT 1
-    """, (user_row["email"],))
+        SELECT name, email, profile_image FROM save_detail 
+        WHERE user_id=%s OR email=%s
+        ORDER BY id DESC LIMIT 1
+    """, (session["user_id"], user_row["email"],))
     row = cursor.fetchone()
     cursor.close()
     conn.close()
