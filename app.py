@@ -6395,10 +6395,13 @@ def get_signout_logs():
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
-            SELECT id, user_id, user_name, user_email, profile_image,
-                   signout_reason, custom_reason, ip_address, signout_at
-            FROM user_signout_logs
-            ORDER BY signout_at DESC
+            SELECT s.id, s.user_id, s.user_name, 
+                   COALESCE(s.user_email, u.email) as user_email,
+                   s.profile_image, s.signout_reason, s.custom_reason, 
+                   s.ip_address, s.signout_at
+            FROM user_signout_logs s
+            LEFT JOIN user u ON u.id = s.user_id
+            ORDER BY s.signout_at DESC
         """)
         logs = cursor.fetchall()
         cursor.close()
@@ -6409,7 +6412,6 @@ def get_signout_logs():
         return jsonify({'logs': logs})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 @app.route('/api/owner/signout-log/<int:log_id>', methods=['DELETE'])
 def delete_signout_log(log_id):
@@ -6437,6 +6439,61 @@ def delete_user_signout_logs(user_id):
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+
+@app.route('/api/signout-log', methods=['POST'])
+def signout_log():
+    try:
+        data       = request.get_json()
+        user_id    = session.get('user_id')
+        user_name  = session.get('username', '')
+        user_email = session.get('email', '')
+
+        # Fallback: get email from user table if not in session
+        if not user_email and user_id:
+            try:
+                conn2   = get_db_connection()
+                cur2    = conn2.cursor(dictionary=True)
+                cur2.execute("SELECT email FROM user WHERE id = %s LIMIT 1", (user_id,))
+                row = cur2.fetchone()
+                if row:
+                    user_email = row.get('email', '')
+                cur2.close()
+                conn2.close()
+            except:
+                pass
+
+        ip_address = request.remote_addr
+        session_id = request.cookies.get('session', '')
+
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO user_signout_logs
+                (user_id, user_name, user_email, profile_image,
+                 signout_reason, custom_reason,
+                 ip_address, user_agent, session_id, signout_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            user_id,
+            user_name,
+            user_email,
+            data.get('profile_image'),
+            data.get('signout_reason'),
+            data.get('custom_reason') or data.get('extra_feedback'),
+            ip_address,
+            data.get('user_agent'),
+            session_id,
+            datetime.utcnow() + timedelta(hours=5, minutes=30)
+        ))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"signout-log error: {e}")
+
+    return jsonify({'success': True})
 
 
 @app.route('/logout')
