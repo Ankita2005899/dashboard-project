@@ -1039,6 +1039,11 @@
             color: #94a3b8;
             margin-top: 5px;
         }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
     </style>
 
 </head>
@@ -1237,41 +1242,58 @@
     </div>
 
     <!-- ================= SPECIAL OFFERS SLIDER ================= -->
-    <div id="specialOffersPanel" style="display:none;position:fixed;top:0;right:0;width:380px;
-        height:100vh;background:white;z-index:99999;flex-direction:column;overflow:hidden;
-        box-shadow:-4px 0 30px rgba(0,0,0,0.18);border-left:2px solid #e2e8f0;">
+    <div id="specialOffersPanel" style="display:none;position:fixed;top:0;right:0;width:460px;
+        height:100vh;background:#f8fafc;z-index:99999;flex-direction:column;overflow:hidden;
+        box-shadow:-8px 0 40px rgba(0,0,0,0.18);border-left:2px solid #e2e8f0;
+        animation:slideInRight 0.25s ease;">
         <!-- Header -->
-        <div style="padding:18px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;
-            justify-content:space-between;background:linear-gradient(135deg,#fce7f3,#ede9fe);">
-            <h3 style="font-size:16px;font-weight:700;color:#1e293b;">🎁 Offers</h3>
+        <div style="padding:20px 24px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;
+            justify-content:space-between;
+            background:linear-gradient(135deg,#fce7f3,#ede9fe);
+            box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:38px;height:38px;border-radius:50%;
+                    background:linear-gradient(135deg,#be185d,#7c3aed);
+                    display:flex;align-items:center;justify-content:center;font-size:18px;">🎁</div>
+                <div>
+                    <h3 style="font-size:17px;font-weight:800;color:#1e293b;margin:0;">Offers & Deals</h3>
+                    <p style="font-size:11px;color:#94a3b8;margin:0;">Exclusive offers just for you</p>
+                </div>
+            </div>
             <button onclick="closeSpecialOffers()"
-                style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;padding:0;">✕</button>
+                style="background:rgba(0,0,0,0.06);border:none;font-size:18px;cursor:pointer;
+                color:#64748b;padding:6px 10px;border-radius:8px;
+                transition:background 0.2s;"
+                onmouseover="this.style.background='rgba(0,0,0,0.12)'"
+                onmouseout="this.style.background='rgba(0,0,0,0.06)'">✕</button>
         </div>
         <!-- Tabs -->
-        <div style="display:flex;border-bottom:1px solid #e5e7eb;">
+        <div style="display:flex;border-bottom:2px solid #e5e7eb;background:white;">
             <div id="offerTabSpecial" onclick="switchOfferTab('special')"
-                style="flex:1;text-align:center;padding:12px;font-size:13px;font-weight:600;
-                cursor:pointer;color:#4f46e5;border-bottom:2px solid #4f46e5;">
+                style="flex:1;text-align:center;padding:14px;font-size:13px;font-weight:700;
+                cursor:pointer;color:#7c3aed;border-bottom:3px solid #7c3aed;
+                transition:all 0.2s;">
                 ✨ Special
             </div>
             <div id="offerTabCommon" onclick="switchOfferTab('common')"
-                style="flex:1;text-align:center;padding:12px;font-size:13px;font-weight:600;
-                cursor:pointer;color:#64748b;border-bottom:2px solid transparent;">
+                style="flex:1;text-align:center;padding:14px;font-size:13px;font-weight:700;
+                cursor:pointer;color:#94a3b8;border-bottom:3px solid transparent;
+                transition:all 0.2s;">
                 📢 Common
             </div>
         </div>
         <!-- Special Content -->
-        <div id="specialOffersContent" style="overflow-y:auto;flex:1;padding:10px;">
+        <div id="specialOffersContent" style="overflow-y:auto;flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;">
             <div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">Loading...</div>
         </div>
         <!-- Common Content -->
-        <div id="commonOffersContent" style="display:none;overflow-y:auto;flex:1;padding:10px;">
+        <div id="commonOffersContent" style="display:none;overflow-y:auto;flex:1;padding:14px;flex-direction:column;gap:10px;">
             <div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">Loading...</div>
         </div>
     </div>
     <div id="specialOffersOverlay" onclick="closeSpecialOffers()"
         style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-        background:rgba(0,0,0,0.4);z-index:99998;">
+        background:rgba(0,0,0,0.35);z-index:99998;backdrop-filter:blur(2px);">
     </div>
 
 
@@ -1828,18 +1850,20 @@
             return `
                 <div class="notif-item-dash ${!o.is_read ? 'unread-notif' : ''}"
                      onclick="markOfferRead(${o.id}, this)"
-                     style="cursor:pointer;">
-                    <div class="notif-icon-dash" style="background:#fce7f3;color:#be185d;">🎁</div>
+                     style="cursor:pointer;border-radius:12px;margin-bottom:10px;
+                     border:1px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,0.05);
+                     background:white;padding:14px 16px;">
+                    <div class="notif-icon-dash" style="background:linear-gradient(135deg,#fce7f3,#ede9fe);color:#be185d;border-radius:12px;">🎁</div>
                     <div style="flex:1;">
-                        <div class="notif-title-dash">${o.offer_type}</div>
-                        <div class="notif-desc-dash">${o.message}</div>
+                        <div class="notif-title-dash" style="font-size:15px;font-weight:700;">${o.offer_type}</div>
+                        <div class="notif-desc-dash" style="font-size:13px;color:#475569;margin-top:4px;line-height:1.5;">${o.message}</div>
                         ${comboHTML}
                         ${buyNowBtn}
-                        <div class="notif-time-dash">
+                        <div class="notif-time-dash" style="margin-top:8px;font-size:11px;color:#94a3b8;">
                             ${new Date(o.created_at).toLocaleString('en-IN')}
                         </div>
                     </div>
-                    ${!o.is_read ? '<div class="unread-dot"></div>' : ''}
+                    ${!o.is_read ? '<div class="unread-dot" style="margin-top:4px;"></div>' : ''}
                 </div>`;
         }
 
