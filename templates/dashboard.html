@@ -1224,7 +1224,7 @@
             </div>
         </div>
 
-        <!-- Common Notifications only -->
+        <!-- Common Notifications only - owner messages -->
         <div id="commonNotifs" style="overflow-y:auto;flex:1;">
             <div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">Loading...</div>
         </div>
@@ -1243,13 +1243,30 @@
         <!-- Header -->
         <div style="padding:18px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;
             justify-content:space-between;background:linear-gradient(135deg,#fce7f3,#ede9fe);">
-            <h3 style="font-size:16px;font-weight:700;color:#1e293b;">🎁 Special Offers</h3>
+            <h3 style="font-size:16px;font-weight:700;color:#1e293b;">🎁 Offers</h3>
             <button onclick="closeSpecialOffers()"
                 style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;padding:0;">✕</button>
         </div>
-        <!-- Content -->
+        <!-- Tabs -->
+        <div style="display:flex;border-bottom:1px solid #e5e7eb;">
+            <div id="offerTabSpecial" onclick="switchOfferTab('special')"
+                style="flex:1;text-align:center;padding:12px;font-size:13px;font-weight:600;
+                cursor:pointer;color:#4f46e5;border-bottom:2px solid #4f46e5;">
+                ✨ Special
+            </div>
+            <div id="offerTabCommon" onclick="switchOfferTab('common')"
+                style="flex:1;text-align:center;padding:12px;font-size:13px;font-weight:600;
+                cursor:pointer;color:#64748b;border-bottom:2px solid transparent;">
+                📢 Common
+            </div>
+        </div>
+        <!-- Special Content -->
         <div id="specialOffersContent" style="overflow-y:auto;flex:1;padding:10px;">
-            <div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">Loading offers...</div>
+            <div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">Loading...</div>
+        </div>
+        <!-- Common Content -->
+        <div id="commonOffersContent" style="display:none;overflow-y:auto;flex:1;padding:10px;">
+            <div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">Loading...</div>
         </div>
     </div>
     <div id="specialOffersOverlay" onclick="closeSpecialOffers()"
@@ -1761,26 +1778,15 @@
         }
 
         // ── Load common offers into notification panel ─────────
+        // Update badge count only on page load
         async function loadAllOffers() {
             try {
                 const res = await fetch('/api/my-special-offers');
                 const data = await res.json();
                 const offers = data.offers || [];
-
-                const commonContainer = document.getElementById('commonNotifs');
-                const commonOffers = offers.filter(o => o.offer_category === 'common');
-
-                commonContainer.innerHTML = commonOffers.length
-                    ? commonOffers.map(o => renderOfferCard(o)).join('')
-                    : `<div style="text-align:center;padding:40px 20px;color:#94a3b8;">
-                        <div style="font-size:32px;">📢</div>
-                        <div style="font-size:13px;">No announcements yet!</div>
-                       </div>`;
-
                 const unread = offers.filter(o => !o.is_read).length;
                 const b = document.getElementById('notifBadge');
                 if (b) { b.textContent = unread > 0 ? unread : ''; }
-
             } catch (e) { console.error('Failed to load offers:', e); }
         }
 
@@ -1875,12 +1881,30 @@
         function openOffers() {
             document.getElementById("specialOffersPanel").style.display = "flex";
             document.getElementById("specialOffersOverlay").style.display = "block";
-            loadSpecialOffers();
+            switchOfferTab('special');
         }
 
         function closeSpecialOffers() {
             document.getElementById("specialOffersPanel").style.display = "none";
             document.getElementById("specialOffersOverlay").style.display = "none";
+        }
+
+        function switchOfferTab(tab) {
+            const specialContent = document.getElementById("specialOffersContent");
+            const commonContent  = document.getElementById("commonOffersContent");
+            const tabSpecial     = document.getElementById("offerTabSpecial");
+            const tabCommon      = document.getElementById("offerTabCommon");
+
+            specialContent.style.display = tab === 'special' ? 'block' : 'none';
+            commonContent.style.display  = tab === 'common'  ? 'block' : 'none';
+
+            tabSpecial.style.color        = tab === 'special' ? '#4f46e5' : '#64748b';
+            tabSpecial.style.borderBottom = tab === 'special' ? '2px solid #4f46e5' : '2px solid transparent';
+            tabCommon.style.color         = tab === 'common'  ? '#4f46e5' : '#64748b';
+            tabCommon.style.borderBottom  = tab === 'common'  ? '2px solid #4f46e5' : '2px solid transparent';
+
+            if (tab === 'special') loadSpecialOffers();
+            else loadCommonOffers();
         }
 
         async function loadSpecialOffers() {
@@ -1889,12 +1913,28 @@
                 const res = await fetch('/api/my-special-offers');
                 const data = await res.json();
                 const offers = (data.offers || []).filter(o => o.offer_category === 'special');
-
                 container.innerHTML = offers.length
                     ? offers.map(o => renderOfferCard(o)).join('')
                     : `<div style="text-align:center;padding:40px 20px;color:#94a3b8;">
                         <div style="font-size:32px;">🎁</div>
                         <div style="font-size:13px;">No special offers yet!</div>
+                       </div>`;
+            } catch(e) {
+                container.innerHTML = `<div style="text-align:center;padding:20px;color:red;font-size:13px;">Failed to load</div>`;
+            }
+        }
+
+        async function loadCommonOffers() {
+            const container = document.getElementById("commonOffersContent");
+            try {
+                const res = await fetch('/api/my-special-offers');
+                const data = await res.json();
+                const offers = (data.offers || []).filter(o => o.offer_category === 'common');
+                container.innerHTML = offers.length
+                    ? offers.map(o => renderOfferCard(o)).join('')
+                    : `<div style="text-align:center;padding:40px 20px;color:#94a3b8;">
+                        <div style="font-size:32px;">📢</div>
+                        <div style="font-size:13px;">No common offers yet!</div>
                        </div>`;
             } catch(e) {
                 container.innerHTML = `<div style="text-align:center;padding:20px;color:red;font-size:13px;">Failed to load</div>`;
