@@ -666,6 +666,11 @@
                 </div>
                 <input type="hidden" id="reqUserName" value="{{ session.get('username', '') }}">
                 <div class="col-12">
+                    <label style="font-size:13px;font-weight:600;color:#374151;">Reason Name</label>
+                    <input type="text" id="reqReasonName" placeholder="e.g. High demand, Missing category..."
+                        class="form-control mt-1" style="border-radius:8px;border:1px solid #cbd5e1;">
+                </div>
+                <div class="col-12">
                     <label style="font-size:13px;font-weight:600;color:#374151;">Why this category is needed?</label>
                     <textarea id="reqReason" rows="4" placeholder="Explain why this category should be added..."
                         class="form-control mt-1"
@@ -712,11 +717,12 @@
         function submitCategoryRequest() {
             const category = document.getElementById("reqCategoryName").value.trim();
             const name = document.getElementById("reqUserName").value.trim();
+            const reasonName = document.getElementById("reqReasonName").value.trim();
             const reason = document.getElementById("reqReason").value.trim();
             const msg = document.getElementById("reqMsg");
             const btn = document.querySelector("button[onclick='submitCategoryRequest()']");
 
-            if (!category || !reason) {
+            if (!category || !reasonName || !reason) {
                 msg.style.display = "block";
                 msg.style.color = "red";
                 msg.innerText = "⚠ Please fill all fields!";
@@ -737,13 +743,14 @@
             fetch("/request-category", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_name: name, category_name: category, reason: reason })
+                body: JSON.stringify({ user_name: name, category_name: category, reason_name: reasonName, reason: reason })
             })
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === "success") {
                         document.getElementById("categorySuccessPopup").style.display = "flex";
                         document.getElementById("reqCategoryName").value = "";
+                        document.getElementById("reqReasonName").value = "";
                         document.getElementById("reqReason").value = "";
                         msg.style.display = "none";
                         btn.disabled = false;
