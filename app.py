@@ -4303,10 +4303,10 @@ def get_category_requests():
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
-    SELECT id, user_id, user_name, category_name, reason, status, requested_at
-    FROM category_requests
-    ORDER BY requested_at DESC
-""")
+        SELECT id, user_id, user_name, category_name, reason_name, reason, status, requested_at
+            FROM category_requests
+            ORDER BY requested_at DESC
+        """)
         rows = cursor.fetchall()
         cursor.close()
 
