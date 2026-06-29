@@ -3850,52 +3850,52 @@
 
                 tbody.innerHTML = "";
                 rows.forEach((row, i) => {
-                  try {
-                    const isSent = row.status === "sent_to_developer";
+                    try {
+                        const isSent = row.status === "sent_to_developer";
 
-                    // ── Duplicate badge ──────────────────────────────────────────
-                    const dupTag = row.is_duplicate
-                        ? `<span style="background:#fee2e2;color:#dc2626;padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">⚠️ ${row.similarity_score}%</span>`
-                        : `<span style="background:#dcfce7;color:#16a34a;padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">✅ Unique</span>`;
+                        // ── Duplicate badge ──────────────────────────────────────────
+                        const dupTag = row.is_duplicate
+                            ? `<span style="background:#fee2e2;color:#dc2626;padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">⚠️ ${row.similarity_score}%</span>`
+                            : `<span style="background:#dcfce7;color:#16a34a;padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">✅ Unique</span>`;
 
-                    // ── Priority badge ───────────────────────────────────────────
-                    const priorityColors = {
-                        High: { bg: "#fef2f2", color: "#dc2626" },
-                        Medium: { bg: "#fffbeb", color: "#d97706" },
-                        Low: { bg: "#f0fdf4", color: "#16a34a" }
-                    };
-                    const pc = priorityColors[row.priority_label] || priorityColors.Low;
-                    const priorityTag = `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                        // ── Priority badge ───────────────────────────────────────────
+                        const priorityColors = {
+                            High: { bg: "#fef2f2", color: "#dc2626" },
+                            Medium: { bg: "#fffbeb", color: "#d97706" },
+                            Low: { bg: "#f0fdf4", color: "#16a34a" }
+                        };
+                        const pc = priorityColors[row.priority_label] || priorityColors.Low;
+                        const priorityTag = `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
                 <span style="background:${pc.bg};color:${pc.color};padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">
                     ${row.priority_label === "High" ? "🔥" : row.priority_label === "Medium" ? "⚡" : "🟢"} ${row.priority_label}
                 </span>
                 <span style="font-size:12px;color:#94a3b8;">${row.priority_score}%</span>
             </div>`;
 
-                    // ── Sentiment badge ──────────────────────────────────────────
-                    const sentimentMap = {
-                        positive: { bg: "#dcfce7", color: "#16a34a", emoji: "😊" },
-                        negative: { bg: "#fee2e2", color: "#dc2626", emoji: "😟" },
-                        neutral: { bg: "#f1f5f9", color: "#64748b", emoji: "😐" }
-                    };
-                    const sm = sentimentMap[row.sentiment] || sentimentMap.neutral;
-                    const sentimentTag = `<span style="background:${sm.bg};color:${sm.color};padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">
+                        // ── Sentiment badge ──────────────────────────────────────────
+                        const sentimentMap = {
+                            positive: { bg: "#dcfce7", color: "#16a34a", emoji: "😊" },
+                            negative: { bg: "#fee2e2", color: "#dc2626", emoji: "😟" },
+                            neutral: { bg: "#f1f5f9", color: "#64748b", emoji: "😐" }
+                        };
+                        const sm = sentimentMap[row.sentiment] || sentimentMap.neutral;
+                        const sentimentTag = `<span style="background:${sm.bg};color:${sm.color};padding:5px 12px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap;">
                 ${sm.emoji} ${row.sentiment.charAt(0).toUpperCase() + row.sentiment.slice(1)}
             </span>`;
 
-                    // ── Cluster badge ────────────────────────────────────────────
-                    const clusterColors = ["#ede9fe", "#fce7f3", "#ffedd5"];
-                    const clusterTextColors = ["#7c3aed", "#be185d", "#c2410c"];
-                    const cid = row.cluster_id ?? 0;
-                    const clusterTag = `<span style="background:${clusterColors[cid % 3]};color:${clusterTextColors[cid % 3]};
+                        // ── Cluster badge ────────────────────────────────────────────
+                        const clusterColors = ["#ede9fe", "#fce7f3", "#ffedd5"];
+                        const clusterTextColors = ["#7c3aed", "#be185d", "#c2410c"];
+                        const cid = row.cluster_id ?? 0;
+                        const clusterTag = `<span style="background:${clusterColors[cid % 3]};color:${clusterTextColors[cid % 3]};
                 padding:5px 10px;border-radius:12px;font-size:13px;font-weight:700;
                 white-space:nowrap;max-width:160px;display:inline-block;
                 overflow:hidden;text-overflow:ellipsis;" title="${row.cluster_label}">
                 ${row.cluster_label}
             </span>`;
 
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
                 <td>${row.user_id || "-"}</td>
                 <td>${row.user_name || "-"}</td>
                 <td>
@@ -3913,16 +3913,16 @@
                 <td>${row.requested_at || "-"}</td>
                 <td>${dupTag}</td>
             `;
-                    tbody.appendChild(tr);
+                        tbody.appendChild(tr);
 
-                    // ── Detail panel — its own full-width row so it can
-                    //    never get squeezed by, or overlap, neighbouring
-                    //    columns like Priority/Sentiment/Cluster ──────────
-                    const detailTr = document.createElement("tr");
-                    detailTr.id = `req-row-${row.id}`;
-                    detailTr.className = "req-detail-row";
-                    detailTr.style.display = "none";
-                    detailTr.innerHTML = `
+                        // ── Detail panel — its own full-width row so it can
+                        //    never get squeezed by, or overlap, neighbouring
+                        //    columns like Priority/Sentiment/Cluster ──────────
+                        const detailTr = document.createElement("tr");
+                        detailTr.id = `req-row-${row.id}`;
+                        detailTr.className = "req-detail-row";
+                        detailTr.style.display = "none";
+                        detailTr.innerHTML = `
                 <td colspan="9">
                     <div id="req-card-${row.id}" style="margin:4px 0 4px 24px;
                         background:white;border:1px solid #e2e8f0;border-radius:14px;
@@ -4035,10 +4035,10 @@
                     </div>
                 </td>
             `;
-                    tbody.appendChild(detailTr);
-                  } catch(rowErr) {
-                    console.error("Row render error:", rowErr, row);
-                  }
+                        tbody.appendChild(detailTr);
+                    } catch (rowErr) {
+                        console.error("Row render error:", rowErr, row);
+                    }
                 });
 
             } catch (err) {
@@ -7815,13 +7815,16 @@
                 });
                 const data = await res.json();
                 if (res.ok && data.status === "success") {
-                status.style.color = "#16a34a";
-                status.textContent = "✅ Message sent!";
-                textarea.value = "";
-                // Turn tick white (sent but not yet read)
-                const tick = document.getElementById(`user-tick-${requestId}`);
-                if (tick) { tick.style.color = "#94a3b8"; tick.title = "Sent - not yet read"; }
-
+                    status.style.color = "#16a34a";
+                    status.textContent = "✅ Message sent!";
+                    textarea.value = "";
+                    // Turn tick grey (sent, not yet read)
+                    const tick = document.getElementById(`user-tick-${requestId}`);
+                    if (tick) { tick.style.color = "#94a3b8"; tick.title = "Sent - not yet read"; }
+                    // Store notif_id and start polling
+                    if (data.notif_id) {
+                        startTickPolling(requestId, data.notif_id);
+                    }
                 } else {
                     status.style.color = "red";
                     status.textContent = "❌ Failed: " + (data.error || "Unknown error");
@@ -7835,21 +7838,40 @@
             }
         }
 
-
-
-
-        
-        // Poll every 30s to check if user read the message
-async function pollUserReadStatus(requestId, notifId) {
-    try {
-        const res  = await fetch(`/api/owner/notif-read-status/${notifId}`);
-        const data = await res.json();
-        if (data.is_read) {
-            const tick = document.getElementById(`user-tick-${requestId}`);
-            if (tick) { tick.style.color = "#2563eb"; tick.title = "Seen by user"; }
+        // Poll every 15s to check if user read the message
+        function startTickPolling(requestId, notifId) {
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/owner/notif-read-status/${notifId}`);
+                    const data = await res.json();
+                    if (data.is_read) {
+                        const tick = document.getElementById(`user-tick-${requestId}`);
+                        if (tick) {
+                            tick.style.color = "#2563eb";
+                            tick.title = "✅ Seen by user";
+                        }
+                        clearInterval(interval); // stop polling once read
+                    }
+                } catch (e) { }
+            }, 15000); // every 15 seconds
         }
+    </script>
+
+
+
+
+
+    // Poll every 30s to check if user read the message
+    async function pollUserReadStatus(requestId, notifId) {
+    try {
+    const res = await fetch(`/api/owner/notif-read-status/${notifId}`);
+    const data = await res.json();
+    if (data.is_read) {
+    const tick = document.getElementById(`user-tick-${requestId}`);
+    if (tick) { tick.style.color = "#2563eb"; tick.title = "Seen by user"; }
+    }
     } catch(e) {}
-}
+    }
     </script>
 
     <!-- ══════════════════════════ SIGN OUT LOGS MODAL ══════════════════════════ -->
