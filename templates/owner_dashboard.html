@@ -3850,6 +3850,7 @@
 
                 tbody.innerHTML = "";
                 rows.forEach((row, i) => {
+                  try {
                     const isSent = row.status === "sent_to_developer";
 
                     // ── Duplicate badge ──────────────────────────────────────────
@@ -3976,7 +3977,7 @@
                                 style="width:100%;padding:10px 12px;border:2px solid #86efac;
                                     border-radius:10px;font-size:13.5px;resize:none;outline:none;
                                     box-sizing:border-box;background:#fff;color:#334155;"></textarea>
-                            <button onclick="sendMessageToUser(${row.user_id}, ${row.id}, this)"
+                            <button onclick="sendMessageToUser(${row.user_id || 'null'}, ${row.id}, this)"
                                 style="margin-top:8px;background:linear-gradient(135deg,#16a34a,#15803d);
                                     color:white;border:none;padding:8px 24px;border-radius:20px;
                                     font-size:13px;font-weight:700;cursor:pointer;
@@ -4026,6 +4027,9 @@
                 </td>
             `;
                     tbody.appendChild(detailTr);
+                  } catch(rowErr) {
+                    console.error("Row render error:", rowErr, row);
+                  }
                 });
 
             } catch (err) {
