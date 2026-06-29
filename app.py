@@ -4290,10 +4290,15 @@ def request_category():
     # Sab theek hai â€” DB mein save karo
     conn = get_db_connection()
     cursor = conn.cursor()
+    # Get user_id from user table
+    cursor.execute("SELECT id FROM user WHERE username = %s LIMIT 1", (user_name,))
+    user_row = cursor.fetchone()
+    uid = user_row["id"] if user_row else None
+
     cursor.execute("""
-        INSERT INTO category_requests (user_name, category_name, reason)
-        VALUES (%s, %s, %s)
-    """, (user_name, category_name, reason))
+        INSERT INTO category_requests (user_id, user_name, category_name, reason)
+        VALUES (%s, %s, %s, %s)
+    """, (uid, user_name, category_name, reason))
     conn.commit()
     cursor.close()
     conn.close()
@@ -4308,11 +4313,9 @@ def get_category_requests():
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
-    SELECT cr.id, cr.user_name, cr.category_name, cr.reason, cr.status, cr.requested_at,
-           u.id AS user_id
-    FROM category_requests cr
-    LEFT JOIN user u ON u.username = cr.user_name
-    ORDER BY cr.requested_at DESC
+    SELECT id, user_id, user_name, category_name, reason, status, requested_at
+    FROM category_requests
+    ORDER BY requested_at DESC
 """)
         rows = cursor.fetchall()
         cursor.close()
