@@ -1579,7 +1579,7 @@ Chest: ${menData["Chest"]}
 
             // Merge with clothing & shoes + other data
             const dataToSend = {
-                Username: "Kevin Smith",
+                Username: sessionStorage.getItem('username') || localStorage.getItem('username') || "User",
                 Department: selectedDept || "--",
                 Heights: document.getElementById("heightValue")?.value || "--",
                 Weights: document.getElementById("weightValue")?.value || "--",
@@ -1871,7 +1871,7 @@ Chest: ${menData["Chest"]}
             // --- Combine all ---
             const payload = {
                 UserID: "001",  // optional, can be dynamic
-                Username: "Kevin Smith",
+                Username: sessionStorage.getItem('username') || localStorage.getItem('username') || "User",
                 ...clothingData,
                 ...skinFinal,
                 Interests: interestsFinal  // <-- last column

@@ -864,7 +864,7 @@
                 <div class="account-icon" id="accountIcon">👤</div>
 
                 <div class="account-content">
-                    <div class="account-name" id="accountName">Kevin Smith</div>
+                    <div class="account-name" id="accountName">{{ user.name or 'User' }}</div>
                     <div class="account-role">Account holder</div>
                 </div>
 
@@ -1246,7 +1246,7 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    const name = data.name || "Kevin Smith";
+                    const name = data.name || "{{ user.name or 'User' }}";
                     const email = data.email || "Advisor and Consultant";
                     const img = data.profile_image || "https://randomuser.me/api/portraits/men/32.jpg";
 
@@ -1834,6 +1834,8 @@
             document.getElementById('signoutOverlay').style.display = 'none';
             _selectedReason = null;
         }
+        // Save username to sessionStorage for other pages
+        sessionStorage.setItem('username', '{{ user.name or "" }}');
 
         async function confirmSignout() {
             if (!_selectedReason) return;
