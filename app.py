@@ -4367,8 +4367,8 @@ def get_category_requests():
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
-        SELECT id, user_id, user_name, category_name, reason_name, reason, status, requested_at
-            FROM category_requests
+        SELECT id, user_id, user_name, category_name, reason_name, reason, status, requested_at, notif_id
+        FROM category_requests
             ORDER BY requested_at DESC
         """)
         rows = cursor.fetchall()
@@ -4653,10 +4653,11 @@ def send_category_request(request_id):
 @app.route("/api/owner/send-notification", methods=["POST"])
 def send_notification_to_user():
     try:
-        body    = request.get_json(silent=True) or {}
-        user_id = body.get("user_id")
-        title   = body.get("title", "").strip()
-        message = body.get("message", "").strip()
+        body       = request.get_json(silent=True) or {}
+        user_id    = body.get("user_id")
+        title      = body.get("title", "").strip()
+        message    = body.get("message", "").strip()
+        request_id = body.get("request_id")  # category_requests.id
 
         if not user_id or not message:
             return jsonify({"error": "user_id and message required"}), 400
@@ -4669,12 +4670,19 @@ def send_notification_to_user():
         """, (user_id, title, message))
         conn.commit()
         notif_id = cursor.lastrowid
+
+        if request_id:
+            cursor.execute(
+                "UPDATE category_requests SET notif_id = %s WHERE id = %s",
+                (notif_id, request_id)
+            )
+            conn.commit()
+
         cursor.close()
         conn.close()
         return jsonify({"status": "success", "notif_id": notif_id})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 @app.route("/api/user/notifications", methods=["GET"])
 def get_user_notifications():
