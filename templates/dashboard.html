@@ -2052,10 +2052,12 @@
         }
 
         async function toggleNotifMessage(id) {
+            console.log("toggleNotifMessage called with id:", id);
             const body     = document.getElementById(`msg-body-${id}`);
             const chevron  = document.getElementById(`chevron-${id}`);
             const newBadge = document.getElementById(`new-badge-${id}`);
-            if (!body) return;
+            console.log("body element found:", body);
+            if (!body) { console.log("EXITING - body not found"); return; }
 
             const isOpen = body.style.display === "block";
             body.style.display = isOpen ? "none" : "block";
