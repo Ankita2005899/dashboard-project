@@ -4712,6 +4712,9 @@ def get_user_notifications():
         return jsonify({"error": str(e), "notifications": []}), 500
 
 
+#________________easy with out error all message easily see hoyla ____________________
+
+
 @app.route("/api/user/notifications/read/<int:notif_id>", methods=["POST"])
 def mark_notification_read(notif_id):
     try:
@@ -4720,15 +4723,19 @@ def mark_notification_read(notif_id):
         cursor.execute("""
             UPDATE user_notifications 
             SET is_read = 1, read_at = NOW() 
-            WHERE id = %s AND is_read = 0
+            WHERE id = %s
         """, (notif_id,))
+        rows_affected = cursor.rowcount
         conn.commit()
         cursor.close()
         conn.close()
-        return jsonify({"status": "ok"})
+        print(f"mark_notification_read: id={notif_id}, rows_affected={rows_affected}")
+        return jsonify({"status": "ok", "rows_affected": rows_affected})
     except Exception as e:
+        print(f"mark_notification_read CRASHED: {e}")
         return jsonify({"error": str(e)}), 500
     
+     
 #___________notification dakhavlay__________________________
   
     
