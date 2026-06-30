@@ -4054,7 +4054,7 @@
                                         📨 Send to User
                                     </button>
                                     <!-- Double tick - turns blue when user reads -->
-                                    <span id="user-tick-${row.id}" style="font-size:18px;color:#cbd5e1;"
+                                    <span id="user-tick-${row.id}" data-notif-id="${row.notif_id || ''}" style="font-size:18px;color:#cbd5e1;"
                                         title="Not yet seen">✔✔</span>
                                     <span id="user-msg-status-${row.id}" style="font-size:12px;color:#16a34a;"></span>
                                 </div>
@@ -4067,6 +4067,15 @@
                         tbody.appendChild(detailTr);
                     } catch (rowErr) {
                         console.error("Row render error:", rowErr, row);
+                    }
+                });
+
+                // After all rows rendered, resume tick polling for any pending notifications
+                document.querySelectorAll('[id^="user-tick-"]').forEach(tickEl => {
+                    const notifId = tickEl.getAttribute('data-notif-id');
+                    const requestId = tickEl.id.replace('user-tick-', '');
+                    if (notifId) {
+                        checkAndPollTick(requestId, notifId);
                     }
                 });
 
@@ -7839,7 +7848,8 @@
                     body: JSON.stringify({
                         user_id: userId,
                         title: "📂 Category Request Update",
-                        message: msg
+                        message: msg,
+                        request_id: requestId
                     })
                 });
                 const data = await res.json();
@@ -7888,19 +7898,38 @@
 
 
 
+    <script>
+
+        // Poll every 30s to check if user read the message
+        async function pollUserReadStatus(requestId, notifId) {
+            try {
+                const res = await fetch(`/api/owner/notif-read-status/${notifId}`);
+                const data = await res.json();
+                if (data.is_read) {
+                    const tick = document.getElementById(`user-tick-${requestId}`);
+                    if (tick) { tick.style.color = "#2563eb"; tick.title = "Seen by user"; }
+                }
+            } catch (e) { }
+        }
 
 
-    // Poll every 30s to check if user read the message
-    async function pollUserReadStatus(requestId, notifId) {
-    try {
-    const res = await fetch(`/api/owner/notif-read-status/${notifId}`);
-    const data = await res.json();
-    if (data.is_read) {
-    const tick = document.getElementById(`user-tick-${requestId}`);
-    if (tick) { tick.style.color = "#2563eb"; tick.title = "Seen by user"; }
-    }
-    } catch(e) {}
-    }
+        async function checkAndPollTick(requestId, notifId) {
+            try {
+                const res = await fetch(`/api/owner/notif-read-status/${notifId}`);
+                const data = await res.json();
+                const tick = document.getElementById(`user-tick-${requestId}`);
+                if (tick) {
+                    if (data.is_read) {
+                        tick.style.color = "#2563eb";
+                        tick.title = `✅ Seen at ${data.read_at}`;
+                    } else {
+                        tick.style.color = "#94a3b8";
+                        tick.title = "Sent - not yet read";
+                        startTickPolling(requestId, notifId); // resume polling
+                    }
+                }
+            } catch (e) { }
+        }
     </script>
 
     <!-- ══════════════════════════ SIGN OUT LOGS MODAL ══════════════════════════ -->
