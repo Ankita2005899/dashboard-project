@@ -4709,14 +4709,20 @@ def mark_notification_read(notif_id):
     try:
         conn   = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE user_notifications SET is_read=1 WHERE id=%s", (notif_id,))
+        cursor.execute("""
+            UPDATE user_notifications 
+            SET is_read = 1, read_at = NOW() 
+            WHERE id = %s AND is_read = 0
+        """, (notif_id,))
         conn.commit()
         cursor.close()
         conn.close()
         return jsonify({"status": "ok"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
+    
+    
 #__________owner provider message from owner_section to dashboard where if user see that message it will blue tick at the owner_dashboard ________________________
 
 
@@ -4725,13 +4731,22 @@ def notif_read_status(notif_id):
     try:
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT is_read FROM user_notifications WHERE id = %s", (notif_id,))
+        cursor.execute("SELECT is_read, read_at, created_at FROM user_notifications WHERE id = %s", (notif_id,))
         row = cursor.fetchone()
         cursor.close()
         conn.close()
-        return jsonify({"is_read": bool(row["is_read"]) if row else False})
+        if not row:
+            return jsonify({"is_read": False})
+        return jsonify({
+            "is_read": bool(row["is_read"]),
+            "read_at": row["read_at"].strftime("%Y-%m-%d %H:%M:%S") if row["read_at"] else None,
+            "sent_at": row["created_at"].strftime("%Y-%m-%d %H:%M:%S") if row["created_at"] else None
+        })
     except Exception as e:
         return jsonify({"is_read": False}), 500
+    
+    
+    
 #------------------------------------------------------------------------------------------------------------   
 #---------------owner search data of ( owner_section ) ------------------------------------            
 @app.route("/api/owner/search-analytics", methods=["GET"])

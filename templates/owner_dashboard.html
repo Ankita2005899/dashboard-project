@@ -1697,7 +1697,9 @@
                         </thead>
 
                         <tbody id="avgOrdersTableBody">
-                            <tr><td colspan="6" style="text-align:center;padding:20px;">Loading...</td></tr>
+                            <tr>
+                                <td colspan="6" style="text-align:center;padding:20px;">Loading...</td>
+                            </tr>
                         </tbody>
                     </table>
 
@@ -3043,9 +3045,9 @@
 
                     const statusClass = (status) => {
                         if (status === 'Frequent Buyer') return 'color:#10b981;font-weight:600;';
-                        if (status === 'Stable Buyer')   return 'color:#6366f1;font-weight:600;';
-                        if (status === 'Regular Buyer')  return 'color:#f59e0b;font-weight:600;';
-                        if (status === 'No Orders')      return 'color:#94a3b8;font-weight:600;';
+                        if (status === 'Stable Buyer') return 'color:#6366f1;font-weight:600;';
+                        if (status === 'Regular Buyer') return 'color:#f59e0b;font-weight:600;';
+                        if (status === 'No Orders') return 'color:#94a3b8;font-weight:600;';
                         return 'color:#ef4444;font-weight:600;';
                     };
 
@@ -7875,9 +7877,9 @@
                         const tick = document.getElementById(`user-tick-${requestId}`);
                         if (tick) {
                             tick.style.color = "#2563eb";
-                            tick.title = "✅ Seen by user";
+                            tick.title = `✅ Seen at ${data.read_at}`;
                         }
-                        clearInterval(interval); // stop polling once read
+                        clearInterval(interval);
                     }
                 } catch (e) { }
             }, 15000); // every 15 seconds
