@@ -4729,7 +4729,35 @@ def mark_notification_read(notif_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+#___________notification dakhavlay__________________________
+  
     
+@app.route("/api/owner/notification-history/<int:request_id>", methods=["GET"])
+def get_notification_history(request_id):
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT un.id, un.message, un.is_read, un.created_at, un.read_at
+            FROM user_notifications un
+            JOIN category_requests cr ON cr.notif_id = un.id
+            WHERE cr.id = %s
+            ORDER BY un.created_at DESC
+        """, (request_id,))
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        for r in rows:
+            r["created_at"] = r["created_at"].strftime("%Y-%m-%d %H:%M:%S") if r["created_at"] else None
+            r["read_at"]    = r["read_at"].strftime("%Y-%m-%d %H:%M:%S") if r["read_at"] else None
+
+        return jsonify({"history": rows})
+    except Exception as e:
+        return jsonify({"error": str(e), "history": []}), 500
+    
+    
+        
     
 #__________owner provider message from owner_section to dashboard where if user see that message it will blue tick at the owner_dashboard ________________________
 
