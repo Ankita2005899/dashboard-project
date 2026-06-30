@@ -4063,6 +4063,8 @@ def avg_orders():
         conn.close()
         
         
+        
+        
 @app.route('/api/owner/avg-orders-detail')
 def avg_orders_detail():
     conn   = get_db_connection()
@@ -4096,6 +4098,7 @@ def avg_orders_detail():
                 parts = table.rsplit('_', 1)
                 if len(parts) != 2 or not parts[1].isdigit():
                     continue
+                user_id  = parts[1]
                 username = parts[0].replace('_', ' ').title()
 
                 cursor.execute(f"""
@@ -4107,13 +4110,11 @@ def avg_orders_detail():
                     WHERE mode IN ('successful', 'combo_offer')
                 """)
                 row = cursor.fetchone()
-                total  = int(row['total_orders'] or 0)
-                last_o = row['last_order']
+                total   = int(row['total_orders'] or 0)
+                last_o  = row['last_order']
                 first_o = row['first_order']
 
-                # Avg per month
                 if first_o and last_o and total > 0:
-                    from datetime import datetime
                     months = max(1, (last_o.year - first_o.year) * 12
                                   + (last_o.month - first_o.month) + 1)
                     avg_pm = round(total / months, 1)
@@ -4121,6 +4122,7 @@ def avg_orders_detail():
                     avg_pm = 0
 
                 customers.append({
+                    'user_id'      : user_id,
                     'username'     : username,
                     'total_orders' : total,
                     'avg_per_month': avg_pm,
@@ -4128,6 +4130,61 @@ def avg_orders_detail():
                 })
             except:
                 continue
+
+        # ── ML: KMeans clustering on avg_per_month to assign buyer status ──
+        active = [c for c in customers if c['total_orders'] > 0]
+
+        if len(active) >= 4:
+            try:
+                import numpy as np
+                from sklearn.cluster import KMeans
+
+                X = np.array([[c['avg_per_month']] for c in active])
+                k = 4 if len(active) >= 4 else len(active)
+                km = KMeans(n_clusters=k, n_init=10, random_state=42)
+                labels = km.fit_predict(X)
+
+                # Rank clusters by their mean avg_per_month, high to low
+                cluster_means = {}
+                for lbl in set(labels):
+                    vals = [active[i]['avg_per_month'] for i in range(len(active)) if labels[i] == lbl]
+                    cluster_means[lbl] = sum(vals) / len(vals)
+
+                ranked = sorted(cluster_means, key=lambda l: cluster_means[l], reverse=True)
+                status_names = ['Frequent Buyer', 'Stable Buyer', 'Regular Buyer', 'Low Activity']
+                cluster_to_status = {lbl: status_names[i] for i, lbl in enumerate(ranked)}
+
+                for i, c in enumerate(active):
+                    c['status'] = cluster_to_status[labels[i]]
+            except Exception:
+                # Fallback to rule-based thresholds if sklearn/numpy unavailable
+                for c in active:
+                    apm = c['avg_per_month']
+                    if apm >= 4:
+                        c['status'] = 'Frequent Buyer'
+                    elif apm >= 2.5:
+                        c['status'] = 'Stable Buyer'
+                    elif apm >= 1:
+                        c['status'] = 'Regular Buyer'
+                    else:
+                        c['status'] = 'Low Activity'
+        else:
+            # Too few customers to cluster meaningfully — use rule-based thresholds
+            for c in active:
+                apm = c['avg_per_month']
+                if apm >= 4:
+                    c['status'] = 'Frequent Buyer'
+                elif apm >= 2.5:
+                    c['status'] = 'Stable Buyer'
+                elif apm >= 1:
+                    c['status'] = 'Regular Buyer'
+                else:
+                    c['status'] = 'Low Activity'
+
+        # Customers with zero orders
+        for c in customers:
+            if c['total_orders'] == 0:
+                c['status'] = 'No Orders'
 
         customers.sort(key=lambda x: x['total_orders'], reverse=True)
         return jsonify({'customers': customers})
@@ -4137,7 +4194,6 @@ def avg_orders_detail():
     finally:
         cursor.close()
         conn.close()
-       
 
 #--------------------------------------------------------------------------------------------------
 

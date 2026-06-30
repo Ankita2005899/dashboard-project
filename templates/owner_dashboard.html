@@ -1697,41 +1697,7 @@
                         </thead>
 
                         <tbody id="avgOrdersTableBody">
-                            <tr>
-                                <td>#A3001</td>
-                                <td>Michael Brown</td>
-                                <td>24</td>
-                                <td>4.0</td>
-                                <td>May 03, 2026</td>
-                                <td>Frequent Buyer</td>
-                            </tr>
-
-                            <tr>
-                                <td>#A3002</td>
-                                <td>Emily Davis</td>
-                                <td>12</td>
-                                <td>2.0</td>
-                                <td>May 01, 2026</td>
-                                <td>Regular Buyer</td>
-                            </tr>
-
-                            <tr>
-                                <td>#A3003</td>
-                                <td>William Clark</td>
-                                <td>6</td>
-                                <td>1.0</td>
-                                <td>Apr 28, 2026</td>
-                                <td>Low Activity</td>
-                            </tr>
-
-                            <tr>
-                                <td>#A3004</td>
-                                <td>Olivia Turner</td>
-                                <td>18</td>
-                                <td>3.0</td>
-                                <td>May 04, 2026</td>
-                                <td>Stable Buyer</td>
-                            </tr>
+                            <tr><td colspan="6" style="text-align:center;padding:20px;">Loading...</td></tr>
                         </tbody>
                     </table>
 
@@ -2959,6 +2925,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', function () {
+            loadAvgOrdersCard();
             loadCustomerRanking();
             loadCustomerBehaviorTrends();
             loadChurnDataSilent();
@@ -3058,6 +3025,66 @@
 
         function openAvgOrdersModal() {
             document.getElementById("avgOrdersModal").style.display = "flex";
+            loadAvgOrdersDetail();
+        }
+
+        function loadAvgOrdersDetail() {
+            const tbody = document.getElementById("avgOrdersTableBody");
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">Loading...</td></tr>';
+
+            fetch('/api/owner/avg-orders-detail')
+                .then(res => res.json())
+                .then(data => {
+                    const customers = data.customers || [];
+                    if (customers.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">No customer data found.</td></tr>';
+                        return;
+                    }
+
+                    const statusClass = (status) => {
+                        if (status === 'Frequent Buyer') return 'color:#10b981;font-weight:600;';
+                        if (status === 'Stable Buyer')   return 'color:#6366f1;font-weight:600;';
+                        if (status === 'Regular Buyer')  return 'color:#f59e0b;font-weight:600;';
+                        if (status === 'No Orders')      return 'color:#94a3b8;font-weight:600;';
+                        return 'color:#ef4444;font-weight:600;';
+                    };
+
+                    tbody.innerHTML = customers.map(c => `
+                        <tr>
+                            <td>#A${c.user_id}</td>
+                            <td>${c.username}</td>
+                            <td>${c.total_orders}</td>
+                            <td>${c.avg_per_month}</td>
+                            <td>${c.last_order || '—'}</td>
+                            <td style="${statusClass(c.status)}">${c.status}</td>
+                        </tr>
+                    `).join('');
+                })
+                .catch(err => {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#ef4444;">Failed to load data.</td></tr>';
+                    console.error('avg-orders-detail error:', err);
+                });
+        }
+
+        function loadAvgOrdersCard() {
+            fetch('/api/owner/avg-orders')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("avgOrdersValue").innerText = data.avg_orders ?? '—';
+                    const trendEl = document.getElementById("avgOrdersTrend");
+                    const trend = data.trend ?? 0;
+                    if (trend > 0) {
+                        trendEl.className = 'up';
+                        trendEl.innerText = `▲ ${trend}% vs last month`;
+                    } else if (trend < 0) {
+                        trendEl.className = 'down';
+                        trendEl.innerText = `▼ ${Math.abs(trend)}% vs last month`;
+                    } else {
+                        trendEl.className = '';
+                        trendEl.innerText = 'No change vs last month';
+                    }
+                })
+                .catch(err => console.error('avg-orders card error:', err));
         }
 
         function closeAvgOrdersModal() {
