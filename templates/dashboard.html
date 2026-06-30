@@ -1804,15 +1804,12 @@
         }
 
         // ── Load common offers into notification panel ─────────
-        // Update badge count only on page load
         async function loadAllOffers() {
             try {
                 const res = await fetch('/api/my-special-offers');
                 const data = await res.json();
                 const offers = data.offers || [];
-                const unread = offers.filter(o => !o.is_read).length;
-                const b = document.getElementById('notifBadge');
-                if (b) { b.textContent = unread > 0 ? unread : ''; }
+                // Note: badge count is driven by loadUserNotifications(), not offers
             } catch (e) { console.error('Failed to load offers:', e); }
         }
 
@@ -2007,7 +2004,7 @@
                     const isNew = !n.is_read;
                     const div = document.createElement("div");
                     div.id = `notif-${n.id}`;
-                    div.onclick = () => toggleNotifMessage(n.id);
+                    div.onclick = () => readNotif(n.id);
                     div.style.cssText = `
                         display:flex;align-items:flex-start;gap:12px;
                         padding:14px 16px;margin-bottom:8px;cursor:pointer;
@@ -2021,18 +2018,14 @@
                             background:linear-gradient(135deg,#ede9fe,#ddd6fe);
                             display:flex;align-items:center;justify-content:center;font-size:18px;">📂</div>
                         <div style="flex:1;min-width:0;">
-                            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:3px;">
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <span style="font-size:13.5px;font-weight:700;color:#1e293b;">${n.title}</span>
-                                    ${isNew ? `<span id="new-badge-${n.id}" style="background:linear-gradient(135deg,#7c3aed,#a855f7);
-                                        color:white;font-size:10px;font-weight:700;padding:2px 7px;
-                                        border-radius:20px;letter-spacing:0.5px;">NEW</span>` : ''}
-                                </div>
-                                <span id="chevron-${n.id}" style="font-size:11px;color:#94a3b8;transition:transform 0.2s;">▼</span>
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+                                <span style="font-size:13.5px;font-weight:700;color:#1e293b;">${n.title}</span>
+                                ${isNew ? `<span style="background:linear-gradient(135deg,#7c3aed,#a855f7);
+                                    color:white;font-size:10px;font-weight:700;padding:2px 7px;
+                                    border-radius:20px;letter-spacing:0.5px;">NEW</span>` : ''}
                             </div>
-                            <div id="msg-body-${n.id}" style="display:none;font-size:13px;color:#475569;
-                                line-height:1.5;margin-bottom:5px;word-break:break-word;
-                                padding-top:6px;border-top:1px dashed #e2e8f0;margin-top:6px;">${n.message}</div>
+                            <div style="font-size:13px;color:#475569;line-height:1.5;margin-bottom:5px;
+                                word-break:break-word;">${n.message}</div>
                             <div style="font-size:11px;color:#94a3b8;">🕐 ${n.created_at}</div>
                         </div>
                     `;
@@ -2060,25 +2053,6 @@
             // Refresh badge count
             loadUserNotifications();
         }
-
-
-        function toggleNotifMessage(id) {
-            const body = document.getElementById(`msg-body-${id}`);
-            const chevron = document.getElementById(`chevron-${id}`);
-            const newBadge = document.getElementById(`new-badge-${id}`);
-            if (!body) return;
-
-            const isOpen = body.style.display === "block";
-            body.style.display = isOpen ? "none" : "block";
-            if (chevron) chevron.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
-
-            if (!isOpen) {
-                // Remove NEW badge immediately on open
-                if (newBadge) newBadge.remove();
-                readNotif(id); // mark as read in DB
-            }
-        }
-
     </script>
 
     <!-- SUCCESS POPUP -->
