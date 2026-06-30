@@ -2051,7 +2051,7 @@
             // Don't reload the whole list - it would close the dropdown we just opened
         }
 
-        function toggleNotifMessage(id) {
+        async function toggleNotifMessage(id) {
             const body     = document.getElementById(`msg-body-${id}`);
             const chevron  = document.getElementById(`chevron-${id}`);
             const newBadge = document.getElementById(`new-badge-${id}`);
@@ -2063,7 +2063,7 @@
 
             if (!isOpen) {
                 if (newBadge) newBadge.remove();
-                readNotif(id);
+                await readNotif(id);
                 // Decrement badge count directly
                 const badge = document.getElementById("notifBadge");
                 if (badge && badge.textContent) {
