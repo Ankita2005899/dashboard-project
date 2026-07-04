@@ -4788,7 +4788,72 @@ def notif_read_status(notif_id):
     except Exception as e:
         return jsonify({"is_read": False}), 500
     
-    
+#___________Notification Log button sathi in the (owner_section.html page ) ________________________________________
+
+
+@app.route("/api/owner/notification-summary", methods=["GET"])
+def notification_summary():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id, user_id, user_name, category_name, reason_name, reason, status, requested_at
+            FROM category_requests
+            ORDER BY requested_at DESC
+        """)
+        requests_rows = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT id, user_id, title, message, is_read, created_at, read_at
+            FROM user_notifications
+            ORDER BY created_at DESC
+        """)
+        notif_rows = cursor.fetchall()
+        cursor.close()
+
+        from datetime import datetime
+        def fmt(v):
+            return v.strftime("%Y-%m-%d %H:%M:%S") if isinstance(v, datetime) else v
+
+        users = {}
+
+        for r in requests_rows:
+            uid = r["user_id"]
+            users.setdefault(uid, {
+                "user_id": uid, "user_name": r["user_name"],
+                "requests": [], "messages": []
+            })
+            users[uid]["requests"].append({
+                "category_name": r["category_name"],
+                "reason": r["reason"],
+                "status": r["status"],
+                "sent_to_developer": r["status"] == "sent_to_developer",
+                "requested_at": fmt(r["requested_at"])
+            })
+
+        for n in notif_rows:
+            uid = n["user_id"]
+            users.setdefault(uid, {
+                "user_id": uid, "user_name": None,
+                "requests": [], "messages": []
+            })
+            users[uid]["messages"].append({
+                "message": n["message"],
+                "sent_at": fmt(n["created_at"]),
+                "is_read": bool(n["is_read"]),
+                "read_at": fmt(n["read_at"])
+            })
+
+        return jsonify({"summary": list(users.values())})
+    except Exception as e:
+        import traceback
+        print("notification_summary crashed:", traceback.format_exc())
+        return jsonify({"error": str(e), "summary": []}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()   
     
 #------------------------------------------------------------------------------------------------------------   
 #---------------owner search data of ( owner_section ) ------------------------------------            
