@@ -4745,11 +4745,12 @@ def get_notification_history(request_id):
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
-            SELECT id, message, is_read, created_at, read_at
-            FROM user_notifications
-            WHERE request_id = %s
-            ORDER BY created_at DESC
-        """, (request_id,))
+            SELECT un.id, un.message, un.is_read, un.created_at, un.read_at
+            FROM user_notifications un
+            WHERE un.request_id = %s
+               OR un.id = (SELECT notif_id FROM category_requests WHERE id = %s)
+            ORDER BY un.created_at DESC
+        """, (request_id, request_id))
         rows = cursor.fetchall()
         cursor.close()
         conn.close()
