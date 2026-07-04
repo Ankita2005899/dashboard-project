@@ -961,77 +961,133 @@
 
 
 
-        .notif-item-dash:hover {
-            background: linear-gradient(135deg, rgba(249, 115, 22, 0.06), rgba(245, 158, 11, 0.06));
-            border-left: 3px solid #f97316;
-        }
-
-        .unread-notif {
-            background: #eef2ff;
-        }
-
-        .unread-notif:hover {
-            background: #e0e7ff;
-        }
-
-        .unread-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #6366f1;
-            flex-shrink: 0;
-            margin-top: 5px;
-        }
-
         #notificationPanel {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 780px;
-            max-height: 90vh;
-            background: white;
-            border-radius: 12px;
-            border: 2px solid #cbd5e1;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18);
+            width: 640px;
+            max-height: 85vh;
+            background: #ffffff;
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.20), 0 2px 8px rgba(15, 23, 42, 0.06);
             z-index: 99999;
             flex-direction: column;
             overflow: hidden;
         }
 
+        #commonNotifs {
+            background: #f8fafc;
+            padding: 14px;
+        }
+
+        #commonNotifs::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #commonNotifs::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        #commonNotifs::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
         .notif-item-dash {
             display: flex;
             align-items: flex-start;
-            gap: 16px;
-            padding: 18px 26px;
-            border-bottom: 1px solid #e5e7eb;
+            gap: 14px;
+            padding: 16px 18px;
+            margin-bottom: 10px;
+            border-radius: 14px;
+            border: 1px solid #eef0f4;
+            background: #ffffff;
             cursor: pointer;
-            transition: background 0.2s;
+            position: relative;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+
+        .notif-item-dash:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.14);
+            border-color: #ddd6fe;
+        }
+
+        .unread-notif {
+            background: linear-gradient(135deg, #f5f3ff, #eef2ff);
+            border-color: #ddd6fe;
+        }
+
+        .unread-notif::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 4px;
+            border-radius: 4px;
+            background: linear-gradient(180deg, #8b5cf6, #6366f1);
+        }
+
+        .unread-notif:hover {
+            background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+        }
+
+        .unread-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+            flex-shrink: 0;
+            margin-top: 6px;
         }
 
         .notif-icon-dash {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
             flex-shrink: 0;
         }
 
         .notif-title-dash {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 14.5px;
+            font-weight: 700;
             color: #1e293b;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .notif-desc-dash {
-            font-size: 14px;
+            font-size: 13px;
             color: #64748b;
-            line-height: 1.6;
+            line-height: 1.55;
+        }
+
+        .notif-msg-body {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.55;
+            word-break: break-word;
+            transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.2s ease;
+        }
+
+        .notif-msg-body.open {
+            max-height: 300px;
+            opacity: 1;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px dashed #e2e8f0;
         }
 
         .notif-time-dash {
@@ -1225,14 +1281,22 @@
     <!-- ================= NOTIFICATION PANEL ================= -->
     <div id="notificationPanel">
         <!-- Header -->
-        <div
-            style="padding:18px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#a8bcee,#81f5e8);">
-            <h3 style="font-size:16px;font-weight:700;color:#1e293b;">🔔 Notifications</h3>
+        <div style="padding:20px 24px;display:flex;align-items:center;justify-content:space-between;
+            background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.18);
+                    display:flex;align-items:center;justify-content:center;font-size:19px;">🔔</div>
+                <div>
+                    <h3 style="font-size:16px;font-weight:800;color:white;margin:0;">Notifications</h3>
+                    <p style="font-size:11px;color:rgba(255,255,255,0.75);margin:0;">Updates from ShopSphere</p>
+                </div>
+            </div>
             <div style="display:flex;gap:10px;align-items:center;">
-                <span onclick="markAllRead()" style="font-size:12px;color:#4f46e5;cursor:pointer;font-weight:600;">Mark
+                <span onclick="markAllRead()" style="font-size:12px;color:white;cursor:pointer;font-weight:600;
+                    background:rgba(255,255,255,0.16);padding:6px 12px;border-radius:20px;white-space:nowrap;">✓ Mark
                     all read</span>
-                <button onclick="closeNotifications()"
-                    style="background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;padding:0;">✕</button>
+                <button onclick="closeNotifications()" style="background:rgba(255,255,255,0.16);border:none;width:28px;height:28px;border-radius:50%;
+                    font-size:15px;cursor:pointer;color:white;padding:0;line-height:1;">✕</button>
             </div>
         </div>
 
@@ -1241,9 +1305,7 @@
             <div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">Loading...</div>
         </div>
 
-    </div>
-
-    <!-- Overlay -->
+    </div> <!-- Overlay -->
     <div id="notifOverlay" onclick="closeNotifications()"
         style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:9998;">
     </div>
@@ -2004,39 +2066,29 @@
                     const isNew = !n.is_read;
                     const div = document.createElement("div");
                     div.id = `notif-${n.id}`;
+                    div.className = `notif-item-dash ${isNew ? 'unread-notif' : ''}`;
                     div.onclick = () => toggleNotifMessage(n.id);
-                    div.style.cssText = `
-                        display:flex;align-items:flex-start;gap:12px;
-                        padding:14px 16px;margin-bottom:8px;cursor:pointer;
-                        border-radius:12px;border:1px solid ${isNew ? '#ddd6fe' : '#f1f5f9'};
-                        background:${isNew ? '#faf5ff' : 'white'};
-                        box-shadow:${isNew ? '0 2px 8px rgba(139,92,246,0.1)' : '0 1px 3px rgba(0,0,0,0.04)'};
-                        transition:all 0.2s;
-                    `;
                     div.innerHTML = `
-                        <div style="width:40px;height:40px;border-radius:50%;flex-shrink:0;
-                            background:linear-gradient(135deg,#ede9fe,#ddd6fe);
-                            display:flex;align-items:center;justify-content:center;font-size:18px;">📂</div>
+                        <div class="notif-icon-dash" style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);color:#7c3aed;">📂</div>
                         <div style="flex:1;min-width:0;">
-                            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:3px;">
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <span style="font-size:13.5px;font-weight:700;color:#1e293b;">${n.title}</span>
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                                <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+                                    <span class="notif-title-dash" style="margin-bottom:0;">${n.title}</span>
                                     ${isNew ? `<span id="new-badge-${n.id}" style="background:linear-gradient(135deg,#7c3aed,#a855f7);
-                                        color:white;font-size:10px;font-weight:700;padding:2px 7px;
+                                        color:white;font-size:9.5px;font-weight:700;padding:2px 7px;flex-shrink:0;
                                         border-radius:20px;letter-spacing:0.5px;">NEW</span>` : ''}
                                 </div>
-                                <span id="chevron-${n.id}" style="font-size:11px;color:#94a3b8;transition:transform 0.2s;">▼</span>
+                                <span id="chevron-${n.id}" style="font-size:11px;color:#94a3b8;flex-shrink:0;
+                                    transition:transform 0.2s;">▼</span>
                             </div>
-                            <div id="msg-body-${n.id}" style="display:none;font-size:13px;color:#475569;
-                                line-height:1.5;margin-bottom:5px;word-break:break-word;
-                                padding-top:6px;border-top:1px dashed #e2e8f0;margin-top:6px;">${n.message}</div>
-                            <div style="font-size:11px;color:#94a3b8;">🕐 ${n.created_at}</div>
+                            <div class="notif-desc-dash" style="margin-top:4px;">
+                                🕐 ${n.created_at}
+                            </div>
+                            <div id="msg-body-${n.id}" class="notif-msg-body">${n.message}</div>
                         </div>
                     `;
                     container.appendChild(div);
-                });
-
-                const badge = document.getElementById("notifBadge");
+                }); const badge = document.getElementById("notifBadge");
                 if (badge) badge.textContent = unreadCount > 0 ? unreadCount : "";
 
             } catch (err) {
@@ -2063,10 +2115,9 @@
             console.log("body element found:", body);
             if (!body) { console.log("EXITING - body not found"); return; }
 
-            const isOpen = body.style.display === "block";
-            body.style.display = isOpen ? "none" : "block";
+            const isOpen = body.classList.contains("open");
+            body.classList.toggle("open", !isOpen);
             if (chevron) chevron.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
-
             if (!isOpen) {
                 if (newBadge) newBadge.remove();
                 await readNotif(id);
