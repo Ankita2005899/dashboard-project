@@ -1041,8 +1041,15 @@
         }
 
         @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to   { transform: translateX(0);    opacity: 1; }
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     </style>
 
@@ -1260,39 +1267,36 @@
                     <p style="font-size:11px;color:#94a3b8;margin:0;">Exclusive offers just for you</p>
                 </div>
             </div>
-            <button onclick="closeSpecialOffers()"
-                style="background:rgba(0,0,0,0.06);border:none;font-size:18px;cursor:pointer;
+            <button onclick="closeSpecialOffers()" style="background:rgba(0,0,0,0.06);border:none;font-size:18px;cursor:pointer;
                 color:#64748b;padding:6px 10px;border-radius:8px;
-                transition:background 0.2s;"
-                onmouseover="this.style.background='rgba(0,0,0,0.12)'"
+                transition:background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.12)'"
                 onmouseout="this.style.background='rgba(0,0,0,0.06)'">✕</button>
         </div>
         <!-- Tabs -->
         <div style="display:flex;border-bottom:2px solid #e5e7eb;background:white;">
-            <div id="offerTabSpecial" onclick="switchOfferTab('special')"
-                style="flex:1;text-align:center;padding:14px;font-size:13px;font-weight:700;
+            <div id="offerTabSpecial" onclick="switchOfferTab('special')" style="flex:1;text-align:center;padding:14px;font-size:13px;font-weight:700;
                 cursor:pointer;color:#7c3aed;border-bottom:3px solid #7c3aed;
                 transition:all 0.2s;">
                 ✨ Special
             </div>
-            <div id="offerTabCommon" onclick="switchOfferTab('common')"
-                style="flex:1;text-align:center;padding:14px;font-size:13px;font-weight:700;
+            <div id="offerTabCommon" onclick="switchOfferTab('common')" style="flex:1;text-align:center;padding:14px;font-size:13px;font-weight:700;
                 cursor:pointer;color:#94a3b8;border-bottom:3px solid transparent;
                 transition:all 0.2s;">
                 📢 Common
             </div>
         </div>
         <!-- Special Content -->
-        <div id="specialOffersContent" style="overflow-y:auto;flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;">
+        <div id="specialOffersContent"
+            style="overflow-y:auto;flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;">
             <div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">Loading...</div>
         </div>
         <!-- Common Content -->
-        <div id="commonOffersContent" style="display:none;overflow-y:auto;flex:1;padding:14px;flex-direction:column;gap:10px;">
+        <div id="commonOffersContent"
+            style="display:none;overflow-y:auto;flex:1;padding:14px;flex-direction:column;gap:10px;">
             <div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">Loading...</div>
         </div>
     </div>
-    <div id="specialOffersOverlay" onclick="closeSpecialOffers()"
-        style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+    <div id="specialOffersOverlay" onclick="closeSpecialOffers()" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
         background:rgba(0,0,0,0.35);z-index:99998;backdrop-filter:blur(2px);">
     </div>
 
@@ -1780,7 +1784,7 @@
             document.getElementById("notifOverlay").style.display = "none";
         }
 
-        window.readNotif = function (id) {
+        window.readNotifLegacyPanel = function (id) {
             const el = document.getElementById(id);
             if (el) el.classList.remove("unread-notif");
             const dot = document.getElementById("dot-" + id);
@@ -1912,17 +1916,17 @@
 
         function switchOfferTab(tab) {
             const specialContent = document.getElementById("specialOffersContent");
-            const commonContent  = document.getElementById("commonOffersContent");
-            const tabSpecial     = document.getElementById("offerTabSpecial");
-            const tabCommon      = document.getElementById("offerTabCommon");
+            const commonContent = document.getElementById("commonOffersContent");
+            const tabSpecial = document.getElementById("offerTabSpecial");
+            const tabCommon = document.getElementById("offerTabCommon");
 
             specialContent.style.display = tab === 'special' ? 'block' : 'none';
-            commonContent.style.display  = tab === 'common'  ? 'block' : 'none';
+            commonContent.style.display = tab === 'common' ? 'block' : 'none';
 
-            tabSpecial.style.color        = tab === 'special' ? '#4f46e5' : '#64748b';
+            tabSpecial.style.color = tab === 'special' ? '#4f46e5' : '#64748b';
             tabSpecial.style.borderBottom = tab === 'special' ? '2px solid #4f46e5' : '2px solid transparent';
-            tabCommon.style.color         = tab === 'common'  ? '#4f46e5' : '#64748b';
-            tabCommon.style.borderBottom  = tab === 'common'  ? '2px solid #4f46e5' : '2px solid transparent';
+            tabCommon.style.color = tab === 'common' ? '#4f46e5' : '#64748b';
+            tabCommon.style.borderBottom = tab === 'common' ? '2px solid #4f46e5' : '2px solid transparent';
 
             if (tab === 'special') loadSpecialOffers();
             else loadCommonOffers();
@@ -1940,7 +1944,7 @@
                         <div style="font-size:32px;">🎁</div>
                         <div style="font-size:13px;">No special offers yet!</div>
                        </div>`;
-            } catch(e) {
+            } catch (e) {
                 container.innerHTML = `<div style="text-align:center;padding:20px;color:red;font-size:13px;">Failed to load</div>`;
             }
         }
@@ -1957,7 +1961,7 @@
                         <div style="font-size:32px;">📢</div>
                         <div style="font-size:13px;">No common offers yet!</div>
                        </div>`;
-            } catch(e) {
+            } catch (e) {
                 container.innerHTML = `<div style="text-align:center;padding:20px;color:red;font-size:13px;">Failed to load</div>`;
             }
         }
@@ -1972,7 +1976,7 @@
                 const unread = (data.notifications || []).filter(n => !n.is_read).length;
                 const badge = document.getElementById("notifBadge");
                 if (badge) badge.textContent = unread > 0 ? unread : "";
-            } catch(e) {}
+            } catch (e) { }
         });
         async function loadUserNotifications() {
             const container = document.getElementById("commonNotifs");
@@ -2053,8 +2057,8 @@
 
         async function toggleNotifMessage(id) {
             console.log("toggleNotifMessage called with id:", id);
-            const body     = document.getElementById(`msg-body-${id}`);
-            const chevron  = document.getElementById(`chevron-${id}`);
+            const body = document.getElementById(`msg-body-${id}`);
+            const chevron = document.getElementById(`chevron-${id}`);
             const newBadge = document.getElementById(`new-badge-${id}`);
             console.log("body element found:", body);
             if (!body) { console.log("EXITING - body not found"); return; }
