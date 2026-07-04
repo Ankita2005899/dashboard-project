@@ -2105,32 +2105,34 @@
             <!-- Notification Log Modal -->
             <div id="notificationLogModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
     background:rgba(15,23,42,0.55);z-index:9998;align-items:center;justify-content:center;">
-                <div style="background:white;width:900px;max-width:94vw;max-height:88vh;border-radius:16px;
+                <div style="background:white;width:1400px;max-width:97vw;height:94vh;border-radius:18px;
         overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,0.3);">
 
-                    <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:18px 24px;
+                    <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:24px 32px;
             display:flex;align-items:center;justify-content:space-between;">
                         <div>
-                            <h3 style="color:white;margin:0;font-size:17px;font-weight:800;">📋 Notification Log</h3>
-                            <p style="color:rgba(255,255,255,0.75);margin:4px 0 0;font-size:12px;">
+                            <h3 style="color:white;margin:0;font-size:24px;font-weight:800;">📋 Notification Log</h3>
+                            <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:15px;">
                                 Full history per user — category requests, developer status, and messages sent
                             </p>
                         </div>
-                        <button onclick="closeNotificationLogModal()" style="background:rgba(255,255,255,0.18);border:none;width:30px;height:30px;
-                border-radius:50%;color:white;font-size:16px;cursor:pointer;">✕</button>
+                        <button onclick="closeNotificationLogModal()" style="background:rgba(255,255,255,0.18);border:none;width:38px;height:38px;
+                border-radius:50%;color:white;font-size:20px;cursor:pointer;">✕</button>
                     </div>
 
-                    <div style="padding:14px 24px;border-bottom:1px solid #f1f5f9;background:#f8fafc;">
+                    <div style="padding:18px 32px;border-bottom:1px solid #f1f5f9;background:#f8fafc;">
                         <input type="text" id="notifLogSearch" placeholder="🔍 Search by User ID, name, or category..."
-                            oninput="filterNotificationLog()" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:10px;
-                font-size:13.5px;outline:none;">
+                            oninput="filterNotificationLog()" style="width:100%;padding:14px 18px;border:1px solid #e2e8f0;border-radius:12px;
+                font-size:16px;outline:none;">
                     </div>
 
-                    <div id="notificationLogBody" style="overflow-y:auto;flex:1;padding:16px 24px;background:#f8fafc;">
-                        <div style="text-align:center;padding:30px;color:#94a3b8;">Loading...</div>
+                    <div id="notificationLogBody" style="overflow-y:auto;flex:1;padding:24px 32px;background:#f8fafc;">
+                        <div style="text-align:center;padding:40px;color:#94a3b8;font-size:16px;">Loading...</div>
                     </div>
                 </div>
             </div>
+
+
             <!-- ===== Single Modal Popup ===== -->
             <div id="monthModal" class="modal-overlay">
                 <div class="modal-content">
@@ -8048,68 +8050,73 @@
             const body = document.getElementById('notificationLogBody');
 
             if (users.length === 0) {
-                body.innerHTML = `<div style="text-align:center;padding:30px;color:#94a3b8;">No activity yet</div>`;
+                body.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:16px;">No activity yet</div>`;
                 return;
             }
 
             body.innerHTML = users.map(u => {
                 const requestsHTML = u.requests.length ? u.requests.map(r => `
-            <div style="background:white;border:1px solid #e2e8f0;border-radius:10px;
-                padding:10px 12px;margin-bottom:6px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                    <span style="font-weight:700;font-size:13px;color:#1e293b;">📂 ${r.category_name}</span>
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;
+                padding:16px 18px;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+                    <span style="font-weight:800;font-size:16px;color:#1e293b;">📂 ${r.category_name}</span>
                     ${r.sent_to_developer
-                        ? `<span style="background:#d1fae5;color:#065f46;font-size:10.5px;font-weight:700;
-                            padding:3px 9px;border-radius:20px;">✅ Sent to Developer</span>`
-                        : `<span style="background:#fef3c7;color:#b45309;font-size:10.5px;font-weight:700;
-                            padding:3px 9px;border-radius:20px;">⏳ Pending</span>`}
+                        ? `<span style="background:#d1fae5;color:#065f46;font-size:13px;font-weight:700;
+                            padding:5px 12px;border-radius:20px;white-space:nowrap;">✅ Sent to Developer</span>`
+                        : `<span style="background:#fef3c7;color:#b45309;font-size:13px;font-weight:700;
+                            padding:5px 12px;border-radius:20px;white-space:nowrap;">⏳ Pending</span>`}
                 </div>
-                <div style="font-size:12px;color:#64748b;margin-top:5px;line-height:1.5;">${r.reason}</div>
-                <div style="font-size:10.5px;color:#94a3b8;margin-top:5px;">Requested: ${r.requested_at}</div>
+                <div style="font-size:14.5px;color:#475569;margin-top:8px;line-height:1.65;">${r.reason}</div>
+                <div style="font-size:12.5px;color:#94a3b8;margin-top:8px;">Requested: ${r.requested_at}</div>
             </div>
-        `).join('') : `<div style="font-size:12px;color:#94a3b8;padding:6px 0;">No category requests</div>`;
+        `).join('') : `<div style="font-size:14.5px;color:#94a3b8;padding:8px 0;">No category requests</div>`;
 
                 const messagesHTML = u.messages.length ? u.messages.map(m => `
-            <div style="background:white;border:1px solid #e2e8f0;border-radius:10px;
-                padding:10px 12px;margin-bottom:6px;">
-                <div style="font-size:12.5px;color:#334155;line-height:1.5;">${m.message}</div>
-                <div style="font-size:10.5px;color:#94a3b8;margin-top:5px;display:flex;
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;
+                padding:16px 18px;margin-bottom:12px;">
+                <div style="font-size:15px;color:#1e293b;line-height:1.6;">${m.message}</div>
+                <div style="font-size:12.5px;color:#94a3b8;margin-top:8px;display:flex;
                     justify-content:space-between;align-items:center;">
                     <span>Sent: ${m.sent_at}</span>
-                    <span style="display:flex;align-items:center;gap:5px;">
+                    <span style="display:flex;align-items:center;gap:6px;">
                         ${m.is_read ? 'Seen: ' + m.read_at : 'Not seen yet'}
-                        <span style="font-weight:700;letter-spacing:-2px;
+                        <span style="font-size:15px;font-weight:700;letter-spacing:-2px;
                             color:${m.is_read ? '#2563eb' : '#cbd5e1'};">✓✓</span>
                     </span>
                 </div>
             </div>
-        `).join('') : `<div style="font-size:12px;color:#94a3b8;padding:6px 0;">No messages sent yet</div>`;
+        `).join('') : `<div style="font-size:14.5px;color:#94a3b8;padding:8px 0;">No messages sent yet</div>`;
 
                 return `
         <div class="notif-log-user" data-search="${(u.user_name || '').toLowerCase()} ${u.user_id} ${u.requests.map(r => r.category_name).join(' ').toLowerCase()}"
-            style="background:#f1f5f9;border-radius:14px;padding:16px;margin-bottom:14px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);
-                    display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:13px;">
+            style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:22px;margin-bottom:20px;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:16px;
+                border-bottom:2px solid #f1f5f9;">
+                <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                    display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:18px;flex-shrink:0;">
                     ${(u.user_name || '?').charAt(0).toUpperCase()}
                 </div>
                 <div>
-                    <div style="font-weight:800;font-size:14px;color:#1e293b;">${u.user_name || 'Unknown User'}</div>
-                    <div style="font-size:11px;color:#94a3b8;">User ID: ${u.user_id}</div>
+                    <div style="font-weight:800;font-size:19px;color:#1e293b;">${u.user_name || 'Unknown User'}</div>
+                    <div style="font-size:13.5px;color:#94a3b8;">User ID: ${u.user_id}</div>
                 </div>
             </div>
 
-            <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;
-                letter-spacing:0.5px;margin-bottom:6px;">Category Requests</div>
-            ${requestsHTML}
-
-            <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;
-                letter-spacing:0.5px;margin:12px 0 6px;">Messages Sent (Developer Reply)</div>
-            ${messagesHTML}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+                <div>
+                    <div style="font-size:13px;font-weight:800;color:#7c3aed;text-transform:uppercase;
+                        letter-spacing:0.6px;margin-bottom:10px;">Category Requests</div>
+                    ${requestsHTML}
+                </div>
+                <div>
+                    <div style="font-size:13px;font-weight:800;color:#7c3aed;text-transform:uppercase;
+                        letter-spacing:0.6px;margin-bottom:10px;">Messages Sent (Developer Reply)</div>
+                    ${messagesHTML}
+                </div>
+            </div>
         </div>`;
             }).join('');
         }
-
         function filterNotificationLog() {
             const q = document.getElementById('notifLogSearch').value.trim().toLowerCase();
             if (!q) { renderNotificationLog(notificationLogData); return; }
