@@ -4665,9 +4665,9 @@ def send_notification_to_user():
         conn   = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO user_notifications (user_id, title, message)
-            VALUES (%s, %s, %s)
-        """, (user_id, title, message))
+            INSERT INTO user_notifications (user_id, title, message, request_id)
+            VALUES (%s, %s, %s, %s)
+        """, (user_id, title, message, request_id))
         conn.commit()
         notif_id = cursor.lastrowid
 
@@ -4745,11 +4745,10 @@ def get_notification_history(request_id):
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
-            SELECT un.id, un.message, un.is_read, un.created_at, un.read_at
-            FROM user_notifications un
-            JOIN category_requests cr ON cr.notif_id = un.id
-            WHERE cr.id = %s
-            ORDER BY un.created_at DESC
+            SELECT id, message, is_read, created_at, read_at
+            FROM user_notifications
+            WHERE request_id = %s
+            ORDER BY created_at DESC
         """, (request_id,))
         rows = cursor.fetchall()
         cursor.close()
