@@ -4573,7 +4573,7 @@ def send_category_request(request_id):
         message = SendGridMail(
             from_email=os.environ.get("SENDER_EMAIL"),
             to_emails="ankitabandal45@gmail.com",
-            subject=f"New Category Request: {req['category_name']}",
+            subject=f"New Category Request: {req['category_name']} [REQ-{request_id}]",
             html_content=f"""
                 <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:480px;margin:0 auto;
                     background:#f8fafc;padding:24px;">
@@ -4958,13 +4958,13 @@ def notification_summary():
 #________________________ IMAP fetch function + route ---> developer replay from gmail la owner dashboard madhe input field chya madhe aanayla _____________________
 
 
-def fetch_latest_gmail_reply(category_name, since_datetime):
+def fetch_latest_gmail_reply(request_id, since_datetime):
     try:
         mail = imaplib.IMAP4_SSL("imap.gmail.com")
         mail.login(os.environ.get("SENDER_EMAIL"), os.environ.get("GMAIL_APP_PASSWORD"))
         mail.select("inbox")
 
-        status, data = mail.search(None, f'(SUBJECT "{category_name}")')
+        status, data = mail.search(None, f'(SUBJECT "REQ-{request_id}")')
         if status != "OK" or not data[0]:
             mail.logout()
             return None
@@ -4996,7 +4996,9 @@ def fetch_latest_gmail_reply(category_name, since_datetime):
                 body = msg.get_payload(decode=True).decode(errors="ignore")
 
             if not latest_date or msg_date > latest_date:
-                latest_date, latest_reply = msg_date, body.strip()
+                # Strip common quoted-reply markers so only the new reply text remains
+                clean_body = body.split("\nOn ")[0].split("\n>")[0].strip()
+                latest_date, latest_reply = msg_date, clean_body
 
         mail.logout()
         return latest_reply
@@ -5011,21 +5013,20 @@ def fetch_gmail_reply(request_id):
     try:
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT category_name, requested_at FROM category_requests WHERE id = %s", (request_id,))
+        cursor.execute("SELECT requested_at FROM category_requests WHERE id = %s", (request_id,))
         req = cursor.fetchone()
         cursor.close()
 
         if not req:
             return jsonify({"error": "Request not found"}), 404
 
-        reply_text = fetch_latest_gmail_reply(req["category_name"], req["requested_at"])
+        reply_text = fetch_latest_gmail_reply(request_id, req["requested_at"])
         return jsonify({"reply_text": reply_text or ""})
     except Exception as e:
         return jsonify({"error": str(e), "reply_text": ""}), 500
     finally:
         if conn and conn.is_connected():
             conn.close()
-
 
     
 #------------------------------------------------------------------------------------------------------------   
