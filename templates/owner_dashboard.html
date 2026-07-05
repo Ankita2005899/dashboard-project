@@ -4061,11 +4061,16 @@
                                     </div>
                                 </div>
 
-                                <div style="margin-top:16px;padding-top:14px;border-top:1px dashed #d8b4fe;">
-                                    <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;
-                                        letter-spacing:0.6px;margin-bottom:8px;">📥 Paste Developer's Gmail Reply</div>
+<div style="margin-top:16px;padding-top:14px;border-top:1px dashed #d8b4fe;">
+                                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                                        <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;
+                                            letter-spacing:0.6px;">📥 Developer's Gmail Reply</div>
+                                        <span onclick="fetchGmailReply(${row.id})" id="gmail-fetch-${row.id}"
+                                            style="font-size:11px;font-weight:700;color:#7c3aed;cursor:pointer;
+                                                text-decoration:underline;">🔄 Fetch from Gmail</span>
+                                    </div>
                                     <textarea id="dev-reply-${row.id}" rows="3"
-                                        placeholder="Paste what the developer replied on Gmail..."
+                                        placeholder="Fetching from Gmail... (you can also edit this manually)"
                                         style="width:100%;padding:10px 12px;border:2px solid #d8b4fe;border-radius:10px;
                                             font-size:13px;resize:vertical;outline:none;box-sizing:border-box;background:#fff;
                                             color:#334155;line-height:1.5;"></textarea>
@@ -4132,6 +4137,7 @@
                 // Load message history for each request
                 rows.forEach(row => {
                     loadMessageHistory(row.id);
+                    fetchGmailReply(row.id);
                 });
 
             } catch (err) {
@@ -8199,6 +8205,29 @@
                 btnEl.textContent = "💾 Save Reply";
             }
         }
+
+
+        async function fetchGmailReply(requestId) {
+            const textarea = document.getElementById(`dev-reply-${requestId}`);
+            const fetchBtn = document.getElementById(`gmail-fetch-${requestId}`);
+            if (!textarea) return;
+
+            const original = fetchBtn.textContent;
+            fetchBtn.textContent = "⏳ Checking...";
+            try {
+                const res = await fetch(`/api/owner/fetch-gmail-reply/${requestId}`);
+                const data = await res.json();
+                if (data.reply_text) {
+                    textarea.value = data.reply_text;
+                }
+            } catch (e) {
+                console.error("Gmail fetch failed:", e);
+            } finally {
+                fetchBtn.textContent = original;
+            }
+        }
+
+
     </script>
 
     <!-- ══════════════════════════ SIGN OUT LOGS MODAL ══════════════════════════ -->

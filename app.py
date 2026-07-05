@@ -44,6 +44,9 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail as SendGridMail
 import socket
 from collections import defaultdict
+import imaplib
+import email
+from email.utils import parsedate_to_datetime
 
 load_dotenv("databasehandler.env")
 
@@ -4949,6 +4952,81 @@ def notification_summary():
     finally:
         if conn and conn.is_connected():
             conn.close()   
+    
+    
+    
+#________________________ IMAP fetch function + route ---> developer replay from gmail la owner dashboard madhe input field chya madhe aanayla _____________________
+
+
+def fetch_latest_gmail_reply(category_name, since_datetime):
+    try:
+        mail = imaplib.IMAP4_SSL("imap.gmail.com")
+        mail.login(os.environ.get("SENDER_EMAIL"), os.environ.get("GMAIL_APP_PASSWORD"))
+        mail.select("inbox")
+
+        status, data = mail.search(None, f'(SUBJECT "{category_name}")')
+        if status != "OK" or not data[0]:
+            mail.logout()
+            return None
+
+        ids = data[0].split()
+        latest_reply, latest_date = None, None
+
+        for eid in reversed(ids[-15:]):
+            status, msg_data = mail.fetch(eid, "(RFC822)")
+            if status != "OK":
+                continue
+            msg = email.message_from_bytes(msg_data[0][1])
+
+            try:
+                msg_date = parsedate_to_datetime(msg["Date"]).replace(tzinfo=None)
+            except Exception:
+                continue
+
+            if since_datetime and msg_date <= since_datetime:
+                continue  # skip the original outgoing email, only want replies after it
+
+            body = ""
+            if msg.is_multipart():
+                for part in msg.walk():
+                    if part.get_content_type() == "text/plain":
+                        body = part.get_payload(decode=True).decode(errors="ignore")
+                        break
+            else:
+                body = msg.get_payload(decode=True).decode(errors="ignore")
+
+            if not latest_date or msg_date > latest_date:
+                latest_date, latest_reply = msg_date, body.strip()
+
+        mail.logout()
+        return latest_reply
+    except Exception as e:
+        print("fetch_latest_gmail_reply failed:", e)
+        return None
+
+
+@app.route("/api/owner/fetch-gmail-reply/<int:request_id>", methods=["GET"])
+def fetch_gmail_reply(request_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT category_name, requested_at FROM category_requests WHERE id = %s", (request_id,))
+        req = cursor.fetchone()
+        cursor.close()
+
+        if not req:
+            return jsonify({"error": "Request not found"}), 404
+
+        reply_text = fetch_latest_gmail_reply(req["category_name"], req["requested_at"])
+        return jsonify({"reply_text": reply_text or ""})
+    except Exception as e:
+        return jsonify({"error": str(e), "reply_text": ""}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
     
 #------------------------------------------------------------------------------------------------------------   
 #---------------owner search data of ( owner_section ) ------------------------------------            
