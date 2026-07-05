@@ -4959,15 +4959,21 @@ def notification_summary():
 
 
 def fetch_latest_gmail_reply(request_id, since_datetime):
+    import socket
     try:
-        mail = imaplib.IMAP4_SSL("imap.gmail.com")
+        if not os.environ.get("GMAIL_APP_PASSWORD"):
+            return {"error": "GMAIL_APP_PASSWORD is not set in Render environment variables"}
+        if not os.environ.get("SENDER_EMAIL"):
+            return {"error": "SENDER_EMAIL is not set in Render environment variables"}
+
+        mail = imaplib.IMAP4_SSL("imap.gmail.com", timeout=15)
         mail.login(os.environ.get("SENDER_EMAIL"), os.environ.get("GMAIL_APP_PASSWORD"))
         mail.select("inbox")
 
         status, data = mail.search(None, f'(SUBJECT "REQ-{request_id}")')
         if status != "OK" or not data[0]:
             mail.logout()
-            return None
+            return {"error": f"No emails found with tag REQ-{request_id} in subject. Make sure the developer hit Reply (not a new email) so the tag stayed in the subject line."}
 
         ids = data[0].split()
         latest_reply, latest_date = None, None
@@ -5001,12 +5007,20 @@ def fetch_latest_gmail_reply(request_id, since_datetime):
                 latest_date, latest_reply = msg_date, clean_body
 
         mail.logout()
-        return latest_reply
+        if not latest_reply:
+            return {"error": "Found the email thread but no reply after the original request. The developer may not have replied yet."}
+        return {"text": latest_reply}
+    except socket.timeout:
+        return {"error": "Connection to Gmail timed out"}
+    except imaplib.IMAP4.error as e:
+        return {"error": f"Gmail login/IMAP failed: {e}. Check GMAIL_APP_PASSWORD is a valid App Password."}
     except Exception as e:
-        print("fetch_latest_gmail_reply failed:", e)
-        return None
-
-
+        import traceback
+        print("fetch_latest_gmail_reply failed:", traceback.format_exc())
+        return {"error": str(e)}
+    
+    
+    
 @app.route("/api/owner/fetch-gmail-reply/<int:request_id>", methods=["GET"])
 def fetch_gmail_reply(request_id):
     conn = None
@@ -5020,8 +5034,10 @@ def fetch_gmail_reply(request_id):
         if not req:
             return jsonify({"error": "Request not found"}), 404
 
-        reply_text = fetch_latest_gmail_reply(request_id, req["requested_at"])
-        return jsonify({"reply_text": reply_text or ""})
+        result = fetch_latest_gmail_reply(request_id, req["requested_at"])
+        if "error" in result:
+            return jsonify({"reply_text": "", "error": result["error"]})
+        return jsonify({"reply_text": result["text"]})
     except Exception as e:
         return jsonify({"error": str(e), "reply_text": ""}), 500
     finally:

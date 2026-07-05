@@ -8219,14 +8219,19 @@
                 const data = await res.json();
                 if (data.reply_text) {
                     textarea.value = data.reply_text;
+                    fetchBtn.textContent = "✅ Found reply";
+                } else if (data.error) {
+                    textarea.placeholder = "⚠ " + data.error;
+                    fetchBtn.textContent = "🔄 Fetch from Gmail";
+                } else {
+                    fetchBtn.textContent = "🔄 Fetch from Gmail";
                 }
             } catch (e) {
                 console.error("Gmail fetch failed:", e);
-            } finally {
-                fetchBtn.textContent = original;
+                textarea.placeholder = "⚠ Network error while fetching Gmail reply";
+                fetchBtn.textContent = "🔄 Fetch from Gmail";
             }
         }
-
 
     </script>
 
