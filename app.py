@@ -4648,6 +4648,80 @@ def send_category_request(request_id):
         if conn and conn.is_connected():
             conn.close()
    
+#_________________________________category request la deveoper kadun yanara response store karila and "Notification Log " madhe dakhavaila _________________________________    
+
+@app.route("/api/owner/developer-reply", methods=["POST"])
+def save_developer_reply():
+    conn = None
+    try:
+        body       = request.get_json(silent=True) or {}
+        request_id = body.get("request_id")
+        reply_text = (body.get("reply_text") or "").strip()
+
+        if not request_id or not reply_text:
+            return jsonify({"error": "request_id and reply_text required"}), 400
+
+        # Extractive summary: pick the sentence with highest TF-IDF weight
+        auto_summary = reply_text[:100]
+        try:
+            from sklearn.feature_extraction.text import TfidfVectorizer
+            sentences = [s.strip() for s in reply_text.replace(".", ". ").split(".") if len(s.strip()) > 8]
+            if sentences:
+                vectorizer = TfidfVectorizer(token_pattern=r"(?u)\b\w+\b")
+                tfidf = vectorizer.fit_transform(sentences)
+                scores = tfidf.sum(axis=1)
+                best_idx = int(scores.argmax())
+                best = sentences[best_idx]
+                auto_summary = best[:100] + ("..." if len(best) > 100 else "")
+        except Exception as ml_err:
+            print("developer_reply summary failed:", ml_err)
+
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO developer_replies (request_id, reply_text, auto_summary)
+            VALUES (%s, %s, %s)
+        """, (request_id, reply_text, auto_summary))
+        conn.commit()
+        cursor.close()
+
+        return jsonify({"status": "success", "auto_summary": auto_summary})
+    except Exception as e:
+        import traceback
+        print("save_developer_reply crashed:", traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+@app.route("/api/owner/developer-reply/<int:request_id>", methods=["GET"])
+def get_developer_reply(request_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, reply_text, auto_summary, replied_at
+            FROM developer_replies
+            WHERE request_id = %s
+            ORDER BY replied_at DESC
+        """, (request_id,))
+        rows = cursor.fetchall()
+        cursor.close()
+
+        from datetime import datetime
+        for r in rows:
+            if isinstance(r.get("replied_at"), datetime):
+                r["replied_at"] = r["replied_at"].strftime("%Y-%m-%d %H:%M:%S")
+
+        return jsonify({"replies": rows})
+    except Exception as e:
+        return jsonify({"error": str(e), "replies": []}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+   
 #---------------owner_section madhun category request chi return message to that user notification sathi ----------------------------------
 
 @app.route("/api/owner/send-notification", methods=["POST"])
@@ -4811,6 +4885,14 @@ def notification_summary():
             ORDER BY created_at DESC
         """)
         notif_rows = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT dr.request_id, dr.reply_text, dr.auto_summary, dr.replied_at, cr.user_id
+            FROM developer_replies dr
+            JOIN category_requests cr ON cr.id = dr.request_id
+            ORDER BY dr.replied_at DESC
+        """)
+        reply_rows = cursor.fetchall()
         cursor.close()
 
         from datetime import datetime
@@ -4826,6 +4908,7 @@ def notification_summary():
                 "requests": [], "messages": []
             })
             users[uid]["requests"].append({
+                "id": r["id"],
                 "category_name": r["category_name"],
                 "reason": r["reason"],
                 "status": r["status"],
@@ -4845,6 +4928,18 @@ def notification_summary():
                 "is_read": bool(n["is_read"]),
                 "read_at": fmt(n["read_at"])
             })
+
+        replies_by_request = {}
+        for r in reply_rows:
+            replies_by_request.setdefault(r["request_id"], []).append({
+                "reply_text": r["reply_text"],
+                "auto_summary": r["auto_summary"],
+                "replied_at": fmt(r["replied_at"])
+            })
+
+        for u in users.values():
+            for req in u["requests"]:
+                req["developer_replies"] = replies_by_request.get(req.get("id"), [])
 
         return jsonify({"summary": list(users.values())})
     except Exception as e:

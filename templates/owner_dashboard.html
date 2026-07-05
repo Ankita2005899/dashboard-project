@@ -4055,9 +4055,25 @@
                                             ${isSent ? '✅ Sent' : '📧 Send to Developer'}
                                         </button>
                                         <!-- Double tick -->
+                                        <!-- Double tick -->
                                         <span id="dev-tick-${row.id}" style="font-size:18px;color:${isSent ? '#2563eb' : '#cbd5e1'};"
                                             title="${isSent ? 'Seen' : 'Not yet seen'}">✔✔</span>
                                     </div>
+                                </div>
+
+                                <div style="margin-top:16px;padding-top:14px;border-top:1px dashed #d8b4fe;">
+                                    <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;
+                                        letter-spacing:0.6px;margin-bottom:8px;">📥 Paste Developer's Gmail Reply</div>
+                                    <textarea id="dev-reply-${row.id}" rows="3"
+                                        placeholder="Paste what the developer replied on Gmail..."
+                                        style="width:100%;padding:10px 12px;border:2px solid #d8b4fe;border-radius:10px;
+                                            font-size:13px;resize:vertical;outline:none;box-sizing:border-box;background:#fff;
+                                            color:#334155;line-height:1.5;"></textarea>
+                                    <button onclick="saveDeveloperReply(${row.id}, this)"
+                                        style="margin-top:8px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;
+                                            border:none;padding:8px 20px;border-radius:20px;font-size:12.5px;font-weight:700;
+                                            cursor:pointer;">💾 Save Reply</button>
+                                    <span id="dev-reply-status-${row.id}" style="font-size:12px;margin-left:8px;color:#16a34a;"></span>
                                 </div>
                             </div>
 
@@ -8086,7 +8102,24 @@
                     </span>
                 </div>
             </div>
-        `).join('') : `<div style="font-size:14.5px;color:#94a3b8;padding:8px 0;">No messages sent yet</div>`;
+`).join('') : `<div style="font-size:14.5px;color:#94a3b8;padding:8px 0;">No messages sent yet</div>`;
+
+                const devReplyHTML = u.requests.some(r => (r.developer_replies || []).length) ?
+                    u.requests.flatMap(r => (r.developer_replies || []).map(dr => `
+                <div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;
+                    padding:16px 18px;margin-bottom:12px;">
+                    <div style="font-size:13px;font-weight:700;color:#0f766e;margin-bottom:6px;">📥 Summary</div>
+                    <div style="font-size:14.5px;color:#134e4a;line-height:1.6;">${dr.auto_summary}</div>
+                    <div style="font-size:12.5px;color:#0f766e;margin-top:10px;cursor:pointer;text-decoration:underline;"
+                        onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+                        View full reply
+                    </div>
+                    <div style="display:none;font-size:13.5px;color:#334155;margin-top:8px;
+                        padding-top:8px;border-top:1px dashed #99f6e4;line-height:1.6;">${dr.reply_text}</div>
+                    <div style="font-size:12px;color:#94a3b8;margin-top:8px;">Replied: ${dr.replied_at}</div>
+                </div>
+            `)).join('')
+                    : `<div style="font-size:14.5px;color:#94a3b8;padding:8px 0;">No developer reply yet</div>`;
 
                 return `
         <div class="notif-log-user" data-search="${(u.user_name || '').toLowerCase()} ${u.user_id} ${u.requests.map(r => r.category_name).join(' ').toLowerCase()}"
@@ -8103,15 +8136,20 @@
                 </div>
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;align-items:start;">
                 <div>
                     <div style="font-size:13px;font-weight:800;color:#7c3aed;text-transform:uppercase;
                         letter-spacing:0.6px;margin-bottom:10px;">Category Requests</div>
                     ${requestsHTML}
                 </div>
                 <div>
-                    <div style="font-size:13px;font-weight:800;color:#7c3aed;text-transform:uppercase;
-                        letter-spacing:0.6px;margin-bottom:10px;">Messages Sent (Developer Reply)</div>
+                    <div style="font-size:13px;font-weight:800;color:#0f766e;text-transform:uppercase;
+                        letter-spacing:0.6px;margin-bottom:10px;">Developer's Reply (Gmail)</div>
+                    ${devReplyHTML}
+                </div>
+                <div>
+                    <div style="font-size:13px;font-weight:800;color:#16a34a;text-transform:uppercase;
+                        letter-spacing:0.6px;margin-bottom:10px;">Messages Sent to User</div>
                     ${messagesHTML}
                 </div>
             </div>
@@ -8127,6 +8165,39 @@
                 u.requests.some(r => (r.category_name || '').toLowerCase().includes(q))
             );
             renderNotificationLog(filtered);
+        }
+
+
+        async function saveDeveloperReply(requestId, btnEl) {
+            const textarea = document.getElementById(`dev-reply-${requestId}`);
+            const status = document.getElementById(`dev-reply-status-${requestId}`);
+            const text = textarea ? textarea.value.trim() : "";
+            if (!text) { status.style.color = "red"; status.textContent = "⚠ Paste something first"; return; }
+
+            btnEl.disabled = true;
+            btnEl.textContent = "Saving...";
+            try {
+                const res = await fetch("/api/owner/developer-reply", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ request_id: requestId, reply_text: text })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === "success") {
+                    status.style.color = "#16a34a";
+                    status.textContent = "✅ Saved";
+                    textarea.value = "";
+                } else {
+                    status.style.color = "red";
+                    status.textContent = "❌ " + (data.error || "Failed");
+                }
+            } catch (e) {
+                status.style.color = "red";
+                status.textContent = "❌ Network error";
+            } finally {
+                btnEl.disabled = false;
+                btnEl.textContent = "💾 Save Reply";
+            }
         }
     </script>
 
