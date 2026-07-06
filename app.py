@@ -4486,7 +4486,7 @@ def get_category_requests():
                     from sklearn.cluster import KMeans
                     n_clusters = min(3, len(rows))
 
-                    cat_vectorizer = TfidfVectorizer(token_pattern=r"(?u)\b\w+\b", analyzer="char_wb", ngram_range=(2,4))
+                    cat_vectorizer = TfidfVectorizer(analyzer="char_wb", ngram_range=(2,4))
                     cat_matrix     = cat_vectorizer.fit_transform(cat_names)
 
                     km = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
