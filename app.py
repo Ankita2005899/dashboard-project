@@ -4911,7 +4911,65 @@ def notification_summary():
         if conn and conn.is_connected():
             conn.close()   
     
-    
+#____________________developer cha replay database madhe save karila _____________________    
+  
+
+@app.route("/api/owner/developer-reply", methods=["POST"])
+def save_developer_reply():
+    conn = None
+    try:
+        body       = request.get_json(silent=True) or {}
+        request_id = body.get("request_id")
+        reply_text = (body.get("reply_text") or "").strip()
+
+        if not request_id or not reply_text:
+            return jsonify({"error": "request_id and reply_text required"}), 400
+
+        conn_lookup   = get_db_connection()
+        cursor_lookup = conn_lookup.cursor(dictionary=True)
+        cursor_lookup.execute("SELECT user_id, user_name FROM category_requests WHERE id = %s", (request_id,))
+        req_info = cursor_lookup.fetchone()
+        cursor_lookup.close()
+        conn_lookup.close()
+
+        req_user_id   = req_info["user_id"] if req_info else None
+        req_user_name = req_info["user_name"] if req_info else None
+
+        # Extractive summary: pick the sentence with highest TF-IDF weight
+        auto_summary = reply_text[:100]
+        try:
+            from sklearn.feature_extraction.text import TfidfVectorizer
+            sentences = [s.strip() for s in reply_text.replace(".", ". ").split(".") if len(s.strip()) > 8]
+            if sentences:
+                vectorizer = TfidfVectorizer(token_pattern=r"(?u)\b\w+\b")
+                tfidf = vectorizer.fit_transform(sentences)
+                scores = tfidf.sum(axis=1)
+                best_idx = int(scores.argmax())
+                best = sentences[best_idx]
+                auto_summary = best[:100] + ("..." if len(best) > 100 else "")
+        except Exception as ml_err:
+            print("developer_reply summary failed:", ml_err)
+
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO developer_replies (request_id, reply_text, auto_summary, user_id, user_name)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (request_id, reply_text, auto_summary, req_user_id, req_user_name))
+        conn.commit()
+        cursor.close()
+
+        return jsonify({"status": "success", "auto_summary": auto_summary})
+    except Exception as e:
+        import traceback
+        print("save_developer_reply crashed:", traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+            
+              
+  
     
 #________________________ IMAP fetch function + route ---> developer replay from gmail la owner dashboard madhe input field chya madhe aanayla _____________________
 
