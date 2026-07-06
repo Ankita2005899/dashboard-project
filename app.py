@@ -6189,6 +6189,16 @@ def buy_combo_offer():
 
             conn.commit()
 
+        # Mark the originating offer as genuinely used, since this is a real redemption
+        if offer_id:
+            try:
+                cursor.execute("""
+                    UPDATE special_offers SET is_used = 1, used_at = NOW() WHERE id = %s
+                """, (offer_id,))
+                conn.commit()
+            except Exception as mark_err:
+                print(f"Failed to mark offer {offer_id} as used:", mark_err)
+
         return jsonify({
             'success'       : True,
             'cart_id'       : cart_id,
