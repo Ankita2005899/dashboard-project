@@ -8069,6 +8069,34 @@
             }
         }
 
+        function removeNotifLogItem(itemId) {
+            const el = document.getElementById(itemId);
+            if (el) {
+                el.style.transition = 'opacity 0.2s, transform 0.2s';
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(8px)';
+                setTimeout(() => el.remove(), 200);
+            }
+        }
+
+        function deleteIconHTML(itemId) {
+            return `
+        <button onclick="removeNotifLogItem('${itemId}')" title="Remove from view (UI only)"
+            style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;
+            padding:5px;line-height:1;border-radius:6px;display:flex;align-items:center;
+            justify-content:center;transition:background 0.15s;"
+            onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                <path d="M10 11v6"></path>
+                <path d="M14 11v6"></path>
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+            </svg>
+        </button>`;
+        }
+
         function renderNotificationLog(users) {
             const body = document.getElementById('notificationLogBody');
 
@@ -8077,27 +8105,36 @@
                 return;
             }
 
+            let nlCounter = 0;
+
             body.innerHTML = users.map(u => {
-                const requestsHTML = u.requests.length ? u.requests.map(r => `
-            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;
-                padding:16px 18px;margin-bottom:12px;">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+                const requestsHTML = u.requests.length ? u.requests.map(r => {
+                    const itemId = `nl-item-${nlCounter++}`;
+                    return `
+            <div id="${itemId}" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;
+                padding:16px 18px;margin-bottom:12px;position:relative;">
+                ${deleteIconHTML(itemId)}
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-right:22px;">
                     <span style="font-weight:800;font-size:16px;color:#1e293b;">📂 ${r.category_name}</span>
                     ${r.sent_to_developer
-                        ? `<span style="background:#d1fae5;color:#065f46;font-size:13px;font-weight:700;
+                            ? `<span style="background:#d1fae5;color:#065f46;font-size:13px;font-weight:700;
                             padding:5px 12px;border-radius:20px;white-space:nowrap;">✅ Sent to Developer</span>`
-                        : `<span style="background:#fef3c7;color:#b45309;font-size:13px;font-weight:700;
+                            : `<span style="background:#fef3c7;color:#b45309;font-size:13px;font-weight:700;
                             padding:5px 12px;border-radius:20px;white-space:nowrap;">⏳ Pending</span>`}
                 </div>
                 <div style="font-size:14.5px;color:#475569;margin-top:8px;line-height:1.65;">${r.reason}</div>
                 <div style="font-size:12.5px;color:#94a3b8;margin-top:8px;">Requested: ${r.requested_at}</div>
             </div>
-        `).join('') : `<div style="font-size:14.5px;color:#94a3b8;padding:8px 0;">No category requests</div>`;
+        `;
+                }).join('') : `<div style="font-size:14.5px;color:#94a3b8;padding:8px 0;">No category requests</div>`;
 
-                const messagesHTML = u.messages.length ? u.messages.map(m => `
-            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;
-                padding:16px 18px;margin-bottom:12px;">
-                <div style="font-size:15px;color:#1e293b;line-height:1.6;">${m.message}</div>
+                const messagesHTML = u.messages.length ? u.messages.map(m => {
+                    const itemId = `nl-item-${nlCounter++}`;
+                    return `
+            <div id="${itemId}" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;
+                padding:16px 18px;margin-bottom:12px;position:relative;">
+                ${deleteIconHTML(itemId)}
+                <div style="font-size:15px;color:#1e293b;line-height:1.6;padding-right:22px;">${m.message}</div>
                 <div style="font-size:12.5px;color:#94a3b8;margin-top:8px;display:flex;
                     justify-content:space-between;align-items:center;">
                     <span>Sent: ${m.sent_at}</span>
@@ -8108,13 +8145,16 @@
                     </span>
                 </div>
             </div>
-`).join('') : `<div style="font-size:14.5px;color:#94a3b8;padding:8px 0;">No messages sent yet</div>`;
-
+        `;
+                }).join('') : `<div style="font-size:14.5px;color:#94a3b8;padding:8px 0;">No messages sent yet</div>`;
                 const devReplyHTML = u.requests.some(r => (r.developer_replies || []).length) ?
-                    u.requests.flatMap(r => (r.developer_replies || []).map(dr => `
-                <div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;
-                    padding:16px 18px;margin-bottom:12px;">
-                    <div style="font-size:13px;font-weight:700;color:#0f766e;margin-bottom:6px;">📥 Summary</div>
+                    u.requests.flatMap(r => (r.developer_replies || []).map(dr => {
+                        const itemId = `nl-item-${nlCounter++}`;
+                        return `
+                <div id="${itemId}" style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;
+                    padding:16px 18px;margin-bottom:12px;position:relative;">
+                    ${deleteIconHTML(itemId)}
+                    <div style="font-size:13px;font-weight:700;color:#0f766e;margin-bottom:6px;padding-right:22px;">📥 Summary</div>
                     <div style="font-size:14.5px;color:#134e4a;line-height:1.6;">${dr.auto_summary}</div>
                     <div style="font-size:12.5px;color:#0f766e;margin-top:10px;cursor:pointer;text-decoration:underline;"
                         onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
@@ -8124,7 +8164,10 @@
                         padding-top:8px;border-top:1px dashed #99f6e4;line-height:1.6;">${dr.reply_text}</div>
                     <div style="font-size:12px;color:#94a3b8;margin-top:8px;">Replied: ${dr.replied_at}</div>
                 </div>
-            `)).join('')
+            `;
+                    })).join('')
+                    : `<div style="font-size:14.5px;color:#94a3b8;padding:8px 0;">No developer reply yet</div>`;
+            
                     : `<div style="font-size:14.5px;color:#94a3b8;padding:8px 0;">No developer reply yet</div>`;
 
                 return `
