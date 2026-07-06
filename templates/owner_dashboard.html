@@ -1273,6 +1273,10 @@
                     📋 Notification Log
                 </button>
 
+                <button class="header-btn" onclick="openOfferLogModal()" style="font-size:15px;font-weight:700;">
+                    🎁 Offer Log
+                </button>
+
                 <div style="position:relative;">
                     <button id="headerMenuBtn" onclick="toggleHeaderMenu(event)" class="header-btn"
                         style="font-size:18px;font-weight:800;padding:8px 16px;margin-left:4px;">
@@ -2132,6 +2136,48 @@
                 </div>
             </div>
 
+            <!-- Offer Log Modal -->
+            <div id="offerLogModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(15,23,42,0.55);z-index:9998;align-items:center;justify-content:center;">
+                <div style="background:white;width:1400px;max-width:97vw;height:94vh;border-radius:18px;
+        overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,0.3);">
+
+                    <div style="background:linear-gradient(135deg,#f97316,#ec4899);padding:24px 32px;
+            display:flex;align-items:center;justify-content:space-between;">
+                        <div>
+                            <h3 style="color:white;margin:0;font-size:24px;font-weight:800;">🎁 Offer Log</h3>
+                            <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:15px;">
+                                Every offer sent, per user — and whether it was actually used
+                            </p>
+                        </div>
+                        <button onclick="closeOfferLogModal()" style="background:rgba(255,255,255,0.18);border:none;width:38px;height:38px;
+                border-radius:50%;color:white;font-size:20px;cursor:pointer;">✕</button>
+                    </div>
+
+                    <div id="offerStatsBar" style="padding:18px 32px;background:#fff7ed;border-bottom:1px solid #fed7aa;
+            display:flex;gap:32px;">
+                        <div><span style="font-size:13px;color:#9a3412;font-weight:700;">Total Offers Sent</span>
+                            <div id="offerStatTotal" style="font-size:26px;font-weight:800;color:#c2410c;">-</div>
+                        </div>
+                        <div><span style="font-size:13px;color:#9a3412;font-weight:700;">Offers Used</span>
+                            <div id="offerStatUsed" style="font-size:26px;font-weight:800;color:#c2410c;">-</div>
+                        </div>
+                        <div><span style="font-size:13px;color:#9a3412;font-weight:700;">Activation Rate</span>
+                            <div id="offerStatRate" style="font-size:26px;font-weight:800;color:#16a34a;">-</div>
+                        </div>
+                    </div>
+
+                    <div style="padding:18px 32px;border-bottom:1px solid #f1f5f9;background:#f8fafc;">
+                        <input type="text" id="offerLogSearch" placeholder="🔍 Search by username or offer category..."
+                            oninput="filterOfferLog()" style="width:100%;padding:14px 18px;border:1px solid #e2e8f0;border-radius:12px;
+                font-size:16px;outline:none;">
+                    </div>
+
+                    <div id="offerLogBody" style="overflow-y:auto;flex:1;padding:24px 32px;background:#f8fafc;">
+                        <div style="text-align:center;padding:40px;color:#94a3b8;font-size:16px;">Loading...</div>
+                    </div>
+                </div>
+            </div>
 
             <!-- ===== Single Modal Popup ===== -->
             <div id="monthModal" class="modal-overlay">
@@ -8272,6 +8318,131 @@
                 textarea.placeholder = "⚠ Network error while fetching Gmail reply";
                 fetchBtn.textContent = "🔄 Fetch from Gmail";
             }
+        }
+
+        let offerLogData = [];
+
+        function openOfferLogModal() {
+            document.getElementById('offerLogModal').style.display = 'flex';
+            loadOfferLog();
+        }
+        function closeOfferLogModal() {
+            document.getElementById('offerLogModal').style.display = 'none';
+        }
+
+        async function loadOfferLog() {
+            const body = document.getElementById('offerLogBody');
+            body.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:16px;">Loading...</div>`;
+            try {
+                const res = await fetch('/api/owner/offer-summary');
+                const data = await res.json();
+                offerLogData = data.users || [];
+
+                document.getElementById('offerStatTotal').textContent = data.stats.total_offers ?? 0;
+                document.getElementById('offerStatUsed').textContent = data.stats.total_used ?? 0;
+                document.getElementById('offerStatRate').textContent = (data.stats.activation_rate ?? 0) + '%';
+
+                renderOfferLog(offerLogData);
+            } catch (e) {
+                body.innerHTML = `<div style="text-align:center;padding:30px;color:red;">Failed to load</div>`;
+            }
+        }
+
+        async function toggleOfferUsed(offerId, currentlyUsed, badgeEl) {
+            try {
+                const res = await fetch(`/api/owner/mark-offer-used/${offerId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ is_used: !currentlyUsed })
+                });
+                if (res.ok) loadOfferLog();
+            } catch (e) {
+                console.error("Failed to toggle offer usage:", e);
+            }
+        }
+
+        function removeOfferLogItem(itemId) {
+            const el = document.getElementById(itemId);
+            if (el) {
+                el.style.transition = 'opacity 0.2s, transform 0.2s';
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(8px)';
+                setTimeout(() => el.remove(), 200);
+            }
+        }
+
+        function renderOfferLog(users) {
+            const body = document.getElementById('offerLogBody');
+            if (users.length === 0) {
+                body.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:16px;">No offers sent yet</div>`;
+                return;
+            }
+
+            let counter = 0;
+
+            body.innerHTML = users.map(u => {
+                const offersHTML = u.offers.map(o => {
+                    const itemId = `offer-item-${counter++}`;
+                    return `
+            <div id="${itemId}" style="background:white;border:1px solid #e2e8f0;border-radius:12px;
+                padding:16px 18px;margin-bottom:12px;position:relative;">
+                <button onclick="removeOfferLogItem('${itemId}')" title="Remove from view (UI only)"
+                    style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;
+                    padding:5px;line-height:1;border-radius:6px;display:flex;align-items:center;justify-content:center;"
+                    onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                        <path d="M10 11v6"></path><path d="M14 11v6"></path>
+                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                    </svg>
+                </button>
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-right:22px;">
+                    <span style="font-weight:800;font-size:15px;color:#1e293b;">🎁 ${o.offer_type || 'Offer'} — ${o.offer_category}</span>
+                    <span onclick="toggleOfferUsed(${o.id}, ${o.is_used}, this)" style="cursor:pointer;
+                        background:${o.is_used ? '#d1fae5' : '#fee2e2'};color:${o.is_used ? '#065f46' : '#991b1b'};
+                        font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;">
+                        ${o.is_used ? '✅ Used' : '❌ Not Used'}
+                    </span>
+                </div>
+                <div style="font-size:13.5px;color:#475569;margin-top:8px;">
+                    ${o.message || ''}
+                </div>
+                <div style="font-size:12.5px;color:#94a3b8;margin-top:6px;">
+                    ${o.product1_name ? 'Product: ' + o.product1_name : ''} ${o.discount ? `• ${o.discount}% off` : ''}
+                </div>
+                <div style="font-size:12px;color:#94a3b8;margin-top:8px;display:flex;justify-content:space-between;">
+                    <span>Sent: ${o.sent_at}</span>
+                    <span>${o.is_used ? 'Used: ' + o.used_at : (o.is_read ? 'Seen, not used' : 'Not seen')}</span>
+                </div>
+            </div>`;
+                }).join('');
+
+                return `
+        <div class="offer-log-user" data-search="${u.username.toLowerCase()} ${u.offers.map(o => o.offer_category).join(' ').toLowerCase()}"
+            style="background:white;border:1px solid #e2e8f0;border-radius:16px;padding:22px;margin-bottom:20px;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:14px;
+                border-bottom:2px solid #f1f5f9;">
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ec4899);
+                    display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:17px;">
+                    ${u.username.charAt(0).toUpperCase()}
+                </div>
+                <div style="font-weight:800;font-size:18px;color:#1e293b;">${u.username}</div>
+            </div>
+            ${offersHTML}
+        </div>`;
+            }).join('');
+        }
+
+        function filterOfferLog() {
+            const q = document.getElementById('offerLogSearch').value.trim().toLowerCase();
+            if (!q) { renderOfferLog(offerLogData); return; }
+            const filtered = offerLogData.filter(u =>
+                u.username.toLowerCase().includes(q) ||
+                u.offers.some(o => (o.offer_category || '').toLowerCase().includes(q))
+            );
+            renderOfferLog(filtered);
         }
 
     </script>

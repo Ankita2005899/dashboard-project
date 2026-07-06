@@ -6246,6 +6246,103 @@ def all_products_for_offer():
         
         
 #__________total discount ko calculate karne ki leya to send every user common offer (" owner_dashboard to dashboard")
+
+#__________summery of 🎁 Offer Log button of the ("owner_dashboard")____________________
+
+
+@app.route("/api/owner/offer-summary", methods=["GET"])
+def offer_summary():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, username, offer_type, offer_category, message,
+                   product1_name, product2_name, discount, is_read, is_used,
+                   created_at, used_at
+            FROM special_offers
+            ORDER BY created_at DESC
+        """)
+        rows = cursor.fetchall()
+        cursor.close()
+
+        from datetime import datetime
+        def fmt(v):
+            return v.strftime("%Y-%m-%d %H:%M:%S") if isinstance(v, datetime) else v
+
+        users = {}
+        total_offers = len(rows)
+        total_used = 0
+
+        for r in rows:
+            uname = r["username"] or "Unknown User"
+            users.setdefault(uname, {"username": uname, "offers": []})
+            if r["is_used"]:
+                total_used += 1
+            users[uname]["offers"].append({
+                "id": r["id"],
+                "offer_type": r["offer_type"],
+                "offer_category": r["offer_category"],
+                "message": r["message"],
+                "product1_name": r["product1_name"],
+                "product2_name": r["product2_name"],
+                "discount": float(r["discount"]) if r["discount"] is not None else 0,
+                "is_read": bool(r["is_read"]),
+                "is_used": bool(r["is_used"]),
+                "sent_at": fmt(r["created_at"]),
+                "used_at": fmt(r["used_at"])
+            })
+
+        activation_rate = round((total_used / total_offers) * 100, 1) if total_offers else 0
+
+        return jsonify({
+            "users": list(users.values()),
+            "stats": {
+                "total_offers": total_offers,
+                "total_used": total_used,
+                "activation_rate": activation_rate
+            }
+        })
+    except Exception as e:
+        import traceback
+        print("offer_summary crashed:", traceback.format_exc())
+        return jsonify({"error": str(e), "users": [], "stats": {}}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+@app.route("/api/owner/mark-offer-used/<int:offer_id>", methods=["POST"])
+def mark_offer_used(offer_id):
+    conn = None
+    try:
+        body = request.get_json(silent=True) or {}
+        mark_as = bool(body.get("is_used", True))
+
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        if mark_as:
+            cursor.execute("""
+                UPDATE special_offers
+                SET is_used = 1, used_at = NOW()
+                WHERE id = %s
+            """, (offer_id,))
+        else:
+            cursor.execute("""
+                UPDATE special_offers
+                SET is_used = 0, used_at = NULL
+                WHERE id = %s
+            """, (offer_id,))
+        conn.commit()
+        cursor.close()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+            
+            
 #--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
 
 
