@@ -4348,6 +4348,12 @@ def request_category():
     user_name = session.get("username", "").strip()
     uid = session.get("user_id")
 
+    if not uid:
+        return jsonify({
+            "status": "error",
+            "errors": ["Your session has expired. Please log in again and resubmit your request."]
+        })
+
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
