@@ -4653,49 +4653,7 @@ def send_category_request(request_id):
    
 #_________________________________category request la deveoper kadun yanara response store karila and "Notification Log " madhe dakhavaila _________________________________    
 
-@app.route("/api/owner/developer-reply", methods=["POST"])
-def save_developer_reply():
-    conn = None
-    try:
-        body       = request.get_json(silent=True) or {}
-        request_id = body.get("request_id")
-        reply_text = (body.get("reply_text") or "").strip()
 
-        if not request_id or not reply_text:
-            return jsonify({"error": "request_id and reply_text required"}), 400
-
-        # Extractive summary: pick the sentence with highest TF-IDF weight
-        auto_summary = reply_text[:100]
-        try:
-            from sklearn.feature_extraction.text import TfidfVectorizer
-            sentences = [s.strip() for s in reply_text.replace(".", ". ").split(".") if len(s.strip()) > 8]
-            if sentences:
-                vectorizer = TfidfVectorizer(token_pattern=r"(?u)\b\w+\b")
-                tfidf = vectorizer.fit_transform(sentences)
-                scores = tfidf.sum(axis=1)
-                best_idx = int(scores.argmax())
-                best = sentences[best_idx]
-                auto_summary = best[:100] + ("..." if len(best) > 100 else "")
-        except Exception as ml_err:
-            print("developer_reply summary failed:", ml_err)
-
-        conn   = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO developer_replies (request_id, reply_text, auto_summary)
-            VALUES (%s, %s, %s)
-        """, (request_id, reply_text, auto_summary))
-        conn.commit()
-        cursor.close()
-
-        return jsonify({"status": "success", "auto_summary": auto_summary})
-    except Exception as e:
-        import traceback
-        print("save_developer_reply crashed:", traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
-    finally:
-        if conn and conn.is_connected():
-            conn.close()
 
 
 @app.route("/api/owner/developer-reply/<int:request_id>", methods=["GET"])
@@ -4705,7 +4663,7 @@ def get_developer_reply(request_id):
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
-            SELECT id, reply_text, auto_summary, replied_at
+            SELECT id, reply_text, auto_summary, replied_at, user_id, user_name
             FROM developer_replies
             WHERE request_id = %s
             ORDER BY replied_at DESC
