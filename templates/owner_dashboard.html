@@ -1246,7 +1246,262 @@
 
 <body>
 
+    <!-- Floating Calendar Icon -->
+    <div id="calendarFloatBtn" onclick="toggleCalendarPanel()" style="position:fixed;left:20px;bottom:24px;width:56px;height:56px;border-radius:50%;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;
+    justify-content:center;cursor:pointer;box-shadow:0 8px 24px rgba(99,102,241,0.4);
+    z-index:999998;font-size:26px;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'"
+        onmouseout="this.style.transform='scale(1)'">
+        📅
+        <span id="calendarDueBadge" style="display:none;position:absolute;top:-4px;right:-4px;
+        background:#ef4444;color:white;font-size:11px;font-weight:800;width:20px;height:20px;
+        border-radius:50%;align-items:center;justify-content:center;"></span>
+    </div>
+
+    <!-- Floating Calendar Panel -->
+    <div id="calendarPanel" style="display:none;position:fixed;left:90px;bottom:24px;
+    width:420px;height:520px;min-width:340px;min-height:400px;max-width:90vw;max-height:85vh;
+    background:white;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,0.3);
+    z-index:999999;flex-direction:column;overflow:auto;resize:both;border:1px solid #e2e8f0;">
+
+        <div id="calendarDragHandle" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);
+        padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+        cursor:move;border-radius:16px 16px 0 0;flex-shrink:0;">
+            <span style="color:white;font-weight:800;font-size:15px;">📅 Schedule Calendar</span>
+            <button onclick="toggleCalendarPanel()" style="background:rgba(255,255,255,0.2);border:none;width:26px;height:26px;
+            border-radius:50%;color:white;cursor:pointer;font-size:14px;">✕</button>
+        </div>
+
+        <div style="padding:14px 18px;flex-shrink:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <button onclick="changeCalendarMonth(-1)" style="background:#f1f5f9;border:none;
+                width:28px;height:28px;border-radius:8px;cursor:pointer;font-weight:700;">‹</button>
+                <span id="calendarMonthLabel" style="font-weight:800;font-size:14.5px;color:#1e293b;"></span>
+                <button onclick="changeCalendarMonth(1)" style="background:#f1f5f9;border:none;
+                width:28px;height:28px;border-radius:8px;cursor:pointer;font-weight:700;">›</button>
+            </div>
+            <div id="calendarGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
+        </div>
+
+        <div style="padding:0 18px 14px;flex-shrink:0;">
+            <div id="selectedDateLabel" style="font-size:12.5px;font-weight:700;color:#7c3aed;margin-bottom:8px;"></div>
+            <input type="text" id="scheduleTitle" placeholder="Schedule title..." style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;
+            font-size:13px;margin-bottom:6px;box-sizing:border-box;">
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+                <input type="time" id="scheduleTime"
+                    style="flex:1;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;">
+                <button onclick="addSchedule()" style="background:#6366f1;color:white;border:none;
+                padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;">Add</button>
+            </div>
+        </div>
+
+        <div id="scheduleListContainer" style="padding:0 18px 18px;overflow-y:auto;flex:1;"></div>
+    </div>
+
+    <!-- Due Reminder Popup -->
+    <div id="scheduleReminderPopup" style="display:none;position:fixed;top:24px;right:24px;
+    width:340px;background:white;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,0.3);
+    z-index:9999999;border-left:5px solid #ef4444;overflow:hidden;">
+        <div
+            style="background:#fef2f2;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-weight:800;color:#991b1b;font-size:14px;">⏰ Schedule Reminder</span>
+            <button onclick="closeScheduleReminder()" style="background:none;border:none;font-size:16px;
+            cursor:pointer;color:#991b1b;">✕</button>
+        </div>
+        <div id="scheduleReminderBody" style="padding:16px 18px;"></div>
+    </div>
+
     <script>
+
+        let calendarCurrentDate = new Date();
+        let calendarSelectedDate = null;
+        let scheduleData = [];
+
+        function toggleCalendarPanel() {
+            const panel = document.getElementById('calendarPanel');
+            const isOpen = panel.style.display === 'flex';
+            panel.style.display = isOpen ? 'none' : 'flex';
+            if (!isOpen) loadSchedule();
+        }
+
+        async function loadSchedule() {
+            try {
+                const res = await fetch('/api/owner/schedule');
+                const data = await res.json();
+                scheduleData = data.schedule || [];
+                renderCalendarGrid();
+                if (calendarSelectedDate) renderScheduleListForDate(calendarSelectedDate);
+            } catch (e) {
+                console.error('Failed to load schedule:', e);
+            }
+        }
+
+        function renderCalendarGrid() {
+            const year = calendarCurrentDate.getFullYear();
+            const month = calendarCurrentDate.getMonth();
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('calendarMonthLabel').textContent = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const grid = document.getElementById('calendarGrid');
+
+            const dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d =>
+                `<div style="text-align:center;font-size:11px;font-weight:700;color:#94a3b8;padding:4px 0;">${d}</div>`
+            ).join('');
+
+            let cells = '';
+            for (let i = 0; i < firstDay; i++) cells += `<div></div>`;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const hasEvent = scheduleData.some(s => s.scheduled_at.startsWith(dateStr));
+                const isToday = new Date().toISOString().slice(0, 10) === dateStr;
+                const isSelected = calendarSelectedDate === dateStr;
+
+                cells += `
+            <div onclick="selectCalendarDate('${dateStr}')" style="text-align:center;padding:7px 0;
+                border-radius:8px;cursor:pointer;font-size:13px;position:relative;
+                background:${isSelected ? '#6366f1' : (isToday ? '#eef2ff' : 'transparent')};
+                color:${isSelected ? 'white' : (isToday ? '#6366f1' : '#334155')};
+                font-weight:${isToday || isSelected ? '700' : '500'};">
+                ${day}
+                ${hasEvent ? `<div style="width:4px;height:4px;border-radius:50%;background:${isSelected ? 'white' : '#f97316'};
+                    margin:2px auto 0;"></div>` : ''}
+            </div>`;
+            }
+
+            grid.innerHTML = dayHeaders + cells;
+        }
+
+        function changeCalendarMonth(delta) {
+            calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + delta);
+            renderCalendarGrid();
+        }
+
+        function selectCalendarDate(dateStr) {
+            calendarSelectedDate = dateStr;
+            document.getElementById('selectedDateLabel').textContent = `Selected: ${dateStr}`;
+            renderCalendarGrid();
+            renderScheduleListForDate(dateStr);
+        }
+
+        function renderScheduleListForDate(dateStr) {
+            const container = document.getElementById('scheduleListContainer');
+            const items = scheduleData.filter(s => s.scheduled_at.startsWith(dateStr));
+
+            if (items.length === 0) {
+                container.innerHTML = `<div style="font-size:12.5px;color:#94a3b8;text-align:center;padding:10px 0;">No schedule for this date</div>`;
+                return;
+            }
+
+            container.innerHTML = items.map(s => `
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:8px;
+            display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+            <div>
+                <div style="font-size:13px;font-weight:700;color:#1e293b;">${s.title}</div>
+                <div style="font-size:11.5px;color:#94a3b8;margin-top:2px;">${s.scheduled_at.slice(11, 16)}
+                    ${s.is_notified ? ' • ✅ Notified' : ''}</div>
+                ${s.description ? `<div style="font-size:12px;color:#64748b;margin-top:4px;">${s.description}</div>` : ''}
+            </div>
+            <button onclick="deleteSchedule(${s.id})" style="background:none;border:none;cursor:pointer;flex-shrink:0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                </svg>
+            </button>
+        </div>
+    `).join('');
+        }
+
+        async function addSchedule() {
+            if (!calendarSelectedDate) { alert('Select a date on the calendar first'); return; }
+            const title = document.getElementById('scheduleTitle').value.trim();
+            const time = document.getElementById('scheduleTime').value || '09:00';
+            if (!title) { alert('Enter a title'); return; }
+
+            try {
+                await fetch('/api/owner/schedule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, scheduled_at: `${calendarSelectedDate} ${time}:00` })
+                });
+                document.getElementById('scheduleTitle').value = '';
+                loadSchedule();
+            } catch (e) {
+                console.error('Failed to add schedule:', e);
+            }
+        }
+
+        async function deleteSchedule(id) {
+            try {
+                await fetch(`/api/owner/schedule/${id}`, { method: 'DELETE' });
+                loadSchedule();
+            } catch (e) {
+                console.error('Failed to delete schedule:', e);
+            }
+        }
+
+        // ── Drag logic ──
+        (function enableCalendarDrag() {
+            const panel = document.getElementById('calendarPanel');
+            const handle = document.getElementById('calendarDragHandle');
+            let isDragging = false, offsetX = 0, offsetY = 0;
+
+            handle.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                const rect = panel.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                panel.style.left = rect.left + 'px';
+                panel.style.top = rect.top + 'px';
+                panel.style.bottom = 'auto';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                panel.style.left = (e.clientX - offsetX) + 'px';
+                panel.style.top = (e.clientY - offsetY) + 'px';
+            });
+
+            document.addEventListener('mouseup', () => { isDragging = false; });
+        })();
+
+        // ── Due schedule polling — runs independently, checks every 30s ──
+        async function checkDueSchedule() {
+            try {
+                const res = await fetch('/api/owner/schedule/due');
+                const data = await res.json();
+                if (data.due && data.due.length > 0) {
+                    showScheduleReminder(data.due);
+                }
+            } catch (e) {
+                console.error('Due schedule check failed:', e);
+            }
+        }
+
+        function showScheduleReminder(dueItems) {
+            const body = document.getElementById('scheduleReminderBody');
+            body.innerHTML = dueItems.map(d => `
+        <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">
+            <div style="font-weight:700;font-size:14px;color:#1e293b;">${d.title}</div>
+            <div style="font-size:12px;color:#94a3b8;margin-top:3px;">${d.scheduled_at}</div>
+            ${d.description ? `<div style="font-size:12.5px;color:#64748b;margin-top:6px;">${d.description}</div>` : ''}
+        </div>
+    `).join('');
+            document.getElementById('scheduleReminderPopup').style.display = 'block';
+        }
+
+        function closeScheduleReminder() {
+            document.getElementById('scheduleReminderPopup').style.display = 'none';
+        }
+
+        setInterval(checkDueSchedule, 30000);
+        checkDueSchedule();
+
+        // Auto-select today's date on load
+        selectCalendarDate(new Date().toISOString().slice(0, 10));
         (function () {
             var theme = localStorage.getItem('shopsphere-theme') || 'dark';
             document.documentElement.setAttribute('data-theme', theme);

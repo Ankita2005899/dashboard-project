@@ -6389,6 +6389,120 @@ def mark_offer_used(offer_id):
             conn.close()
             
             
+            
+#------------owner_section chya calender sathi -------------------- 
+
+
+@app.route("/api/owner/schedule", methods=["GET"])
+def get_schedule():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, title, description, scheduled_at, is_notified, created_at
+            FROM owner_schedule
+            ORDER BY scheduled_at ASC
+        """)
+        rows = cursor.fetchall()
+        cursor.close()
+
+        from datetime import datetime
+        for r in rows:
+            if isinstance(r.get("scheduled_at"), datetime):
+                r["scheduled_at"] = r["scheduled_at"].strftime("%Y-%m-%d %H:%M:%S")
+            if isinstance(r.get("created_at"), datetime):
+                r["created_at"] = r["created_at"].strftime("%Y-%m-%d %H:%M:%S")
+
+        return jsonify({"schedule": rows})
+    except Exception as e:
+        return jsonify({"error": str(e), "schedule": []}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+@app.route("/api/owner/schedule", methods=["POST"])
+def add_schedule():
+    conn = None
+    try:
+        body         = request.get_json(silent=True) or {}
+        title        = (body.get("title") or "").strip()
+        description  = (body.get("description") or "").strip()
+        scheduled_at = body.get("scheduled_at")
+
+        if not title or not scheduled_at:
+            return jsonify({"error": "title and scheduled_at required"}), 400
+
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO owner_schedule (title, description, scheduled_at)
+            VALUES (%s, %s, %s)
+        """, (title, description, scheduled_at))
+        conn.commit()
+        new_id = cursor.lastrowid
+        cursor.close()
+
+        return jsonify({"status": "success", "id": new_id})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+@app.route("/api/owner/schedule/<int:schedule_id>", methods=["DELETE"])
+def delete_schedule(schedule_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM owner_schedule WHERE id = %s", (schedule_id,))
+        conn.commit()
+        cursor.close()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+@app.route("/api/owner/schedule/due", methods=["GET"])
+def get_due_schedule():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, title, description, scheduled_at
+            FROM owner_schedule
+            WHERE scheduled_at <= NOW() AND is_notified = 0
+        """)
+        due = cursor.fetchall()
+
+        if due:
+            ids = [d["id"] for d in due]
+            format_strings = ','.join(['%s'] * len(ids))
+            cursor.execute(f"UPDATE owner_schedule SET is_notified = 1 WHERE id IN ({format_strings})", tuple(ids))
+            conn.commit()
+
+        cursor.close()
+
+        from datetime import datetime
+        for d in due:
+            if isinstance(d.get("scheduled_at"), datetime):
+                d["scheduled_at"] = d["scheduled_at"].strftime("%Y-%m-%d %H:%M:%S")
+
+        return jsonify({"due": due})
+    except Exception as e:
+        return jsonify({"error": str(e), "due": []}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+           
 #--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
 
 
