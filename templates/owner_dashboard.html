@@ -1247,7 +1247,7 @@
 <body>
 
     <!-- Floating Calendar Icon -->
-    <div id="calendarFloatBtn" onclick="toggleCalendarPanel()" style="position:fixed;left:24px;bottom:28px;width:76px;height:76px;border-radius:50%;
+    <div id="calendarFloatBtn" onclick="toggleCalendarPanel()" style="position:fixed;left:24px;top:90px;width:76px;height:76px;border-radius:50%;
     background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;
     justify-content:center;cursor:pointer;box-shadow:0 10px 30px rgba(99,102,241,0.45);
     z-index:999998;font-size:36px;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.08)'"
@@ -1258,8 +1258,7 @@
         border-radius:50%;align-items:center;justify-content:center;"></span>
     </div>
 
-    <!-- Floating Calendar Panel -->
-    <div id="calendarPanel" style="display:none;position:fixed;left:112px;bottom:28px;
+    <div id="calendarPanel" style="display:none;position:fixed;left:112px;top:90px;
     width:580px;height:680px;min-width:420px;min-height:480px;max-width:94vw;max-height:90vh;
     background:white;border-radius:18px;box-shadow:0 28px 70px rgba(0,0,0,0.32);
     z-index:999999;flex-direction:column;overflow:auto;resize:both;border:1px solid #e2e8f0;">
@@ -1287,17 +1286,71 @@
             <div id="selectedDateLabel" style="font-size:14px;font-weight:700;color:#7c3aed;margin-bottom:10px;"></div>
             <input type="text" id="scheduleTitle" placeholder="Schedule title..." style="width:100%;padding:12px 14px;border:1px solid #e2e8f0;border-radius:10px;
             font-size:15px;margin-bottom:8px;box-sizing:border-box;">
-            <div style="display:flex;gap:8px;margin-bottom:8px;">
-                <input type="time" id="scheduleTime"
-                    style="flex:1;padding:12px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:15px;">
+            <div style="display:flex;gap:6px;margin-bottom:8px;align-items:center;">
+                <select id="scheduleHour" style="padding:12px 8px;border:1px solid #e2e8f0;border-radius:10px;
+                font-size:15px;background:white;">
+                    ${Array.from({length:12}, (_, i) => i+1).map(h => `<option value="${h}">${h}</option>`).join('')}
+                </select>
+                <span style="font-weight:700;color:#94a3b8;">:</span>
+                <select id="scheduleMinute" style="padding:12px 8px;border:1px solid #e2e8f0;border-radius:10px;
+                font-size:15px;background:white;">
+                    ${Array.from({length:60}, (_, i) => i).map(m => `<option value="${m}" ${m===0?'selected':''}>
+                        ${String(m).padStart(2,'0')}</option>`).join('')}
+                </select>
+                <select id="scheduleAmPm" style="padding:12px 8px;border:1px solid #e2e8f0;border-radius:10px;
+                font-size:15px;background:white;font-weight:700;">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                </select>
                 <button onclick="addSchedule()" style="background:#6366f1;color:white;border:none;
-                padding:12px 22px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;">Add</button>
+                padding:12px 18px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;
+                white-space:nowrap;">Add</button>
+            </div>
+            <div id="scheduleAddedMsg" style="display:none;background:#d1fae5;color:#065f46;font-size:13px;
+            font-weight:700;padding:8px 12px;border-radius:8px;margin-bottom:8px;text-align:center;">
+                ✅ Schedule is fixed
             </div>
         </div>
 
         <div id="scheduleListContainer" style="padding:0 26px 26px;overflow-y:auto;flex:1;"></div>
     </div>
-
+    <div style="display:flex;gap:6px;margin-bottom:8px;align-items:center;">
+        <select id="scheduleHour"
+            style="padding:12px 8px;border:1px solid #e2e8f0;border-radius:10px;font-size:15px;background:white;">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+        </select>
+        <span style="font-weight:700;color:#94a3b8;">:</span>
+        <select id="scheduleMinute"
+            style="padding:12px 8px;border:1px solid #e2e8f0;border-radius:10px;font-size:15px;background:white;">
+            <option value="0" selected>00</option>
+            <option value="15">15</option>
+            <option value="30">30</option>
+            <option value="45">45</option>
+        </select>
+        <select id="scheduleAmPm"
+            style="padding:12px 8px;border:1px solid #e2e8f0;border-radius:10px;font-size:15px;background:white;font-weight:700;">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+        </select>
+        <button onclick="addSchedule()"
+            style="background:#6366f1;color:white;border:none;
+                padding:12px 18px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;white-space:nowrap;">Add</button>
+    </div>
+    <div id="scheduleAddedMsg" style="display:none;background:#d1fae5;color:#065f46;font-size:13px;
+            font-weight:700;padding:8px 12px;border-radius:8px;margin-bottom:8px;text-align:center;">
+        ✅ Schedule is fixed
+    </div>
     <!-- Due Reminder Popup -->
     <div id="scheduleReminderPopup" style="display:none;position:fixed;top:24px;right:24px;
     width:340px;background:white;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,0.3);
@@ -1417,19 +1470,34 @@
         async function addSchedule() {
             if (!calendarSelectedDate) { alert('Select a date on the calendar first'); return; }
             const title = document.getElementById('scheduleTitle').value.trim();
-            const time = document.getElementById('scheduleTime').value || '09:00';
             if (!title) { alert('Enter a title'); return; }
+
+            let hour = parseInt(document.getElementById('scheduleHour').value, 10);
+            const minute = parseInt(document.getElementById('scheduleMinute').value, 10);
+            const ampm = document.getElementById('scheduleAmPm').value;
+
+            // Convert 12-hour + AM/PM to 24-hour format
+            if (ampm === 'AM' && hour === 12) hour = 0;
+            if (ampm === 'PM' && hour !== 12) hour += 12;
+
+            const time24 = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
 
             try {
                 await fetch('/api/owner/schedule', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, scheduled_at: `${calendarSelectedDate} ${time}:00` })
+                    body: JSON.stringify({ title, scheduled_at: `${calendarSelectedDate} ${time24}` })
                 });
                 document.getElementById('scheduleTitle').value = '';
+
+                const msg = document.getElementById('scheduleAddedMsg');
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 2500);
+
                 loadSchedule();
             } catch (e) {
                 console.error('Failed to add schedule:', e);
+                alert('Failed to save schedule — please try again');
             }
         }
 
