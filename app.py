@@ -6055,6 +6055,7 @@ def my_special_offers():
                    discount, is_read, created_at
             FROM special_offers
             WHERE customer_table = %s
+              AND (expires_at IS NULL OR expires_at > NOW())
             ORDER BY created_at DESC
             LIMIT 30
         """, (table_name,))
@@ -6068,6 +6069,38 @@ def my_special_offers():
     finally:
         cursor.close()
         conn.close()
+
+#_________________offer chya time limite sathi in owner_section _____________________________
+
+
+
+@app.route("/api/owner/set-offer-expiry/<int:offer_id>", methods=["POST"])
+def set_offer_expiry(offer_id):
+    conn = None
+    try:
+        body  = request.get_json(silent=True) or {}
+        hours = body.get("hours")
+
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+
+        if hours in (None, "", 0, "0"):
+            cursor.execute("UPDATE special_offers SET expires_at = NULL WHERE id = %s", (offer_id,))
+        else:
+            cursor.execute("""
+                UPDATE special_offers SET expires_at = DATE_ADD(NOW(), INTERVAL %s HOUR)
+                WHERE id = %s
+            """, (float(hours), offer_id))
+        conn.commit()
+        cursor.close()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
 
 
 # ── Buy Combo Offer → save to cart → redirect to buynow ───
@@ -6269,7 +6302,8 @@ def offer_summary():
         cursor.execute("""
             SELECT id, username, offer_type, offer_category, message,
                    product1_name, product2_name, discount, is_read, is_used,
-                   created_at, used_at
+                   created_at, used_at, expires_at,
+                   CASE WHEN expires_at IS NOT NULL AND expires_at < NOW() THEN 1 ELSE 0 END AS is_expired
             FROM special_offers
             ORDER BY created_at DESC
         """)
@@ -6300,7 +6334,9 @@ def offer_summary():
                 "is_read": bool(r["is_read"]),
                 "is_used": bool(r["is_used"]),
                 "sent_at": fmt(r["created_at"]),
-                "used_at": fmt(r["used_at"])
+                "used_at": fmt(r["used_at"]),
+                "expires_at": fmt(r["expires_at"]),
+                "is_expired": bool(r["is_expired"])
             })
 
         activation_rate = round((total_used / total_offers) * 100, 1) if total_offers else 0

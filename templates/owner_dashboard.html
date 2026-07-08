@@ -2179,6 +2179,26 @@
                 </div>
             </div>
 
+            <!-- Confirm Delete Popup (Offer Log) -->
+            <div id="offerDeleteConfirmModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(15,23,42,0.6);z-index:99999;align-items:center;justify-content:center;">
+                <div style="background:white;border-radius:16px;padding:28px;max-width:380px;width:90%;text-align:center;
+        box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+                    <div style="font-size:34px;margin-bottom:10px;">🗑️</div>
+                    <h3 style="margin:0 0 8px;font-size:18px;color:#1e293b;">Remove this offer from view?</h3>
+                    <p style="font-size:13.5px;color:#64748b;line-height:1.6;margin-bottom:20px;">
+                        This only removes it from this Offer Log screen. It will <b>not</b> be deleted from the
+                        database, and the user will still see it on their dashboard.
+                    </p>
+                    <div style="display:flex;gap:10px;justify-content:center;">
+                        <button onclick="closeOfferDeleteConfirm()" style="padding:10px 18px;border-radius:20px;border:1px solid #e2e8f0;background:white;
+                color:#475569;font-weight:700;cursor:pointer;">Cancel</button>
+                        <button onclick="confirmDeleteYes()" style="padding:10px 18px;border-radius:20px;border:none;background:#ef4444;
+                color:white;font-weight:700;cursor:pointer;">Remove</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- ===== Single Modal Popup ===== -->
             <div id="monthModal" class="modal-overlay">
                 <div class="modal-content">
@@ -8386,7 +8406,7 @@
                     return `
             <div id="${itemId}" style="background:white;border:1px solid #e2e8f0;border-radius:12px;
                 padding:16px 18px;margin-bottom:12px;position:relative;">
-                <button onclick="removeOfferLogItem('${itemId}')" title="Remove from view (UI only)"
+                <button onclick="confirmRemoveOfferLogItem('${itemId}')" title="Remove from view (UI only)"
                     style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;
                     padding:5px;line-height:1;border-radius:6px;display:flex;align-items:center;justify-content:center;"
                     onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">
@@ -8416,6 +8436,20 @@
                     <span>Sent: ${o.sent_at}</span>
                     <span>${o.is_used ? 'Used: ' + o.used_at : (o.is_read ? 'Seen, not used' : 'Not seen')}</span>
                 </div>
+                ${o.is_expired
+                            ? `<div style="margin-top:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;
+                        padding:8px 10px;font-size:12px;color:#991b1b;font-weight:600;">
+                        ⏰ Auto-expired at ${o.expires_at} — automatically removed from this user's dashboard
+                    </div>`
+                            : `<div style="margin-top:10px;display:flex;align-items:center;gap:6px;">
+                        <input type="number" id="expiry-hrs-${o.id}" placeholder="Hours" min="1"
+                            value="${o.expires_at ? '' : ''}"
+                            style="width:70px;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;">
+                        <button onclick="setOfferExpiry(${o.id}, this)"
+                            style="font-size:11.5px;font-weight:700;color:white;background:#f97316;
+                            border:none;padding:6px 12px;border-radius:16px;cursor:pointer;">⏱️ Set Expiry</button>
+                        ${o.expires_at ? `<span style="font-size:11.5px;color:#94a3b8;">Expires: ${o.expires_at}</span>` : ''}
+                    </div>`}
             </div>`;
                 }).join('');
 
@@ -8444,7 +8478,39 @@
             );
             renderOfferLog(filtered);
         }
+        let pendingOfferDeleteId = null;
 
+        function confirmRemoveOfferLogItem(itemId) {
+            pendingOfferDeleteId = itemId;
+            document.getElementById('offerDeleteConfirmModal').style.display = 'flex';
+        }
+        function closeOfferDeleteConfirm() {
+            pendingOfferDeleteId = null;
+            document.getElementById('offerDeleteConfirmModal').style.display = 'none';
+        }
+        function confirmDeleteYes() {
+            if (pendingOfferDeleteId) removeOfferLogItem(pendingOfferDeleteId);
+            closeOfferDeleteConfirm();
+        }
+        async function setOfferExpiry(offerId, btnEl) {
+            const input = document.getElementById(`expiry-hrs-${offerId}`);
+            const hours = input ? input.value : null;
+            if (!hours || hours <= 0) { alert("Enter a valid number of hours"); return; }
+
+            btnEl.disabled = true;
+            try {
+                const res = await fetch(`/api/owner/set-offer-expiry/${offerId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ hours: hours })
+                });
+                if (res.ok) loadOfferLog();
+            } catch (e) {
+                console.error("Failed to set expiry:", e);
+            } finally {
+                btnEl.disabled = false;
+            }
+        }
     </script>
 
     <!-- ══════════════════════════ SIGN OUT LOGS MODAL ══════════════════════════ -->
