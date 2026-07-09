@@ -6288,6 +6288,7 @@ def all_products_for_offer():
         conn.close()
         
         
+        
 #__________total discount ko calculate karne ki leya to send every user common offer (" owner_dashboard to dashboard")
 
 #__________summery of 🎁 Offer Log button of the ("owner_dashboard")____________________
@@ -6757,6 +6758,11 @@ def set_delivery_slot(order_id):
         if conn and conn.is_connected():
             conn.close()
 
+
+
+@app.route("/delivery-dashboard")
+def delivery_dashboard():
+    return render_template("delivery_dashboard.html")
 
   
 #--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
