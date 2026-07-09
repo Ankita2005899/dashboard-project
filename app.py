@@ -6564,7 +6564,6 @@ def auto_assign_deliveries():
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Unassigned orders from the last 7 days
         cursor.execute("""
             SELECT id, user_id FROM delivery_orders
             WHERE delivery_boy_id IS NULL
@@ -6575,6 +6574,27 @@ def auto_assign_deliveries():
         cursor.execute("SELECT * FROM delivery_boys WHERE is_online = 1")
         boys = cursor.fetchall()
 
+        if not pending_orders or not boys:
+            cursor.close()
+            return jsonify({"status": "success", "assigned": 0})
+
+        # Current active workload per delivery boy (for balancing)
+        cursor.execute("""
+            SELECT delivery_boy_id, COUNT(*) as active_count
+            FROM delivery_orders
+            WHERE delivery_boy_id IS NOT NULL AND status != 'delivered'
+            GROUP BY delivery_boy_id
+        """)
+        workload = {r["delivery_boy_id"]: r["active_count"] for r in cursor.fetchall()}
+
+        # ── ML: TF-IDF + cosine similarity for address-to-zone matching ──
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        from sklearn.metrics.pairwise import cosine_similarity
+
+        boy_zones = [(b["zone_address"] or "").strip() or "unknown_zone" for b in boys]
+        vectorizer = TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 4))
+        zone_matrix = vectorizer.fit_transform(boy_zones)
+
         assigned_count = 0
         for order in pending_orders:
             cursor.execute("""
@@ -6584,23 +6604,30 @@ def auto_assign_deliveries():
             if not addr_row:
                 continue
 
-            customer_addr = f"{addr_row.get('address1') or ''} {addr_row.get('address2') or ''}".lower()
+            customer_addr = f"{addr_row.get('address1') or ''} {addr_row.get('address2') or ''}".strip()
+            if not customer_addr:
+                continue
 
-            best_match = None
-            for boy in boys:
-                zone_words = (boy["zone_address"] or "").lower().split()
-                # Zone text match: any significant word from the delivery boy's zone
-                # appears in the customer's address
-                if any(len(w) > 3 and w in customer_addr for w in zone_words):
-                    best_match = boy
-                    break
+            addr_vec = vectorizer.transform([customer_addr])
+            sims = cosine_similarity(addr_vec, zone_matrix)[0]
 
-            if best_match:
-                cursor.execute("""
-                    UPDATE delivery_orders SET delivery_boy_id = %s, status = 'confirmed'
-                    WHERE id = %s
-                """, (best_match["id"], order["id"]))
-                assigned_count += 1
+            # Rank boys by similarity, then break ties by lowest current workload
+            ranked = sorted(
+                range(len(boys)),
+                key=lambda i: (-sims[i], workload.get(boys[i]["id"], 0))
+            )
+
+            best_idx = ranked[0]
+            if sims[best_idx] < 0.12:  # too dissimilar, skip rather than force a bad match
+                continue
+
+            best_boy = boys[best_idx]
+            cursor.execute("""
+                UPDATE delivery_orders SET delivery_boy_id = %s, status = 'confirmed'
+                WHERE id = %s
+            """, (best_boy["id"], order["id"]))
+            workload[best_boy["id"]] = workload.get(best_boy["id"], 0) + 1
+            assigned_count += 1
 
         conn.commit()
         cursor.close()
@@ -6611,8 +6638,54 @@ def auto_assign_deliveries():
         return jsonify({"error": str(e)}), 500
     finally:
         if conn and conn.is_connected():
-            conn.close()                       
-                    
+            conn.close()      
+            
+            
+            
+@app.route("/api/owner/predict-eta/<int:order_id>", methods=["GET"])
+def predict_eta(order_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("SELECT delivery_boy_id FROM delivery_orders WHERE id = %s", (order_id,))
+        row = cursor.fetchone()
+        if not row or not row["delivery_boy_id"]:
+            cursor.close()
+            return jsonify({"eta_minutes": None, "confidence": "low", "reason": "Not yet assigned"})
+
+        boy_id = row["delivery_boy_id"]
+
+        # Historical completed deliveries by this same delivery boy
+        cursor.execute("""
+            SELECT TIMESTAMPDIFF(MINUTE, purchased_at, delivered_at) as mins
+            FROM delivery_orders
+            WHERE delivery_boy_id = %s AND status = 'delivered' AND delivered_at IS NOT NULL
+        """, (boy_id,))
+        history = [r["mins"] for r in cursor.fetchall() if r["mins"] and r["mins"] > 0]
+        cursor.close()
+
+        if len(history) >= 3:
+            avg_mins = sum(history) / len(history)
+            confidence = "high" if len(history) >= 8 else "medium"
+        else:
+            avg_mins = 45  # fallback default for brand-new delivery boys with no history
+            confidence = "low"
+
+        return jsonify({
+            "eta_minutes": round(avg_mins),
+            "confidence": confidence,
+            "based_on_deliveries": len(history)
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+            
+            
+                                      
 #--------------------4. Backend — manual status update (owner-side) + delivered/received marking------------------------      
 
 
@@ -6764,6 +6837,33 @@ def set_delivery_slot(order_id):
 def delivery_dashboard():
     return render_template("delivery_dashboard.html")
 
+
+@app.route("/api/owner/delivery-stats", methods=["GET"])
+def delivery_stats():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT status, COUNT(*) as cnt FROM delivery_orders GROUP BY status
+        """)
+        rows = cursor.fetchall()
+        cursor.close()
+
+        counts = {r['status']: r['cnt'] for r in rows}
+        total = sum(counts.values())
+        return jsonify({
+            "total": total,
+            "delivered": counts.get('delivered', 0),
+            "in_transit": counts.get('shipped', 0),
+            "out_for_delivery": counts.get('out_for_delivery', 0),
+            "pending": counts.get('order_placed', 0) + counts.get('confirmed', 0)
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
   
 #--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
 

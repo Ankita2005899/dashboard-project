@@ -1005,31 +1005,31 @@
     </div>
   </header>
 
-  <!-- STATS ROW -->
+  <!-- STATS ROW (live data) -->
   <div class="stats-row">
     <div class="stat">
       <div class="stat-label">Total Orders</div>
-      <div class="stat-value c-accent">24</div>
-      <div class="stat-sub">for this product today</div>
+      <div class="stat-value c-accent" id="statTotal">–</div>
+      <div class="stat-sub">across all delivery orders</div>
     </div>
     <div class="stat">
       <div class="stat-label">Delivered</div>
-      <div class="stat-value c-green">09</div>
-      <div class="stat-sub">37.5% completion</div>
+      <div class="stat-value c-green" id="statDelivered">–</div>
+      <div class="stat-sub" id="statDeliveredPct"></div>
     </div>
     <div class="stat">
       <div class="stat-label">In Transit</div>
-      <div class="stat-value c-blue">08</div>
+      <div class="stat-value c-blue" id="statTransit">–</div>
       <div class="stat-sub">on the road now</div>
     </div>
     <div class="stat">
       <div class="stat-label">Out for Delivery</div>
-      <div class="stat-value c-orange">05</div>
+      <div class="stat-value c-orange" id="statOutForDelivery">–</div>
       <div class="stat-sub">nearby customers</div>
     </div>
     <div class="stat">
       <div class="stat-label">Pending Pickup</div>
-      <div class="stat-value c-purple">02</div>
+      <div class="stat-value c-purple" id="statPending">–</div>
       <div class="stat-sub">awaiting pickup</div>
     </div>
   </div>
@@ -1052,7 +1052,10 @@
         <button class="ftab">Out for Delivery</button>
         <button class="ftab">Delivered</button>
       </div>
-      <div class="scroll-area">
+      <div class="scroll-area" id="customerListContainer">
+        <div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">Loading real orders...</div>
+      </div>
+      <div class="scroll-area" style="display:none;">
 
         <!-- Customer 1 — Out for delivery (active stage: nearby) -->
         <div class="customer-card active" onclick="selectCustomer(this, 1)">
@@ -1525,7 +1528,11 @@
           style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:0 4px 8px;">
           🛵 Delivery Personnel</div>
       </div>
-      <div class="scroll-area" style="max-height:220px;">
+      <div class="scroll-area" id="deliveryBoyListContainer" style="max-height:220px;">
+        <div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">Loading delivery personnel...
+        </div>
+      </div>
+      <div class="scroll-area" style="max-height:220px;display:none;">
 
         <!-- Amit K -->
         <div class="db-card selected">
@@ -1652,9 +1659,14 @@
     <div class="panel detail-panel">
       <div class="panel-header">
         <div class="panel-title"><span class="icon">📋</span> Order Detail</div>
-        <div class="eta-chip">⏱ ETA 12 min</div>
+        <div class="eta-chip" id="orderEtaChip">⏱ Select an order</div>
       </div>
-      <div class="detail-scroll">
+      <div class="detail-scroll" id="orderDetailScroll">
+        <div style="padding:30px 18px;text-align:center;color:var(--muted);font-size:12.5px;">
+          Click a customer on the left to see full order details here.
+        </div>
+      </div>
+      <div class="detail-scroll" style="display:none;">
 
         <!-- Product -->
         <div class="detail-section">
@@ -1898,6 +1910,194 @@
     `).join('');
     }
     loadOrdersManage();
+  </script>
+
+  <script>
+    let allDeliveryOrders = [];
+    let allDeliveryBoys = [];
+
+    async function loadRealDeliveryData() {
+      const [ordersRes, boysRes, statsRes] = await Promise.all([
+        fetch('/api/owner/delivery-orders'),
+        fetch('/api/owner/delivery-boys'),
+        fetch('/api/owner/delivery-stats')
+      ]);
+      const ordersData = await ordersRes.json();
+      const boysData = await boysRes.json();
+      const stats = await statsRes.json();
+
+      allDeliveryOrders = ordersData.orders || [];
+      allDeliveryBoys = boysData.delivery_boys || [];
+
+      // Stats row
+      document.getElementById('statTotal').textContent = stats.total ?? 0;
+      document.getElementById('statDelivered').textContent = String(stats.delivered ?? 0).padStart(2, '0');
+      document.getElementById('statTransit').textContent = String(stats.in_transit ?? 0).padStart(2, '0');
+      document.getElementById('statOutForDelivery').textContent = String(stats.out_for_delivery ?? 0).padStart(2, '0');
+      document.getElementById('statPending').textContent = String(stats.pending ?? 0).padStart(2, '0');
+      const pct = stats.total ? ((stats.delivered / stats.total) * 100).toFixed(1) : 0;
+      document.getElementById('statDeliveredPct').textContent = `${pct}% completion`;
+
+      renderRealCustomerList();
+      renderRealDeliveryBoyList();
+    }
+
+    const STATUS_BADGE = {
+      order_placed: { label: 'Pending', color: '#6b7280' },
+      confirmed: { label: 'Confirmed', color: '#6b7280' },
+      shipped: { label: 'In Transit', color: '#3b82f6' },
+      out_for_delivery: { label: 'Nearby', color: '#f97316' },
+      delivered: { label: 'Delivered ✓', color: '#22c55e' }
+    };
+
+    function renderRealCustomerList() {
+      const container = document.getElementById('customerListContainer');
+      if (allDeliveryOrders.length === 0) {
+        container.innerHTML = `<div style="text-align:center;color:var(--muted);padding:30px 15px;font-size:12.5px;">
+            No orders yet. Once a customer purchases a product, it will appear here automatically.</div>`;
+        return;
+      }
+
+      container.innerHTML = allDeliveryOrders.map(o => {
+        const badge = STATUS_BADGE[o.status] || STATUS_BADGE.order_placed;
+        return `
+        <div class="customer-card" onclick="selectRealOrder(${o.id})">
+            <div class="cc-top">
+                <div class="avatar" style="background:${badge.color};color:white;">
+                    ${(o.username || 'U').charAt(0).toUpperCase()}
+                </div>
+                <div class="cc-info">
+                    <div class="cc-name">${o.username || 'User #' + o.user_id}</div>
+                    <div class="cc-addr">📦 ${o.product_name || 'Product'}</div>
+                </div>
+                <span class="status-badge" style="background:${badge.color}22;color:${badge.color};
+                    border:1px solid ${badge.color}55">${badge.label}</span>
+            </div>
+            <div class="cc-bottom">
+                ${o.eta_text ? `<div class="cc-meta">🕐 <strong>${o.eta_text}</strong></div><div class="dot-sep"></div>` : ''}
+                <div class="cc-meta">Order <strong>#${o.order_ref || o.id}</strong></div>
+                ${o.delivery_boy_name ? `<div class="dot-sep"></div><div class="cc-meta">🛵 <strong>${o.delivery_boy_name}</strong></div>` : ''}
+            </div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderRealDeliveryBoyList() {
+      const container = document.getElementById('deliveryBoyListContainer');
+      if (allDeliveryBoys.length === 0) {
+        container.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">
+            No delivery boys added yet. Click "➕ Add Delivery Detail" below to add one.</div>`;
+        return;
+      }
+
+      container.innerHTML = allDeliveryBoys.map(b => {
+        const assigned = allDeliveryOrders.filter(o => o.delivery_boy_id === b.id).length;
+        const delivered = allDeliveryOrders.filter(o => o.delivery_boy_id === b.id && o.status === 'delivered').length;
+        const nearby = allDeliveryOrders.filter(o => o.delivery_boy_id === b.id && o.status === 'out_for_delivery').length;
+
+        return `
+        <div class="db-card">
+            <div class="db-top">
+                <div class="db-avatar" style="background:${b.is_online ? '#f59e0b' : '#6b7280'};color:#000;">
+                    ${b.name.charAt(0).toUpperCase()}
+                    <div class="db-online-dot" style="background:${b.is_online ? 'var(--green)' : 'var(--muted)'};"></div>
+                </div>
+                <div class="db-info">
+                    <div class="db-name">${b.name}</div>
+                    <div class="db-zone">📍 ${b.zone_address || 'No zone set'}</div>
+                </div>
+                <span class="status-badge" style="background:${b.is_online ? 'rgba(34,197,94,0.1)' : 'rgba(107,114,128,0.1)'};
+                    color:${b.is_online ? 'var(--green)' : 'var(--muted)'};border:1px solid ${b.is_online ? 'rgba(34,197,94,0.25)' : 'rgba(107,114,128,0.25)'}">
+                    ${b.is_online ? 'Online' : 'Offline'}</span>
+            </div>
+            <div class="db-stats-row">
+                <div class="db-stat"><div class="db-stat-val c-accent">${assigned}</div><div class="db-stat-lbl">Assigned</div></div>
+                <div class="db-stat"><div class="db-stat-val c-green">${delivered}</div><div class="db-stat-lbl">Delivered</div></div>
+                <div class="db-stat"><div class="db-stat-val c-orange">${nearby}</div><div class="db-stat-lbl">Nearby</div></div>
+                <div class="db-stat"><div class="db-stat-val" style="color:var(--text-dim)">${b.rating || 5.0}⭐</div><div class="db-stat-lbl">Rating</div></div>
+            </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function selectRealOrder(orderId) {
+      document.querySelectorAll('.customer-card').forEach(c => c.classList.remove('active'));
+      const clickedCard = [...document.querySelectorAll('.customer-card')].find(c =>
+        c.getAttribute('onclick') === `selectRealOrder(${orderId})`);
+      if (clickedCard) clickedCard.classList.add('active');
+
+      const order = allDeliveryOrders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const badge = STATUS_BADGE[order.status] || STATUS_BADGE.order_placed;
+      const scroll = document.getElementById('orderDetailScroll');
+
+      let etaHTML = `<span style="color:var(--muted);">Calculating...</span>`;
+      document.getElementById('orderEtaChip').innerHTML = `⏱ Loading...`;
+
+      scroll.innerHTML = `
+        <div class="detail-section">
+            <div class="ds-title">Product</div>
+            <div class="product-row">
+                <div class="product-thumb">📦</div>
+                <div class="product-details">
+                    <div class="product-pname">${order.product_name || 'Product'}</div>
+                    <div class="product-pid">Order #${order.order_ref || order.id}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="ds-title">Customer</div>
+            <div class="info-row"><div class="info-key">Name</div><div class="info-val">${order.username || 'User #' + order.user_id}</div></div>
+            <div class="info-row"><div class="info-key">Status</div><div class="info-val" style="color:${badge.color}">${badge.label}</div></div>
+            <div class="info-row"><div class="info-key">Purchased</div><div class="info-val">${order.purchased_at}</div></div>
+            ${order.preferred_time_slot ? `<div class="info-row"><div class="info-key">Requested Slot</div><div class="info-val">${order.preferred_time_slot}</div></div>` : ''}
+        </div>
+
+        <div class="detail-section">
+            <div class="ds-title">Delivery Partner</div>
+            ${order.delivery_boy_name ? `
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                    <div class="avatar" style="background:var(--accent);color:#000;width:44px;height:44px;font-size:16px;">
+                        ${order.delivery_boy_name.charAt(0)}</div>
+                    <div>
+                        <div style="font-size:13px;font-weight:600;">${order.delivery_boy_name}</div>
+                        <div style="font-size:11px;color:var(--accent2);">${order.delivery_boy_phone || 'No phone on file'}</div>
+                    </div>
+                </div>` : `<div style="color:var(--muted);font-size:12.5px;">Not yet assigned. Run Auto-Assign or set manually below.</div>`}
+        </div>
+
+        <div class="detail-section" style="border-bottom:none;">
+            <div class="ds-title">Update Status</div>
+            <select onchange="updateStatus(${order.id}, this.value); selectRealOrder(${order.id});"
+                style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;">
+                <option value="order_placed" ${order.status === 'order_placed' ? 'selected' : ''}>Order Placed</option>
+                <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                <option value="out_for_delivery" ${order.status === 'out_for_delivery' ? 'selected' : ''}>Out for Delivery</option>
+                <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+            </select>
+        </div>
+    `;
+
+      // ML-predicted ETA
+      try {
+        const res = await fetch(`/api/owner/predict-eta/${orderId}`);
+        const data = await res.json();
+        if (data.eta_minutes) {
+          document.getElementById('orderEtaChip').innerHTML =
+            `⏱ ~${data.eta_minutes} min <span style="opacity:0.6;font-size:10px;">(${data.confidence} confidence)</span>`;
+        } else {
+          document.getElementById('orderEtaChip').innerHTML = `⏱ ${data.reason || 'Not assigned yet'}`;
+        }
+      } catch (e) {
+        document.getElementById('orderEtaChip').innerHTML = `⏱ –`;
+      }
+    }
+
+    loadRealDeliveryData();
+    setInterval(loadRealDeliveryData, 15000); // auto-refresh every 15s
   </script>
 </body>
 
