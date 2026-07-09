@@ -6503,6 +6503,262 @@ def get_due_schedule():
             conn.close()
 
            
+#---------------------delivery boy management for owner section -------------------------- 
+
+
+@app.route("/api/owner/delivery-boys", methods=["GET"])
+def get_delivery_boys():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM delivery_boys ORDER BY created_at DESC")
+        rows = cursor.fetchall()
+        cursor.close()
+        return jsonify({"delivery_boys": rows})
+    except Exception as e:
+        return jsonify({"error": str(e), "delivery_boys": []}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+@app.route("/api/owner/delivery-boys", methods=["POST"])
+def add_delivery_boy():
+    conn = None
+    try:
+        body = request.get_json(silent=True) or {}
+        name = (body.get("name") or "").strip()
+        phone = (body.get("phone") or "").strip()
+        vehicle = (body.get("vehicle_number") or "").strip()
+        zone = (body.get("zone_address") or "").strip()
+
+        if not name or not zone:
+            return jsonify({"error": "Name and zone/address are required"}), 400
+
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        photo = (body.get("profile_image") or "").strip()
+        cursor.execute("""
+            INSERT INTO delivery_boys (name, phone, vehicle_number, zone_address, profile_image)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (name, phone, vehicle, zone, photo))
+        conn.commit()
+        new_id = cursor.lastrowid
+        cursor.close()
+        return jsonify({"status": "success", "id": new_id})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+#--------------------3. Backend — auto-assignment (zone text-matching, 7-day window)-------------------
+                       
+@app.route("/api/owner/auto-assign-deliveries", methods=["POST"])
+def auto_assign_deliveries():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Unassigned orders from the last 7 days
+        cursor.execute("""
+            SELECT id, user_id FROM delivery_orders
+            WHERE delivery_boy_id IS NULL
+              AND purchased_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        """)
+        pending_orders = cursor.fetchall()
+
+        cursor.execute("SELECT * FROM delivery_boys WHERE is_online = 1")
+        boys = cursor.fetchall()
+
+        assigned_count = 0
+        for order in pending_orders:
+            cursor.execute("""
+                SELECT address1, address2 FROM save_detail WHERE user_id = %s LIMIT 1
+            """, (order["user_id"],))
+            addr_row = cursor.fetchone()
+            if not addr_row:
+                continue
+
+            customer_addr = f"{addr_row.get('address1') or ''} {addr_row.get('address2') or ''}".lower()
+
+            best_match = None
+            for boy in boys:
+                zone_words = (boy["zone_address"] or "").lower().split()
+                # Zone text match: any significant word from the delivery boy's zone
+                # appears in the customer's address
+                if any(len(w) > 3 and w in customer_addr for w in zone_words):
+                    best_match = boy
+                    break
+
+            if best_match:
+                cursor.execute("""
+                    UPDATE delivery_orders SET delivery_boy_id = %s, status = 'confirmed'
+                    WHERE id = %s
+                """, (best_match["id"], order["id"]))
+                assigned_count += 1
+
+        conn.commit()
+        cursor.close()
+        return jsonify({"status": "success", "assigned": assigned_count})
+    except Exception as e:
+        import traceback
+        print("auto_assign_deliveries crashed:", traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()                       
+                    
+#--------------------4. Backend — manual status update (owner-side) + delivered/received marking------------------------      
+
+
+@app.route("/api/owner/delivery-orders", methods=["GET"])
+def get_delivery_orders():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT do.*, db.name AS delivery_boy_name, db.phone AS delivery_boy_phone,
+                   db.profile_image AS delivery_boy_photo
+            FROM delivery_orders do
+            LEFT JOIN delivery_boys db ON db.id = do.delivery_boy_id
+            ORDER BY do.purchased_at DESC
+        """)
+        rows = cursor.fetchall()
+        cursor.close()
+
+        from datetime import datetime
+        for r in rows:
+            for k in ("purchased_at", "updated_at", "delivered_at"):
+                if isinstance(r.get(k), datetime):
+                    r[k] = r[k].strftime("%Y-%m-%d %H:%M:%S")
+
+        return jsonify({"orders": rows})
+    except Exception as e:
+        return jsonify({"error": str(e), "orders": []}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+@app.route("/api/owner/update-delivery-status/<int:order_id>", methods=["POST"])
+def update_delivery_status(order_id):
+    conn = None
+    try:
+        body   = request.get_json(silent=True) or {}
+        status = body.get("status")
+        eta    = body.get("eta_text", "")
+
+        valid = ['order_placed', 'confirmed', 'shipped', 'out_for_delivery', 'delivered']
+        if status not in valid:
+            return jsonify({"error": "Invalid status"}), 400
+
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+
+        if status == 'delivered':
+            cursor.execute("""
+                UPDATE delivery_orders SET status = %s, eta_text = %s, delivered_at = NOW()
+                WHERE id = %s
+            """, (status, eta, order_id))
+        else:
+            cursor.execute("""
+                UPDATE delivery_orders SET status = %s, eta_text = %s
+                WHERE id = %s
+            """, (status, eta, order_id))
+
+        conn.commit()
+        cursor.close()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+#----------------- Backend — customer-facing status (feeds the stepper on dashboard.html)---------------------
+   
+    
+@app.route("/api/my-delivery-status", methods=["GET"])
+def my_delivery_status():
+    conn = None
+    try:
+        uid = session.get('user_id') or session.get('id')
+        if not uid:
+            return jsonify({"orders": []})
+
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT do.id, do.product_name, do.status, do.eta_text, do.purchased_at, do.delivered_at,
+                   do.preferred_time_slot,
+                   db.name AS delivery_boy_name, db.phone AS delivery_boy_phone,
+                   db.profile_image AS delivery_boy_photo, db.vehicle_number AS delivery_boy_vehicle,
+                   db.rating AS delivery_boy_rating
+            FROM delivery_orders do
+            LEFT JOIN delivery_boys db ON db.id = do.delivery_boy_id
+            WHERE do.user_id = %s
+            ORDER BY do.purchased_at DESC
+        """, (uid,))
+        rows = cursor.fetchall()
+        cursor.close()
+
+        from datetime import datetime
+        for r in rows:
+            for k in ("purchased_at", "delivered_at"):
+                if isinstance(r.get(k), datetime):
+                    r[k] = r[k].strftime("%d %b %Y")
+
+        return jsonify({"orders": rows})
+    except Exception as e:
+        return jsonify({"error": str(e), "orders": []}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()    
+                                    
+
+
+#-------------3. Backend — let the customer set their preferred time slot in view card after getting the delivery ----------------- 
+
+@app.route("/api/set-delivery-slot/<int:order_id>", methods=["POST"])
+def set_delivery_slot(order_id):
+    conn = None
+    try:
+        uid = session.get('user_id') or session.get('id')
+        if not uid:
+            return jsonify({"error": "Not logged in"}), 401
+
+        body = request.get_json(silent=True) or {}
+        slot = (body.get("slot") or "").strip()
+        if not slot:
+            return jsonify({"error": "Slot required"}), 400
+
+        conn   = get_db_connection()
+        cursor = conn.cursor()
+        # Only the order's own owner can set it, and only before it's out for delivery
+        cursor.execute("""
+            UPDATE delivery_orders SET preferred_time_slot = %s
+            WHERE id = %s AND user_id = %s AND status IN ('order_placed','confirmed','shipped')
+        """, (slot, order_id, uid))
+        conn.commit()
+        rows_affected = cursor.rowcount
+        cursor.close()
+
+        if rows_affected == 0:
+            return jsonify({"error": "Cannot update — order may already be out for delivery"}), 400
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+  
 #--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
 
 

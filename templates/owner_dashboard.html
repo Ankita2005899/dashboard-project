@@ -1254,8 +1254,7 @@
         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 16px 34px rgba(79,70,229,0.42),0 4px 10px rgba(0,0,0,0.1)'"
         onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 12px 28px rgba(79,70,229,0.35),0 2px 6px rgba(0,0,0,0.08)'">
         📅
-        <span id="calendarDueBadge"
-            style="display:none;position:absolute;top:-6px;right:-6px;
+        <span id="calendarDueBadge" style="display:none;position:absolute;top:-6px;right:-6px;
         background:#ef4444;color:white;font-size:12px;font-weight:800;width:22px;height:22px;
         border-radius:50%;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 6px rgba(239,68,68,0.4);"></span>
     </div>
@@ -1282,38 +1281,26 @@
 
         <div style="padding:18px 22px;flex-shrink:0;border-bottom:1px solid #f1f5f9;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <button onclick="changeCalendarMonth(-1)"
-                    style="background:#f8fafc;border:1px solid #eef0f4;
+                <button onclick="changeCalendarMonth(-1)" style="background:#f8fafc;border:1px solid #eef0f4;
                 width:32px;height:32px;border-radius:9px;cursor:pointer;font-weight:700;font-size:15px;color:#475569;">‹</button>
-                <span id="calendarMonthLabel"
-                    style="font-weight:800;font-size:15.5px;color:#1e293b;letter-spacing:0.2px;"></span>
-                <button onclick="changeCalendarMonth(1)"
-                    style="background:#f8fafc;border:1px solid #eef0f4;
+                <span id="calendarMonthLabel" style="font-weight:800;font-size:15.5px;color:#1e293b;letter-spacing:0.2px;"></span>
+                <button onclick="changeCalendarMonth(1)" style="background:#f8fafc;border:1px solid #eef0f4;
                 width:32px;height:32px;border-radius:9px;cursor:pointer;font-weight:700;font-size:15px;color:#475569;">›</button>
             </div>
             <div id="calendarGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
         </div>
 
         <div style="padding:16px 22px;flex-shrink:0;border-bottom:1px solid #f1f5f9;">
-            <div id="selectedDateLabel" style="font-size:12.5px;font-weight:700;color:#7c3aed;margin-bottom:10px;">
-            </div>
+            <div id="selectedDateLabel" style="font-size:12.5px;font-weight:700;color:#7c3aed;margin-bottom:10px;"></div>
             <input type="text" id="scheduleTitle" placeholder="Schedule title..." style="width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:9px;
             font-size:13.5px;margin-bottom:8px;box-sizing:border-box;outline:none;">
             <div style="display:flex;gap:5px;align-items:center;">
                 <select id="scheduleHour" style="padding:9px 6px;border:1px solid #e2e8f0;border-radius:8px;
                 font-size:13px;background:white;color:#334155;">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                    <option value="12">12</option>
+                    <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                    <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                    <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                    <option value="10">10</option><option value="11">11</option><option value="12">12</option>
                 </select>
                 <span style="font-weight:700;color:#cbd5e1;">:</span>
                 <select id="scheduleMinute" style="padding:9px 6px;border:1px solid #e2e8f0;border-radius:8px;
@@ -1585,7 +1572,8 @@
                     🎁 Offer Log
                 </button>
 
-                <button id="headerMenuBtn" onclick="toggleHeaderMenu(event)" class="header-btn" style="font-size:16px;font-weight:800;padding:9px 15px;margin-left:4px;display:flex;
+                <button id="headerMenuBtn" onclick="toggleHeaderMenu(event)" class="header-btn"
+                    style="font-size:16px;font-weight:800;padding:9px 15px;margin-left:4px;display:flex;
                     align-items:center;gap:6px;">
                     <span style="display:flex;flex-direction:column;gap:3px;">
                         <span style="width:18px;height:2px;background:currentColor;border-radius:2px;"></span>
@@ -1599,88 +1587,88 @@
 
         </div>
 
-        <!-- Backdrop for slide-in menu drawer -->
-        <div id="headerMenuBackdrop" onclick="closeHeaderMenu()" style="display:none;position:fixed;top:0;left:0;
+    <!-- Backdrop for slide-in menu drawer -->
+    <div id="headerMenuBackdrop" onclick="closeHeaderMenu()" style="display:none;position:fixed;top:0;left:0;
         width:100%;height:100%;background:rgba(15,23,42,0.45);z-index:99997;
         opacity:0;transition:opacity 0.25s ease;"></div>
 
-        <!-- Right-side slide-in menu drawer -->
-        <div id="headerMenuDropdown" style="position:fixed;top:0;right:-360px;width:340px;max-width:88vw;height:100vh;
+    <!-- Right-side slide-in menu drawer -->
+    <div id="headerMenuDropdown" style="position:fixed;top:0;right:-360px;width:340px;max-width:88vw;height:100vh;
         background:white;z-index:99998;box-shadow:-8px 0 40px rgba(15,23,42,0.25);
         display:flex;flex-direction:column;transition:right 0.28s cubic-bezier(0.16,1,0.3,1);">
 
-            <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:24px 26px;flex-shrink:0;">
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                    <div>
-                        <div style="color:white;font-weight:800;font-size:18px;">🧑‍💼 Owner Menu</div>
-                        <div style="color:rgba(255,255,255,0.75);font-size:12.5px;margin-top:3px;">Quick access to tools
-                        </div>
-                    </div>
-                    <button onclick="closeHeaderMenu()"
-                        style="background:rgba(255,255,255,0.18);border:none;
-                    width:32px;height:32px;border-radius:50%;color:white;cursor:pointer;font-size:16px;flex-shrink:0;">✕</button>
+        <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:24px 26px;flex-shrink:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                    <div style="color:white;font-weight:800;font-size:18px;">🧑‍💼 Owner Menu</div>
+                    <div style="color:rgba(255,255,255,0.75);font-size:12.5px;margin-top:3px;">Quick access to tools</div>
                 </div>
-            </div>
-
-            <div style="overflow-y:auto;flex:1;padding:14px;">
-
-                <button onclick="openRewardDistributionModal(); closeHeaderMenu();"
-                    style="width:100%;text-align:left;background:#faf5ff;border:1px solid #e9d5ff;
-                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#6d28d9;
-                cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:background 0.15s;" onmouseover="this.style.background='#f3e8ff'"
-                    onmouseout="this.style.background='#faf5ff'">
-                    <span style="font-size:19px;">🎁</span> Reward Distribution
-                </button>
-
-                <button onclick="openStrongPasswordModal(); closeHeaderMenu();"
-                    style="width:100%;text-align:left;background:#f8fafc;border:1px solid #eef0f4;
-                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#1e293b;
-                cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'"
-                    onmouseout="this.style.background='#f8fafc'">
-                    <span style="font-size:19px;">🔐</span> Strong Passwords
-                </button>
-
-                <button onclick="openCategoryRequestsModal(); closeHeaderMenu();"
-                    style="width:100%;text-align:left;background:#f8fafc;border:1px solid #eef0f4;
-                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#1e293b;
-                cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'"
-                    onmouseout="this.style.background='#f8fafc'">
-                    <span style="font-size:19px;">📂</span> Category Requests
-                </button>
-
-                <button onclick="openProductCatalogModal(); closeHeaderMenu();"
-                    style="width:100%;text-align:left;background:#f8fafc;border:1px solid #eef0f4;
-                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#1e293b;
-                cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'"
-                    onmouseout="this.style.background='#f8fafc'">
-                    <span style="font-size:19px;">📦</span> Product Catalog
-                </button>
-
-                <button onclick="openAllUserDetailsModal(); closeHeaderMenu();"
-                    style="width:100%;text-align:left;background:#f8fafc;border:1px solid #eef0f4;
-                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#1e293b;
-                cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'"
-                    onmouseout="this.style.background='#f8fafc'">
-                    <span style="font-size:19px;">👥</span> All User Details
-                </button>
-
-                <button onclick="openAllDashboardCardsModal(); closeHeaderMenu();"
-                    style="width:100%;text-align:left;background:#f8fafc;border:1px solid #eef0f4;
-                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#1e293b;
-                cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'"
-                    onmouseout="this.style.background='#f8fafc'">
-                    <span style="font-size:19px;">🗂️</span> All Dashboard Cards
-                </button>
-
-                <button onclick="openSignOutLogsModal(); closeHeaderMenu();" style="width:100%;text-align:left;background:#fef2f2;border:1px solid #fecaca;
-                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#b91c1c;
-                cursor:pointer;display:flex;align-items:center;gap:12px;transition:background 0.15s;"
-                    onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
-                    <span style="font-size:19px;">🚪</span> Sign Out Users
-                </button>
-
+                <button onclick="closeHeaderMenu()" style="background:rgba(255,255,255,0.18);border:none;
+                    width:32px;height:32px;border-radius:50%;color:white;cursor:pointer;font-size:16px;flex-shrink:0;">✕</button>
             </div>
         </div>
+
+        <div style="overflow-y:auto;flex:1;padding:14px;">
+
+            <a href="/delivery-dashboard" target="_blank"
+                style="width:100%;text-align:left;background:#eff6ff;border:1px solid #bfdbfe;
+                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#1d4ed8;
+                cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:background 0.15s;
+                text-decoration:none;box-sizing:border-box;"
+                onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                <span style="font-size:19px;">🚚</span> Delivery Dashboard
+            </a>
+
+            <button onclick="openStrongPasswordModal(); closeHeaderMenu();"
+                style="width:100%;text-align:left;background:#f8fafc;border:1px solid #eef0f4;
+                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#1e293b;
+                cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:background 0.15s;"
+                onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+                <span style="font-size:19px;">🔐</span> Strong Passwords
+            </button>
+
+            <button onclick="openCategoryRequestsModal(); closeHeaderMenu();"
+                style="width:100%;text-align:left;background:#f8fafc;border:1px solid #eef0f4;
+                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#1e293b;
+                cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:background 0.15s;"
+                onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+                <span style="font-size:19px;">📂</span> Category Requests
+            </button>
+
+            <button onclick="openProductCatalogModal(); closeHeaderMenu();"
+                style="width:100%;text-align:left;background:#f8fafc;border:1px solid #eef0f4;
+                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#1e293b;
+                cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:background 0.15s;"
+                onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+                <span style="font-size:19px;">📦</span> Product Catalog
+            </button>
+
+            <button onclick="openAllUserDetailsModal(); closeHeaderMenu();"
+                style="width:100%;text-align:left;background:#f8fafc;border:1px solid #eef0f4;
+                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#1e293b;
+                cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:background 0.15s;"
+                onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+                <span style="font-size:19px;">👥</span> All User Details
+            </button>
+
+            <button onclick="openAllDashboardCardsModal(); closeHeaderMenu();"
+                style="width:100%;text-align:left;background:#f8fafc;border:1px solid #eef0f4;
+                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#1e293b;
+                cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:background 0.15s;"
+                onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+                <span style="font-size:19px;">🗂️</span> All Dashboard Cards
+            </button>
+
+            <button onclick="openSignOutLogsModal(); closeHeaderMenu();"
+                style="width:100%;text-align:left;background:#fef2f2;border:1px solid #fecaca;
+                border-radius:12px;padding:14px 16px;font-size:14.5px;font-weight:700;color:#b91c1c;
+                cursor:pointer;display:flex;align-items:center;gap:12px;transition:background 0.15s;"
+                onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
+                <span style="font-size:19px;">🚪</span> Sign Out Users
+            </button>
+
+        </div>
+    </div>
 
     </header>
 

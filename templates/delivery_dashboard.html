@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShopSphere · Delivery Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:        #0d0f14;
+    --surface:   #151820;
+    --card:      #1c2030;
+    --border:    #272c3d;
+    --accent:    #f59e0b;
+    --accent2:   #14b8a6;
+    --muted:     #6b7280;
+    --text:      #e5e7eb;
+    --text-dim:  #9ca3af;
+    --green:     #22c55e;
+    --orange:    #f97316;
+    --blue:      #3b82f6;
+    --red:       #ef4444;
+    --purple:    #a855f7;
+
+    --stage-pending:   #6b7280;
+    --stage-picked:    #f59e0b;
+    --stage-transit:   #3b82f6;
+    --stage-nearby:    #f97316;
+    --stage-delivered: #22c55e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 18px; }
+  .logo { font-size: 18px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+  .logo span { color: var(--text); }
+  .breadcrumb { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  .product-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 6px 16px 6px 10px;
+  }
+  .product-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), #d97706);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 14px;
+  }
+  .product-name { font-size: 13px; font-weight: 600; }
+  .product-id { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px; color: var(--green); font-weight: 500;
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .stat {
+    background: var(--surface);
+    padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-value { font-size: 24px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .stat-sub { font-size: 11px; color: var(--muted); }
+  .c-green  { color: var(--green); }
+  .c-orange { color: var(--orange); }
+  .c-blue   { color: var(--blue); }
+  .c-accent { color: var(--accent); }
+  .c-purple { color: var(--purple); }
+
+  /* ── MAIN GRID ── */
+  .main {
+    display: grid;
+    grid-template-columns: 340px 1fr 320px;
+    gap: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── PANEL ── */
+  .panel {
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .panel:last-child { border-right: none; }
+
+  .panel-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 10;
+    flex-shrink: 0;
+  }
+  .panel-title {
+    font-size: 13px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text-dim);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel-title .icon { font-size: 15px; }
+  .count-chip {
+    font-size: 11px; font-family: 'JetBrains Mono', monospace;
+    background: var(--border); border-radius: 10px; padding: 2px 8px;
+    color: var(--text-dim);
+  }
+
+  .search-box {
+    margin: 10px 14px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .search-box input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px 8px 34px;
+    font-size: 13px; color: var(--text);
+    outline: none; font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .search-box input:focus { border-color: var(--accent2); }
+  .search-box input::placeholder { color: var(--muted); }
+  .search-box .s-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 14px;
+  }
+
+  .scroll-area {
+    overflow-y: auto;
+    flex: 1;
+    padding: 10px 10px 20px;
+  }
+  .scroll-area::-webkit-scrollbar { width: 4px; }
+  .scroll-area::-webkit-scrollbar-track { background: transparent; }
+  .scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ── CUSTOMER CARD ── */
+  .customer-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.18s, transform 0.15s;
+    overflow: hidden;
+  }
+  .customer-card:hover { border-color: var(--accent2); transform: translateX(2px); }
+  .customer-card.active { border-color: var(--accent); background: #1f2535; }
+
+  .cc-top {
+    padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .cc-info { flex: 1; min-width: 0; }
+  .cc-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cc-addr { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .status-badge {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+    border-radius: 6px; padding: 3px 8px; white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .cc-bottom {
+    padding: 8px 14px 10px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap;
+  }
+  .cc-meta { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  .cc-meta strong { color: var(--text-dim); }
+  .dot-sep { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+
+  /* delivery progress bar inside card */
+  .progress-mini {
+    margin: 0 14px 12px;
+    display: flex; align-items: center; gap: 0;
+  }
+  .progress-step {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .ps-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    position: relative; z-index: 1;
+    transition: all 0.3s;
+  }
+  .ps-dot.done  { background: var(--green); border-color: var(--green); }
+  .ps-dot.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,158,11,0.2); animation: pulse 1.5s infinite; }
+  .ps-label { font-size: 9px; color: var(--muted); text-align: center; font-family: 'JetBrains Mono', monospace; }
+  .ps-line {
+    flex: 1; height: 2px; background: var(--border); margin-top: -6px; position: relative; z-index: 0;
+  }
+  .ps-line.done { background: var(--green); }
+  .ps-line.partial { background: linear-gradient(90deg, var(--green) 50%, var(--border) 50%); }
+
+  /* ── DELIVERY BOY CARD ── */
+  .db-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.18s;
+    overflow: hidden;
+  }
+  .db-card:hover { border-color: var(--accent2); }
+  .db-card.selected { border-color: var(--accent); background: #1f2535; }
+
+  .db-top {
+    padding: 12px 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .db-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 16px; font-weight: 700;
+    flex-shrink: 0; position: relative;
+  }
+  .db-online-dot {
+    position: absolute; bottom: 1px; right: 1px;
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 2px solid var(--card);
+  }
+  .db-info { flex: 1; min-width: 0; }
+  .db-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .db-zone { font-size: 11px; color: var(--accent2); display: flex; align-items: center; gap: 4px; }
+  .db-zone svg { width: 10px; height: 10px; }
+  .db-stats-row {
+    display: flex; gap: 0;
+    border-top: 1px solid var(--border);
+  }
+  .db-stat {
+    flex: 1; padding: 8px 12px; text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .db-stat:last-child { border-right: none; }
+  .db-stat-val { font-size: 16px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .db-stat-lbl { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+  /* ── MAP PANEL ── */
+  .map-container {
+    position: relative;
+    background: #0f1520;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .map-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .map-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
+  .area-tag {
+    font-size: 11px; background: rgba(20,184,166,0.1); border: 1px solid rgba(20,184,166,0.3);
+    color: var(--accent2); border-radius: 6px; padding: 3px 10px; font-family: 'JetBrains Mono', monospace;
+  }
+
+  .map-svg-wrap {
+    flex: 1; position: relative; overflow: hidden;
+  }
+  .map-svg-wrap svg {
+    width: 100%; height: 100%;
+  }
+
+  /* zone highlight */
+  .zone-label {
+    position: absolute; font-size: 10px; font-family: 'JetBrains Mono', monospace;
+    color: rgba(20,184,166,0.6); pointer-events: none; text-transform: uppercase; letter-spacing: 0.1em;
+  }
+
+  /* ── ORDER DETAIL PANEL ── */
+  .detail-panel {
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .detail-scroll {
+    overflow-y: auto; flex: 1; padding: 0 0 20px;
+  }
+  .detail-scroll::-webkit-scrollbar { width: 4px; }
+  .detail-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .detail-section { padding: 16px 18px; border-bottom: 1px solid var(--border); }
+  .ds-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin-bottom: 12px;
+  }
+
+  .info-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .info-key { font-size: 12px; color: var(--muted); }
+  .info-val { font-size: 12px; color: var(--text); font-weight: 500; text-align: right; max-width: 60%; }
+
+  /* big stage tracker */
+  .stage-tracker {
+    padding: 18px;
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .stage-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding-bottom: 20px; position: relative;
+  }
+  .stage-item:last-child { padding-bottom: 0; }
+  .stage-line {
+    position: absolute; left: 11px; top: 24px; bottom: 0;
+    width: 2px; background: var(--border);
+  }
+  .stage-item.done  .stage-line { background: var(--green); }
+  .stage-item.active .stage-line { background: linear-gradient(180deg, var(--accent), var(--border)); }
+
+  .stage-icon {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 12px; flex-shrink: 0;
+    position: relative; z-index: 1;
+    border: 2px solid var(--border);
+    background: var(--bg);
+  }
+  .stage-item.done  .stage-icon { background: var(--green); border-color: var(--green); }
+  .stage-item.active .stage-icon { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px rgba(245,158,11,0.15); animation: pulse 1.5s infinite; }
+  .stage-item.pending .stage-icon { background: var(--bg); }
+
+  .stage-content { flex: 1; padding-top: 2px; }
+  .stage-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .stage-item.pending .stage-name { color: var(--muted); }
+  .stage-time { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .stage-desc { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* product summary */
+  .product-row {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px;
+    margin-bottom: 8px;
+  }
+  .product-thumb {
+    width: 48px; height: 48px; border-radius: 8px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    display: grid; place-items: center; font-size: 22px;
+    flex-shrink: 0;
+  }
+  .product-details { flex: 1; min-width: 0; }
+  .product-pname { font-size: 13px; font-weight: 600; }
+  .product-pid { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .product-price { font-size: 14px; font-weight: 700; color: var(--accent); }
+
+  /* legend */
+  .legend {
+    display: flex; gap: 14px; padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* responsive */
+  @media (max-width: 1200px) {
+    .main { grid-template-columns: 300px 1fr 280px; }
+  }
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; grid-template-rows: auto auto auto; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+    .panel { max-height: 420px; }
+  }
+
+  /* ── FILTER TABS ── */
+  .filter-tabs {
+    display: flex; gap: 0; padding: 0 14px 10px;
+    flex-shrink: 0;
+  }
+  .ftab {
+    font-size: 11px; padding: 4px 10px; border-radius: 6px;
+    cursor: pointer; color: var(--muted); font-weight: 500;
+    transition: all 0.15s;
+    background: transparent; border: none; font-family: inherit;
+  }
+  .ftab:hover { color: var(--text); background: var(--border); }
+  .ftab.active { color: var(--accent); background: rgba(245,158,11,0.08); }
+
+  /* ETA chip */
+  .eta-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25);
+    color: var(--blue); border-radius: 20px; padding: 4px 12px;
+    font-size: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace;
+  }
+
+  .btn-outline {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-dim); border-radius: 8px; padding: 7px 14px;
+    font-size: 12px; cursor: pointer; font-family: inherit; font-weight: 500;
+    transition: all 0.15s;
+  }
+  .btn-outline:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn-primary {
+    background: var(--accent); border: none;
+    color: #000; border-radius: 8px; padding: 7px 14px;
+    font-size: 12px; cursor: pointer; font-family: inherit; font-weight: 700;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .action-row {
+    display: flex; gap: 8px; padding: 14px 18px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo">Shop<span>Sphere</span></div>
+    <div class="breadcrumb">admin / deliveries / active</div>
+  </div>
+  <div class="product-pill">
+    <div class="product-icon">📦</div>
+    <div>
+      <div class="product-name">Wireless Earbuds Pro X</div>
+      <div class="product-id">#PRD-00821 · 24 orders active</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-badge">
+      <div class="live-dot"></div> Live Tracking
+    </div>
+  </div>
+</header>
+
+<!-- STATS ROW -->
+<div class="stats-row">
+  <div class="stat">
+    <div class="stat-label">Total Orders</div>
+    <div class="stat-value c-accent">24</div>
+    <div class="stat-sub">for this product today</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Delivered</div>
+    <div class="stat-value c-green">09</div>
+    <div class="stat-sub">37.5% completion</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">In Transit</div>
+    <div class="stat-value c-blue">08</div>
+    <div class="stat-sub">on the road now</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Out for Delivery</div>
+    <div class="stat-value c-orange">05</div>
+    <div class="stat-sub">nearby customers</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Pending Pickup</div>
+    <div class="stat-value c-purple">02</div>
+    <div class="stat-sub">awaiting pickup</div>
+  </div>
+</div>
+
+<!-- MAIN 3-COLUMN GRID -->
+<div class="main">
+
+  <!-- ── LEFT: CUSTOMERS ── -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title"><span class="icon">👤</span> Customers <span class="count-chip">24</span></div>
+    </div>
+    <div class="search-box">
+      <span class="s-icon">🔍</span>
+      <input type="text" placeholder="Search by name, area, order ID…"/>
+    </div>
+    <div class="filter-tabs">
+      <button class="ftab active">All</button>
+      <button class="ftab">In Transit</button>
+      <button class="ftab">Out for Delivery</button>
+      <button class="ftab">Delivered</button>
+    </div>
+    <div class="scroll-area">
+
+      <!-- Customer 1 — Out for delivery (active stage: nearby) -->
+      <div class="customer-card active" onclick="selectCustomer(this, 1)">
+        <div class="cc-top">
+          <div class="avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#000">R</div>
+          <div class="cc-info">
+            <div class="cc-name">Rohan Mehta</div>
+            <div class="cc-addr">📍 Andheri West, Zone A</div>
+          </div>
+          <span class="status-badge" style="background:rgba(249,115,22,0.12);color:#f97316;border:1px solid rgba(249,115,22,0.3)">Nearby</span>
+        </div>
+        <div class="progress-mini">
+          <div class="progress-step">
+            <div class="ps-dot done"></div>
+            <div class="ps-label">Confirmed</div>
+          </div>
+          <div class="ps-line done"></div>
+          <div class="progress-step">
+            <div class="ps-dot done"></div>
+            <div class="ps-label">Picked</div>
+          </div>
+          <div class="ps-line done"></div>
+          <div class="progress-step">
+            <div class="ps-dot done"></div>
+            <div class="ps-label">Transit</div>
+          </div>
+          <div class="ps-line partial"></div>
+          <div class="progress-step">
+            <div class="ps-dot active"></div>
+            <div class="ps-label">Nearby</div>
+          </div>
+          <div class="ps-line"></div>
+          <div class="progress-step">
+            <div class="ps-dot"></div>
+            <div class="ps-label">Done</div>
+          </div>
+        </div>
+        <div class="cc-bottom">
+          <div class="cc-meta">🕐 <strong>ETA 12 min</strong></div>
+          <div class="dot-sep"></div>
+          <div class="cc-meta">Order <strong>#ORD-4421</strong></div>
+          <div class="dot-sep"></div>
+          <div class="cc-meta">🛵 <strong>Amit K.</strong></div>
+        </div>
+      </div>
+
+      <!-- Customer 2 — In Transit -->
+      <div class="customer-card" onclick="selectCustomer(this, 2)">
+        <div class="cc-top">
+          <div class="avatar" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff">P</div>
+          <div class="cc-info">
+            <div class="cc-name">Priya Sharma</div>
+            <div class="cc-addr">📍 Bandra East, Zone B</div>
+          </div>
+          <span class="status-badge" style="background:rgba(59,130,246,0.12);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)">In Transit</span>
+        </div>
+        <div class="progress-mini">
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Confirmed</div></div>
+          <div class="ps-line done"></div>
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Picked</div></div>
+          <div class="ps-line done"></div>
+          <div class="progress-step"><div class="ps-dot active"></div><div class="ps-label">Transit</div></div>
+          <div class="ps-line"></div>
+          <div class="progress-step"><div class="ps-dot"></div><div class="ps-label">Nearby</div></div>
+          <div class="ps-line"></div>
+          <div class="progress-step"><div class="ps-dot"></div><div class="ps-label">Done</div></div>
+        </div>
+        <div class="cc-bottom">
+          <div class="cc-meta">🕐 <strong>ETA 28 min</strong></div>
+          <div class="dot-sep"></div>
+          <div class="cc-meta">Order <strong>#ORD-4398</strong></div>
+          <div class="dot-sep"></div>
+          <div class="cc-meta">🛵 <strong>Deepak R.</strong></div>
+        </div>
+      </div>
+
+      <!-- Customer 3 — Delivered -->
+      <div class="customer-card" onclick="selectCustomer(this, 3)">
+        <div class="cc-top">
+          <div class="avatar" style="background:linear-gradient(135deg,#22c55e,#15803d);color:#fff">N</div>
+          <div class="cc-info">
+            <div class="cc-name">Nisha Patil</div>
+            <div class="cc-addr">📍 Juhu, Zone A</div>
+          </div>
+          <span class="status-badge" style="background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.3)">Delivered ✓</span>
+        </div>
+        <div class="progress-mini">
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Confirmed</div></div>
+          <div class="ps-line done"></div>
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Picked</div></div>
+          <div class="ps-line done"></div>
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Transit</div></div>
+          <div class="ps-line done"></div>
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Nearby</div></div>
+          <div class="ps-line done"></div>
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Done</div></div>
+        </div>
+        <div class="cc-bottom">
+          <div class="cc-meta">✅ <strong>Delivered 11:42 AM</strong></div>
+          <div class="dot-sep"></div>
+          <div class="cc-meta">Order <strong>#ORD-4355</strong></div>
+        </div>
+      </div>
+
+      <!-- Customer 4 — Pending -->
+      <div class="customer-card" onclick="selectCustomer(this, 4)">
+        <div class="cc-top">
+          <div class="avatar" style="background:linear-gradient(135deg,#a855f7,#7e22ce);color:#fff">S</div>
+          <div class="cc-info">
+            <div class="cc-name">Sanjay Kulkarni</div>
+            <div class="cc-addr">📍 Malad West, Zone C</div>
+          </div>
+          <span class="status-badge" style="background:rgba(107,114,128,0.12);color:#9ca3af;border:1px solid rgba(107,114,128,0.3)">Pending</span>
+        </div>
+        <div class="progress-mini">
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Confirmed</div></div>
+          <div class="ps-line"></div>
+          <div class="progress-step"><div class="ps-dot active"></div><div class="ps-label">Picked</div></div>
+          <div class="ps-line"></div>
+          <div class="progress-step"><div class="ps-dot"></div><div class="ps-label">Transit</div></div>
+          <div class="ps-line"></div>
+          <div class="progress-step"><div class="ps-dot"></div><div class="ps-label">Nearby</div></div>
+          <div class="ps-line"></div>
+          <div class="progress-step"><div class="ps-dot"></div><div class="ps-label">Done</div></div>
+        </div>
+        <div class="cc-bottom">
+          <div class="cc-meta">🕐 <strong>ETA 52 min</strong></div>
+          <div class="dot-sep"></div>
+          <div class="cc-meta">Order <strong>#ORD-4463</strong></div>
+          <div class="dot-sep"></div>
+          <div class="cc-meta">🛵 <strong>Kiran S.</strong></div>
+        </div>
+      </div>
+
+      <!-- Customer 5 -->
+      <div class="customer-card" onclick="selectCustomer(this, 5)">
+        <div class="cc-top">
+          <div class="avatar" style="background:linear-gradient(135deg,#14b8a6,#0f766e);color:#fff">A</div>
+          <div class="cc-info">
+            <div class="cc-name">Ananya Desai</div>
+            <div class="cc-addr">📍 Goregaon East, Zone C</div>
+          </div>
+          <span class="status-badge" style="background:rgba(249,115,22,0.12);color:#f97316;border:1px solid rgba(249,115,22,0.3)">Nearby</span>
+        </div>
+        <div class="progress-mini">
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Confirmed</div></div>
+          <div class="ps-line done"></div>
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Picked</div></div>
+          <div class="ps-line done"></div>
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Transit</div></div>
+          <div class="ps-line partial"></div>
+          <div class="progress-step"><div class="ps-dot active"></div><div class="ps-label">Nearby</div></div>
+          <div class="ps-line"></div>
+          <div class="progress-step"><div class="ps-dot"></div><div class="ps-label">Done</div></div>
+        </div>
+        <div class="cc-bottom">
+          <div class="cc-meta">🕐 <strong>ETA 8 min</strong></div>
+          <div class="dot-sep"></div>
+          <div class="cc-meta">Order <strong>#ORD-4471</strong></div>
+          <div class="dot-sep"></div>
+          <div class="cc-meta">🛵 <strong>Kiran S.</strong></div>
+        </div>
+      </div>
+
+      <!-- Customer 6 -->
+      <div class="customer-card" onclick="selectCustomer(this, 6)">
+        <div class="cc-top">
+          <div class="avatar" style="background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff">V</div>
+          <div class="cc-info">
+            <div class="cc-name">Vikram Joshi</div>
+            <div class="cc-addr">📍 Andheri East, Zone A</div>
+          </div>
+          <span class="status-badge" style="background:rgba(59,130,246,0.12);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)">In Transit</span>
+        </div>
+        <div class="progress-mini">
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Confirmed</div></div>
+          <div class="ps-line done"></div>
+          <div class="progress-step"><div class="ps-dot done"></div><div class="ps-label">Picked</div></div>
+          <div class="ps-line done"></div>
+          <div class="progress-step"><div class="ps-dot active"></div><div class="ps-label">Transit</div></div>
+          <div class="ps-line"></div>
+          <div class="progress-step"><div class="ps-dot"></div><div class="ps-label">Nearby</div></div>
+          <div class="ps-line"></div>
+          <div class="progress-step"><div class="ps-dot"></div><div class="ps-label">Done</div></div>
+        </div>
+        <div class="cc-bottom">
+          <div class="cc-meta">🕐 <strong>ETA 35 min</strong></div>
+          <div class="dot-sep"></div>
+          <div class="cc-meta">Order <strong>#ORD-4388</strong></div>
+          <div class="dot-sep"></div>
+          <div class="cc-meta">🛵 <strong>Amit K.</strong></div>
+        </div>
+      </div>
+
+    </div><!-- scroll-area -->
+  </div><!-- panel customers -->
+
+
+  <!-- ── MIDDLE: MAP + DELIVERY BOYS ── -->
+  <div class="panel" style="border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden;">
+
+    <!-- Zone Map -->
+    <div class="map-header">
+      <div class="map-title">📡 Zone Map · Mumbai</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="area-tag">Zone A · B · C active</div>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div> Nearby</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> In Transit</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> Delivered</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6b7280"></div> Pending</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Delivery Boy</div>
+    </div>
+
+    <!-- SVG Map -->
+    <div class="map-svg-wrap">
+      <svg viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+        <defs>
+          <radialGradient id="g1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#1e293b" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#0f1520" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- grid -->
+        <g stroke="#1e293b" stroke-width="0.5" opacity="0.7">
+          <line x1="0" y1="57" x2="640" y2="57"/>
+          <line x1="0" y1="114" x2="640" y2="114"/>
+          <line x1="0" y1="171" x2="640" y2="171"/>
+          <line x1="0" y1="228" x2="640" y2="228"/>
+          <line x1="0" y1="285" x2="640" y2="285"/>
+          <line x1="80" y1="0" x2="80" y2="340"/>
+          <line x1="160" y1="0" x2="160" y2="340"/>
+          <line x1="240" y1="0" x2="240" y2="340"/>
+          <line x1="320" y1="0" x2="320" y2="340"/>
+          <line x1="400" y1="0" x2="400" y2="340"/>
+          <line x1="480" y1="0" x2="480" y2="340"/>
+          <line x1="560" y1="0" x2="560" y2="340"/>
+        </g>
+
+        <!-- Zone A bubble -->
+        <ellipse cx="200" cy="130" rx="130" ry="90" fill="rgba(59,130,246,0.05)" stroke="rgba(59,130,246,0.15)" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="76" y="58" fill="rgba(59,130,246,0.4)" font-size="10" font-family="JetBrains Mono,monospace" letter-spacing="2">ZONE A</text>
+
+        <!-- Zone B bubble -->
+        <ellipse cx="430" cy="140" rx="110" ry="80" fill="rgba(20,184,166,0.05)" stroke="rgba(20,184,166,0.15)" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="330" y="72" fill="rgba(20,184,166,0.4)" font-size="10" font-family="JetBrains Mono,monospace" letter-spacing="2">ZONE B</text>
+
+        <!-- Zone C bubble -->
+        <ellipse cx="310" cy="270" rx="150" ry="60" fill="rgba(168,85,247,0.05)" stroke="rgba(168,85,247,0.15)" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="182" y="310" fill="rgba(168,85,247,0.4)" font-size="10" font-family="JetBrains Mono,monospace" letter-spacing="2">ZONE C</text>
+
+        <!-- Roads -->
+        <path d="M0 160 Q160 155 320 165 Q480 175 640 160" stroke="#1a2540" stroke-width="8" fill="none"/>
+        <path d="M0 160 Q160 155 320 165 Q480 175 640 160" stroke="#243050" stroke-width="2" fill="none" stroke-dasharray="20 10"/>
+        <path d="M320 0 Q315 90 310 165 Q305 240 300 340" stroke="#1a2540" stroke-width="6" fill="none"/>
+        <path d="M320 0 Q315 90 310 165 Q305 240 300 340" stroke="#243050" stroke-width="1.5" fill="none" stroke-dasharray="15 8"/>
+
+        <!-- ── DELIVERY ROUTES (animated lines) ── -->
+        <!-- Amit K route: Zone A -->
+        <path d="M205,155 L145,185" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4">
+          <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.5s" repeatCount="indefinite"/>
+        </path>
+        <path d="M205,155 L235,115" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4">
+          <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.5s" repeatCount="indefinite"/>
+        </path>
+
+        <!-- Deepak route: Zone B -->
+        <path d="M425,155 L385,130" stroke="#14b8a6" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4">
+          <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="2s" repeatCount="indefinite"/>
+        </path>
+
+        <!-- Kiran route: Zone C -->
+        <path d="M300,255 L250,270" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4">
+          <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.8s" repeatCount="indefinite"/>
+        </path>
+        <path d="M300,255 L360,265" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4">
+          <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.8s" repeatCount="indefinite"/>
+        </path>
+
+        <!-- ── CUSTOMER PINS ── -->
+        <!-- Rohan Mehta — Nearby / orange -->
+        <g filter="url(#glow)">
+          <circle cx="145" cy="185" r="18" fill="rgba(249,115,22,0.12)" stroke="rgba(249,115,22,0.4)" stroke-width="1.5">
+            <animate attributeName="r" values="18;22;18" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="145" cy="185" r="7" fill="#f97316"/>
+          <text x="145" y="175" text-anchor="middle" fill="#f97316" font-size="9" font-family="JetBrains Mono,monospace">R.Mehta</text>
+        </g>
+
+        <!-- Priya — in transit / blue -->
+        <circle cx="385" cy="130" r="16" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.3)" stroke-width="1.5"/>
+        <circle cx="385" cy="130" r="6" fill="#3b82f6"/>
+        <text x="385" y="119" text-anchor="middle" fill="#3b82f6" font-size="9" font-family="JetBrains Mono,monospace">P.Sharma</text>
+
+        <!-- Nisha — delivered / green -->
+        <circle cx="235" cy="115" r="6" fill="#22c55e"/>
+        <text x="235" y="105" text-anchor="middle" fill="#22c55e" font-size="9" font-family="JetBrains Mono,monospace">N.Patil ✓</text>
+
+        <!-- Sanjay — pending / grey -->
+        <circle cx="250" cy="270" r="6" fill="#6b7280"/>
+        <text x="250" y="260" text-anchor="middle" fill="#6b7280" font-size="9" font-family="JetBrains Mono,monospace">S.Kulkarni</text>
+
+        <!-- Ananya — nearby / orange -->
+        <g filter="url(#glow)">
+          <circle cx="362" cy="265" r="18" fill="rgba(249,115,22,0.12)" stroke="rgba(249,115,22,0.4)" stroke-width="1.5">
+            <animate attributeName="r" values="18;23;18" dur="1.8s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="1;0.5;1" dur="1.8s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="362" cy="265" r="7" fill="#f97316"/>
+          <text x="362" y="254" text-anchor="middle" fill="#f97316" font-size="9" font-family="JetBrains Mono,monospace">A.Desai</text>
+        </g>
+
+        <!-- Vikram — in transit / blue -->
+        <circle cx="175" cy="135" r="6" fill="#3b82f6"/>
+        <text x="175" y="125" text-anchor="middle" fill="#3b82f6" font-size="9" font-family="JetBrains Mono,monospace">V.Joshi</text>
+
+        <!-- ── DELIVERY BOY PINS ── -->
+        <!-- Amit K — Zone A -->
+        <g>
+          <circle cx="205" cy="155" r="14" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2"/>
+          <text x="205" y="159" text-anchor="middle" fill="#f59e0b" font-size="12">🛵</text>
+          <text x="205" y="141" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="bold" font-family="JetBrains Mono,monospace">Amit K.</text>
+        </g>
+
+        <!-- Deepak R — Zone B -->
+        <g>
+          <circle cx="425" cy="155" r="14" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2"/>
+          <text x="425" y="159" text-anchor="middle" fill="#f59e0b" font-size="12">🛵</text>
+          <text x="425" y="141" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="bold" font-family="JetBrains Mono,monospace">Deepak R.</text>
+        </g>
+
+        <!-- Kiran S — Zone C -->
+        <g>
+          <circle cx="300" cy="255" r="14" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2"/>
+          <text x="300" y="259" text-anchor="middle" fill="#f59e0b" font-size="12">🛵</text>
+          <text x="300" y="241" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="bold" font-family="JetBrains Mono,monospace">Kiran S.</text>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Delivery Boy Cards -->
+    <div style="border-top:1px solid var(--border); padding: 12px 12px 0; flex-shrink:0;">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:0 4px 8px;">🛵 Delivery Personnel</div>
+    </div>
+    <div class="scroll-area" style="max-height:220px;">
+
+      <!-- Amit K -->
+      <div class="db-card selected">
+        <div class="db-top">
+          <div class="db-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;">
+            A
+            <div class="db-online-dot" style="background:var(--green);"></div>
+          </div>
+          <div class="db-info">
+            <div class="db-name">Amit Kumar</div>
+            <div class="db-zone">
+              <svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="var(--accent2)"/></svg>
+              Zone A · Andheri West / East / Juhu
+            </div>
+          </div>
+          <span class="status-badge" style="background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.25)">Online</span>
+        </div>
+        <div class="db-stats-row">
+          <div class="db-stat"><div class="db-stat-val c-accent">3</div><div class="db-stat-lbl">Assigned</div></div>
+          <div class="db-stat"><div class="db-stat-val c-green">1</div><div class="db-stat-lbl">Delivered</div></div>
+          <div class="db-stat"><div class="db-stat-val c-orange">1</div><div class="db-stat-lbl">Nearby</div></div>
+          <div class="db-stat"><div class="db-stat-val" style="color:var(--text-dim)">4.8⭐</div><div class="db-stat-lbl">Rating</div></div>
+        </div>
+      </div>
+
+      <!-- Deepak R -->
+      <div class="db-card">
+        <div class="db-top">
+          <div class="db-avatar" style="background:linear-gradient(135deg,#14b8a6,#0f766e);color:#fff;">
+            D
+            <div class="db-online-dot" style="background:var(--green);"></div>
+          </div>
+          <div class="db-info">
+            <div class="db-name">Deepak Rajput</div>
+            <div class="db-zone">
+              <svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="var(--accent2)"/></svg>
+              Zone B · Bandra East / West
+            </div>
+          </div>
+          <span class="status-badge" style="background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.25)">Online</span>
+        </div>
+        <div class="db-stats-row">
+          <div class="db-stat"><div class="db-stat-val c-accent">2</div><div class="db-stat-lbl">Assigned</div></div>
+          <div class="db-stat"><div class="db-stat-val c-green">2</div><div class="db-stat-lbl">Delivered</div></div>
+          <div class="db-stat"><div class="db-stat-val c-blue">1</div><div class="db-stat-lbl">Transit</div></div>
+          <div class="db-stat"><div class="db-stat-val" style="color:var(--text-dim)">4.6⭐</div><div class="db-stat-lbl">Rating</div></div>
+        </div>
+      </div>
+
+      <!-- Kiran S -->
+      <div class="db-card">
+        <div class="db-top">
+          <div class="db-avatar" style="background:linear-gradient(135deg,#a855f7,#7e22ce);color:#fff;">
+            K
+            <div class="db-online-dot" style="background:var(--orange);"></div>
+          </div>
+          <div class="db-info">
+            <div class="db-name">Kiran Sawant</div>
+            <div class="db-zone">
+              <svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="var(--accent2)"/></svg>
+              Zone C · Malad West / Goregaon East
+            </div>
+          </div>
+          <span class="status-badge" style="background:rgba(249,115,22,0.1);color:var(--orange);border:1px solid rgba(249,115,22,0.25)">Busy</span>
+        </div>
+        <div class="db-stats-row">
+          <div class="db-stat"><div class="db-stat-val c-accent">4</div><div class="db-stat-lbl">Assigned</div></div>
+          <div class="db-stat"><div class="db-stat-val c-green">2</div><div class="db-stat-lbl">Delivered</div></div>
+          <div class="db-stat"><div class="db-stat-val c-orange">2</div><div class="db-stat-lbl">Nearby</div></div>
+          <div class="db-stat"><div class="db-stat-val" style="color:var(--text-dim)">4.9⭐</div><div class="db-stat-lbl">Rating</div></div>
+        </div>
+      </div>
+
+    </div><!-- scroll delivery boys -->
+  </div><!-- middle panel -->
+
+
+  <!-- ── RIGHT: ORDER DETAIL ── -->
+  <div class="panel detail-panel">
+    <div class="panel-header">
+      <div class="panel-title"><span class="icon">📋</span> Order Detail</div>
+      <div class="eta-chip">⏱ ETA 12 min</div>
+    </div>
+    <div class="detail-scroll">
+
+      <!-- Product -->
+      <div class="detail-section">
+        <div class="ds-title">Product</div>
+        <div class="product-row">
+          <div class="product-thumb">🎧</div>
+          <div class="product-details">
+            <div class="product-pname">Wireless Earbuds Pro X</div>
+            <div class="product-pid">#PRD-00821 · Qty: 1</div>
+          </div>
+          <div class="product-price">₹2,499</div>
+        </div>
+      </div>
+
+      <!-- Customer Info -->
+      <div class="detail-section">
+        <div class="ds-title">Customer</div>
+        <div class="info-row"><div class="info-key">Name</div><div class="info-val">Rohan Mehta</div></div>
+        <div class="info-row"><div class="info-key">Phone</div><div class="info-val">+91 98765 43210</div></div>
+        <div class="info-row"><div class="info-key">Order ID</div><div class="info-val" style="font-family:'JetBrains Mono',monospace;font-size:11px;">#ORD-4421</div></div>
+        <div class="info-row"><div class="info-key">Address</div><div class="info-val">Flat 4B, Sundar CHS, Andheri West, Mumbai - 400058</div></div>
+        <div class="info-row"><div class="info-key">Zone</div><div class="info-val" style="color:var(--accent2)">Zone A</div></div>
+        <div class="info-row"><div class="info-key">Payment</div><div class="info-val" style="color:var(--green)">Paid · UPI ✓</div></div>
+      </div>
+
+      <!-- Delivery Boy -->
+      <div class="detail-section">
+        <div class="ds-title">Delivery Partner</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <div class="avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;width:44px;height:44px;font-size:16px;">A</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;">Amit Kumar</div>
+            <div style="font-size:11px;color:var(--accent2);">Zone A Specialist · 4.8 ⭐</div>
+          </div>
+        </div>
+        <div class="info-row"><div class="info-key">Phone</div><div class="info-val">+91 91234 56789</div></div>
+        <div class="info-row"><div class="info-key">Vehicle</div><div class="info-val">MH 02 AK 5521 · Bike</div></div>
+        <div class="info-row"><div class="info-key">Current Zone</div><div class="info-val" style="color:var(--accent2)">Zone A</div></div>
+        <div class="info-row"><div class="info-key">Orders Today</div><div class="info-val">3 assigned · 1 done</div></div>
+      </div>
+
+      <!-- Delivery Stage Tracker -->
+      <div class="detail-section" style="border-bottom:none;">
+        <div class="ds-title">Delivery Progress</div>
+      </div>
+      <div class="stage-tracker">
+
+        <div class="stage-item done">
+          <div class="stage-line"></div>
+          <div class="stage-icon">✓</div>
+          <div class="stage-content">
+            <div class="stage-name">Order Confirmed</div>
+            <div class="stage-time">Today · 9:15 AM</div>
+            <div class="stage-desc">Payment received. Order queued for pickup.</div>
+          </div>
+        </div>
+
+        <div class="stage-item done">
+          <div class="stage-line"></div>
+          <div class="stage-icon">✓</div>
+          <div class="stage-content">
+            <div class="stage-name">Picked Up</div>
+            <div class="stage-time">Today · 9:48 AM</div>
+            <div class="stage-desc">Amit Kumar picked up from warehouse.</div>
+          </div>
+        </div>
+
+        <div class="stage-item done">
+          <div class="stage-line"></div>
+          <div class="stage-icon">✓</div>
+          <div class="stage-content">
+            <div class="stage-name">In Transit</div>
+            <div class="stage-time">Today · 10:02 AM</div>
+            <div class="stage-desc">En route to delivery zone.</div>
+          </div>
+        </div>
+
+        <div class="stage-item active">
+          <div class="stage-line"></div>
+          <div class="stage-icon">🛵</div>
+          <div class="stage-content">
+            <div class="stage-name">Out for Delivery · Nearby</div>
+            <div class="stage-time">Now · ~1.2 km away</div>
+            <div class="stage-desc">Delivery partner is nearby your location.</div>
+          </div>
+        </div>
+
+        <div class="stage-item pending">
+          <div class="stage-icon">🏠</div>
+          <div class="stage-content">
+            <div class="stage-name">Delivered</div>
+            <div class="stage-time">Estimated · 11:58 AM</div>
+            <div class="stage-desc">Awaiting final handoff at destination.</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- detail scroll -->
+    <div class="action-row">
+      <button class="btn-outline" style="flex:1;">📞 Call Rider</button>
+      <button class="btn-primary" style="flex:1;">📍 Track Live</button>
+    </div>
+  </div><!-- detail panel -->
+
+</div><!-- main -->
+
+<!-- Delivery Management -->
+<div style="padding:20px 28px;border-top:1px solid var(--border);background:var(--surface);">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <div style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);">
+      🛠️ Delivery Management
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="autoAssignDeliveries()" class="btn-outline">🔄 Auto-Assign (7-day window)</button>
+      <button onclick="openAddDeliveryBoyModal()" class="btn-primary">➕ Add Delivery Detail</button>
+    </div>
+  </div>
+  <div id="ordersManageList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;"></div>
+</div>
+
+<!-- Add Delivery Boy Modal -->
+<div id="addDeliveryBoyModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.6);z-index:99999;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;width:380px;">
+    <h3 style="margin-bottom:16px;font-size:16px;">➕ Add Delivery Boy</h3>
+    <input id="dbName" placeholder="Full name" style="width:100%;margin-bottom:8px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);">
+    <input id="dbPhone" placeholder="Phone number" style="width:100%;margin-bottom:8px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);">
+    <input id="dbVehicle" placeholder="Vehicle number" style="width:100%;margin-bottom:8px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);">
+    <input id="dbZone" placeholder="Zone / covered areas (e.g. Andheri West, Juhu)" style="width:100%;margin-bottom:14px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);">
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeAddDeliveryBoyModal()" class="btn-outline" style="flex:1;">Cancel</button>
+      <button onclick="submitDeliveryBoy()" class="btn-primary" style="flex:1;">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function selectCustomer(el, id) {
+    document.querySelectorAll('.customer-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+  document.querySelectorAll('.ftab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.db-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.db-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    });
+  });
+
+  function openAddDeliveryBoyModal() { document.getElementById('addDeliveryBoyModal').style.display = 'flex'; }
+  function closeAddDeliveryBoyModal() { document.getElementById('addDeliveryBoyModal').style.display = 'none'; }
+
+  async function submitDeliveryBoy() {
+    const body = {
+      name: document.getElementById('dbName').value,
+      phone: document.getElementById('dbPhone').value,
+      vehicle_number: document.getElementById('dbVehicle').value,
+      zone_address: document.getElementById('dbZone').value
+    };
+    const res = await fetch('/api/owner/delivery-boys', {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+    });
+    if (res.ok) { closeAddDeliveryBoyModal(); loadOrdersManage(); }
+  }
+
+  async function autoAssignDeliveries() {
+    const res = await fetch('/api/owner/auto-assign-deliveries', { method: 'POST' });
+    const data = await res.json();
+    alert(`Assigned ${data.assigned || 0} order(s)`);
+    loadOrdersManage();
+  }
+
+  async function updateStatus(orderId, status) {
+    await fetch(`/api/owner/update-delivery-status/${orderId}`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ status })
+    });
+    loadOrdersManage();
+  }
+
+  async function loadOrdersManage() {
+    const res = await fetch('/api/owner/delivery-orders');
+    const data = await res.json();
+    const container = document.getElementById('ordersManageList');
+    container.innerHTML = (data.orders || []).map(o => `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+        <div style="font-size:13px;font-weight:600;">${o.product_name || 'Order #' + o.id}</div>
+        <div style="font-size:11px;color:var(--muted);margin:4px 0;">${o.username || 'User #' + o.user_id} · ${o.delivery_boy_name || 'Unassigned'}</div>
+        ${o.preferred_time_slot ? `<div style="font-size:11px;color:var(--orange);margin-bottom:6px;">🕐 Requested: ${o.preferred_time_slot}</div>` : ''}
+        <select onchange="updateStatus(${o.id}, this.value)" style="width:100%;padding:6px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;">
+          <option value="order_placed" ${o.status==='order_placed'?'selected':''}>Order Placed</option>
+          <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmed</option>
+          <option value="shipped" ${o.status==='shipped'?'selected':''}>Shipped</option>
+          <option value="out_for_delivery" ${o.status==='out_for_delivery'?'selected':''}>Out for Delivery</option>
+          <option value="delivered" ${o.status==='delivered'?'selected':''}>Delivered</option>
+        </select>
+      </div>
+    `).join('');
+  }
+  loadOrdersManage();
+</script>
+</body>
+</html>
