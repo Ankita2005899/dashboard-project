@@ -863,8 +863,10 @@
                         <div style="margin-top:8px;background:#d1fae5;color:#065f46;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:700;text-align:center;">
                             ✅ Purchased on ${item.date}
                         </div>
+                        <div id="delivery-action-${item.id}" style="margin-top:8px;"></div>
                     `;
                     slider.appendChild(card);
+                    renderDeliveryAction(item.id);
                 });
 
                 row.appendChild(slider);
@@ -1048,6 +1050,46 @@
         // ================= INIT =================
         document.addEventListener("DOMContentLoaded", loadCartItems);
 
+
+        async function renderDeliveryAction(cartId) {
+    const container = document.getElementById(`delivery-action-${cartId}`);
+    if (!container) return;
+
+    try {
+        const res = await fetch(`/api/check-delivery-started/${cartId}`);
+        const data = await res.json();
+
+        if (data.started) {
+            container.innerHTML = `<div style="background:#fef3c7;color:#92400e;padding:6px 12px;
+                border-radius:8px;font-size:12px;font-weight:700;text-align:center;">
+                📦 Delivery in progress (${data.status.replace(/_/g, ' ')})
+            </div>`;
+        } else {
+            container.innerHTML = `<button onclick="startDelivery(${cartId})"
+                style="width:100%;padding:8px;border-radius:6px;border:none;cursor:pointer;
+                font-weight:700;background:#3b82f6;color:white;">
+                🚀 Start Delivery
+            </button>`;
+        }
+    } catch (e) {
+        console.error('Failed to check delivery status:', e);
+    }
+}
+
+async function startDelivery(cartId) {
+    try {
+        const res = await fetch(`/api/start-delivery/${cartId}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.status === 'success' || data.status === 'already_started') {
+            renderDeliveryAction(cartId);
+            if (typeof loadDeliveryStatuses === 'function') loadDeliveryStatuses();
+        } else {
+            alert('⚠ ' + (data.error || 'Failed to start delivery'));
+        }
+    } catch (e) {
+        alert('⚠ Network error starting delivery');
+    }
+}
     </script>
 
     <footer class="footer">

@@ -6898,6 +6898,72 @@ def add_delivery_status_column():
         if conn and conn.is_connected():
             conn.close()  
   
+  
+  
+#______________ delivery view_card .html madhe chalu karila ________________________
+
+
+@app.route("/api/start-delivery/<int:cart_id>", methods=["POST"])
+def start_delivery(cart_id):
+    conn = None
+    try:
+        uid = session.get('user_id')
+        uname = session.get('username')
+        if not uid:
+            return jsonify({"error": "Not logged in"}), 401
+
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        table_name = get_cart_table_name(uname, uid)
+        cursor.execute(f"SELECT * FROM `{table_name}` WHERE id = %s AND user_id = %s", (cart_id, uid))
+        item = cursor.fetchone()
+        if not item:
+            cursor.close()
+            return jsonify({"error": "Item not found"}), 404
+
+        # Prevent starting delivery twice for the same purchased item
+        cursor.execute("SELECT id, status FROM delivery_orders WHERE order_ref = %s", (str(cart_id),))
+        existing = cursor.fetchone()
+        if existing:
+            cursor.close()
+            return jsonify({"status": "already_started", "order_id": existing["id"], "order_status": existing["status"]})
+
+        cursor.execute("""
+            INSERT INTO delivery_orders (user_id, username, product_name, order_ref, status)
+            VALUES (%s, %s, %s, %s, 'order_placed')
+        """, (uid, uname, item["name"], str(cart_id)))
+        conn.commit()
+        new_id = cursor.lastrowid
+        cursor.close()
+        return jsonify({"status": "success", "order_id": new_id})
+    except Exception as e:
+        import traceback
+        print("start_delivery crashed:", traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+@app.route("/api/check-delivery-started/<int:cart_id>", methods=["GET"])
+def check_delivery_started(cart_id):
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT id, status FROM delivery_orders WHERE order_ref = %s", (str(cart_id),))
+        row = cursor.fetchone()
+        cursor.close()
+        return jsonify({"started": bool(row), "status": row["status"] if row else None})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
+
+
+  
 #--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
 
 
