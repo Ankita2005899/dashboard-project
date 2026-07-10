@@ -804,11 +804,13 @@
         🎁 Combo Offer Purchase
     </div>` : ''}
     <h4>₹${item.price}</h4>
-    <div style="margin-top:8px;background:#d1fae5;color:#065f46;padding:6px 12px;
-        border-radius:8px;font-size:13px;font-weight:700;text-align:center;">
-        ✅ Purchased on ${item.date}
-    </div>
+    <button class="buy-btn">🛒 Buy Now</button>
 `;
+
+                    card.querySelector(".buy-btn").addEventListener("click", function (e) {
+                        e.preventDefault();
+                        buyNow(card.dataset.cartId, card);
+                    });
 
                     slider.appendChild(card);
                 });
