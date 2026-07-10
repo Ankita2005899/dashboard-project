@@ -1931,8 +1931,8 @@ def final_add():
                 cursor.execute(f"""
                     INSERT INTO `{client_table}`
                     (user_id, row_no, category, name, price, image, video, availability,
-                     detail, address, quantity, total, uploaded_at, date, product_id)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW(),%s)
+                     detail, address, quantity, total, uploaded_at, date, product_id, mode)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW(),%s,NULL)
                 """, (
                     user_id, row_no_value, item["category"], item["name"],
                     item["price"], item.get("image", ""), item.get("video", ""),
