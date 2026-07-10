@@ -6865,6 +6865,39 @@ def delivery_stats():
         if conn and conn.is_connected():
             conn.close()
   
+  
+@app.route("/api/owner/add-delivery-status-column", methods=["POST"])
+def add_delivery_status_column():
+    conn = None
+    try:
+        conn   = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT TABLE_NAME FROM information_schema.tables
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME LIKE '%_product_activity'
+        """)
+        tables = [row['TABLE_NAME'] for row in cursor.fetchall()]
+
+        altered, skipped = [], []
+        for t in tables:
+            try:
+                cursor.execute(f"""
+                    ALTER TABLE `{t}` ADD COLUMN delivery_status VARCHAR(30) DEFAULT 'not_delivered'
+                """)
+                conn.commit()
+    
+                altered.append(t)
+            except Exception as e:
+                skipped.append({"table": t, "reason": str(e)})
+
+        cursor.close()
+        return jsonify({"altered": altered, "skipped": skipped})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn and conn.is_connected():
+            conn.close()  
+  
 #--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
 
 
