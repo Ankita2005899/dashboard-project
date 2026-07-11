@@ -835,10 +835,30 @@
                 return;
             }
 
+            // ✅ Items whose delivery has already been started belong in the
+            // Delivery Status section only — filter them out here so a card
+            // never appears in both sections at once.
+            const checks = await Promise.all(items.map(async item => {
+                try {
+                    const r = await fetch(`/api/check-delivery-started/${item.id}`);
+                    const d = await r.json();
+                    return { item, started: !!d.started };
+                } catch (e) {
+                    return { item, started: false };
+                }
+            }));
+
+            const pendingItems = checks.filter(c => !c.started).map(c => c.item);
+
+            if (pendingItems.length === 0) {
+                document.getElementById("emptyPurchased").style.display = "block";
+                return;
+            }
+
             document.getElementById("emptyPurchased").style.display = "none";
 
             const grouped = {};
-            items.forEach(item => {
+            pendingItems.forEach(item => {
                 const date = item.date || "Unknown Date";
                 if (!grouped[date]) grouped[date] = [];
                 grouped[date].push(item);
@@ -1083,7 +1103,30 @@
                 const res = await fetch(`/api/start-delivery/${cartId}`, { method: 'POST' });
                 const data = await res.json();
                 if (data.status === 'success' || data.status === 'already_started') {
-                    renderDeliveryAction(cartId);
+
+                    // ✅ Remove this card from the Purchased section entirely —
+                    // it now belongs in the Delivery Status section instead.
+                    const actionDiv = document.getElementById(`delivery-action-${cartId}`);
+                    const card = actionDiv ? actionDiv.closest('.card') : null;
+
+                    if (card) {
+                        const slider = card.parentElement;
+                        card.remove();
+
+                        // Clean up the date heading/row if it's now empty
+                        if (slider && slider.children.length === 0) {
+                            const row = slider.closest('.cart-row');
+                            if (row) row.remove();
+                        }
+
+                        // Show the "no purchased items" message if the grid is now empty
+                        const purchasedGrid = document.getElementById('purchasedGrid');
+                        if (purchasedGrid && purchasedGrid.children.length === 0) {
+                            document.getElementById('emptyPurchased').style.display = 'block';
+                        }
+                    }
+
+                    // ✅ Add the card into the Delivery Status section at the bottom
                     if (typeof loadDeliveryStatuses === 'function') loadDeliveryStatuses();
                 } else {
                     alert('⚠ ' + (data.error || 'Failed to start delivery'));
