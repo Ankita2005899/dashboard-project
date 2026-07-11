@@ -1512,7 +1512,8 @@
                 video: item.video || "",
                 availability: Number(item.availability),
                 detail: item.detail || "",
-                address: item.address || ""
+                address: item.address || "",
+                date: item.date || getTodayDateString()   // ✅ correct date for grouping in view_card.html
             }));
 
             fetch("/final-add", {
@@ -1539,6 +1540,18 @@
             if (category === "study") return "study_material";
             if (category === "kitchen") return "card";
             return category;
+        }
+
+        // ✅ Returns today's date as "YYYY-MM-DD" — the same format
+        // view_card.html expects/groups items by. Every payload sent
+        // to /final-add below includes this so items land under the
+        // correct date instead of "Unknown Date".
+        function getTodayDateString() {
+            const d = new Date();
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, "0");
+            const dd = String(d.getDate()).padStart(2, "0");
+            return `${yyyy}-${mm}-${dd}`;
         }
 
 
@@ -1579,7 +1592,8 @@
                 video: product.video || "",
                 availability: Number(product.availability),
                 detail: product.material || "",
-                address: product.address || ""
+                address: product.address || "",
+                date: getTodayDateString()   // ✅ correct date for grouping in view_card.html
             };
             cart.push(cartItem);
 
@@ -1969,7 +1983,8 @@
                         product1_image: p1Image,
                         product2_name: p2Name,
                         product2_image: p2Image,
-                        discount: discount
+                        discount: discount,
+                        date: getTodayDateString()   // ✅ correct date for grouping in view_card.html
                     })
                 });
                 const data = await res.json();
