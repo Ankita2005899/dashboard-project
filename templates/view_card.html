@@ -872,6 +872,14 @@
                 const slider = document.createElement("div");
                 slider.className = "slider";
 
+                // ✅ Attach row+slider to the live page BEFORE adding cards into it.
+                // renderDeliveryAction() looks up elements via document.getElementById,
+                // which only finds nodes that are already in the live DOM tree —
+                // attaching first (while slider is still empty) means every card
+                // we append after this is immediately visible to that lookup.
+                row.appendChild(slider);
+                container.appendChild(row);
+
                 grouped[date].forEach(item => {
                     const card = document.createElement("div");
                     card.className = "card";
@@ -890,9 +898,6 @@
                     slider.appendChild(card);
                     renderDeliveryAction(item.id);
                 });
-
-                row.appendChild(slider);
-                container.appendChild(row);
             });
         }
 
