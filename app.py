@@ -3006,14 +3006,42 @@ def verify_payment():
 
         # âœ… Purchased product ki detail fetch karo
         cursor.execute(f"""
-            SELECT product_id, category FROM `{table_name}`
+            SELECT product_id, category, name, image, video, price, availability, detail, address, quantity
+            FROM `{table_name}`
             WHERE id = %s
         """, (cart_id,))
         purchased_item = cursor.fetchone()
 
         if purchased_item:
-            product_id = purchased_item[0]
-            category   = purchased_item[1]
+            product_id   = purchased_item[0]
+            category     = purchased_item[1]
+            item_name    = purchased_item[2]
+            item_image   = purchased_item[3]
+            item_video   = purchased_item[4]
+            item_price   = purchased_item[5]
+            item_avail   = purchased_item[6]
+            item_detail  = purchased_item[7]
+            item_address = purchased_item[8]
+            item_qty     = purchased_item[9]
+
+            # âœ… your_item table insert
+            your_item_table = f"{safe_username}_{user_id}_your_item"
+            cat_table_map_yi = {"card": "card", "food_items": "food_items", "study_material": "study_material"}
+            prod_table_yi = cat_table_map_yi.get(category, "card")
+
+            cursor.execute(f"SELECT material FROM `{prod_table_yi}` WHERE id=%s", (product_id,))
+            mat_row = cursor.fetchone()
+            item_material = mat_row[0] if mat_row else None
+
+            try:
+                cursor.execute(f"""
+                    INSERT INTO `{your_item_table}`
+                    (store_data_id, category, name, image, video, price, availability, detail, address, quantity, made_of)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (product_id, category, item_name, item_image, item_video, item_price,
+                      item_avail, item_detail, item_address, item_qty, item_material))
+            except Exception as e:
+                print("your_item insert error:", e)
 
             # âœ… product_activity purchase count update
             cursor.execute(f"""
