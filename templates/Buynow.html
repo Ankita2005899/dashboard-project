@@ -842,6 +842,20 @@
                     let result = await verify.json();
 
                     if (result.status === "success") {
+                        // ✅ Make sure this item is removed from "My Cart" now that
+                        // it's been purchased — force_remove:true clears it fully
+                        // (not just decrements quantity), regardless of whether
+                        // /verify-payment already does this on the backend.
+                        try {
+                            await fetch("/remove-from-cart", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ id: cartId, force_remove: true })
+                            });
+                        } catch (e) {
+                            console.error("Failed to remove purchased item from cart:", e);
+                        }
+
                         document.getElementById("paymentOverlay").style.display = "none";
                         document.getElementById("successPopup").style.display = "flex";
                     } else {
