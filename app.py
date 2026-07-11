@@ -196,11 +196,12 @@ def create_user_product_activity_table(username, user_id):
             today_purchase_count INT DEFAULT 0,
             purchased_time DATETIME,
             month VARCHAR(20),
-            growth FLOAT DEFAULT 0
+            growth FLOAT DEFAULT 0,
+            delivery_status VARCHAR(30) DEFAULT NULL
         )
     """)
 
-    # âœ… Purani tables fix karo â€” add_to_cart_time â†’ add_to_cart_date_time
+    # ✅ Purani tables fix karo — add_to_cart_time → add_to_cart_date_time
     cursor.execute(f"""
         SELECT COUNT(*) FROM information_schema.columns 
         WHERE table_schema = DATABASE() 
@@ -213,6 +214,23 @@ def create_user_product_activity_table(username, user_id):
         cursor.execute(f"""
             ALTER TABLE `{table_name}`
             CHANGE COLUMN `add_to_cart_time` `add_to_cart_date_time` DATETIME
+        """)
+
+    # ✅ Purani tables jo already CREATE ho chuki hain unme delivery_status
+    # column add karo agar missing hai (naye users ke liye upar wala CREATE
+    # TABLE already handle karta hai).
+    cursor.execute(f"""
+        SELECT COUNT(*) FROM information_schema.columns 
+        WHERE table_schema = DATABASE() 
+        AND table_name = %s 
+        AND column_name = 'delivery_status'
+    """, (table_name,))
+    has_delivery_status = cursor.fetchone()[0]
+
+    if not has_delivery_status:
+        cursor.execute(f"""
+            ALTER TABLE `{table_name}`
+            ADD COLUMN delivery_status VARCHAR(30) DEFAULT NULL
         """)
 
     # âœ… search_time aur purchased_time DATETIME karo
