@@ -1498,12 +1498,22 @@
         }
 
         document.getElementById("addToDbBtn").addEventListener("click", () => {
+            // ✅ Skip items that handleAddToCart() already auto-saved to the
+            // database — only submit genuinely pending ones, so this button
+            // never re-inserts the same item a second time.
+            const pendingItems = cart.filter(item => !item._alreadySavedToDb);
+
             if (cart.length === 0) {
                 alert("Cart is empty");
                 return;
             }
 
-            const payload = cart.map(item => ({
+            if (pendingItems.length === 0) {
+                alert("✅ All items are already saved");
+                return;
+            }
+
+            const payload = pendingItems.map(item => ({
                 product_id: item.product_id,
                 category: item.category,  // must match Flask mapping
                 name: item.name,
@@ -1593,7 +1603,8 @@
                 availability: Number(product.availability),
                 detail: product.material || "",
                 address: product.address || "",
-                date: getTodayDateString()   // ✅ correct date for grouping in view_card.html
+                date: getTodayDateString(),   // ✅ correct date for grouping in view_card.html
+                _alreadySavedToDb: true        // ✅ prevents the "ADD" button below from re-inserting this
             };
             cart.push(cartItem);
 
