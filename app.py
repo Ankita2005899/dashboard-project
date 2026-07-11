@@ -1916,7 +1916,6 @@ def final_add():
             select_cursor.execute(f"""
                 SELECT id, quantity FROM `{client_table}`
                 WHERE name = %s AND category = %s AND DATE(date) = CURDATE()
-                  AND date >= NOW() - INTERVAL 1 SECOND
                 ORDER BY id DESC LIMIT 1
             """, (item["name"], item["category"]))
             existing = select_cursor.fetchone()
