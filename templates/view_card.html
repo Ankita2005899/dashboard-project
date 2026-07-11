@@ -877,9 +877,7 @@
         }
 
         loadPurchasedItems();
-        loadDeliveryStatuses();
-
-        // ================= REMOVE ITEM =================
+        loadDeliveryStatuses();        // ================= REMOVE ITEM =================
         document.getElementById("cartGrid").addEventListener("click", function (e) {
             const btn = e.target.closest(".delete-btn");
             if (!btn) return;
@@ -1055,85 +1053,85 @@
 
 
         async function renderDeliveryAction(cartId) {
-    const container = document.getElementById(`delivery-action-${cartId}`);
-    if (!container) return;
+            const container = document.getElementById(`delivery-action-${cartId}`);
+            if (!container) return;
 
-    try {
-        const res = await fetch(`/api/check-delivery-started/${cartId}`);
-        const data = await res.json();
+            try {
+                const res = await fetch(`/api/check-delivery-started/${cartId}`);
+                const data = await res.json();
 
-        if (data.started) {
-            container.innerHTML = `<div style="height:100%;background:#fef3c7;color:#92400e;padding:6px 4px;
+                if (data.started) {
+                    container.innerHTML = `<div style="height:100%;background:#fef3c7;color:#92400e;padding:6px 4px;
                 border-radius:8px;font-size:10px;font-weight:700;text-align:center;display:flex;
                 align-items:center;justify-content:center;line-height:1.3;">
                 📦 ${data.status.replace(/_/g, ' ')}
             </div>`;
-        } else {
-            container.innerHTML = `<button onclick="startDelivery(${cartId})"
+                } else {
+                    container.innerHTML = `<button onclick="startDelivery(${cartId})"
                 style="width:100%;height:100%;min-height:38px;padding:6px 4px;border-radius:8px;border:none;cursor:pointer;
                 font-weight:700;background:#3b82f6;color:white;font-size:11px;">
                 🚚 Apply to Delivery
             </button>`;
-        }
-    } catch (e) {
-        console.error('Failed to check delivery status:', e);
-    }
-}
-
-async function startDelivery(cartId) {
-    try {
-        const res = await fetch(`/api/start-delivery/${cartId}`, { method: 'POST' });
-        const data = await res.json();
-        if (data.status === 'success' || data.status === 'already_started') {
-            renderDeliveryAction(cartId);
-            if (typeof loadDeliveryStatuses === 'function') loadDeliveryStatuses();
-        } else {
-            alert('⚠ ' + (data.error || 'Failed to start delivery'));
-        }
-    } catch (e) {
-        alert('⚠ Network error starting delivery');
-    }
-}
-
-// ================= LOAD DELIVERY STATUS SECTION =================
-async function loadDeliveryStatuses() {
-    const container = document.getElementById("deliveryStatusContainer");
-    if (!container) return;
-
-    try {
-        const res = await fetch("/get-purchased-items");
-        const items = await res.json();
-
-        if (!items || items.length === 0) {
-            container.innerHTML = `<p style="text-align:center;color:#94a3b8;padding:20px;">No deliveries in progress.</p>`;
-            return;
-        }
-
-        const checks = await Promise.all(items.map(async item => {
-            try {
-                const r = await fetch(`/api/check-delivery-started/${item.id}`);
-                const d = await r.json();
-                return { item, status: d.started ? d.status : null };
+                }
             } catch (e) {
-                return { item, status: null };
+                console.error('Failed to check delivery status:', e);
             }
-        }));
-
-        const activeDeliveries = checks.filter(c => c.status);
-
-        if (activeDeliveries.length === 0) {
-            container.innerHTML = `<p style="text-align:center;color:#94a3b8;padding:20px;">No deliveries in progress.</p>`;
-            return;
         }
 
-        container.innerHTML = "";
-        const slider = document.createElement("div");
-        slider.className = "slider";
+        async function startDelivery(cartId) {
+            try {
+                const res = await fetch(`/api/start-delivery/${cartId}`, { method: 'POST' });
+                const data = await res.json();
+                if (data.status === 'success' || data.status === 'already_started') {
+                    renderDeliveryAction(cartId);
+                    if (typeof loadDeliveryStatuses === 'function') loadDeliveryStatuses();
+                } else {
+                    alert('⚠ ' + (data.error || 'Failed to start delivery'));
+                }
+            } catch (e) {
+                alert('⚠ Network error starting delivery');
+            }
+        }
 
-        activeDeliveries.forEach(({ item, status }) => {
-            const card = document.createElement("div");
-            card.className = "card";
-            card.innerHTML = `
+        // ================= LOAD DELIVERY STATUS SECTION =================
+        async function loadDeliveryStatuses() {
+            const container = document.getElementById("deliveryStatusContainer");
+            if (!container) return;
+
+            try {
+                const res = await fetch("/get-purchased-items");
+                const items = await res.json();
+
+                if (!items || items.length === 0) {
+                    container.innerHTML = `<p style="text-align:center;color:#94a3b8;padding:20px;">No deliveries in progress.</p>`;
+                    return;
+                }
+
+                const checks = await Promise.all(items.map(async item => {
+                    try {
+                        const r = await fetch(`/api/check-delivery-started/${item.id}`);
+                        const d = await r.json();
+                        return { item, status: d.started ? d.status : null };
+                    } catch (e) {
+                        return { item, status: null };
+                    }
+                }));
+
+                const activeDeliveries = checks.filter(c => c.status);
+
+                if (activeDeliveries.length === 0) {
+                    container.innerHTML = `<p style="text-align:center;color:#94a3b8;padding:20px;">No deliveries in progress.</p>`;
+                    return;
+                }
+
+                container.innerHTML = "";
+                const slider = document.createElement("div");
+                slider.className = "slider";
+
+                activeDeliveries.forEach(({ item, status }) => {
+                    const card = document.createElement("div");
+                    card.className = "card";
+                    card.innerHTML = `
                 <img src="${item.image}" onerror="this.src='https://via.placeholder.com/200?text=📦'">
                 <h3>${item.name}</h3>
                 <p>Category: ${item.category}</p>
@@ -1143,14 +1141,14 @@ async function loadDeliveryStatuses() {
                     📦 ${status.replace(/_/g, ' ')}
                 </div>
             `;
-            slider.appendChild(card);
-        });
+                    slider.appendChild(card);
+                });
 
-        container.appendChild(slider);
-    } catch (e) {
-        console.error('Failed to load delivery statuses:', e);
-    }
-}
+                container.appendChild(slider);
+            } catch (e) {
+                console.error('Failed to load delivery statuses:', e);
+            }
+        }
     </script>
 
     <footer class="footer">
