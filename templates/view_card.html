@@ -1148,6 +1148,60 @@
         }
 
         // ================= LOAD DELIVERY STATUS SECTION =================
+        // ================= DELIVERY STEP TRACKER =================
+        // These stage keys match exactly what delivery_dashboard.html writes
+        // via /api/owner/update-delivery-status/<id>, so whatever the owner
+        // sets there is what renders here.
+        const DELIVERY_STAGES = [
+            { key: 'order_placed', label: 'Order placed', icon: '✓' },
+            { key: 'confirmed', label: 'Confirmed', icon: '✓' },
+            { key: 'shipped', label: 'Shipped', icon: '✓' },
+            { key: 'out_for_delivery', label: 'Out for delivery', icon: '🛵' },
+            { key: 'delivered', label: 'Delivered', icon: '🏠' }
+        ];
+
+        function renderDeliveryStepper(status) {
+            const found = DELIVERY_STAGES.findIndex(s => s.key === status);
+            const idx = found === -1 ? 0 : found;
+
+            const circles = DELIVERY_STAGES.map((stage, i) => {
+                let bg, border, color, content;
+                if (i < idx) {
+                    bg = '#22c55e'; border = '#22c55e'; color = '#fff'; content = '✓';
+                } else if (i === idx) {
+                    bg = '#f59e0b'; border = '#f59e0b'; color = '#fff'; content = stage.icon;
+                } else {
+                    bg = '#ffffff'; border = '#d1d5db'; color = '#9ca3af'; content = '';
+                }
+                const circle = `<div style="width:20px;height:20px;border-radius:50%;background:${bg};border:2px solid ${border};
+                    display:flex;align-items:center;justify-content:center;font-size:9px;color:${color};flex-shrink:0;">${content}</div>`;
+                const line = i < DELIVERY_STAGES.length - 1
+                    ? `<div style="flex:1;height:2px;background:${i < idx ? '#22c55e' : '#e5e7eb'};margin:0 2px;"></div>`
+                    : '';
+                return `<div style="display:flex;align-items:center;${i < DELIVERY_STAGES.length - 1 ? 'flex:1;' : ''}">${circle}${line}</div>`;
+            }).join('');
+
+            const labels = DELIVERY_STAGES.map((stage, i) => {
+                const color = i < idx ? '#065f46' : (i === idx ? '#b45309' : '#9ca3af');
+                const weight = i === idx ? '700' : '500';
+                return `<div style="flex:1;text-align:center;font-size:8.5px;color:${color};font-weight:${weight};line-height:1.3;">${stage.label}</div>`;
+            }).join('');
+
+            const isDelivered = idx === DELIVERY_STAGES.length - 1;
+            const footer = isDelivered
+                ? `<div style="margin-top:8px;background:#d1fae5;color:#065f46;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;text-align:center;">✅ Delivered</div>`
+                : `<div style="margin-top:8px;background:#fef3c7;color:#92400e;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;text-align:center;">📦 ${DELIVERY_STAGES[idx].label}</div>`;
+
+            return `
+                <div style="margin-top:10px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px;">
+                    <div style="font-size:9px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;margin-bottom:8px;">📍 Delivery Status</div>
+                    <div style="display:flex;align-items:center;">${circles}</div>
+                    <div style="display:flex;margin-top:4px;">${labels}</div>
+                    ${footer}
+                </div>
+            `;
+        }
+
         async function loadDeliveryStatuses() {
             const container = document.getElementById("deliveryStatusContainer");
             if (!container) return;
@@ -1190,10 +1244,7 @@
                 <h3>${item.name}</h3>
                 <p>Category: ${item.category}</p>
                 <h4>₹${item.price}</h4>
-                <div style="margin-top:8px;background:#fef3c7;color:#92400e;padding:6px 12px;
-                    border-radius:8px;font-size:13px;font-weight:700;text-align:center;">
-                    📦 ${status.replace(/_/g, ' ')}
-                </div>
+                ${renderDeliveryStepper(status)}
             `;
                     slider.appendChild(card);
                 });
@@ -1203,6 +1254,11 @@
                 console.error('Failed to load delivery statuses:', e);
             }
         }
+
+        // ✅ Auto-refresh every 15s so status updates made by the owner in
+        // delivery_dashboard.html show up here without a manual page reload —
+        // same polling interval delivery_dashboard.html itself uses.
+        setInterval(loadDeliveryStatuses, 15000);
     </script>
 
     <footer class="footer">
