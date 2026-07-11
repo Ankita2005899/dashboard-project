@@ -2539,14 +2539,18 @@ def track_add_to_cart():
     if safe_username and safe_username[0].isdigit():
         safe_username = "user_" + safe_username
     table_name = f"{safe_username}_{user_id}_product_activity"
-    
-    
-    # âœ… Python se IST time
+
+    # ✅ Python se IST time
     ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
     ist_time = ist_now.strftime('%Y-%m-%d %H:%M:%S')
     ist_month = ist_now.strftime('%B')
 
-    cursor.execute(f"SELECT today_add_to_cart_count FROM `{table_name}` WHERE product_id = %s", (product_id,))
+    # ✅ FIX: filter by category too — product_id alone is not unique
+    # across the card / food_items / study_material tables.
+    cursor.execute(
+        f"SELECT today_add_to_cart_count FROM `{table_name}` WHERE product_id = %s AND category = %s",
+        (product_id, product_category)
+    )
     existing = cursor.fetchone()
 
     if existing:
@@ -2554,8 +2558,8 @@ def track_add_to_cart():
         cursor.execute(f"""
             UPDATE `{table_name}` SET today_add_to_cart_count = %s, 
             add_to_cart_date_time = %s, growth_in_addtocart = %s
-            WHERE product_id = %s
-        """, (new_count, ist_time, f"{new_count}/100", product_id))
+            WHERE product_id = %s AND category = %s
+        """, (new_count, ist_time, f"{new_count}/100", product_id, product_category))
     else:
         cursor.execute(f"""
             INSERT INTO `{table_name}`
@@ -2567,10 +2571,6 @@ def track_add_to_cart():
     cursor.close()
     conn.close()
     return jsonify({"message": "cart activity recorded", "time": str(ist_time)})
-
-
-
-
 @app.route("/owner-addtocart-data")
 def owner_addtocart_data():
     conn = get_db_connection()
