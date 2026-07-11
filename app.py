@@ -6763,7 +6763,6 @@ def get_delivery_orders():
         if conn and conn.is_connected():
             conn.close()
 
-
 @app.route("/api/owner/update-delivery-status/<int:order_id>", methods=["POST"])
 def update_delivery_status(order_id):
     conn = None
@@ -6777,7 +6776,7 @@ def update_delivery_status(order_id):
             return jsonify({"error": "Invalid status"}), 400
 
         conn   = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
 
         if status == 'delivered':
             cursor.execute("""
@@ -6790,6 +6789,29 @@ def update_delivery_status(order_id):
                 WHERE id = %s
             """, (status, eta, order_id))
 
+        # ✅ Mirror this status into the customer's own product_activity table,
+        # matched by product_id + category.
+        cursor.execute("""
+            SELECT username, user_id, product_id, category
+            FROM delivery_orders WHERE id = %s
+        """, (order_id,))
+        order_row = cursor.fetchone()
+
+        if order_row and order_row.get("product_id") is not None:
+            safe_username = re.sub(r'[^a-z0-9_]', '_', (order_row["username"] or "").strip().lower())
+            if safe_username and safe_username[0].isdigit():
+                safe_username = "user_" + safe_username
+            activity_table = f"{safe_username}_{order_row['user_id']}_product_activity"
+
+            try:
+                cursor.execute(f"""
+                    UPDATE `{activity_table}`
+                    SET delivery_status = %s
+                    WHERE product_id = %s AND category = %s
+                """, (status, order_row["product_id"], order_row["category"]))
+            except Exception as e:
+                print("delivery_status mirror update failed:", e)
+
         conn.commit()
         cursor.close()
         return jsonify({"status": "success"})
@@ -6798,7 +6820,9 @@ def update_delivery_status(order_id):
     finally:
         if conn and conn.is_connected():
             conn.close()
-
+            
+            
+            
 #----------------- Backend — customer-facing status (feeds the stepper on dashboard.html)---------------------
    
     
@@ -6974,23 +6998,41 @@ def start_delivery(cart_id):
             cursor.close()
             return jsonify({"status": "already_started", "order_id": existing["id"], "order_status": existing["status"]})
 
+        # ✅ Now also storing product_id + category so update_delivery_status()
+        # can later find the matching row in the user's product_activity table.
         cursor.execute("""
-            INSERT INTO delivery_orders (user_id, username, product_name, order_ref, status)
-            VALUES (%s, %s, %s, %s, 'order_placed')
-        """, (uid, uname, item["name"], str(cart_id)))
+            INSERT INTO delivery_orders (user_id, username, product_name, order_ref, status, product_id, category)
+            VALUES (%s, %s, %s, %s, 'order_placed', %s, %s)
+        """, (uid, uname, item["name"], str(cart_id), item.get("product_id"), item.get("category")))
         conn.commit()
         new_id = cursor.lastrowid
+
+        # ✅ Mirror the starting status into this user's product_activity table right away
+        safe_username = re.sub(r'[^a-z0-9_]', '_', (uname or "").strip().lower())
+        if safe_username and safe_username[0].isdigit():
+            safe_username = "user_" + safe_username
+        activity_table = f"{safe_username}_{uid}_product_activity"
+
+        if item.get("product_id") is not None:
+            try:
+                cursor.execute(f"""
+                    UPDATE `{activity_table}`
+                    SET delivery_status = 'order_placed'
+                    WHERE product_id = %s AND category = %s
+                """, (item.get("product_id"), item.get("category")))
+                conn.commit()
+            except Exception as e:
+                print("delivery_status initial mirror failed:", e)
+
         cursor.close()
         return jsonify({"status": "success", "order_id": new_id})
     except Exception as e:
         import traceback
         print("start_delivery crashed:", traceback.format_exc())
         return jsonify({"error": str(e)}), 500
-    finally:
-        if conn and conn.is_connected():
-            conn.close()
-
-
+    
+    
+    
 @app.route("/api/check-delivery-started/<int:cart_id>", methods=["GET"])
 def check_delivery_started(cart_id):
     conn = None
