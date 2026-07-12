@@ -2328,63 +2328,70 @@
       const order = allDeliveryOrders.find(o => o.id === orderId);
       if (!order) return;
 
-      const STAGE_LABELS = ['Order Placed', 'Confirmed', 'Shipped', 'Out for Delivery', 'Delivered'];
-      const color = MAP_STATUS_COLOR[order.status] || '#6b7280';
-      const badge = STATUS_BADGE[order.status] || STATUS_BADGE.order_placed;
+      try {
+        const STAGE_LABELS = ['Order Placed', 'Confirmed', 'Shipped', 'Out for Delivery', 'Delivered'];
+        const color = MAP_STATUS_COLOR[order.status] || '#6b7280';
+        const badge = STATUS_BADGE[order.status] || STATUS_BADGE.order_placed;
 
-      // ✅ Keep the "Delivery Personnel" panel under the map in sync with
-      // whichever order's dot was just clicked.
-      selectedMapOrderId = orderId;
-      renderAssignedDeliveryBoy();
-
-      // ✅ If a specific stage dot was clicked, show exactly which stage
-      // that is and whether it's completed, current, or still upcoming.
-      let stageBannerHtml = '';
-      if (typeof clickedStageIndex === 'number') {
-        const currentIndex = STATUS_ORDER.indexOf(order.status);
-        const stageName = STAGE_LABELS[clickedStageIndex];
-        let stageStatusText, stageColor;
-        if (clickedStageIndex < currentIndex) {
-          stageStatusText = '✅ Completed';
-          stageColor = '#22c55e';
-        } else if (clickedStageIndex === currentIndex) {
-          stageStatusText = '🟡 Current Stage';
-          stageColor = color;
-        } else {
-          stageStatusText = '⏳ Upcoming';
-          stageColor = '#6b7280';
+        // ✅ Keep the "Delivery Personnel" panel under the map in sync with
+        // whichever order's dot was just clicked. Wrapped defensively — if
+        // this panel update fails for any reason, the popup below must
+        // still open regardless.
+        selectedMapOrderId = orderId;
+        try {
+          renderAssignedDeliveryBoy();
+        } catch (e) {
+          console.error('renderAssignedDeliveryBoy failed:', e);
         }
-        stageBannerHtml = `
+
+        // ✅ If a specific stage dot was clicked, show exactly which stage
+        // that is and whether it's completed, current, or still upcoming.
+        let stageBannerHtml = '';
+        if (typeof clickedStageIndex === 'number') {
+          const currentIndex = STATUS_ORDER.indexOf(order.status);
+          const stageName = STAGE_LABELS[clickedStageIndex];
+          let stageStatusText, stageColor;
+          if (clickedStageIndex < currentIndex) {
+            stageStatusText = '✅ Completed';
+            stageColor = '#22c55e';
+          } else if (clickedStageIndex === currentIndex) {
+            stageStatusText = '🟡 Current Stage';
+            stageColor = color;
+          } else {
+            stageStatusText = '⏳ Upcoming';
+            stageColor = '#6b7280';
+          }
+          stageBannerHtml = `
           <div style="background:${stageColor}18;border:1px solid ${stageColor}55;border-radius:10px;
               padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
             <span style="font-size:14px;font-weight:700;">${stageName}</span>
             <span style="font-size:12px;font-weight:700;color:${stageColor};">${stageStatusText}</span>
           </div>
         `;
-      }
-
-      // ✅ For delivered items still showing on the map, tell the owner
-      // how many minutes remain before it auto-disappears (30 min window).
-      let countdownHtml = '';
-      if (order.status === 'delivered' && order.delivered_at) {
-        const deliveredTime = new Date(order.delivered_at.replace(' ', 'T')).getTime();
-        if (!isNaN(deliveredTime)) {
-          const elapsedMin = (Date.now() - deliveredTime) / 60000;
-          const remainingMin = Math.max(0, Math.ceil(30 - elapsedMin));
-          countdownHtml = `<div><span style="color:var(--muted);">🕐 Removing from map in:</span>
-              <strong>${remainingMin} min</strong></div>`;
         }
-      }
 
-      // ✅ Product image, if this order has one saved (populated at the
-      // time delivery was started).
-      const imageHtml = order.image
-        ? `<img src="${order.image}" alt="${order.product_name || 'Product'}"
+        // ✅ For delivered items still showing on the map, tell the owner
+        // how many minutes remain before it auto-disappears (30 min window).
+        let countdownHtml = '';
+        if (order.status === 'delivered' && order.delivered_at) {
+          const deliveredTime = new Date(order.delivered_at.replace(' ', 'T')).getTime();
+          if (!isNaN(deliveredTime)) {
+            const elapsedMin = (Date.now() - deliveredTime) / 60000;
+            const remainingMin = Math.max(0, Math.ceil(30 - elapsedMin));
+            countdownHtml = `<div><span style="color:var(--muted);">🕐 Removing from map in:</span>
+              <strong>${remainingMin} min</strong></div>`;
+          }
+        }
+
+        // ✅ Product image, if this order has one saved (populated at the
+        // time delivery was started).
+        const imageHtml = order.image
+          ? `<img src="${order.image}" alt="${order.product_name || 'Product'}"
              style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:16px;"
              onerror="this.style.display='none';" />`
-        : '';
+          : '';
 
-      document.getElementById('mapMarkerModalBody').innerHTML = `
+        document.getElementById('mapMarkerModalBody').innerHTML = `
         ${imageHtml}
         ${stageBannerHtml}
         <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
@@ -2408,7 +2415,18 @@
           ${countdownHtml}
         </div>
       `;
-      document.getElementById('mapMarkerModal').style.display = 'flex';
+        document.getElementById('mapMarkerModal').style.display = 'flex';
+      } catch (e) {
+        // ✅ Last-resort fallback — no matter what fails above, the popup
+        // still opens with at least the basics, instead of never appearing.
+        console.error('openMapMarkerModal failed, showing fallback:', e);
+        document.getElementById('mapMarkerModalBody').innerHTML = `
+          <div style="font-size:18px;font-weight:700;margin-bottom:8px;">${order.username || 'User #' + order.user_id}</div>
+          <div style="color:var(--muted);">📦 ${order.product_name || 'Product'}</div>
+          <div style="color:var(--muted);margin-top:6px;">Status: ${order.status || 'unknown'}</div>
+        `;
+        document.getElementById('mapMarkerModal').style.display = 'flex';
+      }
     }
 
     function closeMapMarkerModal() {
