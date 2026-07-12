@@ -6970,7 +6970,6 @@ def add_delivery_status_column():
   
   
 #______________ delivery view_card .html madhe chalu karila ________________________
-
 @app.route("/api/start-delivery/<int:cart_id>", methods=["POST"])
 def start_delivery(cart_id):
     conn = None
@@ -6999,12 +6998,12 @@ def start_delivery(cart_id):
             cursor.close()
             return jsonify({"status": "already_started", "order_id": existing["id"], "order_status": existing["status"]})
 
-        # ✅ Now also storing product_id + category so update_delivery_status()
-        # can later find the matching row in the user's product_activity table.
+        # ✅ Now also storing product_id + category + image so
+        # update_delivery_status() and the map popup can use them later.
         cursor.execute("""
-            INSERT INTO delivery_orders (user_id, username, product_name, order_ref, status, product_id, category)
-            VALUES (%s, %s, %s, %s, 'order_placed', %s, %s)
-        """, (uid, uname, item["name"], str(cart_id), item.get("product_id"), item.get("category")))
+            INSERT INTO delivery_orders (user_id, username, product_name, order_ref, status, product_id, category, image)
+            VALUES (%s, %s, %s, %s, 'order_placed', %s, %s, %s)
+        """, (uid, uname, item["name"], str(cart_id), item.get("product_id"), item.get("category"), item.get("image")))
         conn.commit()
         new_id = cursor.lastrowid
 
@@ -7031,6 +7030,8 @@ def start_delivery(cart_id):
         import traceback
         print("start_delivery crashed:", traceback.format_exc())
         return jsonify({"error": str(e)}), 500
+    
+    
     
     
 @app.route("/api/check-delivery-started/<int:cart_id>", methods=["GET"])
