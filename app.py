@@ -6971,7 +6971,6 @@ def add_delivery_status_column():
   
 #______________ delivery view_card .html madhe chalu karila ________________________
 
-
 @app.route("/api/start-delivery/<int:cart_id>", methods=["POST"])
 def start_delivery(cart_id):
     conn = None
@@ -6992,7 +6991,9 @@ def start_delivery(cart_id):
             return jsonify({"error": "Item not found"}), 404
 
         # Prevent starting delivery twice for the same purchased item
-        cursor.execute("SELECT id, status FROM delivery_orders WHERE order_ref = %s", (str(cart_id),))
+        # ✅ FIX: also filter by user_id — order_ref alone collides across
+        # users, since every user's cart_id sequence restarts at 1.
+        cursor.execute("SELECT id, status FROM delivery_orders WHERE order_ref = %s AND user_id = %s", (str(cart_id), uid))
         existing = cursor.fetchone()
         if existing:
             cursor.close()
@@ -7032,14 +7033,21 @@ def start_delivery(cart_id):
         return jsonify({"error": str(e)}), 500
     
     
-    
 @app.route("/api/check-delivery-started/<int:cart_id>", methods=["GET"])
 def check_delivery_started(cart_id):
     conn = None
     try:
+        if "user_id" not in session:
+            return jsonify({"error": "Not logged in"}), 401
+
         conn   = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT id, status FROM delivery_orders WHERE order_ref = %s", (str(cart_id),))
+        # ✅ FIX: order_ref alone is not unique across users — must also
+        # match user_id, since each user's cart_id sequence restarts at 1.
+        cursor.execute(
+            "SELECT id, status FROM delivery_orders WHERE order_ref = %s AND user_id = %s",
+            (str(cart_id), session["user_id"])
+        )
         row = cursor.fetchone()
         cursor.close()
         return jsonify({"started": bool(row), "status": row["status"] if row else None})
@@ -7048,9 +7056,10 @@ def check_delivery_started(cart_id):
     finally:
         if conn and conn.is_connected():
             conn.close()
-
-
-  
+            
+            
+            
+                        
 #--------------------personal search analysis ( " dashboard.html madhe " )-------------------------
 
 
