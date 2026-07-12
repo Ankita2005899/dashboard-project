@@ -997,7 +997,10 @@
     </div>
     <div class="product-pill">
       <div class="product-icon">📦</div>
-      
+      <div>
+        <div class="product-name">Wireless Earbuds Pro X</div>
+        <div class="product-id">#PRD-00821 · 24 orders active</div>
+      </div>
     </div>
     <div class="topbar-right">
       <div class="live-badge">
@@ -2013,26 +2016,33 @@
       });
 
       const svgNS = 'http://www.w3.org/2000/svg';
-      const seenDeliveryBoys = {};
 
       // ✅ Fixed origin point representing the delivery hub/warehouse —
-      // "out for delivery" routes animate from here to each customer.
+      // every order's route is drawn from here to that customer.
       const HUB = { x: 320, y: 22 };
-      if ((byStatus.out_for_delivery || []).length > 0) {
-        const hub = document.createElementNS(svgNS, 'g');
-        hub.innerHTML = `
-          <circle cx="${HUB.x}" cy="${HUB.y}" r="10" fill="rgba(99,102,241,0.15)" stroke="#6366f1" stroke-width="1.5" />
-          <text x="${HUB.x}" y="${HUB.y + 4}" text-anchor="middle" font-size="10">🏬</text>
-          <text x="${HUB.x}" y="${HUB.y + 20}" text-anchor="middle" fill="#6366f1" font-size="8"
-            font-family="JetBrains Mono,monospace" letter-spacing="1">HUB</text>
-        `;
-        layer.appendChild(hub);
-      }
+      const hub = document.createElementNS(svgNS, 'g');
+      hub.innerHTML = `
+        <circle cx="${HUB.x}" cy="${HUB.y}" r="10" fill="rgba(99,102,241,0.15)" stroke="#6366f1" stroke-width="1.5" />
+        <text x="${HUB.x}" y="${HUB.y + 4}" text-anchor="middle" font-size="10">🏬</text>
+        <text x="${HUB.x}" y="${HUB.y + 20}" text-anchor="middle" fill="#6366f1" font-size="8"
+          font-family="JetBrains Mono,monospace" letter-spacing="1">HUB</text>
+      `;
+      layer.appendChild(hub);
+
+      // ✅ How far along the Hub→Customer route each stage represents.
+      const STATUS_PROGRESS = {
+        order_placed: 0.08,
+        confirmed: 0.32,
+        shipped: 0.58,
+        out_for_delivery: 0.85,
+        delivered: 1.0
+      };
 
       Object.keys(byStatus).forEach(status => {
         const cluster = CLUSTER_CENTERS[status];
         const orders = byStatus[status];
         const color = MAP_STATUS_COLOR[status] || '#6b7280';
+        const progress = STATUS_PROGRESS[status] ?? 0.08;
 
         orders.forEach((o, i) => {
           // Spread markers evenly around the cluster center using the
@@ -2041,6 +2051,41 @@
           const dist = Math.min(cluster.r, 14 + i * 9);
           const cx = Math.max(30, Math.min(610, cluster.cx + Math.cos(angle) * dist));
           const cy = Math.max(30, Math.min(310, cluster.cy + Math.sin(angle) * dist));
+
+          // ── Route: faint full path (Hub → destination) plus a solid
+          // portion showing exactly how far this order has progressed ──
+          const pathD = `M${HUB.x},${HUB.y} Q${(HUB.x + cx) / 2},${Math.min(HUB.y, cy) - 20} ${cx},${cy}`;
+          const fullRoute = document.createElementNS(svgNS, 'path');
+          fullRoute.setAttribute('d', pathD);
+          fullRoute.setAttribute('stroke', '#334155');
+          fullRoute.setAttribute('stroke-width', '1');
+          fullRoute.setAttribute('stroke-dasharray', '3 4');
+          fullRoute.setAttribute('fill', 'none');
+          fullRoute.setAttribute('opacity', '0.5');
+          layer.appendChild(fullRoute);
+
+          const progressRoute = document.createElementNS(svgNS, 'path');
+          progressRoute.setAttribute('d', pathD);
+          progressRoute.setAttribute('stroke', color);
+          progressRoute.setAttribute('stroke-width', '2');
+          progressRoute.setAttribute('fill', 'none');
+          progressRoute.setAttribute('opacity', '0.85');
+          layer.appendChild(progressRoute);
+
+          // Reveal only the `progress` fraction of the route as solid —
+          // this is the standard SVG "draw a path progressively" trick.
+          const totalLen = progressRoute.getTotalLength();
+          progressRoute.setAttribute('stroke-dasharray', String(totalLen));
+          progressRoute.setAttribute('stroke-dashoffset', String(totalLen * (1 - progress)));
+
+          // ── Stage marker: sits exactly at the order's current position
+          // along the route, so you can see precisely where each item is ──
+          const stagePt = progressRoute.getPointAtLength(totalLen * progress);
+          const stageMarker = document.createElementNS(svgNS, 'g');
+          stageMarker.innerHTML = `
+            <circle cx="${stagePt.x}" cy="${stagePt.y}" r="5" fill="${color}" stroke="#0b0f18" stroke-width="1.5" />
+          `;
+          layer.appendChild(stageMarker);
 
           const g = document.createElementNS(svgNS, 'g');
           g.style.cursor = 'pointer';
@@ -2065,18 +2110,21 @@
           `;
           layer.appendChild(g);
 
-          // ✅ "Out for delivery" gets a real animated route: a dashed path
-          // from the hub to this customer, with a 🛵 icon travelling along
-          // it on a loop — a clear visual of "on the way to home delivery".
+          // ✅ "Out for delivery" additionally gets a 🛵 icon animating
+          // continuously along its route, on top of the static progress
+          // indicator above — the clearest possible "on the way" signal.
           if (status === 'out_for_delivery') {
-            const pathId = `route-path-${o.id}`;
+            const pathId = `route-motion-${o.id}`;
             const dur = (3 + (i % 3) * 0.6).toFixed(1) + 's';
+            const motionPath = document.createElementNS(svgNS, 'path');
+            motionPath.setAttribute('id', pathId);
+            motionPath.setAttribute('d', pathD);
+            motionPath.setAttribute('fill', 'none');
+            motionPath.style.display = 'none';
+            layer.appendChild(motionPath);
+
             const routeG = document.createElementNS(svgNS, 'g');
             routeG.innerHTML = `
-              <path id="${pathId}" d="M${HUB.x},${HUB.y} Q${(HUB.x + cx) / 2},${Math.min(HUB.y, cy) - 20} ${cx},${cy}"
-                stroke="${color}" stroke-width="1.5" stroke-dasharray="6 4" fill="none" opacity="0.5">
-                <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.2s" repeatCount="indefinite" />
-              </path>
               <text font-size="13">🛵
                 <animateMotion dur="${dur}" repeatCount="indefinite" rotate="auto">
                   <mpath href="#${pathId}" />
@@ -2084,20 +2132,6 @@
               </text>
             `;
             layer.appendChild(routeG);
-          }
-
-          // One 🛵 marker per unique delivery boy, placed at their first order's
-          // position — skipped for out_for_delivery since the animated route
-          // above already shows that delivery boy travelling live.
-          if (o.delivery_boy_name && status !== 'out_for_delivery' && !seenDeliveryBoys[o.delivery_boy_id]) {
-            seenDeliveryBoys[o.delivery_boy_id] = true;
-            const bx = cx + 26, by = cy + 20;
-            const bg = document.createElementNS(svgNS, 'g');
-            bg.innerHTML = `
-              <circle cx="${bx}" cy="${by}" r="12" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2" />
-              <text x="${bx}" y="${by + 4}" text-anchor="middle" fill="#f59e0b" font-size="11">🛵</text>
-            `;
-            layer.appendChild(bg);
           }
         });
       });
