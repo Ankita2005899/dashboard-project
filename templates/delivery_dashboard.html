@@ -1428,8 +1428,8 @@
           🛵 Delivery Personnel</div>
       </div>
       <div class="scroll-area" id="deliveryBoyListContainer" style="max-height:220px;">
-        <div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">Loading delivery personnel...
-        </div>
+        <div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">Select a customer to see their
+          delivery partner.</div>
       </div>
       <div class="scroll-area" style="max-height:220px;display:none;">
 
@@ -1867,6 +1867,11 @@
     let allDeliveryOrders = [];
     let allDeliveryBoys = [];
 
+    // ✅ When set (by clicking a customer card or a map dot), the "Delivery
+    // Personnel" panel below the map shows ONLY this order's assigned
+    // delivery person instead of the full roster. Null = nothing selected yet.
+    let selectedMapOrderId = null;
+
     async function loadRealDeliveryData() {
       const [ordersRes, boysRes, statsRes] = await Promise.all([
         fetch('/api/owner/delivery-orders'),
@@ -1890,7 +1895,7 @@
       document.getElementById('statDeliveredPct').textContent = `${pct}% completion`;
 
       renderRealCustomerList();
-      renderRealDeliveryBoyList();
+      renderAssignedDeliveryBoy();
       renderLiveMap();
     }
 
@@ -1934,20 +1939,56 @@
       }).join('');
     }
 
-    function renderRealDeliveryBoyList() {
+    // ✅ Shows ONLY the delivery person assigned to the currently selected
+    // customer's order (selectedMapOrderId), instead of the full roster.
+    function renderAssignedDeliveryBoy() {
       const container = document.getElementById('deliveryBoyListContainer');
-      if (allDeliveryBoys.length === 0) {
+
+      if (selectedMapOrderId === null) {
         container.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">
-            No delivery boys added yet. Click "➕ Add Delivery Detail" below to add one.</div>`;
+            Select a customer to see their delivery partner.</div>`;
         return;
       }
 
-      container.innerHTML = allDeliveryBoys.map(b => {
-        const assigned = allDeliveryOrders.filter(o => o.delivery_boy_id === b.id).length;
-        const delivered = allDeliveryOrders.filter(o => o.delivery_boy_id === b.id && o.status === 'delivered').length;
-        const nearby = allDeliveryOrders.filter(o => o.delivery_boy_id === b.id && o.status === 'out_for_delivery').length;
+      const order = allDeliveryOrders.find(o => o.id === selectedMapOrderId);
+      if (!order) {
+        container.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">
+            Order not found.</div>`;
+        return;
+      }
 
-        return `
+      if (!order.delivery_boy_id) {
+        container.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">
+            Not yet assigned for ${order.username || 'this customer'}'s order.</div>`;
+        return;
+      }
+
+      const b = allDeliveryBoys.find(db => db.id === order.delivery_boy_id);
+
+      // Fallback: even if the delivery-boys list hasn't loaded/matched,
+      // the order itself already carries the joined name/phone from the
+      // backend, so we can still show something useful.
+      if (!b) {
+        container.innerHTML = `
+        <div class="db-card">
+            <div class="db-top">
+                <div class="db-avatar" style="background:#f59e0b;color:#000;">
+                    ${(order.delivery_boy_name || '?').charAt(0).toUpperCase()}
+                </div>
+                <div class="db-info">
+                    <div class="db-name">${order.delivery_boy_name}</div>
+                    <div class="db-zone">📞 ${order.delivery_boy_phone || 'No phone on file'}</div>
+                </div>
+            </div>
+        </div>`;
+        return;
+      }
+
+      const assigned = allDeliveryOrders.filter(o => o.delivery_boy_id === b.id).length;
+      const delivered = allDeliveryOrders.filter(o => o.delivery_boy_id === b.id && o.status === 'delivered').length;
+      const nearby = allDeliveryOrders.filter(o => o.delivery_boy_id === b.id && o.status === 'out_for_delivery').length;
+
+      container.innerHTML = `
         <div class="db-card">
             <div class="db-top">
                 <div class="db-avatar" style="background:${b.is_online ? '#f59e0b' : '#6b7280'};color:#000;">
@@ -1969,7 +2010,6 @@
                 <div class="db-stat"><div class="db-stat-val" style="color:var(--text-dim)">${b.rating || 5.0}⭐</div><div class="db-stat-lbl">Rating</div></div>
             </div>
         </div>`;
-      }).join('');
     }
 
     // ✅ Colors matching the existing legend in the map header
@@ -2150,6 +2190,11 @@
       const color = MAP_STATUS_COLOR[order.status] || '#6b7280';
       const badge = STATUS_BADGE[order.status] || STATUS_BADGE.order_placed;
 
+      // ✅ Keep the "Delivery Personnel" panel under the map in sync with
+      // whichever order's dot was just clicked.
+      selectedMapOrderId = orderId;
+      renderAssignedDeliveryBoy();
+
       // ✅ For delivered items still showing on the map, tell the owner
       // how many minutes remain before it auto-disappears (30 min window).
       let countdownHtml = '';
@@ -2214,6 +2259,11 @@
       // ✅ Filter the "Delivery Management" section below to only this
       // customer's orders, so items from different users stop mixing together.
       filterOrdersManageByUser(order.user_id, order.username);
+
+      // ✅ Update the "Delivery Personnel" panel under the map to show only
+      // the delivery person assigned to THIS order.
+      selectedMapOrderId = orderId;
+      renderAssignedDeliveryBoy();
 
       const badge = STATUS_BADGE[order.status] || STATUS_BADGE.order_placed;
       const scroll = document.getElementById('orderDetailScroll');
