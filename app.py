@@ -2641,68 +2641,6 @@ def owner_addtocart_data():
 # ============================================================
 # ROUTES â€” PROFILE
 # ============================================================
-@app.route("/save-user-detail", methods=["POST"])
-def save_user_detail():
-    try:
-        name = request.form.get("name") or None
-
-        db_temp = get_db_connection()
-        cursor_temp = db_temp.cursor(dictionary=True)
-        cursor_temp.execute("SELECT email FROM user WHERE id=%s", (session.get("user_id"),))
-        user_row = cursor_temp.fetchone()
-        email = user_row["email"] if user_row else None
-        cursor_temp.close()
-        db_temp.close()
-
-        session['current_user_email'] = email
-
-        age_raw = request.form.get("age")
-        phone1 = request.form.get("phone1") or None
-        phone2 = request.form.get("phone2") or None
-        address1 = request.form.get("address1") or None
-        address2 = request.form.get("address2") or None
-        age = int(age_raw) if age_raw and age_raw.isdigit() else None
-
-        file = request.files.get("profile_image")
-        profile_image_path = None
-        if file and file.filename:
-            filename = secure_filename(file.filename)
-            upload_folder = os.path.join("static", "profile_images")
-            os.makedirs(upload_folder, exist_ok=True)
-            file.save(os.path.join(upload_folder, filename))
-            profile_image_path = f"/static/profile_images/{filename}"
-
-        db = get_db_connection()
-        cursor = db.cursor()
-
-        cursor.execute("SELECT id FROM save_detail WHERE email=%s ORDER BY id DESC LIMIT 1", (email,))
-        existing = cursor.fetchone()
-
-        if existing:
-            cursor.execute("""
-                UPDATE save_detail SET name=%s, age=%s, phone1=%s, phone2=%s,
-                    address1=%s, address2=%s, profile_image=COALESCE(%s, profile_image),
-                    user_id=%s
-                WHERE id=%s
-            """, (name, age, phone1, phone2, address1, address2, profile_image_path,
-                  session.get('user_id'), existing[0]))
-        else:
-            cursor.execute("""
-                INSERT INTO save_detail (name, age, phone1, phone2, address1, address2, email, profile_image, user_id)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            """, (name, age, phone1, phone2, address1, address2, email, profile_image_path,
-                  session.get('user_id')))
-
-        db.commit()
-        cursor.close()
-        db.close()
-        return redirect("/profile")
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return redirect("/profile")
-
 
 @app.route("/profile")
 def profile_page():
@@ -2783,6 +2721,103 @@ def get_latest_profile():
     return jsonify({"success": False})
 
 
+
+@app.route("/check-user-detail", methods=["POST"])
+def check_user_detail():
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"exists": False})
+
+    try:
+        db = get_db_connection()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT email FROM user_activity WHERE id=%s", (user_id,))
+        user_row = cursor.fetchone()
+
+        if not user_row:
+            return jsonify({"exists": False})
+
+        cursor.execute("""
+            SELECT id FROM save_detail WHERE email=%s AND name IS NOT NULL ORDER BY id DESC LIMIT 1
+        """, (user_row["email"],))
+        detail = cursor.fetchone()
+        cursor.close()
+        db.close()
+        return jsonify({"exists": bool(detail)})
+
+    except Exception as e:
+        print("Error in /check-user-detail:", e)
+        return jsonify({"exists": False})
+
+
+@app.route("/profile-view")
+def profile_view_page():
+    user = {"name": "Kevin Smith", "email": "example@example.com", "profile_image": "/static/default_profile.png"}
+    return render_template("profile_view.html", user=user)
+
+@app.route("/save-user-detail", methods=["POST"])
+def save_user_detail():
+    try:
+        name = request.form.get("name") or None
+
+        db_temp = get_db_connection()
+        cursor_temp = db_temp.cursor(dictionary=True)
+        cursor_temp.execute("SELECT email FROM user_activity WHERE id=%s", (session.get("user_id"),))
+        user_row = cursor_temp.fetchone()
+        email = user_row["email"] if user_row else None
+        cursor_temp.close()
+        db_temp.close()
+
+        session['current_user_email'] = email
+
+        age_raw = request.form.get("age")
+        phone1 = request.form.get("phone1") or None
+        phone2 = request.form.get("phone2") or None
+        address1 = request.form.get("address1") or None
+        address2 = request.form.get("address2") or None
+        age = int(age_raw) if age_raw and age_raw.isdigit() else None
+
+        file = request.files.get("profile_image")
+        profile_image_path = None
+        if file and file.filename:
+            filename = secure_filename(file.filename)
+            upload_folder = os.path.join("static", "profile_images")
+            os.makedirs(upload_folder, exist_ok=True)
+            file.save(os.path.join(upload_folder, filename))
+            profile_image_path = f"/static/profile_images/{filename}"
+
+        db = get_db_connection()
+        cursor = db.cursor()
+
+        cursor.execute("SELECT id FROM save_detail WHERE email=%s ORDER BY id DESC LIMIT 1", (email,))
+        existing = cursor.fetchone()
+
+        if existing:
+            cursor.execute("""
+                UPDATE save_detail SET name=%s, age=%s, phone1=%s, phone2=%s,
+                    address1=%s, address2=%s, profile_image=COALESCE(%s, profile_image),
+                    user_id=%s
+                WHERE id=%s
+            """, (name, age, phone1, phone2, address1, address2, profile_image_path,
+                  session.get('user_id'), existing[0]))
+        else:
+            cursor.execute("""
+                INSERT INTO save_detail (name, age, phone1, phone2, address1, address2, email, profile_image, user_id)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (name, age, phone1, phone2, address1, address2, email, profile_image_path,
+                  session.get('user_id')))
+
+        db.commit()
+        cursor.close()
+        db.close()
+        return redirect("/profile")
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return redirect("/profile")
+
+
 @app.route("/get-full-profile")
 def get_full_profile():
     if "user_id" not in session:
@@ -2790,7 +2825,7 @@ def get_full_profile():
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT email FROM user WHERE id=%s", (session["user_id"],))
+    cursor.execute("SELECT email FROM user_activity WHERE id=%s", (session["user_id"],))
     user_row = cursor.fetchone()
 
     if not user_row:
@@ -2821,40 +2856,6 @@ def get_full_profile():
     return jsonify({"success": False})
 
 
-@app.route("/check-user-detail", methods=["POST"])
-def check_user_detail():
-    user_id = session.get("user_id")
-    if not user_id:
-        return jsonify({"exists": False})
-
-    try:
-        db = get_db_connection()
-        cursor = db.cursor(dictionary=True)
-        cursor.execute("SELECT email FROM user WHERE id=%s", (user_id,))
-        user_row = cursor.fetchone()
-
-        if not user_row:
-            return jsonify({"exists": False})
-
-        cursor.execute("""
-            SELECT id FROM save_detail WHERE email=%s AND name IS NOT NULL ORDER BY id DESC LIMIT 1
-        """, (user_row["email"],))
-        detail = cursor.fetchone()
-        cursor.close()
-        db.close()
-        return jsonify({"exists": bool(detail)})
-
-    except Exception as e:
-        print("Error in /check-user-detail:", e)
-        return jsonify({"exists": False})
-
-
-@app.route("/profile-view")
-def profile_view_page():
-    user = {"name": "Kevin Smith", "email": "example@example.com", "profile_image": "/static/default_profile.png"}
-    return render_template("profile_view.html", user=user)
-
-
 @app.route("/profile-view-basic")
 def profile_view_basic():
     if "user_id" not in session:
@@ -2863,7 +2864,7 @@ def profile_view_basic():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT email FROM user WHERE id=%s", (session["user_id"],))
+        cursor.execute("SELECT email FROM user_activity WHERE id=%s", (session["user_id"],))
         user_row = cursor.fetchone()
 
         user = {"name": "", "profile_image": "/static/default_profile.png"}
@@ -2894,7 +2895,7 @@ def profile_view_name_image_page():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT email FROM user WHERE id=%s", (session["user_id"],))
+        cursor.execute("SELECT email FROM user_activity WHERE id=%s", (session["user_id"],))
         user_row = cursor.fetchone()
 
         user = {"name": "", "profile_image": "/static/default_profile.png"}
@@ -2915,7 +2916,6 @@ def profile_view_name_image_page():
     except Exception as e:
         print("Error loading name & image:", e)
         return render_template("profile_view.html", user={"name": "", "profile_image": "/static/default_profile.png"})
-
 
 # ============================================================
 # ROUTES â€” CART / VIEW
@@ -6643,7 +6643,10 @@ def auto_assign_deliveries():
         assigned_count = 0
         for order in pending_orders:
             cursor.execute("""
-                SELECT address1, address2 FROM save_detail WHERE user_id = %s LIMIT 1
+                SELECT address1, address2 FROM save_detail
+                WHERE user_id = %s AND name IS NOT NULL
+                AND address1 IS NOT NULL AND address1 != ''
+                ORDER BY id DESC LIMIT 1
             """, (order["user_id"],))
             addr_row = cursor.fetchone()
             if not addr_row:
