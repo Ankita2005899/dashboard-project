@@ -1946,7 +1946,22 @@
     // delivery person instead of the full roster. Null = nothing selected yet.
     let selectedMapOrderId = null;
 
+    // ✅ Silently runs the existing zone-matching auto-assign logic on every
+    // refresh cycle, so newly placed orders get matched to a delivery boy
+    // automatically without the owner needing to click the manual button.
+    // The manual "🔄 Auto-Assign (7-day window)" button and its alert() still
+    // work exactly as before — this just adds an automatic background pass.
+    async function silentAutoAssignDeliveries() {
+      try {
+        await fetch('/api/owner/auto-assign-deliveries', { method: 'POST' });
+      } catch (e) {
+        console.error('Silent auto-assign failed:', e);
+      }
+    }
+
     async function loadRealDeliveryData() {
+      await silentAutoAssignDeliveries();
+
       const [ordersRes, boysRes, statsRes] = await Promise.all([
         fetch('/api/owner/delivery-orders'),
         fetch('/api/owner/delivery-boys'),
