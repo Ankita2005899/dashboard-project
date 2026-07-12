@@ -1709,12 +1709,10 @@
   <div style="padding:20px 28px;border-top:1px solid var(--border);background:var(--surface);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <div
-          style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);">
+        <div style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);">
           🛠️ Delivery Management
         </div>
-        <div id="manageUserFilterChip"
-          style="display:none;align-items:center;gap:6px;background:var(--accent, #6366f1)22;
+        <div id="manageUserFilterChip" style="display:none;align-items:center;gap:6px;background:var(--accent, #6366f1)22;
             border:1px solid var(--accent, #6366f1)55;color:var(--accent, #6366f1);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;">
           <span id="manageUserFilterLabel"></span>
           <span onclick="clearOrdersManageFilter()" style="cursor:pointer;font-weight:800;">✕</span>
@@ -2003,10 +2001,10 @@
       // Loose cluster centers per status, similar spatial feel to the old mock zones
       const CLUSTER_CENTERS = {
         out_for_delivery: { cx: 170, cy: 175, r: 110 },
-        shipped: { cx: 430, cy: 140, r: 100 },
-        order_placed: { cx: 310, cy: 270, r: 130 },
-        confirmed: { cx: 310, cy: 270, r: 130 },
-        delivered: { cx: 230, cy: 90, r: 90 }
+        shipped:           { cx: 430, cy: 140, r: 100 },
+        order_placed:      { cx: 310, cy: 270, r: 130 },
+        confirmed:         { cx: 310, cy: 270, r: 130 },
+        delivered:         { cx: 230, cy: 90,  r: 90 }
       };
 
       // Group orders by status so each cluster's items can be spread out
@@ -2019,6 +2017,20 @@
 
       const svgNS = 'http://www.w3.org/2000/svg';
       const seenDeliveryBoys = {};
+
+      // ✅ Fixed origin point representing the delivery hub/warehouse —
+      // "out for delivery" routes animate from here to each customer.
+      const HUB = { x: 320, y: 22 };
+      if ((byStatus.out_for_delivery || []).length > 0) {
+        const hub = document.createElementNS(svgNS, 'g');
+        hub.innerHTML = `
+          <circle cx="${HUB.x}" cy="${HUB.y}" r="10" fill="rgba(99,102,241,0.15)" stroke="#6366f1" stroke-width="1.5" />
+          <text x="${HUB.x}" y="${HUB.y + 4}" text-anchor="middle" font-size="10">🏬</text>
+          <text x="${HUB.x}" y="${HUB.y + 20}" text-anchor="middle" fill="#6366f1" font-size="8"
+            font-family="JetBrains Mono,monospace" letter-spacing="1">HUB</text>
+        `;
+        layer.appendChild(hub);
+      }
 
       Object.keys(byStatus).forEach(status => {
         const cluster = CLUSTER_CENTERS[status];
@@ -2056,8 +2068,31 @@
           `;
           layer.appendChild(g);
 
-          // One 🛵 marker per unique delivery boy, placed at their first order's position
-          if (o.delivery_boy_name && !seenDeliveryBoys[o.delivery_boy_id]) {
+          // ✅ "Out for delivery" gets a real animated route: a dashed path
+          // from the hub to this customer, with a 🛵 icon travelling along
+          // it on a loop — a clear visual of "on the way to home delivery".
+          if (status === 'out_for_delivery') {
+            const pathId = `route-path-${o.id}`;
+            const dur = (3 + (i % 3) * 0.6).toFixed(1) + 's';
+            const routeG = document.createElementNS(svgNS, 'g');
+            routeG.innerHTML = `
+              <path id="${pathId}" d="M${HUB.x},${HUB.y} Q${(HUB.x + cx) / 2},${Math.min(HUB.y, cy) - 20} ${cx},${cy}"
+                stroke="${color}" stroke-width="1.5" stroke-dasharray="6 4" fill="none" opacity="0.5">
+                <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.2s" repeatCount="indefinite" />
+              </path>
+              <text font-size="13">🛵
+                <animateMotion dur="${dur}" repeatCount="indefinite" rotate="auto">
+                  <mpath href="#${pathId}" />
+                </animateMotion>
+              </text>
+            `;
+            layer.appendChild(routeG);
+          }
+
+          // One 🛵 marker per unique delivery boy, placed at their first order's
+          // position — skipped for out_for_delivery since the animated route
+          // above already shows that delivery boy travelling live.
+          if (o.delivery_boy_name && status !== 'out_for_delivery' && !seenDeliveryBoys[o.delivery_boy_id]) {
             seenDeliveryBoys[o.delivery_boy_id] = true;
             const bx = cx + 26, by = cy + 20;
             const bg = document.createElementNS(svgNS, 'g');
