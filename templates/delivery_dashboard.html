@@ -2164,13 +2164,13 @@
 
       // ✅ Fixed origin point representing the delivery hub/warehouse —
       // every order's route is drawn from here to that customer.
-      const HUB = { x: 320, y: 22 };
+      const HUB = { x: 320, y: 30 };
       const hub = document.createElementNS(svgNS, 'g');
       hub.innerHTML = `
-        <circle cx="${HUB.x}" cy="${HUB.y}" r="10" fill="rgba(99,102,241,0.15)" stroke="#6366f1" stroke-width="1.5" />
-        <text x="${HUB.x}" y="${HUB.y + 4}" text-anchor="middle" font-size="10">🏬</text>
-        <text x="${HUB.x}" y="${HUB.y + 20}" text-anchor="middle" fill="#6366f1" font-size="8"
-          font-family="JetBrains Mono,monospace" letter-spacing="1">HUB</text>
+        <circle cx="${HUB.x}" cy="${HUB.y}" r="18" fill="rgba(99,102,241,0.18)" stroke="#6366f1" stroke-width="2" />
+        <text x="${HUB.x}" y="${HUB.y + 7}" text-anchor="middle" font-size="20">🏬</text>
+        <text x="${HUB.x}" y="${HUB.y + 32}" text-anchor="middle" fill="#6366f1" font-size="10" font-weight="700"
+          font-family="JetBrains Mono,monospace" letter-spacing="1.5">HUB</text>
       `;
       layer.appendChild(hub);
 
@@ -2207,14 +2207,16 @@
 
           // ── 5 stage dots along the route: ✓ for completed stages, a
           // pulsing highlighted dot for the current stage, plain grey
-          // dots for stages still ahead. Every dot opens this order's
-          // detail popup when clicked. ──
+          // dots for stages still ahead. Clicking a dot shows exactly
+          // which stage it represents in the popup. ──
           STATUS_ORDER.forEach((stageKey, stageIndex) => {
-            const t = stageIndex / (STATUS_ORDER.length - 1);
+            // ✅ Start at t=0.14 instead of t=0 so the first stage dot
+            // doesn't land exactly on top of the Hub marker itself.
+            const t = 0.14 + stageIndex * (0.86 / (STATUS_ORDER.length - 1));
             const pt = routePath.getPointAtLength(totalLen * t);
             const stageG = document.createElementNS(svgNS, 'g');
             stageG.style.cursor = 'pointer';
-            stageG.setAttribute('onclick', `openMapMarkerModal(${o.id})`);
+            stageG.setAttribute('onclick', `openMapMarkerModal(${o.id}, ${stageIndex})`);
 
             if (stageIndex < currentIndex) {
               stageG.innerHTML = `
@@ -2276,10 +2278,11 @@
       });
     }
 
-    function openMapMarkerModal(orderId) {
+    function openMapMarkerModal(orderId, clickedStageIndex) {
       const order = allDeliveryOrders.find(o => o.id === orderId);
       if (!order) return;
 
+      const STAGE_LABELS = ['Order Placed', 'Confirmed', 'Shipped', 'Out for Delivery', 'Delivered'];
       const color = MAP_STATUS_COLOR[order.status] || '#6b7280';
       const badge = STATUS_BADGE[order.status] || STATUS_BADGE.order_placed;
 
@@ -2287,6 +2290,32 @@
       // whichever order's dot was just clicked.
       selectedMapOrderId = orderId;
       renderAssignedDeliveryBoy();
+
+      // ✅ If a specific stage dot was clicked, show exactly which stage
+      // that is and whether it's completed, current, or still upcoming.
+      let stageBannerHtml = '';
+      if (typeof clickedStageIndex === 'number') {
+        const currentIndex = STATUS_ORDER.indexOf(order.status);
+        const stageName = STAGE_LABELS[clickedStageIndex];
+        let stageStatusText, stageColor;
+        if (clickedStageIndex < currentIndex) {
+          stageStatusText = '✅ Completed';
+          stageColor = '#22c55e';
+        } else if (clickedStageIndex === currentIndex) {
+          stageStatusText = '🟡 Current Stage';
+          stageColor = color;
+        } else {
+          stageStatusText = '⏳ Upcoming';
+          stageColor = '#6b7280';
+        }
+        stageBannerHtml = `
+          <div style="background:${stageColor}18;border:1px solid ${stageColor}55;border-radius:10px;
+              padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:14px;font-weight:700;">${stageName}</span>
+            <span style="font-size:12px;font-weight:700;color:${stageColor};">${stageStatusText}</span>
+          </div>
+        `;
+      }
 
       // ✅ For delivered items still showing on the map, tell the owner
       // how many minutes remain before it auto-disappears (30 min window).
@@ -2311,6 +2340,7 @@
 
       document.getElementById('mapMarkerModalBody').innerHTML = `
         ${imageHtml}
+        ${stageBannerHtml}
         <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
           <div style="width:52px;height:52px;border-radius:50%;background:${color};color:white;
               display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;">
