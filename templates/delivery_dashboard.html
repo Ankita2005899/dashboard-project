@@ -995,13 +995,6 @@
       <div class="logo">Shop<span>Sphere</span></div>
       <div class="breadcrumb">admin / deliveries / active</div>
     </div>
-    <div class="product-pill">
-      <div class="product-icon">📦</div>
-      <div>
-        <div class="product-name">Wireless Earbuds Pro X</div>
-        <div class="product-id">#PRD-00821 · 24 orders active</div>
-      </div>
-    </div>
     <div class="topbar-right">
       <div class="live-badge">
         <div class="live-dot"></div> Live Tracking
@@ -2183,6 +2176,7 @@
         const orders = byStatus[status];
         const color = MAP_STATUS_COLOR[status] || '#6b7280';
         const currentIndex = STATUS_ORDER.indexOf(status);
+        const STAGE_LABELS = ['Order Placed', 'Confirmed', 'Shipped', 'Out for Delivery', 'Delivered'];
 
         orders.forEach((o, i) => {
           // Spread markers evenly around the cluster center using the
@@ -2205,10 +2199,25 @@
           layer.appendChild(routePath);
           const totalLen = routePath.getTotalLength();
 
+          // ✅ Solid ORANGE line over the portion of the route already
+          // covered (Hub up to the current stage) — the classic "-----"
+          // dashed route becomes a filled-in progress line for what's done.
+          const coveredFraction = 0.14 + currentIndex * (0.86 / (STATUS_ORDER.length - 1));
+          const coveredPath = document.createElementNS(svgNS, 'path');
+          coveredPath.setAttribute('d', pathD);
+          coveredPath.setAttribute('stroke', '#f97316');
+          coveredPath.setAttribute('stroke-width', '2');
+          coveredPath.setAttribute('fill', 'none');
+          coveredPath.setAttribute('opacity', '0.9');
+          layer.appendChild(coveredPath);
+          coveredPath.setAttribute('stroke-dasharray', String(totalLen));
+          coveredPath.setAttribute('stroke-dashoffset', String(totalLen * (1 - coveredFraction)));
+
           // ── 5 stage dots along the route: ✓ for completed stages, a
           // pulsing highlighted dot for the current stage, plain grey
-          // dots for stages still ahead. Clicking a dot shows exactly
-          // which stage it represents in the popup. ──
+          // dots for stages still ahead, and a 🏠 home icon at the final
+          // (delivered) stage. Hover any dot to see its stage name;
+          // clicking opens the full order detail popup. ──
           STATUS_ORDER.forEach((stageKey, stageIndex) => {
             // ✅ Start at t=0.14 instead of t=0 so the first stage dot
             // doesn't land exactly on top of the Hub marker itself.
@@ -2217,14 +2226,27 @@
             const stageG = document.createElementNS(svgNS, 'g');
             stageG.style.cursor = 'pointer';
             stageG.setAttribute('onclick', `openMapMarkerModal(${o.id}, ${stageIndex})`);
+            const isLastStage = stageIndex === STATUS_ORDER.length - 1;
+            const tooltip = `<title>${STAGE_LABELS[stageIndex]}${stageIndex === currentIndex ? ' (current)' : ''}</title>`;
 
-            if (stageIndex < currentIndex) {
+            if (isLastStage) {
+              // 🏠 Home/destination marker — always shown here regardless
+              // of status, so you can always see where the order is headed.
+              const doneColor = stageIndex <= currentIndex ? '#22c55e' : '#334155';
               stageG.innerHTML = `
+                ${tooltip}
+                <circle cx="${pt.x}" cy="${pt.y}" r="10" fill="${doneColor}22" stroke="${doneColor}" stroke-width="1.5" />
+                <text x="${pt.x}" y="${pt.y + 4}" text-anchor="middle" font-size="11">🏠</text>
+              `;
+            } else if (stageIndex < currentIndex) {
+              stageG.innerHTML = `
+                ${tooltip}
                 <circle cx="${pt.x}" cy="${pt.y}" r="7" fill="#22c55e" stroke="#0b0f18" stroke-width="1.5" />
                 <text x="${pt.x}" y="${pt.y + 3}" text-anchor="middle" font-size="8" fill="white">✓</text>
               `;
             } else if (stageIndex === currentIndex) {
               stageG.innerHTML = `
+                ${tooltip}
                 <circle cx="${pt.x}" cy="${pt.y}" r="11" fill="${color}22" stroke="${color}88" stroke-width="1.5">
                   <animate attributeName="r" values="11;14;11" dur="1.6s" repeatCount="indefinite" />
                   <animate attributeName="opacity" values="1;0.5;1" dur="1.6s" repeatCount="indefinite" />
@@ -2232,9 +2254,28 @@
                 <circle cx="${pt.x}" cy="${pt.y}" r="6" fill="${color}" />
               `;
             } else {
-              stageG.innerHTML = `<circle cx="${pt.x}" cy="${pt.y}" r="4" fill="#334155" stroke="#1e293b" stroke-width="1" />`;
+              stageG.innerHTML = `${tooltip}<circle cx="${pt.x}" cy="${pt.y}" r="4" fill="#334155" stroke="#1e293b" stroke-width="1" />`;
             }
             layer.appendChild(stageG);
+
+            // ✅ Product image marker, sitting right next to the current
+            // stage dot — clicking it opens the same full detail popup.
+            if (stageIndex === currentIndex && order_hasImage(o)) {
+              const imgSize = 26;
+              const ix = pt.x + 16, iy = pt.y - 16;
+              const clipId = `clip-${o.id}`;
+              const imgG = document.createElementNS(svgNS, 'g');
+              imgG.style.cursor = 'pointer';
+              imgG.setAttribute('onclick', `openMapMarkerModal(${o.id})`);
+              imgG.innerHTML = `
+                <title>${o.product_name || 'Product'} — click for details</title>
+                <clipPath id="${clipId}"><circle cx="${ix}" cy="${iy}" r="${imgSize / 2}" /></clipPath>
+                <circle cx="${ix}" cy="${iy}" r="${imgSize / 2 + 2}" fill="#0b0f18" stroke="${color}" stroke-width="2" />
+                <image href="${o.image}" x="${ix - imgSize / 2}" y="${iy - imgSize / 2}" width="${imgSize}" height="${imgSize}"
+                  clip-path="url(#${clipId})" preserveAspectRatio="xMidYMid slice" />
+              `;
+              layer.appendChild(imgG);
+            }
           });
 
           const label = (o.username || 'User #' + o.user_id).length > 10
@@ -2276,6 +2317,11 @@
           }
         });
       });
+    }
+
+    // Small helper so the image marker only renders when there's a real image to show.
+    function order_hasImage(o) {
+      return !!(o.image && o.image.trim().length > 0);
     }
 
     function openMapMarkerModal(orderId, clickedStageIndex) {
