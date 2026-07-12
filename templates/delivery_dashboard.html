@@ -47,6 +47,10 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      /* ✅ Scales all text/spacing/icons on this page up proportionally,
+         so everything reads bigger without hand-editing every font-size
+         rule individually. */
+      zoom: 115%;
     }
 
     /* ── TOP BAR ── */
@@ -1367,14 +1371,10 @@
         </div>
       </div>
 
-      <!-- SVG Map -->
+      <!-- Live Map (populated from real order data by renderLiveMap()) -->
       <div class="map-svg-wrap">
-        <svg viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+        <svg id="liveMapSvg" viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" style="display:block;">
           <defs>
-            <radialGradient id="g1" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#1e293b" stop-opacity="0.6" />
-              <stop offset="100%" stop-color="#0f1520" stop-opacity="0" />
-            </radialGradient>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3" result="b" />
               <feMerge>
@@ -1384,7 +1384,7 @@
             </filter>
           </defs>
 
-          <!-- grid -->
+          <!-- background grid (decorative only) -->
           <g stroke="#1e293b" stroke-width="0.5" opacity="0.7">
             <line x1="0" y1="57" x2="640" y2="57" />
             <line x1="0" y1="114" x2="640" y2="114" />
@@ -1400,126 +1400,25 @@
             <line x1="560" y1="0" x2="560" y2="340" />
           </g>
 
-          <!-- Zone A bubble -->
-          <ellipse cx="200" cy="130" rx="130" ry="90" fill="rgba(59,130,246,0.05)" stroke="rgba(59,130,246,0.15)"
-            stroke-width="1.5" stroke-dasharray="6 4" />
-          <text x="76" y="58" fill="rgba(59,130,246,0.4)" font-size="10" font-family="JetBrains Mono,monospace"
-            letter-spacing="2">ZONE A</text>
-
-          <!-- Zone B bubble -->
-          <ellipse cx="430" cy="140" rx="110" ry="80" fill="rgba(20,184,166,0.05)" stroke="rgba(20,184,166,0.15)"
-            stroke-width="1.5" stroke-dasharray="6 4" />
-          <text x="330" y="72" fill="rgba(20,184,166,0.4)" font-size="10" font-family="JetBrains Mono,monospace"
-            letter-spacing="2">ZONE B</text>
-
-          <!-- Zone C bubble -->
-          <ellipse cx="310" cy="270" rx="150" ry="60" fill="rgba(168,85,247,0.05)" stroke="rgba(168,85,247,0.15)"
-            stroke-width="1.5" stroke-dasharray="6 4" />
-          <text x="182" y="310" fill="rgba(168,85,247,0.4)" font-size="10" font-family="JetBrains Mono,monospace"
-            letter-spacing="2">ZONE C</text>
-
-          <!-- Roads -->
-          <path d="M0 160 Q160 155 320 165 Q480 175 640 160" stroke="#1a2540" stroke-width="8" fill="none" />
-          <path d="M0 160 Q160 155 320 165 Q480 175 640 160" stroke="#243050" stroke-width="2" fill="none"
-            stroke-dasharray="20 10" />
-          <path d="M320 0 Q315 90 310 165 Q305 240 300 340" stroke="#1a2540" stroke-width="6" fill="none" />
-          <path d="M320 0 Q315 90 310 165 Q305 240 300 340" stroke="#243050" stroke-width="1.5" fill="none"
-            stroke-dasharray="15 8" />
-
-          <!-- ── DELIVERY ROUTES (animated lines) ── -->
-          <!-- Amit K route: Zone A -->
-          <path d="M205,155 L145,185" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4">
-            <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.5s" repeatCount="indefinite" />
-          </path>
-          <path d="M205,155 L235,115" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4">
-            <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.5s" repeatCount="indefinite" />
-          </path>
-
-          <!-- Deepak route: Zone B -->
-          <path d="M425,155 L385,130" stroke="#14b8a6" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4">
-            <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="2s" repeatCount="indefinite" />
-          </path>
-
-          <!-- Kiran route: Zone C -->
-          <path d="M300,255 L250,270" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4">
-            <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.8s" repeatCount="indefinite" />
-          </path>
-          <path d="M300,255 L360,265" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4">
-            <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="1.8s" repeatCount="indefinite" />
-          </path>
-
-          <!-- ── CUSTOMER PINS ── -->
-          <!-- Rohan Mehta — Nearby / orange -->
-          <g filter="url(#glow)">
-            <circle cx="145" cy="185" r="18" fill="rgba(249,115,22,0.12)" stroke="rgba(249,115,22,0.4)"
-              stroke-width="1.5">
-              <animate attributeName="r" values="18;22;18" dur="2s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" />
-            </circle>
-            <circle cx="145" cy="185" r="7" fill="#f97316" />
-            <text x="145" y="175" text-anchor="middle" fill="#f97316" font-size="9"
-              font-family="JetBrains Mono,monospace">R.Mehta</text>
-          </g>
-
-          <!-- Priya — in transit / blue -->
-          <circle cx="385" cy="130" r="16" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.3)"
-            stroke-width="1.5" />
-          <circle cx="385" cy="130" r="6" fill="#3b82f6" />
-          <text x="385" y="119" text-anchor="middle" fill="#3b82f6" font-size="9"
-            font-family="JetBrains Mono,monospace">P.Sharma</text>
-
-          <!-- Nisha — delivered / green -->
-          <circle cx="235" cy="115" r="6" fill="#22c55e" />
-          <text x="235" y="105" text-anchor="middle" fill="#22c55e" font-size="9"
-            font-family="JetBrains Mono,monospace">N.Patil ✓</text>
-
-          <!-- Sanjay — pending / grey -->
-          <circle cx="250" cy="270" r="6" fill="#6b7280" />
-          <text x="250" y="260" text-anchor="middle" fill="#6b7280" font-size="9"
-            font-family="JetBrains Mono,monospace">S.Kulkarni</text>
-
-          <!-- Ananya — nearby / orange -->
-          <g filter="url(#glow)">
-            <circle cx="362" cy="265" r="18" fill="rgba(249,115,22,0.12)" stroke="rgba(249,115,22,0.4)"
-              stroke-width="1.5">
-              <animate attributeName="r" values="18;23;18" dur="1.8s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="1;0.5;1" dur="1.8s" repeatCount="indefinite" />
-            </circle>
-            <circle cx="362" cy="265" r="7" fill="#f97316" />
-            <text x="362" y="254" text-anchor="middle" fill="#f97316" font-size="9"
-              font-family="JetBrains Mono,monospace">A.Desai</text>
-          </g>
-
-          <!-- Vikram — in transit / blue -->
-          <circle cx="175" cy="135" r="6" fill="#3b82f6" />
-          <text x="175" y="125" text-anchor="middle" fill="#3b82f6" font-size="9"
-            font-family="JetBrains Mono,monospace">V.Joshi</text>
-
-          <!-- ── DELIVERY BOY PINS ── -->
-          <!-- Amit K — Zone A -->
-          <g>
-            <circle cx="205" cy="155" r="14" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2" />
-            <text x="205" y="159" text-anchor="middle" fill="#f59e0b" font-size="12">🛵</text>
-            <text x="205" y="141" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="bold"
-              font-family="JetBrains Mono,monospace">Amit K.</text>
-          </g>
-
-          <!-- Deepak R — Zone B -->
-          <g>
-            <circle cx="425" cy="155" r="14" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2" />
-            <text x="425" y="159" text-anchor="middle" fill="#f59e0b" font-size="12">🛵</text>
-            <text x="425" y="141" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="bold"
-              font-family="JetBrains Mono,monospace">Deepak R.</text>
-          </g>
-
-          <!-- Kiran S — Zone C -->
-          <g>
-            <circle cx="300" cy="255" r="14" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2" />
-            <text x="300" y="259" text-anchor="middle" fill="#f59e0b" font-size="12">🛵</text>
-            <text x="300" y="241" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="bold"
-              font-family="JetBrains Mono,monospace">Kiran S.</text>
-          </g>
+          <!-- ✅ Real order + delivery-boy markers get injected here by renderLiveMap() -->
+          <g id="mapMarkersLayer"></g>
         </svg>
+
+        <div id="liveMapEmpty" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;
+            color:var(--muted);font-size:13px;text-align:center;padding:20px;">
+          No active orders to show on the map yet.
+        </div>
+      </div>
+
+      <!-- Enlarged marker popup -->
+      <div id="mapMarkerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:999;
+          align-items:center;justify-content:center;" onclick="if(event.target===this) closeMapMarkerModal()">
+        <div style="background:var(--card, #151b28);border:1px solid var(--border, #2a3448);border-radius:16px;
+            padding:28px;width:min(440px,90vw);position:relative;">
+          <span onclick="closeMapMarkerModal()" style="position:absolute;top:14px;right:16px;cursor:pointer;
+              font-size:20px;color:var(--muted);">✕</span>
+          <div id="mapMarkerModalBody" style="font-size:15px;"></div>
+        </div>
       </div>
 
       <!-- Delivery Boy Cards -->
@@ -1809,8 +1708,17 @@
   <!-- Delivery Management -->
   <div style="padding:20px 28px;border-top:1px solid var(--border);background:var(--surface);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);">
-        🛠️ Delivery Management
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div
+          style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);">
+          🛠️ Delivery Management
+        </div>
+        <div id="manageUserFilterChip"
+          style="display:none;align-items:center;gap:6px;background:var(--accent, #6366f1)22;
+            border:1px solid var(--accent, #6366f1)55;color:var(--accent, #6366f1);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;">
+          <span id="manageUserFilterLabel"></span>
+          <span onclick="clearOrdersManageFilter()" style="cursor:pointer;font-weight:800;">✕</span>
+        </div>
       </div>
       <div style="display:flex;gap:10px;">
         <button onclick="autoAssignDeliveries()" class="btn-outline">🔄 Auto-Assign (7-day window)</button>
@@ -1890,11 +1798,56 @@
       loadOrdersManage();
     }
 
+    // ✅ When set, the "Delivery Management" section below only shows
+    // orders belonging to this user. Set by clicking a customer card
+    // on the left; cleared via the "✕ Show All" chip.
+    let selectedManageUserId = null;
+    let selectedManageUsername = null;
+
+    function updateManageFilterChip() {
+      const chip = document.getElementById('manageUserFilterChip');
+      const label = document.getElementById('manageUserFilterLabel');
+      if (selectedManageUserId !== null) {
+        label.textContent = `Showing: ${selectedManageUsername || 'User #' + selectedManageUserId}`;
+        chip.style.display = 'inline-flex';
+      } else {
+        chip.style.display = 'none';
+      }
+    }
+
+    function filterOrdersManageByUser(userId, username) {
+      selectedManageUserId = userId;
+      selectedManageUsername = username;
+      updateManageFilterChip();
+      loadOrdersManage();
+    }
+
+    function clearOrdersManageFilter() {
+      selectedManageUserId = null;
+      selectedManageUsername = null;
+      updateManageFilterChip();
+      loadOrdersManage();
+    }
+
     async function loadOrdersManage() {
       const res = await fetch('/api/owner/delivery-orders');
       const data = await res.json();
+      let orders = data.orders || [];
+
+      // ✅ Only show the selected user's orders, if a filter is active
+      if (selectedManageUserId !== null) {
+        orders = orders.filter(o => o.user_id === selectedManageUserId);
+      }
+
       const container = document.getElementById('ordersManageList');
-      container.innerHTML = (data.orders || []).map(o => `
+
+      if (orders.length === 0) {
+        container.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;font-size:12.5px;">
+            ${selectedManageUserId !== null ? 'This user has no delivery orders.' : 'No delivery orders yet.'}</div>`;
+        return;
+      }
+
+      container.innerHTML = orders.map(o => `
       <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;">
         <div style="font-size:13px;font-weight:600;">${o.product_name || 'Order #' + o.id}</div>
         <div style="font-size:11px;color:var(--muted);margin:4px 0;">${o.username || 'User #' + o.user_id} · ${o.delivery_boy_name || 'Unassigned'}</div>
@@ -1940,6 +1893,7 @@
 
       renderRealCustomerList();
       renderRealDeliveryBoyList();
+      renderLiveMap();
     }
 
     const STATUS_BADGE = {
@@ -2020,7 +1974,140 @@
       }).join('');
     }
 
+    // ✅ Colors matching the existing legend in the map header
+    const MAP_STATUS_COLOR = {
+      order_placed: '#6b7280',
+      confirmed: '#6b7280',
+      shipped: '#3b82f6',
+      out_for_delivery: '#f97316',
+      delivered: '#22c55e'
+    };
+
+    // Renders one marker per real order onto the SVG map, clustered loosely
+    // by status (same visual language as the old mock map: orange=nearby,
+    // blue=in transit, green=delivered, grey=pending), and a 🛵 marker for
+    // any delivery boy currently assigned to orders in that cluster.
+    function renderLiveMap() {
+      const layer = document.getElementById('mapMarkersLayer');
+      const emptyMsg = document.getElementById('liveMapEmpty');
+      if (!layer) return;
+
+      layer.innerHTML = '';
+
+      if (allDeliveryOrders.length === 0) {
+        emptyMsg.style.display = 'flex';
+        return;
+      }
+      emptyMsg.style.display = 'none';
+
+      // Loose cluster centers per status, similar spatial feel to the old mock zones
+      const CLUSTER_CENTERS = {
+        out_for_delivery: { cx: 170, cy: 175, r: 110 },
+        shipped: { cx: 430, cy: 140, r: 100 },
+        order_placed: { cx: 310, cy: 270, r: 130 },
+        confirmed: { cx: 310, cy: 270, r: 130 },
+        delivered: { cx: 230, cy: 90, r: 90 }
+      };
+
+      // Group orders by status so each cluster's items can be spread out
+      // around its center instead of stacking on top of each other.
+      const byStatus = {};
+      allDeliveryOrders.forEach(o => {
+        const key = CLUSTER_CENTERS[o.status] ? o.status : 'order_placed';
+        (byStatus[key] = byStatus[key] || []).push(o);
+      });
+
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const seenDeliveryBoys = {};
+
+      Object.keys(byStatus).forEach(status => {
+        const cluster = CLUSTER_CENTERS[status];
+        const orders = byStatus[status];
+        const color = MAP_STATUS_COLOR[status] || '#6b7280';
+
+        orders.forEach((o, i) => {
+          // Spread markers evenly around the cluster center using the
+          // golden-angle so any number of orders fits without hand-tuning.
+          const angle = i * 137.5 * (Math.PI / 180);
+          const dist = Math.min(cluster.r, 14 + i * 9);
+          const cx = Math.max(30, Math.min(610, cluster.cx + Math.cos(angle) * dist));
+          const cy = Math.max(30, Math.min(310, cluster.cy + Math.sin(angle) * dist));
+
+          const g = document.createElementNS(svgNS, 'g');
+          g.style.cursor = 'pointer';
+          g.setAttribute('onclick', `openMapMarkerModal(${o.id})`);
+          if (status === 'out_for_delivery') g.setAttribute('filter', 'url(#glow)');
+
+          const pulseRing = (status === 'out_for_delivery')
+            ? `<circle cx="${cx}" cy="${cy}" r="16" fill="${color}22" stroke="${color}66" stroke-width="1.5">
+                 <animate attributeName="r" values="16;20;16" dur="2s" repeatCount="indefinite" />
+                 <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" />
+               </circle>` : '';
+
+          const label = (o.username || 'User #' + o.user_id).length > 10
+            ? (o.username || '').slice(0, 9) + '…'
+            : (o.username || 'User #' + o.user_id);
+
+          g.innerHTML = `
+            ${pulseRing}
+            <circle cx="${cx}" cy="${cy}" r="6" fill="${color}" />
+            <text x="${cx}" y="${cy - 11}" text-anchor="middle" fill="${color}" font-size="9"
+              font-family="JetBrains Mono,monospace">${label}${status === 'delivered' ? ' ✓' : ''}</text>
+          `;
+          layer.appendChild(g);
+
+          // One 🛵 marker per unique delivery boy, placed at their first order's position
+          if (o.delivery_boy_name && !seenDeliveryBoys[o.delivery_boy_id]) {
+            seenDeliveryBoys[o.delivery_boy_id] = true;
+            const bx = cx + 26, by = cy + 20;
+            const bg = document.createElementNS(svgNS, 'g');
+            bg.innerHTML = `
+              <circle cx="${bx}" cy="${by}" r="12" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2" />
+              <text x="${bx}" y="${by + 4}" text-anchor="middle" fill="#f59e0b" font-size="11">🛵</text>
+            `;
+            layer.appendChild(bg);
+          }
+        });
+      });
+    }
+
+    function openMapMarkerModal(orderId) {
+      const order = allDeliveryOrders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const color = MAP_STATUS_COLOR[order.status] || '#6b7280';
+      const badge = STATUS_BADGE[order.status] || STATUS_BADGE.order_placed;
+
+      document.getElementById('mapMarkerModalBody').innerHTML = `
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+          <div style="width:52px;height:52px;border-radius:50%;background:${color};color:white;
+              display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;">
+            ${(order.username || 'U').charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style="font-size:19px;font-weight:700;">${order.username || 'User #' + order.user_id}</div>
+            <span style="display:inline-block;margin-top:4px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;
+                background:${badge.color}22;color:${badge.color};border:1px solid ${badge.color}55;">${badge.label}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;">
+          <div><span style="color:var(--muted);">📦 Product:</span> <strong>${order.product_name || 'Product'}</strong></div>
+          <div><span style="color:var(--muted);">🧾 Order:</span> <strong>#${order.order_ref || order.id}</strong></div>
+          <div><span style="color:var(--muted);">🛵 Delivery Boy:</span> <strong>${order.delivery_boy_name || 'Not yet assigned'}</strong></div>
+          ${order.eta_text ? `<div><span style="color:var(--muted);">⏱ ETA:</span> <strong>${order.eta_text}</strong></div>` : ''}
+          ${order.purchased_at ? `<div><span style="color:var(--muted);">🗓 Purchased:</span> <strong>${order.purchased_at}</strong></div>` : ''}
+        </div>
+      `;
+      document.getElementById('mapMarkerModal').style.display = 'flex';
+    }
+
+    function closeMapMarkerModal() {
+      document.getElementById('mapMarkerModal').style.display = 'none';
+    }
+
     async function selectRealOrder(orderId) {
+
+
       document.querySelectorAll('.customer-card').forEach(c => c.classList.remove('active'));
       const clickedCard = [...document.querySelectorAll('.customer-card')].find(c =>
         c.getAttribute('onclick') === `selectRealOrder(${orderId})`);
@@ -2028,6 +2115,10 @@
 
       const order = allDeliveryOrders.find(o => o.id === orderId);
       if (!order) return;
+
+      // ✅ Filter the "Delivery Management" section below to only this
+      // customer's orders, so items from different users stop mixing together.
+      filterOrdersManageByUser(order.user_id, order.username);
 
       const badge = STATUS_BADGE[order.status] || STATUS_BADGE.order_placed;
       const scroll = document.getElementById('orderDetailScroll');
