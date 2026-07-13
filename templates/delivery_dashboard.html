@@ -1986,8 +1986,17 @@
       renderRealCustomerList();
       renderAssignedDeliveryBoy();
       renderLiveMap();
-      // ✅ NEW: keep the Delivery Intelligence panel live too, if it's the one currently showing
-      if (typeof trackingPanelActive !== 'undefined' && trackingPanelActive) renderTrackingPanel();
+      // ✅ Keep the Delivery Intelligence panel showing (and the map hidden)
+      // across every 15s refresh, instead of assuming the display styles
+      // set at toggle-time persist untouched — this is what was causing
+      // it to silently revert to the map after a few seconds.
+      if (typeof trackingPanelActive !== 'undefined' && trackingPanelActive) {
+        const mapWrap = document.querySelector('.map-svg-wrap');
+        const trackWrap = document.getElementById('trackingPanelWrap');
+        if (mapWrap) mapWrap.style.display = 'none';
+        if (trackWrap) trackWrap.style.display = 'flex';
+        renderTrackingPanel();
+      }
     }
 
     const STATUS_BADGE = {
@@ -2180,12 +2189,16 @@
       emptyMsg.style.display = 'none';
 
       // Loose cluster centers per status, similar spatial feel to the old mock zones
+      // ✅ FIX: each status now has its own distinct center — order_placed
+      // and confirmed previously shared identical coordinates, which meant
+      // an order in one status could render exactly on top of an order in
+      // the other, silently hiding it. Every zone is now separate.
       const CLUSTER_CENTERS = {
-        out_for_delivery: { cx: 170, cy: 175, r: 110 },
-        shipped:           { cx: 430, cy: 140, r: 100 },
-        order_placed:      { cx: 310, cy: 270, r: 130 },
-        confirmed:         { cx: 310, cy: 270, r: 130 },
-        delivered:         { cx: 230, cy: 90,  r: 90 }
+        delivered:         { cx: 150, cy: 90,  r: 85 },
+        confirmed:         { cx: 480, cy: 95,  r: 90 },
+        shipped:           { cx: 500, cy: 200, r: 90 },
+        out_for_delivery:  { cx: 150, cy: 200, r: 90 },
+        order_placed:      { cx: 320, cy: 290, r: 100 }
       };
 
       // Group orders by status so each cluster's items can be spread out
