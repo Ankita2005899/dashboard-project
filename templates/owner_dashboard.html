@@ -1344,6 +1344,12 @@
             cursor:pointer;color:#991b1b;">✕</button>
         </div>
         <div id="scheduleReminderBody" style="padding:16px 18px;"></div>
+        <div style="padding:10px 18px 16px;display:flex;justify-content:flex-end;
+            border-top:1px solid #f1f5f9;background:#fff;">
+            <button onclick="acknowledgeScheduleReminder()" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);
+                color:white;border:none;padding:9px 24px;border-radius:9px;font-size:13.5px;font-weight:800;
+                cursor:pointer;box-shadow:0 4px 10px rgba(79,70,229,0.3);letter-spacing:0.3px;">OK</button>
+        </div>
     </div>
 
     <script>
@@ -1448,7 +1454,7 @@
             <div>
                 <div style="font-size:13px;font-weight:700;color:#1e293b;">${s.title}</div>
                 <div style="font-size:11.5px;color:#94a3b8;margin-top:2px;">${s.scheduled_at.slice(11, 16)}
-                    ${s.is_notified ? ' • ✅ Notified' : ''}</div>
+                    ${isReminderAcknowledged(s.id) ? ' • 🔕 Deactivated' : (s.is_notified ? ' • ✅ Notified' : '')}</div>
                 ${s.description ? `<div style="font-size:12px;color:#64748b;margin-top:4px;">${s.description}</div>` : ''}
             </div>
             <button onclick="deleteSchedule(${s.id})" style="background:none;border:none;cursor:pointer;flex-shrink:0;">
@@ -1533,8 +1539,40 @@
 
         // ── Due schedule polling — runs independently, checks every 30s ──
         let lastNotifiedDueSignature = '';
+        let currentDueReminderItems = [];
+        let reminderRingIntervalId = null;
 
-        // ✅ NEW — audible + haptic alert for when a scheduled time passes.
+        // ✅ Acknowledged ("Deactivated") reminders are remembered in localStorage
+        // so that (a) they never ring/pop up again, on this device, even after a
+        // full page reload / browser restart, and (b) the calendar list can show
+        // them as "Deactivated" instead of "Notified".
+        const ACK_STORAGE_KEY = 'ownerDashboard_acknowledgedReminders';
+        function loadAcknowledgedReminders() {
+            try {
+                return new Set(JSON.parse(localStorage.getItem(ACK_STORAGE_KEY) || '[]'));
+            } catch (e) {
+                return new Set();
+            }
+        }
+        function saveAcknowledgedReminders(set) {
+            try {
+                localStorage.setItem(ACK_STORAGE_KEY, JSON.stringify(Array.from(set)));
+            } catch (e) {
+                console.error('Failed to persist acknowledged reminders:', e);
+            }
+        }
+        let acknowledgedReminderIds = loadAcknowledgedReminders();
+
+        function reminderKey(d) {
+            // Prefer a stable id when the API provides one; fall back to a
+            // title+time signature so this still works if it doesn't.
+            return d && d.id !== undefined && d.id !== null ? `id:${d.id}` : `${d.title}|${d.scheduled_at}`;
+        }
+        function isReminderAcknowledged(id) {
+            return acknowledgedReminderIds.has(`id:${id}`);
+        }
+
+        // ✅ Audible + haptic alert for when a scheduled time passes.
         // Uses the Web Audio API directly (no audio file needed) so it works
         // the moment the page has had any user interaction, per browser
         // autoplay rules.
@@ -1567,20 +1605,41 @@
             }
         }
 
+        // ✅ Keeps ringing on a loop (every 4s) until the user clicks "OK" —
+        // it does NOT stop just because the popup was closed with ✕.
+        function startReminderRinging() {
+            playReminderChime();
+            if (reminderRingIntervalId) clearInterval(reminderRingIntervalId);
+            reminderRingIntervalId = setInterval(playReminderChime, 4000);
+        }
+        function stopReminderRinging() {
+            if (reminderRingIntervalId) {
+                clearInterval(reminderRingIntervalId);
+                reminderRingIntervalId = null;
+            }
+        }
+
         async function checkDueSchedule() {
             try {
                 const res = await fetch('/api/owner/schedule/due');
                 const data = await res.json();
-                if (data.due && data.due.length > 0) {
-                    // ✅ Only play the chime/vibration when the due list actually
-                    // changes (new item became due), not on every 30s poll while
-                    // the same already-seen item is still sitting there unacknowledged.
-                    const signature = data.due.map(d => `${d.title}|${d.scheduled_at}`).join(',');
+                // Drop anything the owner has already clicked "OK" on — those
+                // must never ring or pop up again.
+                const dueItems = (data.due || []).filter(d => !acknowledgedReminderIds.has(reminderKey(d)));
+
+                if (dueItems.length > 0) {
+                    // ✅ Only fire a *fresh* chime burst when the due list actually
+                    // changes (new item became due); the ringing loop itself keeps
+                    // going regardless once it has started.
+                    const signature = dueItems.map(d => `${d.title}|${d.scheduled_at}`).join(',');
                     const isNewAlert = signature !== lastNotifiedDueSignature;
                     lastNotifiedDueSignature = signature;
-                    showScheduleReminder(data.due, isNewAlert);
+                    showScheduleReminder(dueItems, isNewAlert);
                 } else {
                     lastNotifiedDueSignature = '';
+                    currentDueReminderItems = [];
+                    stopReminderRinging();
+                    document.getElementById('scheduleReminderPopup').style.display = 'none';
                 }
             } catch (e) {
                 console.error('Due schedule check failed:', e);
@@ -1588,6 +1647,7 @@
         }
 
         function showScheduleReminder(dueItems, playAlert = true) {
+            currentDueReminderItems = dueItems;
             const body = document.getElementById('scheduleReminderBody');
             body.innerHTML = dueItems.map(d => `
         <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">
@@ -1596,12 +1656,44 @@
             ${d.description ? `<div style="font-size:12.5px;color:#64748b;margin-top:6px;">${d.description}</div>` : ''}
         </div>
     `).join('');
+            // ✅ This popup re-activates every time the dashboard is open (or
+            // reloaded) as long as there's an un-acknowledged due reminder.
             document.getElementById('scheduleReminderPopup').style.display = 'block';
-            if (playAlert) playReminderChime();
+            if (playAlert) startReminderRinging();
         }
 
+        // ✕ just hides the popup — it is NOT an acknowledgement. The chime
+        // keeps ringing in the background and the popup will reappear on the
+        // next poll (and on the next dashboard open) until "OK" is clicked.
         function closeScheduleReminder() {
             document.getElementById('scheduleReminderPopup').style.display = 'none';
+        }
+
+        // ✅ OK button — the only action that stops the sound for good and
+        // permanently deactivates these reminders so they never ring again.
+        async function acknowledgeScheduleReminder() {
+            stopReminderRinging();
+            document.getElementById('scheduleReminderPopup').style.display = 'none';
+
+            currentDueReminderItems.forEach(d => acknowledgedReminderIds.add(reminderKey(d)));
+            saveAcknowledgedReminders(acknowledgedReminderIds);
+
+            // Best-effort: also let the backend know, if it supports it. This is
+            // wrapped so nothing breaks if that endpoint doesn't exist — the
+            // localStorage record above already guarantees it stays deactivated
+            // on this device/browser.
+            currentDueReminderItems.forEach(d => {
+                if (d.id !== undefined && d.id !== null) {
+                    fetch(`/api/owner/schedule/${d.id}/deactivate`, { method: 'POST' }).catch(() => {});
+                }
+            });
+
+            lastNotifiedDueSignature = '';
+            currentDueReminderItems = [];
+
+            // Refresh the calendar list so the acknowledged item now shows
+            // "🔕 Deactivated" instead of "✅ Notified".
+            if (calendarSelectedDate) renderScheduleListForDate(calendarSelectedDate);
         }
 
         setInterval(checkDueSchedule, 30000);
