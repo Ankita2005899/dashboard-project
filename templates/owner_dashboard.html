@@ -1329,7 +1329,7 @@
     </div>
 
     <!-- Due Reminder Popup -->
-    <div id="scheduleReminderPopup" style="display:none;position:fixed;top:24px;right:24px;
+    <div id="scheduleReminderPopup" style="display:none;position:fixed;top:24px;left:50%;transform:translateX(-50%);
     width:340px;background:white;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,0.3);
     z-index:9999999;border-left:5px solid #ef4444;overflow:hidden;">
         <div
@@ -1514,19 +1514,62 @@
         })();
 
         // ── Due schedule polling — runs independently, checks every 30s ──
+        let lastNotifiedDueSignature = '';
+
+        // ✅ NEW — audible + haptic alert for when a scheduled time passes.
+        // Uses the Web Audio API directly (no audio file needed) so it works
+        // the moment the page has had any user interaction, per browser
+        // autoplay rules.
+        function playReminderChime() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const now = ctx.currentTime;
+                // Two-note chime (like a soft "ding-dong") instead of one flat beep.
+                [{ freq: 880, start: 0 }, { freq: 660, start: 0.18 }].forEach(note => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = note.freq;
+                    gain.gain.setValueAtTime(0.0001, now + note.start);
+                    gain.gain.exponentialRampToValueAtTime(0.35, now + note.start + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + note.start + 0.35);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + note.start);
+                    osc.stop(now + note.start + 0.4);
+                });
+            } catch (e) {
+                console.error('Reminder chime failed:', e);
+            }
+
+            // Vibration — only works on devices/browsers that support it
+            // (mobile Chrome/Android mainly; desktop browsers simply ignore this).
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200]);
+            }
+        }
+
         async function checkDueSchedule() {
             try {
                 const res = await fetch('/api/owner/schedule/due');
                 const data = await res.json();
                 if (data.due && data.due.length > 0) {
-                    showScheduleReminder(data.due);
+                    // ✅ Only play the chime/vibration when the due list actually
+                    // changes (new item became due), not on every 30s poll while
+                    // the same already-seen item is still sitting there unacknowledged.
+                    const signature = data.due.map(d => `${d.title}|${d.scheduled_at}`).join(',');
+                    const isNewAlert = signature !== lastNotifiedDueSignature;
+                    lastNotifiedDueSignature = signature;
+                    showScheduleReminder(data.due, isNewAlert);
+                } else {
+                    lastNotifiedDueSignature = '';
                 }
             } catch (e) {
                 console.error('Due schedule check failed:', e);
             }
         }
 
-        function showScheduleReminder(dueItems) {
+        function showScheduleReminder(dueItems, playAlert = true) {
             const body = document.getElementById('scheduleReminderBody');
             body.innerHTML = dueItems.map(d => `
         <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">
@@ -1536,6 +1579,7 @@
         </div>
     `).join('');
             document.getElementById('scheduleReminderPopup').style.display = 'block';
+            if (playAlert) playReminderChime();
         }
 
         function closeScheduleReminder() {
