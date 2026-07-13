@@ -1440,6 +1440,23 @@
         </div>
       </div>
 
+      <!-- ✅ NEW — All Riders directory. Opens from any "Call Rider" button
+           and lists every delivery boy added so far with their phone number,
+           plus who they're currently delivering to (customer name + user ID)
+           and which product — instead of only ever showing/dialing the one
+           rider auto-assigned to the selected customer. -->
+      <div id="allRidersModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:999;
+          align-items:center;justify-content:center;" onclick="if(event.target===this) closeAllRidersModal()">
+        <div style="background:var(--card, #151b28);border:1px solid var(--border, #2a3448);border-radius:16px;
+            padding:24px;width:min(460px,90vw);max-height:80vh;display:flex;flex-direction:column;position:relative;">
+          <span onclick="closeAllRidersModal()" style="position:absolute;top:14px;right:16px;cursor:pointer;
+              font-size:20px;color:var(--muted);">✕</span>
+          <div style="font-size:15px;font-weight:700;margin-bottom:4px;">🛵 All Riders</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-bottom:14px;">Every delivery rider added so far, and who they're currently delivering to.</div>
+          <div id="allRidersModalBody" style="overflow-y:auto;display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+      </div>
+
       <!-- Delivery Boy Cards -->
       <div style="border-top:1px solid var(--border); padding: 12px 12px 0; flex-shrink:0;">
         <div
@@ -1448,6 +1465,7 @@
       </div>
       <div class="scroll-area" id="deliveryBoyListContainer" style="max-height:220px;">
         <div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">Select a customer to see their
+
           delivery partner.</div>
       </div>
       <div class="scroll-area" style="max-height:220px;display:none;">
@@ -2014,7 +2032,7 @@
         const trackWrap = document.getElementById('trackingPanelWrap');
         if (mapWrap) mapWrap.style.display = 'none';
         if (trackWrap) trackWrap.style.display = 'flex';
-        renderTrackingPanel();
+        renderTrackingPanel(true);
       }
     }
 
@@ -2105,12 +2123,13 @@
         const phone = (b && b.phone) || order.delivery_boy_phone || '';
         const telHref = phone ? `tel:${phone.replace(/[^0-9+]/g, '')}` : null;
 
-        // ✅ Actually places the call via the device's phone dialer.
-        const callBtn = telHref
-          ? `<a href="${telHref}" style="display:inline-flex;align-items:center;gap:6px;background:var(--green, #22c55e);
-              color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;margin-top:10px;">
-              📞 Call Rider</a>`
-          : `<div style="font-size:11px;color:var(--muted);margin-top:10px;">No phone on file</div>`;
+        // ✅ CHANGED: "Call Rider" now opens the full All Riders directory
+        // (every rider added so far, with phone numbers) instead of only
+        // ever dialing the one rider auto-assigned to this customer — the
+        // owner may want to reach a different/backup rider too.
+        const callBtn = `<button onclick="openAllRidersModal()" style="display:inline-flex;align-items:center;gap:6px;background:var(--green, #22c55e);
+              color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:10px;">
+              📞 Call Rider</button>`;
 
         // Fallback: even if the delivery-boys list hasn't loaded/matched,
         // the order itself already carries the joined name/phone from the
@@ -2508,6 +2527,68 @@
       document.getElementById('mapMarkerModal').style.display = 'none';
     }
 
+    // ✅ NEW — All Riders directory, opened from any "Call Rider" button.
+    // Lists every delivery boy added so far (allDeliveryBoys, already loaded
+    // on this page) with their phone number, plus — for each rider — the
+    // customer (username + user ID) and product they're currently
+    // delivering, if any. Purely additive: doesn't touch renderAssignedDeliveryBoy
+    // or anything else that already worked.
+    function openAllRidersModal() {
+      const body = document.getElementById('allRidersModalBody');
+
+      if (!allDeliveryBoys || allDeliveryBoys.length === 0) {
+        body.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">
+            No riders added yet.</div>`;
+        document.getElementById('allRidersModal').style.display = 'flex';
+        return;
+      }
+
+      body.innerHTML = allDeliveryBoys.map(b => {
+        const phone = b.phone || '';
+        const telHref = phone ? `tel:${phone.replace(/[^0-9+]/g, '')}` : null;
+
+        // A rider can be actively carrying more than one order — show
+        // every customer currently allotted to them, not just one.
+        const activeOrders = allDeliveryOrders.filter(o => o.delivery_boy_id === b.id && o.status !== 'delivered');
+
+        const assignmentsHtml = activeOrders.length > 0
+          ? activeOrders.map(o => `
+              <div style="display:flex;align-items:center;justify-content:space-between;font-size:11.5px;background:#0f1420;
+                  border:1px solid var(--border,#2a3448);border-radius:8px;padding:6px 10px;margin-top:6px;">
+                <span style="color:var(--text-dim,#9ca3af);">👤 ${o.username || 'User'} <span style="color:var(--muted);">(ID #${o.user_id})</span></span>
+                <span style="color:var(--text);font-weight:600;">📦 ${o.product_name || 'Product'}</span>
+              </div>`).join('')
+          : `<div style="font-size:11px;color:var(--muted);margin-top:6px;">Not currently delivering anything.</div>`;
+
+        return `
+          <div style="background:#0f1420;border:1px solid var(--border,#2a3448);border-radius:10px;padding:12px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="db-avatar" style="width:36px;height:36px;background:${b.is_online ? '#f59e0b' : '#6b7280'};color:#000;
+                  border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;position:relative;">
+                ${b.profile_image
+            ? `<img src="${b.profile_image}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
+            : b.name.charAt(0).toUpperCase()}
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:700;">${b.name}</div>
+                <div style="font-size:11px;color:var(--muted);">${phone || 'No number on file'}</div>
+              </div>
+              ${telHref
+            ? `<a href="${telHref}" style="display:inline-flex;align-items:center;gap:5px;background:var(--green,#22c55e);
+                    color:#fff;padding:6px 12px;border-radius:8px;font-size:11.5px;font-weight:700;text-decoration:none;flex-shrink:0;">📞 Call</a>`
+            : ''}
+            </div>
+            ${assignmentsHtml}
+          </div>`;
+      }).join('');
+
+      document.getElementById('allRidersModal').style.display = 'flex';
+    }
+
+    function closeAllRidersModal() {
+      document.getElementById('allRidersModal').style.display = 'none';
+    }
+
     // ══════════════════════════════════════════════════════════════════
     // ✅ NEW — "Track Live" Delivery Intelligence panel.
     // Swaps into the exact spot the Hub→Home map occupies. Doesn't modify
@@ -2554,9 +2635,17 @@
       }).join('');
     }
 
-    async function renderTrackingPanel() {
+    async function renderTrackingPanel(isSilentRefresh = false) {
       const body = document.getElementById('trackingPanelBody');
-      body.innerHTML = `<div style="text-align:center;color:var(--muted);padding:40px;">Loading delivery intelligence…</div>`;
+      // ✅ FIX: this used to reset to "Loading…" every time the function ran —
+      // including the silent 15s background refresh — which blanked the
+      // panel out for a moment and made the detail look like it kept
+      // disappearing while it was being read. Now the loading placeholder
+      // only shows the first time the panel opens; background refreshes
+      // just swap in fresh content once ready, no blank state in between.
+      if (!isSilentRefresh) {
+        body.innerHTML = `<div style="text-align:center;color:var(--muted);padding:40px;">Loading delivery intelligence…</div>`;
+      }
 
       // ── Section 1: real ML-predicted ETA for the currently selected order,
       // reusing the same /api/owner/predict-eta endpoint already used
