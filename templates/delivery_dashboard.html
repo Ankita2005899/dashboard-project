@@ -161,6 +161,25 @@
       }
     }
 
+    /* ✅ NEW — ring pulse used by the per-customer item cards in the
+       Delivery Intelligence panel to indicate an item is actively moving. */
+    @keyframes itemPulse {
+      0% {
+        opacity: 0.7;
+        transform: scale(0.9);
+      }
+
+      70% {
+        opacity: 0;
+        transform: scale(1.15);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.15);
+      }
+    }
+
     /* ── STATS ROW ── */
     .stats-row {
       display: grid;
@@ -2602,18 +2621,47 @@
         ? trackingBarChart(riderStats, 100)
         : `<div style="color:var(--muted);font-size:12px;">No active rider assignments yet.</div>`;
 
-      // ── Section 3: live order-stage distribution across the whole
-      // system — same status colors used on the map, for consistency. ──
-      const STAGE_ORDER_LOCAL = ['order_placed', 'confirmed', 'shipped', 'out_for_delivery', 'delivered'];
-      const stageCounts = STAGE_ORDER_LOCAL.map(s => ({
-        label: (STATUS_BADGE[s] || {}).label || s,
-        value: allDeliveryOrders.filter(o => o.status === s).length,
-        color: MAP_STATUS_COLOR[s] || '#6b7280'
-      }));
-      const maxStage = Math.max(1, ...stageCounts.map(s => s.value));
-      const stageChartHtml = trackingBarChart(
-        stageCounts.map(s => ({ ...s, valueLabel: String(s.value) })), maxStage
-      );
+      // ── Section 3: this customer's items — replaces the old global
+      // "Orders by Stage" breakdown. That section counted every order in
+      // the whole system regardless of who was selected, which read as
+      // confusing/incomplete no matter which customer you clicked. This
+      // shows only the selected customer's own items: how many, and each
+      // one's current status, with a small pulse on items still moving. ──
+      let itemsSectionHtml = `<div style="color:var(--muted);font-size:12px;">Select a customer on the left to see their items here.</div>`;
+      if (selectedMapOrderId !== null) {
+        const selOrder = allDeliveryOrders.find(o => o.id === selectedMapOrderId);
+        if (selOrder) {
+          const customerItems = allDeliveryOrders.filter(o => o.user_id === selOrder.user_id);
+          const deliveredCount = customerItems.filter(o => o.status === 'delivered').length;
+
+          itemsSectionHtml = `
+            <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;">
+              <div style="font-size:13px;color:var(--text-dim, #9ca3af);">
+                <strong style="color:var(--text);font-size:16px;">${customerItems.length}</strong>
+                item${customerItems.length !== 1 ? 's' : ''} for <strong style="color:var(--text);">${selOrder.username || 'this customer'}</strong>
+              </div>
+              <div style="font-size:11px;color:var(--muted);">${deliveredCount}/${customerItems.length} delivered</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              ${customerItems.map(item => {
+                const badge = STATUS_BADGE[item.status] || STATUS_BADGE.order_placed;
+                const isActive = item.status === 'shipped' || item.status === 'out_for_delivery';
+                return `
+                <div style="display:flex;align-items:center;gap:12px;background:#0f1420;border:1px solid var(--border,#2a3448);border-radius:10px;padding:10px 12px;">
+                  <div style="width:34px;height:34px;border-radius:9px;background:${badge.color}22;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;position:relative;">
+                    📦
+                    ${isActive ? `<span style="position:absolute;inset:-4px;border-radius:12px;border:2px solid ${badge.color};animation:itemPulse 1.6s ease-out infinite;"></span>` : ''}
+                  </div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.product_name || 'Product'}</div>
+                    <div style="font-size:10.5px;color:var(--muted);">Order #${item.order_ref || item.id}</div>
+                  </div>
+                  <span style="font-size:10.5px;font-weight:700;color:${badge.color};background:${badge.color}18;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;">${badge.label}</span>
+                </div>`;
+              }).join('')}
+            </div>`;
+        }
+      }
 
       body.innerHTML = `
         <div style="max-width:720px;margin:0 auto;">
@@ -2639,8 +2687,8 @@
 
           <div style="background:var(--card, #151b28);border:1px solid var(--border, #2a3448);border-radius:14px;padding:18px;">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-weight:700;margin-bottom:12px;">
-              📊 Orders by Stage — Right Now</div>
-            ${stageChartHtml}
+              📦 This Customer's Items</div>
+            ${itemsSectionHtml}
           </div>
         </div>
       `;
@@ -2665,6 +2713,14 @@
       // the delivery person assigned to THIS order.
       selectedMapOrderId = orderId;
       renderAssignedDeliveryBoy();
+
+      // ✅ FIX: previously the Track Live / Delivery Intelligence panel only
+      // picked up a newly selected customer on the next 15s auto-refresh —
+      // clicking a different customer while the panel was open kept showing
+      // whichever customer was selected before. Refresh it immediately too.
+      if (typeof trackingPanelActive !== 'undefined' && trackingPanelActive) {
+        renderTrackingPanel();
+      }
 
       const badge = STATUS_BADGE[order.status] || STATUS_BADGE.order_placed;
       const scroll = document.getElementById('orderDetailScroll');
