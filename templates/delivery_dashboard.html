@@ -30,6 +30,28 @@
       --stage-transit: #3b82f6;
       --stage-nearby: #f97316;
       --stage-delivered: #22c55e;
+
+      --grid-bg: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      --grid-size: 50px 50px;
+    }
+
+    /* ✅ Light mode — this page has no toggle of its own; it just reads
+       the same 'shopsphere-theme' localStorage key that index.html's
+       toggle writes to, so the theme set there carries over here too
+       (same pattern login.html uses). */
+    [data-theme="light"] {
+      --bg: #d4f4f8;
+      --surface: #ffffff;
+      --card: #f8fafc;
+      --border: #e2e8f0;
+      --muted: #64748b;
+      --text: #1e293b;
+      --text-dim: #64748b;
+
+      --grid-bg: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+      --grid-size: 50px 50px;
     }
 
     *,
@@ -51,6 +73,29 @@
          so everything reads bigger without hand-editing every font-size
          rule individually. */
       zoom: 115%;
+      position: relative;
+      transition: background 0.3s;
+    }
+
+    /* ✅ Grid "box pattern" overlay — same technique used on index.html /
+       login.html / the owner dashboard, driven by --grid-bg/--grid-size so
+       it flips automatically with the theme. */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image: var(--grid-bg);
+      background-size: var(--grid-size);
+      pointer-events: none;
+    }
+
+    .topbar,
+    .stats-row,
+    main,
+    footer {
+      position: relative;
+      z-index: 1;
     }
 
     /* ── TOP BAR ── */
@@ -1007,6 +1052,13 @@
 </head>
 
 <body>
+
+  <script>
+    (function () {
+      var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
 
   <!-- TOP BAR -->
   <header class="topbar">

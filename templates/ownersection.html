@@ -22,7 +22,32 @@
   --muted2:#6A6A7A;
   --white:#ffffff;
   --card-border:rgba(255,107,43,0.15);
+  --grid-line:rgba(255,255,255,0.035);
 }
+
+/* ✅ Light mode — this page has no toggle of its own; it just reads the
+   same 'shopsphere-theme' localStorage key that index.html's toggle
+   writes to, so the theme set there carries over here too (same
+   pattern login.html uses). */
+[data-theme="light"]{
+  --bg:#D5F5F5;
+  --surface:#FFFFFF;
+  --surface2:#EDECEA;
+  --border:rgba(0,0,0,0.08);
+  --border2:rgba(0,0,0,0.14);
+  --orange:#E85520;
+  --orange-dark:#C94214;
+  --orange-glow2:rgba(232,85,32,0.08);
+  --gold:#D48B10;
+  --teal:#009B7D;
+  --text:#1A1A26;
+  --muted:#6A6A7A;
+  --muted2:#8A8A9A;
+  --white:#1A1A26;
+  --card-border:rgba(232,85,32,0.2);
+  --grid-line:rgba(0,0,0,0.05);
+}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
 body{
@@ -31,8 +56,8 @@ body{
   background-image:
     radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,107,43,0.12) 0%, transparent 70%),
     radial-gradient(ellipse 50% 40% at 80% 80%, rgba(0,212,170,0.06) 0%, transparent 60%),
-    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size:auto, auto, 60px 60px, 60px 60px;
   color:var(--text);
   display:flex;
@@ -41,6 +66,7 @@ body{
   height:100vh;
   overflow:hidden;
   position:relative;
+  transition:background-color 0.3s, color 0.3s;
 }
 
 /* ── Floating background items ── */
@@ -219,9 +245,17 @@ button:active{transform:translateY(0);}
   z-index:1000;
   letter-spacing:.01em;
 }
+
 </style>
 </head>
 <body>
+
+<script>
+  (function () {
+    var theme = localStorage.getItem('shopsphere-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 
 <!-- Floating background SVG items (CSS-driven, no JS) -->
 <div class="float-item" style="--dur:14s;--delay:0s;--start-y:8%;--end-y:80%;--rot:-12deg;--op:0.22;width:72px;"><svg viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="25" width="40" height="32" rx="4" fill="#FF6B2B" opacity="0.9"/><path d="M25 25 Q25 14 35 14 Q45 14 45 25" stroke="#4B2A8A" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="27" y="38" width="16" height="3" rx="1.5" fill="white" opacity="0.5"/></svg></div>
