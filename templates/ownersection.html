@@ -254,6 +254,14 @@ button:active{transform:translateY(0);}
   (function () {
     var theme = localStorage.getItem('shopsphere-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', theme);
+    // Keep it live: if the theme is changed on another tab of the same
+    // site (e.g. the toggle on index.html), pick it up here immediately
+    // instead of only on the next page load.
+    window.addEventListener('storage', function (e) {
+      if (e.key === 'shopsphere-theme') {
+        document.documentElement.setAttribute('data-theme', e.newValue || 'dark');
+      }
+    });
   })();
 </script>
 
