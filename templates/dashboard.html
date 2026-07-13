@@ -497,6 +497,8 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 
             z-index: 99999;
+
+            transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
         /* ================= CART ITEM ================= */
@@ -1144,6 +1146,32 @@
         {{ message }}
     </div>
 
+    <script>
+        // ===== AUTO-HIDE SUCCESS/ENTRY POPUP AFTER 5 SECONDS =====
+        (function () {
+            const popup = document.getElementById("successPopup");
+            if (!popup) return;
+
+            const hasMessage = popup.textContent.trim().length > 0;
+
+            if (!hasMessage) {
+                // Nothing to show, hide immediately
+                popup.style.display = "none";
+                return;
+            }
+
+            setTimeout(() => {
+                // Fade out first, then fully remove from view
+                popup.style.opacity = "0";
+                popup.style.transform = "translateY(-10px)";
+
+                setTimeout(() => {
+                    popup.style.display = "none";
+                }, 400); // matches CSS transition duration
+            }, 5000);
+        })();
+    </script>
+
 
 
     <div class="container">
@@ -1509,6 +1537,9 @@
             }
 
             if (pendingItems.length === 0) {
+                // Already saved to DB — still clear the cart list/counter
+                cart = [];
+                updateCartUI();
                 alert("✅ All items are already saved");
                 return;
             }
