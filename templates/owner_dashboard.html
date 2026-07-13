@@ -1310,6 +1310,14 @@
                     <option value="30">30</option>
                     <option value="45">45</option>
                 </select>
+                <span style="font-weight:700;color:#cbd5e1;">:</span>
+                <select id="scheduleSecond" style="padding:9px 6px;border:1px solid #e2e8f0;border-radius:8px;
+                font-size:13px;background:white;color:#334155;">
+                    <option value="0" selected>00</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="45">45</option>
+                </select>
                 <select id="scheduleAmPm" style="padding:9px 6px;border:1px solid #e2e8f0;border-radius:8px;
                 font-size:13px;background:white;font-weight:700;color:#334155;">
                     <option value="AM">AM</option>
@@ -1385,19 +1393,31 @@
 
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const hasEvent = scheduleData.some(s => s.scheduled_at.startsWith(dateStr));
+                const eventCount = scheduleData.filter(s => s.scheduled_at.startsWith(dateStr)).length;
+                const hasEvent = eventCount > 0;
                 const isToday = new Date().toISOString().slice(0, 10) === dateStr;
                 const isSelected = calendarSelectedDate === dateStr;
 
+                // ✅ Richer "this date has a schedule" treatment: a soft tinted
+                // background + border on the cell itself, plus a small count
+                // badge in the corner — instead of just one flat dot under the
+                // number, which was easy to miss and didn't show how many
+                // items were on a date.
                 cells += `
             <div onclick="selectCalendarDate('${dateStr}')" style="text-align:center;padding:11px 0;
                 border-radius:10px;cursor:pointer;font-size:15px;position:relative;
-                background:${isSelected ? '#6366f1' : (isToday ? '#eef2ff' : 'transparent')};
+                background:${isSelected ? '#6366f1' : (isToday ? '#eef2ff' : (hasEvent ? '#fff7ed' : 'transparent'))};
                 color:${isSelected ? 'white' : (isToday ? '#6366f1' : '#334155')};
-                font-weight:${isToday || isSelected ? '700' : '500'};">
+                font-weight:${isToday || isSelected ? '700' : '500'};
+                border:1.5px solid ${hasEvent && !isSelected ? '#fdba74' : 'transparent'};
+                transition:background 0.15s ease;">
                 ${day}
-                ${hasEvent ? `<div style="width:5px;height:5px;border-radius:50%;background:${isSelected ? 'white' : '#f97316'};
-                    margin:3px auto 0;"></div>` : ''}
+                ${hasEvent ? `
+                <div style="position:absolute;top:-6px;right:-4px;min-width:16px;height:16px;padding:0 4px;
+                    border-radius:9px;background:${isSelected ? 'white' : 'linear-gradient(135deg,#f97316,#ef4444)'};
+                    color:${isSelected ? '#f97316' : 'white'};font-size:9.5px;font-weight:800;
+                    display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,0.25);
+                    border:2px solid white;">${eventCount}</div>` : ''}
             </div>`;
             }
 
@@ -1451,13 +1471,14 @@
 
             let hour = parseInt(document.getElementById('scheduleHour').value, 10);
             const minute = parseInt(document.getElementById('scheduleMinute').value, 10);
+            const second = parseInt(document.getElementById('scheduleSecond').value, 10);
             const ampm = document.getElementById('scheduleAmPm').value;
 
             // Convert 12-hour + AM/PM to 24-hour format
             if (ampm === 'AM' && hour === 12) hour = 0;
             if (ampm === 'PM' && hour !== 12) hour += 12;
 
-            const time24 = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
+            const time24 = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
 
             try {
                 await fetch('/api/owner/schedule', {
